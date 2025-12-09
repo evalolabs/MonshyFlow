@@ -1,0 +1,49 @@
+{
+  "name": "@monshy/api-service",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"**/*.ts\"",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@monshy/core": "workspace:*",
+    "@monshy/database": "workspace:*",
+    "@monshy/auth": "workspace:*",
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "tsyringe": "^4.10.0",
+    "zod": "^3.25.76",
+    "express-rate-limit": "^7.4.1",
+    "helmet": "^8.0.0",
+    "http-proxy-middleware": "^3.0.3",
+    "uuid": "^11.0.3",
+    "bcrypt": "^5.1.1",
+    "axios": "^1.12.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^24.7.1",
+    "@types/express": "^5.0.3",
+    "@types/cors": "^2.8.17",
+    "@types/uuid": "^10.0.0",
+    "@types/bcrypt": "^5.0.2",
+    "reflect-metadata": "^0.2.2",
+    "ts-node-dev": "^2.0.0",
+    "vitest": "^2.1.8",
+    "supertest": "^7.0.0",
+    "@types/supertest": "^6.0.2",
+    "eslint": "^9.36.0",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "prettier": "^3.4.2"
+  }
+}
+

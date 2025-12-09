@@ -1,0 +1,21 @@
+{
+  "name": "@monshy/database",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@monshy/core": "workspace:*",
+    "mongoose": "^8.19.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^24.7.1"
+  }
+}
+

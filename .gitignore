@@ -196,8 +196,12 @@ PublishScripts/
 *.nupkg
 # NuGet Symbol Packages
 *.snupkg
-# The packages folder can be ignored because of Package Restore
-**/[Pp]ackages/*
+# NuGet packages folder (but NOT our monorepo packages/ directory)
+# Only ignore packages folders that are NOT at the root level
+**/packages/*.nupkg
+**/packages/*.snupkg
+**/Packages/*.nupkg
+**/Packages/*.snupkg
 # except build/, which is used as an MSBuild target.
 !**/[Pp]ackages/build/
 # Uncomment if necessary however generally it will be regenerated when needed
@@ -440,7 +444,10 @@ bower_components
 build/Release
 
 # Dependency directories
-jspm_packages/
+jspm_# packages/ - REMOVED: Our monorepo packages directory should be tracked
+# Only ignore NuGet packages (Windows-style)
+**/[Pp]ackages/*.nupkg
+**/[Pp]ackages/*.snupkg
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
