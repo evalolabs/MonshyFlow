@@ -68,32 +68,73 @@ export interface DecryptedSecretResponse {
 
 export const secretsService = {
   async getAllSecrets(): Promise<SecretResponse[]> {
-    const response = await api.get<SecretResponse[]>('/api/secrets');
-    return response.data;
+    const response = await api.get<{ success: boolean; data: SecretResponse[] }>('/api/secrets');
+    // API gibt {success: true, data: [...]} zurück
+    if (response.data.success && Array.isArray(response.data.data)) {
+      return response.data.data;
+    }
+    // Fallback für direkte Array-Response
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return [];
   },
 
   async getSecretById(id: string): Promise<SecretResponse> {
-    const response = await api.get<SecretResponse>(`/api/secrets/${id}`);
-    return response.data;
+    const response = await api.get<{ success: boolean; data: SecretResponse }>(`/api/secrets/${id}`);
+    // API gibt {success: true, data: {...}} zurück
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    // Fallback für direkte Object-Response
+    if (response.data && !response.data.success) {
+      return response.data as SecretResponse;
+    }
+    throw new Error('Invalid response format');
   },
 
   async createSecret(request: CreateSecretRequest): Promise<SecretResponse> {
-    const response = await api.post<SecretResponse>('/api/secrets', request);
-    return response.data;
+    const response = await api.post<{ success: boolean; data: SecretResponse }>('/api/secrets', request);
+    // API gibt {success: true, data: {...}} zurück
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    // Fallback für direkte Object-Response
+    if (response.data && !response.data.success) {
+      return response.data as SecretResponse;
+    }
+    throw new Error('Invalid response format');
   },
 
   async updateSecret(id: string, request: UpdateSecretRequest): Promise<SecretResponse> {
-    const response = await api.put<SecretResponse>(`/api/secrets/${id}`, request);
-    return response.data;
+    const response = await api.put<{ success: boolean; data: SecretResponse }>(`/api/secrets/${id}`, request);
+    // API gibt {success: true, data: {...}} zurück
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    // Fallback für direkte Object-Response
+    if (response.data && !response.data.success) {
+      return response.data as SecretResponse;
+    }
+    throw new Error('Invalid response format');
   },
 
   async deleteSecret(id: string): Promise<void> {
     await api.delete(`/api/secrets/${id}`);
+    // 204 No Content oder {success: true}
   },
 
   async getDecryptedSecret(id: string): Promise<DecryptedSecretResponse> {
-    const response = await api.get<DecryptedSecretResponse>(`/api/secrets/${id}/decrypt`);
-    return response.data;
+    const response = await api.get<{ success: boolean; data: DecryptedSecretResponse }>(`/api/secrets/${id}/decrypt`);
+    // API gibt {success: true, data: {...}} zurück
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    // Fallback für direkte Object-Response
+    if (response.data && !response.data.success) {
+      return response.data as DecryptedSecretResponse;
+    }
+    throw new Error('Invalid response format');
   },
 };
 

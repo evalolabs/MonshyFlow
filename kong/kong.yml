@@ -1,0 +1,225 @@
+_format_version: "3.0"
+_transform: true
+
+# ============================================
+# Services - Backend Services
+# ============================================
+
+services:
+  # API Service (Workflow Management)
+  - name: api-service
+    url: http://api-service:80
+    routes:
+      - name: api-workflows
+        paths:
+          - /api/workflows
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: api-admin
+        paths:
+          - /api/admin
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: api-health
+        paths:
+          - /health
+        methods:
+          - GET
+        strip_path: false
+      - name: api-webhook
+        paths:
+          - /api/webhook
+        methods:
+          - POST
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+
+  # Auth Service
+  - name: auth-service
+    url: http://auth-service:80
+    routes:
+      # Öffentliche Auth Routes (keine Auth erforderlich)
+      - name: auth-login
+        paths:
+          - /api/auth/login
+        methods:
+          - POST
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: auth-register
+        paths:
+          - /api/auth/register
+        methods:
+          - POST
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      # Geschützte Auth Routes (benötigen JWT)
+      - name: auth-protected
+        paths:
+          - /api/auth
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      # API Keys Routes
+      - name: auth-apikeys
+        paths:
+          - /api/apikeys
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+
+  # Secrets Service
+  - name: secrets-service
+    url: http://secrets-service:80
+    routes:
+      - name: secrets-routes
+        paths:
+          - /api/secrets
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+
+  # Execution Service
+  - name: execution-service
+    url: http://execution-service:5004
+    routes:
+      - name: execution-execute
+        paths:
+          - /api/execute
+        methods:
+          - POST
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: execution-history
+        paths:
+          - /api/execution
+        methods:
+          - GET
+          - POST
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: execution-schemas
+        paths:
+          - /api/schemas
+        methods:
+          - GET
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: execution-events
+        paths:
+          - /api/events
+        methods:
+          - GET
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+
+  # Scheduler Service
+  - name: scheduler-service
+    url: http://scheduler-service:80
+    routes:
+      - name: scheduler-routes
+        paths:
+          - /api/scheduler
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+
+# ============================================
+# Plugins - Global & Service-spezifisch
+# ============================================
+
+plugins:
+  # CORS Plugin (global)
+  - name: cors
+    config:
+      origins:
+        - "*"  # In Development: alle Origins erlauben
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - PATCH
+        - OPTIONS
+      headers:
+        - Accept
+        - Accept-Version
+        - Content-Length
+        - Content-MD5
+        - Content-Type
+        - Date
+        - Authorization
+        - X-Request-ID
+      exposed_headers:
+        - X-Request-ID
+      credentials: true
+      max_age: 3600
+      preflight_continue: false  # Kong behandelt OPTIONS automatisch
+
+  # Rate Limiting für öffentliche Auth Routes
+  - name: rate-limiting
+    service: auth-service
+    route: auth-login
+    config:
+      minute: 10  # Erhöht von 5 auf 10 (für bessere UX)
+      hour: 100   # Erhöht von 50 auf 100
+      policy: local
+      hide_client_headers: false  # Zeige Rate-Limit-Header (Standard: true)
+      limit_by: ip  # Limit pro IP-Adresse
+  - name: rate-limiting
+    service: auth-service
+    route: auth-register
+    config:
+      minute: 10  # Erhöht von 5 auf 10
+      hour: 100   # Erhöht von 50 auf 100
+      policy: local
+      hide_client_headers: false
+      limit_by: ip
+
+  # Rate Limiting für API Routes
+  - name: rate-limiting
+    service: api-service
+    config:
+      minute: 100
+      hour: 1000
+      policy: local
+
+  # Request ID Plugin (für Tracing)
+  - name: correlation-id
+    config:
+      header_name: X-Request-ID
+      echo_downstream: true
+      generator: uuid
+
+  # Request/Response Logging
+  - name: file-log
+    config:
+      path: /dev/stdout
+      reopen: true
+

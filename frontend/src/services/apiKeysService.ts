@@ -20,21 +20,39 @@ export interface CreateApiKeyRequest {
 
 export const apiKeysService = {
   async getAllApiKeys(): Promise<ApiKeyResponse[]> {
-    const response = await api.get<ApiKeyResponse[]>('/api/apikeys');
-    return response.data;
+    const response = await api.get<{ success: boolean; data: ApiKeyResponse[] }>('/api/apikeys');
+    // API gibt {success: true, data: [...]} zurück
+    if (response.data.success && Array.isArray(response.data.data)) {
+      return response.data.data;
+    }
+    // Fallback für direkte Array-Response
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return [];
   },
 
   async createApiKey(request: CreateApiKeyRequest): Promise<ApiKeyResponse> {
-    const response = await api.post<ApiKeyResponse>('/api/apikeys', request);
-    return response.data;
+    const response = await api.post<{ success: boolean; data: ApiKeyResponse }>('/api/apikeys', request);
+    // API gibt {success: true, data: {...}} zurück
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    // Fallback für direkte Object-Response
+    if (response.data && !response.data.success) {
+      return response.data as ApiKeyResponse;
+    }
+    throw new Error('Invalid response format');
   },
 
   async deleteApiKey(id: string): Promise<void> {
     await api.delete(`/api/apikeys/${id}`);
+    // 204 No Content oder {success: true}
   },
 
   async revokeApiKey(id: string): Promise<void> {
     await api.post(`/api/apikeys/${id}/revoke`);
+    // {success: true}
   },
 };
 

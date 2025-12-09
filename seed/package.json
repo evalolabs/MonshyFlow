@@ -1,0 +1,29 @@
+{
+  "name": "@monshy/seed",
+  "version": "1.0.0",
+  "description": "Database seeding tool for MonshyFlow - Quick test data generation",
+  "private": true,
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "seed": "ts-node src/index.ts",
+    "seed:clean": "ts-node src/index.ts --clean",
+    "seed:tenants": "ts-node src/index.ts --tenants-only",
+    "seed:users": "ts-node src/index.ts --users-only"
+  },
+  "dependencies": {
+    "@monshy/database": "workspace:*",
+    "@monshy/core": "workspace:*",
+    "@monshy/auth": "workspace:*",
+    "bcrypt": "^5.1.1",
+    "mongoose": "^8.19.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^24.7.1",
+    "@types/bcrypt": "^5.0.2",
+    "ts-node": "^10.9.2"
+  }
+}
+

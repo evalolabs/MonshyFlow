@@ -5,11 +5,13 @@
   "description": "MonshyFlow - Professional Node.js-Only Workflow Automation Platform",
   "workspaces": [
     "packages/*",
-    "frontend"
+    "frontend",
+    "seed"
   ],
   "scripts": {
     "dev": "pnpm --filter './packages/*' --parallel dev",
     "build": "pnpm --recursive build",
+    "build:packages": "pnpm --filter '@monshy/*' build",
     "test": "pnpm --recursive test",
     "lint": "pnpm --recursive lint",
     "format": "prettier --write \"packages/**/*.ts\"",

@@ -24,7 +24,8 @@ export function ApiKeysManagementPage() {
       const data = await apiKeysService.getAllApiKeys();
       setApiKeys(data);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load API keys');
+      // Backend gibt {success: false, error: string} zurück
+      setError(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to load API keys');
       console.error('Error loading API keys:', err);
     } finally {
       setLoading(false);
@@ -46,7 +47,7 @@ export function ApiKeysManagementPage() {
       await apiKeysService.deleteApiKey(id);
       await loadApiKeys();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to delete API key');
+      alert(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to delete API key');
     }
   };
 
@@ -60,7 +61,7 @@ export function ApiKeysManagementPage() {
       await apiKeysService.revokeApiKey(id);
       await loadApiKeys();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to revoke API key');
+      alert(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to revoke API key');
     } finally {
       setRevokingId(null);
     }
@@ -85,7 +86,7 @@ export function ApiKeysManagementPage() {
       setShowModal(false);
       await loadApiKeys();
     } catch (err: any) {
-      alert(err.response?.data?.message || `Failed to create API key`);
+      alert(err.response?.data?.error || err.response?.data?.message || err.message || `Failed to create API key`);
     }
   };
 

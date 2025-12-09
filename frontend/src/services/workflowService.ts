@@ -5,25 +5,49 @@ import type { StartNodeUpdateRequest } from '../types/startNode';
 export const workflowService = {
   // Get all workflows
   async getAllWorkflows(): Promise<Workflow[]> {
-    const response = await api.get<Workflow[]>('/api/workflows');
-    return response.data;
+    const response = await api.get<{ success: boolean; data: Workflow[] }>('/api/workflows');
+    // API gibt {success: true, data: [...]} zurück
+    if (response.data.success && Array.isArray(response.data.data)) {
+      return response.data.data;
+    }
+    // Fallback für direkte Array-Response (falls API geändert wurde)
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return [];
   },
 
   // Get workflow by ID
   async getWorkflowById(id: string): Promise<Workflow> {
-    const response = await api.get<Workflow>(`/api/workflows/${id}`);
-    return response.data;
+    const response = await api.get<{ success: boolean; data: Workflow }>(`/api/workflows/${id}`);
+    // API gibt {success: true, data: {...}} zurück
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    // Fallback für direkte Object-Response
+    if (response.data && !response.data.success) {
+      return response.data as Workflow;
+    }
+    throw new Error('Invalid response format');
   },
 
   // Create workflow
   async createWorkflow(workflow: CreateWorkflowRequest): Promise<Workflow> {
-    const response = await api.post<Workflow>('/api/workflows', {
+    const response = await api.post<{ success: boolean; data: Workflow }>('/api/workflows', {
       ...workflow,
       version: 1,
       nodes: workflow.nodes || [],
       edges: workflow.edges || [],
     });
-    return response.data;
+    // API gibt {success: true, data: {...}} zurück
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    // Fallback für direkte Object-Response
+    if (response.data && !response.data.success) {
+      return response.data as Workflow;
+    }
+    throw new Error('Invalid response format');
   },
 
   // Update workflow
@@ -143,7 +167,7 @@ export const workflowService = {
     console.log('input:', input);
     
     try {
-      // Use executionApi to call Execution Service directly (Port 5002)
+      // Use executionApi (now routes through Kong Gateway on Port 5000)
       const response = await executionApi.post(`/api/execute/${workflowId}`, {
         input: input || {}
       });

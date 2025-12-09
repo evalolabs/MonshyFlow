@@ -468,8 +468,9 @@ export function WorkflowCanvas({
     
     // Create SSE connection for real-time events (if not already connected)
     if (!sseConnection) {
-      const EXECUTION_API_URL = import.meta.env.VITE_EXECUTION_API_URL || 'http://localhost:5002';
-      const eventsStreamUrl = `${EXECUTION_API_URL}/api/events/stream`;
+      // Use Gateway (Port 5000) instead of direct service (Port 5002)
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const eventsStreamUrl = `${API_URL}/api/events/stream`;
       console.log('[WorkflowCanvas] Creating SSE connection for node test:', eventsStreamUrl);
       const sse = createSSEConnection(eventsStreamUrl);
       sse.connect();

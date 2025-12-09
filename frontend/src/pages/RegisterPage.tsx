@@ -22,7 +22,9 @@ export function RegisterPage() {
       await register(email, password, firstName, lastName, tenantName);
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      // Backend gibt {success: false, error: string} zurück
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

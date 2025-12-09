@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-const EXECUTION_API_URL = import.meta.env.VITE_EXECUTION_API_URL || 'http://localhost:5002';
+// All requests should go through Kong Gateway (Port 5000)
+// No need for separate executionApi - use api (Kong Gateway) for all requests
+const EXECUTION_API_URL = API_URL; // Use Gateway instead of direct service
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -10,9 +12,9 @@ export const api = axios.create({
   },
 });
 
-// Separate API client for execution service
+// Separate API client for execution service (now also uses Gateway)
 export const executionApi = axios.create({
-  baseURL: EXECUTION_API_URL,
+  baseURL: EXECUTION_API_URL, // Now uses Gateway (Port 5000) instead of direct service (Port 5002)
   headers: {
     'Content-Type': 'application/json',
   },
@@ -109,6 +111,20 @@ const errorResponseInterceptor = (error: any) => {
     // Redirect to login if not already there
     if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
       window.location.href = '/login';
+    }
+  }
+  
+  // Transform error to match Backend format
+  // Backend gibt {success: false, error: string, code?: string} zurück
+  if (error.response?.data) {
+    const backendError = error.response.data;
+    if (backendError.error) {
+      // Backend Error Format
+      error.message = backendError.error;
+      error.code = backendError.code || 'UNKNOWN_ERROR';
+    } else if (backendError.message) {
+      // Fallback für alte Format
+      error.message = backendError.message;
     }
   }
   

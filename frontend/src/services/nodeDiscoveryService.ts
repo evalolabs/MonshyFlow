@@ -5,7 +5,7 @@
  * This eliminates the need for manual frontend registration.
  */
 
-import { executionApi } from './api';
+import { api } from './api';
 import type { NodeMetadata, NodeCategoryId } from '../components/WorkflowBuilder/nodeRegistry/nodeMetadata';
 
 export interface DiscoveredNode {
@@ -27,8 +27,17 @@ export interface NodeDiscoveryResponse {
  */
 export async function discoverNodes(): Promise<DiscoveredNode[]> {
   try {
-    const response = await executionApi.get<NodeDiscoveryResponse>('/api/schemas/nodes');
-    return response.data.nodes;
+    // Use main API (Kong Gateway) instead of direct execution service
+    const response = await api.get<NodeDiscoveryResponse>('/api/schemas/nodes');
+    // Response format: {nodes: [...], count: ...}
+    if (response.data.nodes && Array.isArray(response.data.nodes)) {
+      return response.data.nodes;
+    }
+    // Fallback: if response is direct array
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return [];
   } catch (error: any) {
     console.error('[NodeDiscoveryService] Failed to discover nodes:', error);
     return [];

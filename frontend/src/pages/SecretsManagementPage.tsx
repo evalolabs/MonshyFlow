@@ -25,7 +25,8 @@ export function SecretsManagementPage() {
       const data = await secretsService.getAllSecrets();
       setSecrets(data);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load secrets');
+      // Backend gibt {success: false, error: string} zurück
+      setError(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to load secrets');
       console.error('Error loading secrets:', err);
     } finally {
       setLoading(false);
@@ -51,7 +52,7 @@ export function SecretsManagementPage() {
       await secretsService.deleteSecret(id);
       await loadSecrets();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to delete secret');
+        alert(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to delete secret');
     }
   };
 
@@ -61,7 +62,7 @@ export function SecretsManagementPage() {
       setDecryptedSecret(decrypted);
       setShowDecrypted(id);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to decrypt secret');
+        alert(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to decrypt secret');
     }
   };
 
@@ -85,7 +86,7 @@ export function SecretsManagementPage() {
       setShowModal(false);
       await loadSecrets();
     } catch (err: any) {
-      alert(err.response?.data?.message || `Failed to ${editingSecret ? 'update' : 'create'} secret`);
+        alert(err.response?.data?.error || err.response?.data?.message || err.message || `Failed to ${editingSecret ? 'update' : 'create'} secret`);
     }
   };
 

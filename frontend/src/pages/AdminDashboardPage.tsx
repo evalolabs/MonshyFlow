@@ -21,7 +21,8 @@ export function AdminDashboardPage() {
       const data = await adminService.getStatistics();
       setStatistics(data);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load statistics');
+      // Backend gibt {success: false, error: string} zurück
+      setError(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to load statistics');
       console.error('Error loading statistics:', err);
     } finally {
       setLoading(false);

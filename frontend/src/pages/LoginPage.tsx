@@ -19,7 +19,9 @@ export function LoginPage() {
       await login(email, password);
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      // Backend gibt {success: false, error: string} zurück
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || 'Login failed. Please check your credentials.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

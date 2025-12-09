@@ -28,13 +28,21 @@ export interface AuthResponse {
 
 export const authService = {
   async login(request: LoginRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>('/api/auth/login', request);
-    return response.data;
+    const response = await api.post<{ success: boolean; data: AuthResponse }>('/api/auth/login', request);
+    // API gibt {success: true, data: {token, user}} zurück
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error('Invalid response format');
   },
 
   async register(request: RegisterRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>('/api/auth/register', request);
-    return response.data;
+    const response = await api.post<{ success: boolean; data: AuthResponse }>('/api/auth/register', request);
+    // API gibt {success: true, data: {token, user}} zurück
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error('Invalid response format');
   },
 };
 
