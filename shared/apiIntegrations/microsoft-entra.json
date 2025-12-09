@@ -1,0 +1,245 @@
+{
+  "id": "microsoft-entra",
+  "name": "Microsoft Entra (Azure AD)",
+  "icon": "🔐",
+  "logoUrl": "https://cdn.simpleicons.org/microsoftazure/0078D4",
+  "description": "Identity and access management via Microsoft Graph API",
+  "baseUrl": "https://graph.microsoft.com/v1.0",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "MICROSOFT_ENTRA_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-user",
+      "name": "Create User",
+      "description": "Create a new user",
+      "method": "POST",
+      "path": "/users",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "accountEnabled": { "type": "boolean", "default": true, "description": "Account enabled status" },
+          "displayName": { "type": "string", "required": true, "description": "Display name" },
+          "mailNickname": { "type": "string", "required": true, "description": "Mail nickname" },
+          "userPrincipalName": { "type": "string", "format": "email", "required": true, "description": "User principal name (email)" },
+          "passwordProfile": {
+            "type": "object",
+            "properties": {
+              "password": { "type": "string", "required": true, "description": "Password" },
+              "forceChangePasswordNextSignIn": { "type": "boolean", "default": true, "description": "Force password change on next sign in" }
+            },
+            "required": ["password"]
+          },
+          "givenName": { "type": "string", "description": "Given name" },
+          "surname": { "type": "string", "description": "Surname" },
+          "jobTitle": { "type": "string", "description": "Job title" },
+          "department": { "type": "string", "description": "Department" },
+          "officeLocation": { "type": "string", "description": "Office location" },
+          "mobilePhone": { "type": "string", "description": "Mobile phone" },
+          "businessPhones": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Business phone numbers"
+          },
+          "mail": { "type": "string", "format": "email", "description": "Email address" }
+        },
+        "required": ["displayName", "mailNickname", "userPrincipalName", "passwordProfile"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/users"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user by ID",
+      "method": "GET",
+      "path": "/users/{userId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "$select": { "type": "string", "description": "OData select expression" },
+        "$expand": { "type": "string", "description": "OData expand expression" }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/users/{userId}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/users",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "$filter": { "type": "string", "description": "OData filter expression" },
+        "$orderby": { "type": "string", "description": "OData order by expression" },
+        "$top": { "type": "integer", "description": "Number of results" },
+        "$skip": { "type": "integer", "description": "Skip results" },
+        "$select": { "type": "string", "description": "OData select expression" },
+        "$expand": { "type": "string", "description": "OData expand expression" },
+        "$search": { "type": "string", "description": "Search query" }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/users"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update an existing user",
+      "method": "PATCH",
+      "path": "/users/{userId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "accountEnabled": { "type": "boolean", "description": "Account enabled status" },
+          "displayName": { "type": "string", "description": "Display name" },
+          "mailNickname": { "type": "string", "description": "Mail nickname" },
+          "givenName": { "type": "string", "description": "Given name" },
+          "surname": { "type": "string", "description": "Surname" },
+          "jobTitle": { "type": "string", "description": "Job title" },
+          "department": { "type": "string", "description": "Department" },
+          "officeLocation": { "type": "string", "description": "Office location" },
+          "mobilePhone": { "type": "string", "description": "Mobile phone" },
+          "businessPhones": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "mail": { "type": "string", "format": "email", "description": "Email address" },
+          "passwordProfile": {
+            "type": "object",
+            "properties": {
+              "password": { "type": "string", "description": "Password" },
+              "forceChangePasswordNextSignIn": { "type": "boolean", "description": "Force password change on next sign in" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/users/{userId}"
+    },
+    {
+      "id": "delete-user",
+      "name": "Delete User",
+      "description": "Delete a user",
+      "method": "DELETE",
+      "path": "/users/{userId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/users/{userId}"
+    },
+    {
+      "id": "create-group",
+      "name": "Create Group",
+      "description": "Create a new group",
+      "method": "POST",
+      "path": "/groups",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "displayName": { "type": "string", "required": true, "description": "Group display name" },
+          "mailNickname": { "type": "string", "required": true, "description": "Mail nickname" },
+          "mailEnabled": { "type": "boolean", "default": false, "description": "Mail enabled" },
+          "securityEnabled": { "type": "boolean", "default": true, "description": "Security enabled" },
+          "groupTypes": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Group types (e.g., 'Unified' for Office 365 groups)"
+          },
+          "description": { "type": "string", "description": "Group description" },
+          "visibility": { "type": "string", "enum": ["Private", "Public"], "default": "Private", "description": "Group visibility" }
+        },
+        "required": ["displayName", "mailNickname"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/groups"
+    },
+    {
+      "id": "get-group",
+      "name": "Get Group",
+      "description": "Get group by ID",
+      "method": "GET",
+      "path": "/groups/{groupId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "$select": { "type": "string", "description": "OData select expression" },
+        "$expand": { "type": "string", "description": "OData expand expression" }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/groups/{groupId}"
+    },
+    {
+      "id": "list-groups",
+      "name": "List Groups",
+      "description": "List all groups",
+      "method": "GET",
+      "path": "/groups",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "$filter": { "type": "string", "description": "OData filter expression" },
+        "$orderby": { "type": "string", "description": "OData order by expression" },
+        "$top": { "type": "integer", "description": "Number of results" },
+        "$skip": { "type": "integer", "description": "Skip results" },
+        "$select": { "type": "string", "description": "OData select expression" },
+        "$expand": { "type": "string", "description": "OData expand expression" },
+        "$search": { "type": "string", "description": "Search query" }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/groups"
+    },
+    {
+      "id": "update-group",
+      "name": "Update Group",
+      "description": "Update an existing group",
+      "method": "PATCH",
+      "path": "/groups/{groupId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "displayName": { "type": "string", "description": "Group display name" },
+          "mailNickname": { "type": "string", "description": "Mail nickname" },
+          "description": { "type": "string", "description": "Group description" },
+          "visibility": { "type": "string", "enum": ["Private", "Public"], "description": "Group visibility" }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/groups/{groupId}"
+    },
+    {
+      "id": "delete-group",
+      "name": "Delete Group",
+      "description": "Delete a group",
+      "method": "DELETE",
+      "path": "/groups/{groupId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/groups/{groupId}"
+    }
+  ]
+}
+

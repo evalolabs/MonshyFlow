@@ -1,0 +1,430 @@
+{
+  "id": "linear",
+  "name": "Linear",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/linear/5E6AD2",
+  "description": "Issue tracking and project management",
+  "baseUrl": "https://api.linear.app/graphql",
+  "color": {
+    "bg": "from-indigo-100 to-blue-100",
+    "border": "border-indigo-500",
+    "icon": "text-indigo-700",
+    "handle": "bg-indigo-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "LINEAR_API_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "graphql-query",
+      "name": "GraphQL Query",
+      "description": "Execute a GraphQL query",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "required": true, "description": "GraphQL query string" },
+          "variables": {
+            "type": "object",
+            "description": "GraphQL variables",
+            "additionalProperties": true
+          },
+          "operationName": { "type": "string", "description": "Operation name" }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.linear.app/graphql"
+    },
+    {
+      "id": "create-issue",
+      "name": "Create Issue",
+      "description": "Create a new issue",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL mutation: mutation IssueCreate($input: IssueCreateInput!) { issueCreate(input: $input) { success issue { id title } } }",
+            "default": "mutation IssueCreate($input: IssueCreateInput!) { issueCreate(input: $input) { success issue { id title description state { id name } assignee { id name } team { id name } } } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "input": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string", "required": true, "description": "Issue title" },
+                  "description": { "type": "string", "description": "Issue description" },
+                  "teamId": { "type": "string", "required": true, "description": "Team ID" },
+                  "assigneeId": { "type": "string", "description": "Assignee user ID" },
+                  "stateId": { "type": "string", "description": "State ID" },
+                  "priority": { "type": "number", "enum": [0, 1, 2, 3, 4], "description": "Priority (0=None, 1=Urgent, 2=High, 3=Medium, 4=Low)" },
+                  "labelIds": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Label IDs"
+                  },
+                  "projectId": { "type": "string", "description": "Project ID" },
+                  "dueDate": { "type": "string", "format": "date-time", "description": "Due date" },
+                  "estimate": { "type": "number", "description": "Estimate in points" }
+                },
+                "required": true
+              }
+            },
+            "required": ["input"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.linear.app/graphql"
+    },
+    {
+      "id": "get-issue",
+      "name": "Get Issue",
+      "description": "Get issue details by ID",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query: query Issue($id: String!) { issue(id: $id) { id title description state { id name } assignee { id name } team { id name } } }",
+            "default": "query Issue($id: String!) { issue(id: $id) { id title description state { id name } assignee { id name } team { id name } priority createdAt updatedAt } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "required": true, "description": "Issue ID" }
+            },
+            "required": ["id"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.linear.app/graphql"
+    },
+    {
+      "id": "list-issues",
+      "name": "List Issues",
+      "description": "List issues with filters",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query: query Issues($filter: IssueFilter, $after: String) { issues(filter: $filter, after: $after, first: 50) { nodes { id title state { name } } pageInfo { hasNextPage endCursor } } }",
+            "default": "query Issues($filter: IssueFilter, $after: String) { issues(filter: $filter, after: $after, first: 50) { nodes { id title description state { id name } assignee { id name } team { id name } priority } pageInfo { hasNextPage endCursor } } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "filter": {
+                "type": "object",
+                "properties": {
+                  "team": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" }
+                    }
+                  },
+                  "assignee": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" }
+                    }
+                  },
+                  "state": {
+                    "type": "object",
+                    "properties": {
+                      "type": { "type": "string", "enum": ["unstarted", "started", "completed", "canceled"] }
+                    }
+                  }
+                }
+              },
+              "after": { "type": "string", "description": "Cursor for pagination" }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.linear.app/graphql"
+    },
+    {
+      "id": "update-issue",
+      "name": "Update Issue",
+      "description": "Update an existing issue",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL mutation: mutation IssueUpdate($id: String!, $input: IssueUpdateInput!) { issueUpdate(id: $id, input: $input) { success issue { id title } } }",
+            "default": "mutation IssueUpdate($id: String!, $input: IssueUpdateInput!) { issueUpdate(id: $id, input: $input) { success issue { id title description state { id name } assignee { id name } } } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "required": true, "description": "Issue ID" },
+              "input": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string", "description": "Issue title" },
+                  "description": { "type": "string", "description": "Issue description" },
+                  "assigneeId": { "type": "string", "description": "Assignee user ID" },
+                  "stateId": { "type": "string", "description": "State ID" },
+                  "priority": { "type": "number", "enum": [0, 1, 2, 3, 4] },
+                  "labelIds": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "projectId": { "type": "string", "description": "Project ID" },
+                  "dueDate": { "type": "string", "format": "date-time", "description": "Due date" },
+                  "estimate": { "type": "number", "description": "Estimate in points" }
+                }
+              }
+            },
+            "required": ["id", "input"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.linear.app/graphql"
+    },
+    {
+      "id": "create-comment",
+      "name": "Create Comment",
+      "description": "Create a comment on an issue",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL mutation: mutation CommentCreate($input: CommentCreateInput!) { commentCreate(input: $input) { success comment { id body } } }",
+            "default": "mutation CommentCreate($input: CommentCreateInput!) { commentCreate(input: $input) { success comment { id body createdAt user { id name } } } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "input": {
+                "type": "object",
+                "properties": {
+                  "issueId": { "type": "string", "required": true, "description": "Issue ID" },
+                  "body": { "type": "string", "required": true, "description": "Comment body" },
+                  "parentId": { "type": "string", "description": "Parent comment ID (for replies)" }
+                },
+                "required": true
+              }
+            },
+            "required": ["input"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.linear.app/graphql"
+    },
+    {
+      "id": "get-comment",
+      "name": "Get Comment",
+      "description": "Get comment details by ID",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query: query Comment($id: String!) { comment(id: $id) { id body createdAt user { id name } } }",
+            "default": "query Comment($id: String!) { comment(id: $id) { id body createdAt updatedAt user { id name email } issue { id title } } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "required": true, "description": "Comment ID" }
+            },
+            "required": ["id"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.linear.app/graphql"
+    },
+    {
+      "id": "list-comments",
+      "name": "List Comments",
+      "description": "List comments for an issue",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query: query Comments($issueId: String!, $after: String) { issue(id: $issueId) { comments(after: $after, first: 50) { nodes { id body createdAt user { id name } } pageInfo { hasNextPage endCursor } } } }",
+            "default": "query Comments($issueId: String!, $after: String) { issue(id: $issueId) { comments(after: $after, first: 50) { nodes { id body createdAt updatedAt user { id name email } } pageInfo { hasNextPage endCursor } } } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "issueId": { "type": "string", "required": true, "description": "Issue ID" },
+              "after": { "type": "string", "description": "Cursor for pagination" }
+            },
+            "required": ["issueId"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.linear.app/graphql"
+    },
+    {
+      "id": "update-comment",
+      "name": "Update Comment",
+      "description": "Update an existing comment",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL mutation: mutation CommentUpdate($id: String!, $input: CommentUpdateInput!) { commentUpdate(id: $id, input: $input) { success comment { id body } } }",
+            "default": "mutation CommentUpdate($id: String!, $input: CommentUpdateInput!) { commentUpdate(id: $id, input: $input) { success comment { id body updatedAt } } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "required": true, "description": "Comment ID" },
+              "input": {
+                "type": "object",
+                "properties": {
+                  "body": { "type": "string", "required": true, "description": "Comment body" }
+                },
+                "required": true
+              }
+            },
+            "required": ["id", "input"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.linear.app/graphql"
+    },
+    {
+      "id": "get-teams",
+      "name": "Get Teams",
+      "description": "List all teams",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query: query Teams { teams { nodes { id name key } } }",
+            "default": "query Teams { teams { nodes { id name key description } } }"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.linear.app/graphql"
+    },
+    {
+      "id": "get-users",
+      "name": "Get Users",
+      "description": "List all users",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query: query Users { users { nodes { id name email } } }",
+            "default": "query Users { users { nodes { id name email avatarUrl } } }"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.linear.app/graphql"
+    },
+    {
+      "id": "get-projects",
+      "name": "Get Projects",
+      "description": "List all projects",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query: query Projects { projects { nodes { id name description } } }",
+            "default": "query Projects { projects { nodes { id name description status targetDate } } }"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.linear.app/graphql"
+    }
+  ]
+}
+

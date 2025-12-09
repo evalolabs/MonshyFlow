@@ -1,0 +1,107 @@
+{
+  "id": "bannerbear",
+  "name": "Bannerbear",
+  "icon": "🖼️",
+  "logoUrl": "https://cdn.simpleicons.org/bannerbear/FF6B6B",
+  "description": "Automated image generation API",
+  "baseUrl": "https://api.bannerbear.com/v2",
+  "color": {
+    "bg": "from-red-100 to-yellow-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "BANNERBEAR_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-image",
+      "name": "Create Image",
+      "description": "Generate an image from a template",
+      "method": "POST",
+      "path": "/images",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "template": { "type": "string", "required": true, "description": "Template ID" },
+          "modifications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "description": "Element name" },
+                "text": { "type": "string", "description": "Text content" },
+                "image_url": { "type": "string", "format": "uri", "description": "Image URL" },
+                "color": { "type": "string", "description": "Color (hex code)" },
+                "background": { "type": "string", "description": "Background color (hex code)" },
+                "x": { "type": "number", "description": "X position" },
+                "y": { "type": "number", "description": "Y position" },
+                "width": { "type": "number", "description": "Width" },
+                "height": { "type": "number", "description": "Height" },
+                "rotation": { "type": "number", "description": "Rotation angle" },
+                "opacity": { "type": "number", "minimum": 0, "maximum": 1, "description": "Opacity" },
+                "effect": { "type": "string", "enum": ["grayscale", "sepia", "blur"], "description": "Image effect" }
+              }
+            },
+            "description": "Array of modifications to apply to template elements"
+          },
+          "webhook_url": { "type": "string", "format": "uri", "description": "Webhook URL for async processing" },
+          "transparent": { "type": "boolean", "default": false, "description": "Generate transparent background" },
+          "metadata": {
+            "type": "object",
+            "description": "Additional metadata",
+            "additionalProperties": true
+          }
+        },
+        "required": ["template"]
+      },
+      "urlTemplate": "https://api.bannerbear.com/v2/images"
+    },
+    {
+      "id": "get-image",
+      "name": "Get Image",
+      "description": "Get image details by ID",
+      "method": "GET",
+      "path": "/images/{id}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.bannerbear.com/v2/images/{id}"
+    },
+    {
+      "id": "get-template",
+      "name": "Get Template",
+      "description": "Get template details by ID",
+      "method": "GET",
+      "path": "/templates/{id}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.bannerbear.com/v2/templates/{id}"
+    },
+    {
+      "id": "list-templates",
+      "name": "List Templates",
+      "description": "List all templates",
+      "method": "GET",
+      "path": "/templates",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "limit": { "type": "integer", "default": 20, "description": "Number of templates per page" }
+      },
+      "urlTemplate": "https://api.bannerbear.com/v2/templates"
+    }
+  ]
+}
+

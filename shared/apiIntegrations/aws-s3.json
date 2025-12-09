@@ -1,0 +1,142 @@
+{
+  "id": "aws-s3",
+  "name": "AWS S3",
+  "icon": "☁️",
+  "logoUrl": "https://cdn.simpleicons.org/amazons3/569A31",
+  "description": "Amazon Simple Storage Service for object storage",
+  "baseUrl": "https://{bucket}.s3.{region}.amazonaws.com",
+  "color": {
+    "bg": "from-orange-100 to-yellow-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "aws",
+    "secretKey": "AWS_SECRET_ACCESS_KEY",
+    "accessKeyIdSecretKey": "AWS_ACCESS_KEY_ID",
+    "regionSecretKey": "AWS_REGION",
+    "note": "AWS Signature Version 4 authentication required. Headers must include x-amz-date, Authorization signature, and other AWS-specific headers."
+  },
+  "endpoints": [
+    {
+      "id": "create-bucket",
+      "name": "Create Bucket",
+      "description": "Create a new S3 bucket",
+      "method": "PUT",
+      "path": "/{bucket}",
+      "headers": {
+        "Content-Type": "application/xml"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "CreateBucketConfiguration": {
+            "type": "object",
+            "properties": {
+              "LocationConstraint": { "type": "string", "description": "AWS region for bucket" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://{bucket}.s3.{region}.amazonaws.com/{bucket}"
+    },
+    {
+      "id": "delete-bucket",
+      "name": "Delete Bucket",
+      "description": "Delete an S3 bucket",
+      "method": "DELETE",
+      "path": "/{bucket}",
+      "headers": {},
+      "urlTemplate": "https://{bucket}.s3.{region}.amazonaws.com/{bucket}"
+    },
+    {
+      "id": "list-buckets",
+      "name": "List Buckets",
+      "description": "List all S3 buckets",
+      "method": "GET",
+      "path": "/",
+      "headers": {},
+      "urlTemplate": "https://s3.{region}.amazonaws.com/"
+    },
+    {
+      "id": "upload-object",
+      "name": "Upload Object",
+      "description": "Upload an object to S3 bucket",
+      "method": "PUT",
+      "path": "/{bucket}/{key}",
+      "headers": {
+        "Content-Type": "application/octet-stream",
+        "x-amz-storage-class": "{storageClass}",
+        "x-amz-server-side-encryption": "{encryption}",
+        "x-amz-acl": "{acl}",
+        "x-amz-metadata-directive": "{metadataDirective}"
+      },
+      "bodySchema": {
+        "type": "string",
+        "format": "binary",
+        "description": "File content (binary data)"
+      },
+      "urlTemplate": "https://{bucket}.s3.{region}.amazonaws.com/{bucket}/{key}"
+    },
+    {
+      "id": "download-object",
+      "name": "Download Object",
+      "description": "Download an object from S3 bucket",
+      "method": "GET",
+      "path": "/{bucket}/{key}",
+      "headers": {},
+      "queryParams": {
+        "response-content-type": "{contentType}",
+        "response-content-disposition": "{contentDisposition}",
+        "response-cache-control": "{cacheControl}"
+      },
+      "urlTemplate": "https://{bucket}.s3.{region}.amazonaws.com/{bucket}/{key}"
+    },
+    {
+      "id": "delete-object",
+      "name": "Delete Object",
+      "description": "Delete an object from S3 bucket",
+      "method": "DELETE",
+      "path": "/{bucket}/{key}",
+      "headers": {},
+      "urlTemplate": "https://{bucket}.s3.{region}.amazonaws.com/{bucket}/{key}"
+    },
+    {
+      "id": "copy-object",
+      "name": "Copy Object",
+      "description": "Copy an object within S3",
+      "method": "PUT",
+      "path": "/{bucket}/{key}",
+      "headers": {
+        "x-amz-copy-source": "{copySource}",
+        "x-amz-metadata-directive": "{metadataDirective}",
+        "x-amz-storage-class": "{storageClass}",
+        "x-amz-server-side-encryption": "{encryption}",
+        "x-amz-acl": "{acl}"
+      },
+      "queryParams": {
+        "x-amz-copy-source": "{copySource}"
+      },
+      "urlTemplate": "https://{bucket}.s3.{region}.amazonaws.com/{bucket}/{key}"
+    },
+    {
+      "id": "list-objects",
+      "name": "List Objects",
+      "description": "List all objects in a bucket",
+      "method": "GET",
+      "path": "/{bucket}",
+      "headers": {},
+      "queryParams": {
+        "list-type": "2",
+        "prefix": "{prefix}",
+        "delimiter": "{delimiter}",
+        "max-keys": "1000",
+        "continuation-token": "{continuationToken}",
+        "start-after": "{startAfter}"
+      },
+      "urlTemplate": "https://{bucket}.s3.{region}.amazonaws.com/{bucket}"
+    }
+  ]
+}
+

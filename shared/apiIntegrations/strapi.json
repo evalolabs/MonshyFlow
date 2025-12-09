@@ -1,0 +1,112 @@
+{
+  "id": "strapi",
+  "name": "Strapi",
+  "icon": "📝",
+  "logoUrl": "https://cdn.simpleicons.org/strapi/2E7EEA",
+  "description": "Headless content management system",
+  "baseUrl": "{url}/api",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(username:password)}",
+    "secretKey": "STRAPI_PASSWORD",
+    "usernameSecretKey": "STRAPI_USERNAME",
+    "note": "Can also use API Token with Bearer authentication (STRAPI_API_TOKEN)"
+  },
+  "endpoints": [
+    {
+      "id": "create-entry",
+      "name": "Create Entry",
+      "description": "Create a new entry for a content type",
+      "method": "POST",
+      "path": "/{contentType}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Entry data (fields depend on content type)"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "{url}/api/{contentType}"
+    },
+    {
+      "id": "get-entry",
+      "name": "Get Entry",
+      "description": "Get entry details by ID",
+      "method": "GET",
+      "path": "/{contentType}/{id}",
+      "headers": {},
+      "queryParams": {
+        "populate": "*",
+        "locale": "{locale}",
+        "publicationState": "{publicationState}"
+      },
+      "urlTemplate": "{url}/api/{contentType}/{id}"
+    },
+    {
+      "id": "list-entries",
+      "name": "List Entries",
+      "description": "List all entries for a content type",
+      "method": "GET",
+      "path": "/{contentType}",
+      "headers": {},
+      "queryParams": {
+        "populate": "*",
+        "filters": "{filters}",
+        "sort": "{sort}",
+        "pagination[page]": "1",
+        "pagination[pageSize]": "25",
+        "pagination[withCount]": "true",
+        "locale": "{locale}",
+        "publicationState": "{publicationState}",
+        "fields": "{fields}"
+      },
+      "urlTemplate": "{url}/api/{contentType}"
+    },
+    {
+      "id": "update-entry",
+      "name": "Update Entry",
+      "description": "Update an existing entry",
+      "method": "PUT",
+      "path": "/{contentType}/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Entry data to update"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "{url}/api/{contentType}/{id}"
+    },
+    {
+      "id": "delete-entry",
+      "name": "Delete Entry",
+      "description": "Delete an entry",
+      "method": "DELETE",
+      "path": "/{contentType}/{id}",
+      "headers": {},
+      "urlTemplate": "{url}/api/{contentType}/{id}"
+    }
+  ]
+}
+

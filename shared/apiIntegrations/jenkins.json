@@ -1,0 +1,186 @@
+{
+  "id": "jenkins",
+  "name": "Jenkins",
+  "icon": "🔧",
+  "logoUrl": "https://cdn.simpleicons.org/jenkins/D24939",
+  "description": "Automation server for CI/CD",
+  "baseUrl": "https://{host}",
+  "color": {
+    "bg": "from-red-100 to-amber-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(username:password)}",
+    "secretKey": "JENKINS_API_TOKEN",
+    "usernameSecretKey": "JENKINS_USERNAME",
+    "note": "Host should be provided in baseUrl placeholder {host} or as JENKINS_BASE_URL secret key. API token is used as password in Basic Auth."
+  },
+  "endpoints": [
+    {
+      "id": "get-instance",
+      "name": "Get Instance",
+      "description": "Get Jenkins instance information",
+      "method": "GET",
+      "path": "/api/json",
+      "headers": {
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "urlTemplate": "https://{host}/api/json"
+    },
+    {
+      "id": "list-jobs",
+      "name": "List Jobs",
+      "description": "List all jobs",
+      "method": "GET",
+      "path": "/api/json",
+      "headers": {
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "queryParams": {
+        "tree": "jobs[name,url,color]",
+        "depth": { "type": "integer", "description": "JSON depth" }
+      },
+      "urlTemplate": "https://{host}/api/json"
+    },
+    {
+      "id": "get-job",
+      "name": "Get Job",
+      "description": "Get job details",
+      "method": "GET",
+      "path": "/job/{jobName}/api/json",
+      "headers": {
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "queryParams": {
+        "depth": { "type": "integer", "description": "JSON depth" },
+        "tree": { "type": "string", "description": "JSON tree filter" }
+      },
+      "urlTemplate": "https://{host}/job/{jobName}/api/json"
+    },
+    {
+      "id": "create-job",
+      "name": "Create Job",
+      "description": "Create a new job",
+      "method": "POST",
+      "path": "/createItem",
+      "headers": {
+        "Content-Type": "application/xml",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "queryParams": {
+        "name": { "type": "string", "required": true, "description": "Job name" }
+      },
+      "bodySchema": {
+        "type": "string",
+        "description": "Job configuration XML"
+      },
+      "urlTemplate": "https://{host}/createItem"
+    },
+    {
+      "id": "delete-job",
+      "name": "Delete Job",
+      "description": "Delete a job",
+      "method": "POST",
+      "path": "/job/{jobName}/doDelete",
+      "headers": {
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "urlTemplate": "https://{host}/job/{jobName}/doDelete"
+    },
+    {
+      "id": "copy-job",
+      "name": "Copy Job",
+      "description": "Copy a job",
+      "method": "POST",
+      "path": "/job/{jobName}/doCopy",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "New job name" },
+          "mode": { "type": "string", "enum": ["copy", "move"], "default": "copy", "description": "Copy or move mode" },
+          "from": { "type": "string", "required": true, "description": "Source job name" }
+        },
+        "required": ["name", "from"]
+      },
+      "urlTemplate": "https://{host}/job/{jobName}/doCopy"
+    },
+    {
+      "id": "trigger-build",
+      "name": "Trigger Build",
+      "description": "Trigger a build",
+      "method": "POST",
+      "path": "/job/{jobName}/build",
+      "headers": {
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "urlTemplate": "https://{host}/job/{jobName}/build"
+    },
+    {
+      "id": "trigger-build-with-parameters",
+      "name": "Trigger Build with Parameters",
+      "description": "Trigger a parameterized build",
+      "method": "POST",
+      "path": "/job/{jobName}/buildWithParameters",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Build parameters (form data)",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{host}/job/{jobName}/buildWithParameters"
+    },
+    {
+      "id": "get-build",
+      "name": "Get Build",
+      "description": "Get build details",
+      "method": "GET",
+      "path": "/job/{jobName}/{buildNumber}/api/json",
+      "headers": {
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "queryParams": {
+        "depth": { "type": "integer", "description": "JSON depth" },
+        "tree": { "type": "string", "description": "JSON tree filter" }
+      },
+      "urlTemplate": "https://{host}/job/{jobName}/{buildNumber}/api/json"
+    },
+    {
+      "id": "list-builds",
+      "name": "List Builds",
+      "description": "List all builds for a job",
+      "method": "GET",
+      "path": "/job/{jobName}/api/json",
+      "headers": {
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "queryParams": {
+        "tree": "builds[number,status,timestamp,id,result]",
+        "depth": { "type": "integer", "description": "JSON depth" }
+      },
+      "urlTemplate": "https://{host}/job/{jobName}/api/json"
+    },
+    {
+      "id": "stop-build",
+      "name": "Stop Build",
+      "description": "Stop a running build",
+      "method": "POST",
+      "path": "/job/{jobName}/{buildNumber}/stop",
+      "headers": {
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "urlTemplate": "https://{host}/job/{jobName}/{buildNumber}/stop"
+    }
+  ]
+}
+

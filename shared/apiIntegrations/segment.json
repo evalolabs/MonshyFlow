@@ -1,0 +1,195 @@
+{
+  "id": "segment",
+  "name": "Segment",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/segment/43AF79",
+  "description": "Customer data platform and analytics",
+  "baseUrl": "https://api.segment.io/v1",
+  "color": {
+    "bg": "from-green-100 to-teal-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(writeKey:)}",
+    "secretKey": "SEGMENT_WRITE_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "add-group",
+      "name": "Add Group",
+      "description": "Add or update a group",
+      "method": "POST",
+      "path": "/group",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "groupId": { "type": "string", "required": true, "description": "Group ID" },
+          "userId": { "type": "string", "description": "User ID" },
+          "anonymousId": { "type": "string", "description": "Anonymous ID" },
+          "traits": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Group traits/properties"
+          },
+          "context": {
+            "type": "object",
+            "properties": {
+              "ip": { "type": "string", "description": "IP address" },
+              "userAgent": { "type": "string", "description": "User agent" },
+              "locale": { "type": "string", "description": "Locale" },
+              "timezone": { "type": "string", "description": "Timezone" },
+              "page": {
+                "type": "object",
+                "properties": {
+                  "path": { "type": "string" },
+                  "referrer": { "type": "string" },
+                  "search": { "type": "string" },
+                  "title": { "type": "string" },
+                  "url": { "type": "string", "format": "uri" }
+                }
+              },
+              "screen": {
+                "type": "object",
+                "properties": {
+                  "width": { "type": "number" },
+                  "height": { "type": "number" },
+                  "density": { "type": "number" }
+                }
+              }
+            },
+            "description": "Context information"
+          },
+          "integrations": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Integration-specific options"
+          },
+          "timestamp": { "type": "string", "format": "date-time", "description": "Event timestamp" }
+        },
+        "required": ["groupId"]
+      },
+      "urlTemplate": "https://api.segment.io/v1/group"
+    },
+    {
+      "id": "identify-user",
+      "name": "Identify User",
+      "description": "Identify a user",
+      "method": "POST",
+      "path": "/identify",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "userId": { "type": "string", "description": "User ID" },
+          "anonymousId": { "type": "string", "description": "Anonymous ID" },
+          "traits": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "User traits/properties"
+          },
+          "context": {
+            "type": "object",
+            "properties": {
+              "ip": { "type": "string", "description": "IP address" },
+              "userAgent": { "type": "string", "description": "User agent" },
+              "locale": { "type": "string", "description": "Locale" },
+              "timezone": { "type": "string", "description": "Timezone" },
+              "page": {
+                "type": "object",
+                "properties": {
+                  "path": { "type": "string" },
+                  "referrer": { "type": "string" },
+                  "search": { "type": "string" },
+                  "title": { "type": "string" },
+                  "url": { "type": "string", "format": "uri" }
+                }
+              },
+              "screen": {
+                "type": "object",
+                "properties": {
+                  "width": { "type": "number" },
+                  "height": { "type": "number" },
+                  "density": { "type": "number" }
+                }
+              }
+            }
+          },
+          "integrations": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "timestamp": { "type": "string", "format": "date-time", "description": "Event timestamp" }
+        }
+      },
+      "urlTemplate": "https://api.segment.io/v1/identify"
+    },
+    {
+      "id": "track-event",
+      "name": "Track Event",
+      "description": "Track an event",
+      "method": "POST",
+      "path": "/track",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "event": { "type": "string", "required": true, "description": "Event name" },
+          "userId": { "type": "string", "description": "User ID" },
+          "anonymousId": { "type": "string", "description": "Anonymous ID" },
+          "properties": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Event properties"
+          },
+          "context": {
+            "type": "object",
+            "properties": {
+              "ip": { "type": "string", "description": "IP address" },
+              "userAgent": { "type": "string", "description": "User agent" },
+              "locale": { "type": "string", "description": "Locale" },
+              "timezone": { "type": "string", "description": "Timezone" },
+              "page": {
+                "type": "object",
+                "properties": {
+                  "path": { "type": "string" },
+                  "referrer": { "type": "string" },
+                  "search": { "type": "string" },
+                  "title": { "type": "string" },
+                  "url": { "type": "string", "format": "uri" }
+                }
+              },
+              "screen": {
+                "type": "object",
+                "properties": {
+                  "width": { "type": "number" },
+                  "height": { "type": "number" },
+                  "density": { "type": "number" }
+                }
+              }
+            }
+          },
+          "integrations": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Integration-specific options"
+          },
+          "timestamp": { "type": "string", "format": "date-time", "description": "Event timestamp" }
+        },
+        "required": ["event"]
+      },
+      "urlTemplate": "https://api.segment.io/v1/track"
+    }
+  ]
+}
+

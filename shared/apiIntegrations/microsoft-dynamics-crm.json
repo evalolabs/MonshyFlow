@@ -1,0 +1,151 @@
+{
+  "id": "microsoft-dynamics-crm",
+  "name": "Microsoft Dynamics CRM",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/microsoft/0078D4",
+  "description": "Customer relationship management via Dynamics 365 API",
+  "baseUrl": "https://{subdomain}.{region}/api/data/v9.2",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "MICROSOFT_DYNAMICS_ACCESS_TOKEN",
+    "note": "Subdomain and region should be provided in baseUrl placeholders {subdomain} and {region}, or as separate secret keys MICROSOFT_DYNAMICS_SUBDOMAIN and MICROSOFT_DYNAMICS_REGION"
+  },
+  "endpoints": [
+    {
+      "id": "create-account",
+      "name": "Create Account",
+      "description": "Create a new account",
+      "method": "POST",
+      "path": "/accounts",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}",
+        "OData-MaxVersion": "4.0",
+        "OData-Version": "4.0"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Account name" },
+          "accountnumber": { "type": "string", "description": "Account number" },
+          "telephone1": { "type": "string", "description": "Primary phone" },
+          "telephone2": { "type": "string", "description": "Secondary phone" },
+          "emailaddress1": { "type": "string", "format": "email", "description": "Primary email" },
+          "emailaddress2": { "type": "string", "format": "email", "description": "Secondary email" },
+          "websiteurl": { "type": "string", "format": "uri", "description": "Website URL" },
+          "address1_line1": { "type": "string", "description": "Address line 1" },
+          "address1_line2": { "type": "string", "description": "Address line 2" },
+          "address1_city": { "type": "string", "description": "City" },
+          "address1_stateorprovince": { "type": "string", "description": "State or province" },
+          "address1_postalcode": { "type": "string", "description": "Postal code" },
+          "address1_country": { "type": "string", "description": "Country" },
+          "description": { "type": "string", "description": "Description" },
+          "industrycode": { "type": "integer", "description": "Industry code" },
+          "customertypecode": { "type": "integer", "description": "Customer type code" },
+          "accountratingcode": { "type": "integer", "description": "Account rating code" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{subdomain}.{region}/api/data/v9.2/accounts"
+    },
+    {
+      "id": "get-account",
+      "name": "Get Account",
+      "description": "Get account by ID",
+      "method": "GET",
+      "path": "/accounts({accountId})",
+      "headers": {
+        "Authorization": "Bearer {apiKey}",
+        "OData-MaxVersion": "4.0",
+        "OData-Version": "4.0"
+      },
+      "queryParams": {
+        "$select": { "type": "string", "description": "OData select expression" },
+        "$expand": { "type": "string", "description": "OData expand expression" }
+      },
+      "urlTemplate": "https://{subdomain}.{region}/api/data/v9.2/accounts({accountId})"
+    },
+    {
+      "id": "list-accounts",
+      "name": "List Accounts",
+      "description": "List all accounts",
+      "method": "GET",
+      "path": "/accounts",
+      "headers": {
+        "Authorization": "Bearer {apiKey}",
+        "OData-MaxVersion": "4.0",
+        "OData-Version": "4.0"
+      },
+      "queryParams": {
+        "$filter": { "type": "string", "description": "OData filter expression" },
+        "$orderby": { "type": "string", "description": "OData order by expression" },
+        "$top": { "type": "integer", "description": "Number of results" },
+        "$skip": { "type": "integer", "description": "Skip results" },
+        "$select": { "type": "string", "description": "OData select expression" },
+        "$expand": { "type": "string", "description": "OData expand expression" },
+        "$count": { "type": "boolean", "description": "Include count" }
+      },
+      "urlTemplate": "https://{subdomain}.{region}/api/data/v9.2/accounts"
+    },
+    {
+      "id": "update-account",
+      "name": "Update Account",
+      "description": "Update an existing account",
+      "method": "PATCH",
+      "path": "/accounts({accountId})",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}",
+        "OData-MaxVersion": "4.0",
+        "OData-Version": "4.0",
+        "If-Match": "{etag}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Account name" },
+          "accountnumber": { "type": "string", "description": "Account number" },
+          "telephone1": { "type": "string", "description": "Primary phone" },
+          "telephone2": { "type": "string", "description": "Secondary phone" },
+          "emailaddress1": { "type": "string", "format": "email", "description": "Primary email" },
+          "emailaddress2": { "type": "string", "format": "email", "description": "Secondary email" },
+          "websiteurl": { "type": "string", "format": "uri", "description": "Website URL" },
+          "address1_line1": { "type": "string", "description": "Address line 1" },
+          "address1_line2": { "type": "string", "description": "Address line 2" },
+          "address1_city": { "type": "string", "description": "City" },
+          "address1_stateorprovince": { "type": "string", "description": "State or province" },
+          "address1_postalcode": { "type": "string", "description": "Postal code" },
+          "address1_country": { "type": "string", "description": "Country" },
+          "description": { "type": "string", "description": "Description" },
+          "industrycode": { "type": "integer", "description": "Industry code" },
+          "customertypecode": { "type": "integer", "description": "Customer type code" },
+          "accountratingcode": { "type": "integer", "description": "Account rating code" }
+        }
+      },
+      "urlTemplate": "https://{subdomain}.{region}/api/data/v9.2/accounts({accountId})"
+    },
+    {
+      "id": "delete-account",
+      "name": "Delete Account",
+      "description": "Delete an account",
+      "method": "DELETE",
+      "path": "/accounts({accountId})",
+      "headers": {
+        "Authorization": "Bearer {apiKey}",
+        "OData-MaxVersion": "4.0",
+        "OData-Version": "4.0",
+        "If-Match": "{etag}"
+      },
+      "urlTemplate": "https://{subdomain}.{region}/api/data/v9.2/accounts({accountId})"
+    }
+  ]
+}
+

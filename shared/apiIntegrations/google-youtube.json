@@ -1,0 +1,635 @@
+{
+  "id": "google-youtube",
+  "name": "Google YouTube",
+  "icon": "📺",
+  "logoUrl": "https://cdn.simpleicons.org/youtube/FF0000",
+  "description": "YouTube Data API v3 for accessing videos, playlists, channels, and more",
+  "baseUrl": "https://www.googleapis.com/youtube/v3",
+  "color": {
+    "bg": "from-red-100 to-orange-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GOOGLE_YOUTUBE_OAUTH2_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "get-video",
+      "name": "Get Video",
+      "description": "Get video by ID",
+      "method": "GET",
+      "path": "/videos",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "description": "Video ID (comma-separated for multiple)"
+        },
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to retrieve (comma-separated: snippet, contentDetails, statistics, etc.)"
+        },
+        "maxResults": {
+          "type": "integer",
+          "default": 5,
+          "description": "Maximum number of results"
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/videos"
+    },
+    {
+      "id": "list-videos",
+      "name": "List Videos",
+      "description": "List videos",
+      "method": "GET",
+      "path": "/videos",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to retrieve"
+        },
+        "chart": {
+          "type": "string",
+          "enum": ["mostPopular"],
+          "description": "Chart type"
+        },
+        "regionCode": {
+          "type": "string",
+          "description": "Region code (ISO 3166-1 alpha-2)"
+        },
+        "videoCategoryId": {
+          "type": "string",
+          "description": "Video category ID"
+        },
+        "maxResults": {
+          "type": "integer",
+          "default": 5
+        },
+        "pageToken": {
+          "type": "string",
+          "description": "Page token for pagination"
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/videos"
+    },
+    {
+      "id": "update-video",
+      "name": "Update Video",
+      "description": "Update video metadata",
+      "method": "PUT",
+      "path": "/videos",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to update (comma-separated)"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "description": "Video ID"
+          },
+          "snippet": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "categoryId": { "type": "string" },
+              "defaultLanguage": { "type": "string" },
+              "defaultAudioLanguage": { "type": "string" }
+            }
+          },
+          "status": {
+            "type": "object",
+            "properties": {
+              "privacyStatus": {
+                "type": "string",
+                "enum": ["private", "public", "unlisted"]
+              },
+              "selfDeclaredMadeForKids": { "type": "boolean" }
+            }
+          }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/videos"
+    },
+    {
+      "id": "create-playlist",
+      "name": "Create Playlist",
+      "description": "Create a new playlist",
+      "method": "POST",
+      "path": "/playlists",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to include (snippet, status)"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "snippet": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "required": true,
+                "description": "Playlist title"
+              },
+              "description": { "type": "string" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "defaultLanguage": { "type": "string" }
+            },
+            "required": ["title"]
+          },
+          "status": {
+            "type": "object",
+            "properties": {
+              "privacyStatus": {
+                "type": "string",
+                "enum": ["private", "public", "unlisted"],
+                "default": "private"
+              }
+            }
+          }
+        },
+        "required": ["snippet"]
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/playlists"
+    },
+    {
+      "id": "get-playlist",
+      "name": "Get Playlist",
+      "description": "Get playlist by ID",
+      "method": "GET",
+      "path": "/playlists",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "description": "Playlist ID (comma-separated for multiple)"
+        },
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to retrieve"
+        },
+        "maxResults": {
+          "type": "integer",
+          "default": 5
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/playlists"
+    },
+    {
+      "id": "list-playlists",
+      "name": "List Playlists",
+      "description": "List playlists",
+      "method": "GET",
+      "path": "/playlists",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to retrieve"
+        },
+        "channelId": {
+          "type": "string",
+          "description": "Channel ID"
+        },
+        "mine": {
+          "type": "boolean",
+          "description": "List playlists of authenticated user"
+        },
+        "maxResults": {
+          "type": "integer",
+          "default": 5
+        },
+        "pageToken": {
+          "type": "string",
+          "description": "Page token for pagination"
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/playlists"
+    },
+    {
+      "id": "update-playlist",
+      "name": "Update Playlist",
+      "description": "Update a playlist",
+      "method": "PUT",
+      "path": "/playlists",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to update"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "description": "Playlist ID"
+          },
+          "snippet": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          },
+          "status": {
+            "type": "object",
+            "properties": {
+              "privacyStatus": {
+                "type": "string",
+                "enum": ["private", "public", "unlisted"]
+              }
+            }
+          }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/playlists"
+    },
+    {
+      "id": "delete-playlist",
+      "name": "Delete Playlist",
+      "description": "Delete a playlist",
+      "method": "DELETE",
+      "path": "/playlists",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "description": "Playlist ID"
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/playlists"
+    },
+    {
+      "id": "create-playlist-item",
+      "name": "Create Playlist Item",
+      "description": "Add a video to a playlist",
+      "method": "POST",
+      "path": "/playlistItems",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to include (snippet, contentDetails)"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "snippet": {
+            "type": "object",
+            "properties": {
+              "playlistId": {
+                "type": "string",
+                "required": true,
+                "description": "Playlist ID"
+              },
+              "resourceId": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "default": "youtube#video",
+                    "description": "Resource kind"
+                  },
+                  "videoId": {
+                    "type": "string",
+                    "required": true,
+                    "description": "Video ID"
+                  }
+                },
+                "required": ["videoId"]
+              },
+              "position": {
+                "type": "integer",
+                "description": "Position in playlist"
+              }
+            },
+            "required": ["playlistId", "resourceId"]
+          }
+        },
+        "required": ["snippet"]
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/playlistItems"
+    },
+    {
+      "id": "get-playlist-item",
+      "name": "Get Playlist Item",
+      "description": "Get playlist item by ID",
+      "method": "GET",
+      "path": "/playlistItems",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "description": "Playlist item ID (comma-separated for multiple)"
+        },
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to retrieve"
+        },
+        "maxResults": {
+          "type": "integer",
+          "default": 5
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/playlistItems"
+    },
+    {
+      "id": "list-playlist-items",
+      "name": "List Playlist Items",
+      "description": "List items in a playlist",
+      "method": "GET",
+      "path": "/playlistItems",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to retrieve"
+        },
+        "playlistId": {
+          "type": "string",
+          "required": true,
+          "description": "Playlist ID"
+        },
+        "maxResults": {
+          "type": "integer",
+          "default": 5
+        },
+        "pageToken": {
+          "type": "string",
+          "description": "Page token for pagination"
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/playlistItems"
+    },
+    {
+      "id": "update-playlist-item",
+      "name": "Update Playlist Item",
+      "description": "Update a playlist item",
+      "method": "PUT",
+      "path": "/playlistItems",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to update"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "description": "Playlist item ID"
+          },
+          "snippet": {
+            "type": "object",
+            "properties": {
+              "position": { "type": "integer" }
+            }
+          }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/playlistItems"
+    },
+    {
+      "id": "delete-playlist-item",
+      "name": "Delete Playlist Item",
+      "description": "Remove a video from a playlist",
+      "method": "DELETE",
+      "path": "/playlistItems",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "description": "Playlist item ID"
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/playlistItems"
+    },
+    {
+      "id": "get-channel",
+      "name": "Get Channel",
+      "description": "Get channel by ID",
+      "method": "GET",
+      "path": "/channels",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "id": {
+          "type": "string",
+          "description": "Channel ID (comma-separated for multiple)"
+        },
+        "mine": {
+          "type": "boolean",
+          "description": "Get authenticated user's channel"
+        },
+        "forUsername": {
+          "type": "string",
+          "description": "Channel username"
+        },
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to retrieve"
+        },
+        "maxResults": {
+          "type": "integer",
+          "default": 5
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/channels"
+    },
+    {
+      "id": "list-channels",
+      "name": "List Channels",
+      "description": "List channels",
+      "method": "GET",
+      "path": "/channels",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to retrieve"
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Category ID"
+        },
+        "forUsername": {
+          "type": "string",
+          "description": "Channel username"
+        },
+        "maxResults": {
+          "type": "integer",
+          "default": 5
+        },
+        "pageToken": {
+          "type": "string",
+          "description": "Page token for pagination"
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/channels"
+    },
+    {
+      "id": "update-channel",
+      "name": "Update Channel",
+      "description": "Update channel metadata",
+      "method": "PUT",
+      "path": "/channels",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to update"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "description": "Channel ID"
+          },
+          "snippet": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "customUrl": { "type": "string" },
+              "defaultLanguage": { "type": "string" }
+            }
+          },
+          "brandingSettings": {
+            "type": "object",
+            "description": "Branding settings",
+            "additionalProperties": true
+          }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/channels"
+    },
+    {
+      "id": "list-video-categories",
+      "name": "List Video Categories",
+      "description": "List video categories",
+      "method": "GET",
+      "path": "/videoCategories",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "part": {
+          "type": "string",
+          "required": true,
+          "description": "Parts to retrieve"
+        },
+        "regionCode": {
+          "type": "string",
+          "description": "Region code (ISO 3166-1 alpha-2)"
+        },
+        "id": {
+          "type": "string",
+          "description": "Category ID (comma-separated for multiple)"
+        },
+        "hl": {
+          "type": "string",
+          "description": "Language code (ISO 639-1)"
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/youtube/v3/videoCategories"
+    }
+  ]
+}
+

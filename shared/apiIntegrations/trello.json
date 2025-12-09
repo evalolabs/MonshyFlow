@@ -1,0 +1,301 @@
+{
+  "id": "trello",
+  "name": "Trello",
+  "icon": "📋",
+  "logoUrl": "https://cdn.simpleicons.org/trello/0079BF",
+  "description": "Project management and collaboration tool",
+  "baseUrl": "https://api.trello.com/1",
+  "color": {
+    "bg": "from-sky-100 to-blue-100",
+    "border": "border-sky-500",
+    "icon": "text-sky-700",
+    "handle": "bg-sky-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "OAuth {apiKey}",
+    "secretKey": "TRELLO_API_KEY",
+    "tokenSecretKey": "TRELLO_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-board",
+      "name": "Create Board",
+      "description": "Create a new board",
+      "method": "POST",
+      "path": "/boards",
+      "queryParams": {
+        "name": "{boardName}",
+        "defaultLists": "true",
+        "key": "{apiKey}",
+        "token": "{token}"
+      },
+      "urlTemplate": "https://api.trello.com/1/boards?name={boardName}&key={apiKey}&token={token}"
+    },
+    {
+      "id": "get-board",
+      "name": "Get Board",
+      "description": "Get board details by ID",
+      "method": "GET",
+      "path": "/boards/{id}",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}",
+        "fields": "name,desc,closed,idOrganization"
+      },
+      "urlTemplate": "https://api.trello.com/1/boards/{id}?key={apiKey}&token={token}"
+    },
+    {
+      "id": "list-boards",
+      "name": "List Boards",
+      "description": "List all boards",
+      "method": "GET",
+      "path": "/members/me/boards",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}",
+        "filter": "open"
+      },
+      "urlTemplate": "https://api.trello.com/1/members/me/boards?key={apiKey}&token={token}"
+    },
+    {
+      "id": "update-board",
+      "name": "Update Board",
+      "description": "Update a board",
+      "method": "PUT",
+      "path": "/boards/{id}",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Board name" },
+          "desc": { "type": "string", "description": "Board description" },
+          "closed": { "type": "boolean", "description": "Close the board" },
+          "prefs_background": { "type": "string", "description": "Background color or image" }
+        }
+      },
+      "urlTemplate": "https://api.trello.com/1/boards/{id}?key={apiKey}&token={token}"
+    },
+    {
+      "id": "create-list",
+      "name": "Create List",
+      "description": "Create a new list on a board",
+      "method": "POST",
+      "path": "/lists",
+      "queryParams": {
+        "name": "{listName}",
+        "idBoard": "{boardId}",
+        "key": "{apiKey}",
+        "token": "{token}"
+      },
+      "urlTemplate": "https://api.trello.com/1/lists?name={listName}&idBoard={boardId}&key={apiKey}&token={token}"
+    },
+    {
+      "id": "get-list",
+      "name": "Get List",
+      "description": "Get list details by ID",
+      "method": "GET",
+      "path": "/lists/{id}",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}",
+        "cards": "open"
+      },
+      "urlTemplate": "https://api.trello.com/1/lists/{id}?key={apiKey}&token={token}"
+    },
+    {
+      "id": "list-lists",
+      "name": "List Lists",
+      "description": "List all lists on a board",
+      "method": "GET",
+      "path": "/boards/{id}/lists",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}",
+        "filter": "open"
+      },
+      "urlTemplate": "https://api.trello.com/1/boards/{id}/lists?key={apiKey}&token={token}"
+    },
+    {
+      "id": "update-list",
+      "name": "Update List",
+      "description": "Update a list",
+      "method": "PUT",
+      "path": "/lists/{id}",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "List name" },
+          "closed": { "type": "boolean", "description": "Close the list" },
+          "pos": { "type": "number", "description": "List position" }
+        }
+      },
+      "urlTemplate": "https://api.trello.com/1/lists/{id}?key={apiKey}&token={token}"
+    },
+    {
+      "id": "create-card",
+      "name": "Create Card",
+      "description": "Create a new card",
+      "method": "POST",
+      "path": "/cards",
+      "queryParams": {
+        "idList": "{listId}",
+        "name": "{cardName}",
+        "desc": "{description}",
+        "key": "{apiKey}",
+        "token": "{token}"
+      },
+      "urlTemplate": "https://api.trello.com/1/cards?idList={listId}&name={cardName}&key={apiKey}&token={token}"
+    },
+    {
+      "id": "get-card",
+      "name": "Get Card",
+      "description": "Get card details by ID",
+      "method": "GET",
+      "path": "/cards/{id}",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}",
+        "fields": "name,desc,due,idList,idMembers"
+      },
+      "urlTemplate": "https://api.trello.com/1/cards/{id}?key={apiKey}&token={token}"
+    },
+    {
+      "id": "list-cards",
+      "name": "List Cards",
+      "description": "List all cards on a board or list",
+      "method": "GET",
+      "path": "/lists/{id}/cards",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}",
+        "filter": "open"
+      },
+      "urlTemplate": "https://api.trello.com/1/lists/{id}/cards?key={apiKey}&token={token}"
+    },
+    {
+      "id": "update-card",
+      "name": "Update Card",
+      "description": "Update a card",
+      "method": "PUT",
+      "path": "/cards/{id}",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Card name" },
+          "desc": { "type": "string", "description": "Card description" },
+          "due": { "type": "string", "format": "date-time", "description": "Due date (ISO 8601)" },
+          "idList": { "type": "string", "description": "Move card to list" },
+          "idMembers": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Member IDs to assign"
+          },
+          "closed": { "type": "boolean", "description": "Archive the card" }
+        }
+      },
+      "urlTemplate": "https://api.trello.com/1/cards/{id}?key={apiKey}&token={token}"
+    },
+    {
+      "id": "delete-card",
+      "name": "Delete Card",
+      "description": "Delete a card",
+      "method": "DELETE",
+      "path": "/cards/{id}",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}"
+      },
+      "urlTemplate": "https://api.trello.com/1/cards/{id}?key={apiKey}&token={token}"
+    },
+    {
+      "id": "add-card-comment",
+      "name": "Add Card Comment",
+      "description": "Add a comment to a card",
+      "method": "POST",
+      "path": "/cards/{id}/actions/comments",
+      "queryParams": {
+        "text": "{commentText}",
+        "key": "{apiKey}",
+        "token": "{token}"
+      },
+      "urlTemplate": "https://api.trello.com/1/cards/{id}/actions/comments?text={commentText}&key={apiKey}&token={token}"
+    },
+    {
+      "id": "get-card-comments",
+      "name": "Get Card Comments",
+      "description": "Get all comments for a card",
+      "method": "GET",
+      "path": "/cards/{id}/actions",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}",
+        "filter": "commentCard"
+      },
+      "urlTemplate": "https://api.trello.com/1/cards/{id}/actions?key={apiKey}&token={token}&filter=commentCard"
+    },
+    {
+      "id": "add-card-member",
+      "name": "Add Card Member",
+      "description": "Add a member to a card",
+      "method": "POST",
+      "path": "/cards/{id}/idMembers",
+      "queryParams": {
+        "value": "{memberId}",
+        "key": "{apiKey}",
+        "token": "{token}"
+      },
+      "urlTemplate": "https://api.trello.com/1/cards/{id}/idMembers?value={memberId}&key={apiKey}&token={token}"
+    },
+    {
+      "id": "remove-card-member",
+      "name": "Remove Card Member",
+      "description": "Remove a member from a card",
+      "method": "DELETE",
+      "path": "/cards/{id}/idMembers/{idMember}",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}"
+      },
+      "urlTemplate": "https://api.trello.com/1/cards/{id}/idMembers/{idMember}?key={apiKey}&token={token}"
+    },
+    {
+      "id": "get-member",
+      "name": "Get Member",
+      "description": "Get member details by ID",
+      "method": "GET",
+      "path": "/members/{id}",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}",
+        "fields": "username,fullName,email"
+      },
+      "urlTemplate": "https://api.trello.com/1/members/{id}?key={apiKey}&token={token}"
+    },
+    {
+      "id": "get-me",
+      "name": "Get Me",
+      "description": "Get authenticated member details",
+      "method": "GET",
+      "path": "/members/me",
+      "queryParams": {
+        "key": "{apiKey}",
+        "token": "{token}"
+      },
+      "urlTemplate": "https://api.trello.com/1/members/me?key={apiKey}&token={token}"
+    }
+  ]
+}
+

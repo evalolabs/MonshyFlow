@@ -1,0 +1,383 @@
+{
+  "id": "hubspot",
+  "name": "HubSpot",
+  "icon": "🟠",
+  "logoUrl": "https://cdn.simpleicons.org/hubspot/FF7A59",
+  "description": "Marketing, sales, and service software",
+  "baseUrl": "https://api.hubapi.com",
+  "color": {
+    "bg": "from-orange-100 to-amber-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "HUBSPOT_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-company",
+      "name": "Create Company",
+      "description": "Create a new company in HubSpot",
+      "method": "POST",
+      "path": "/crm/v3/objects/companies",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "properties": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "required": true, "description": "Company name" },
+              "domain": { "type": "string", "description": "Company domain" },
+              "industry": { "type": "string", "description": "Industry" },
+              "phone": { "type": "string", "description": "Phone number" },
+              "address": { "type": "string", "description": "Address" },
+              "city": { "type": "string", "description": "City" },
+              "state": { "type": "string", "description": "State" },
+              "zip": { "type": "string", "description": "ZIP code" },
+              "country": { "type": "string", "description": "Country" }
+            },
+            "required": ["name"]
+          }
+        },
+        "required": ["properties"]
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/companies"
+    },
+    {
+      "id": "get-all-companies",
+      "name": "Get All Companies",
+      "description": "Get all companies",
+      "method": "GET",
+      "path": "/crm/v3/objects/companies",
+      "queryParams": {
+        "limit": "100",
+        "after": "{paginationToken}"
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/companies"
+    },
+    {
+      "id": "search-companies",
+      "name": "Search Companies by Domain",
+      "description": "Search for companies by domain",
+      "method": "GET",
+      "path": "/crm/v3/objects/companies/search",
+      "queryParams": {
+        "q": "{searchTerm}",
+        "limit": "100"
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/companies/search?q={searchTerm}"
+    },
+    {
+      "id": "update-company",
+      "name": "Update Company",
+      "description": "Update an existing company",
+      "method": "PATCH",
+      "path": "/crm/v3/objects/companies/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "properties": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Company name" },
+              "domain": { "type": "string", "description": "Company domain" },
+              "industry": { "type": "string", "description": "Industry" },
+              "phone": { "type": "string", "description": "Phone number" }
+            }
+          }
+        },
+        "required": ["properties"]
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/companies/{id}"
+    },
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact in HubSpot",
+      "method": "POST",
+      "path": "/crm/v3/objects/contacts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "properties": {
+            "type": "object",
+            "properties": {
+              "email": { "type": "string", "required": true, "description": "Contact email" },
+              "firstname": { "type": "string", "description": "First name" },
+              "lastname": { "type": "string", "description": "Last name" },
+              "phone": { "type": "string", "description": "Phone number" },
+              "company": { "type": "string", "description": "Company name" },
+              "jobtitle": { "type": "string", "description": "Job title" },
+              "website": { "type": "string", "description": "Website URL" }
+            },
+            "required": ["email"]
+          }
+        },
+        "required": ["properties"]
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact details by ID",
+      "method": "GET",
+      "path": "/crm/v3/objects/contacts/{id}",
+      "queryParams": {
+        "properties": "email,firstname,lastname,phone"
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/contacts/{id}"
+    },
+    {
+      "id": "get-all-contacts",
+      "name": "Get All Contacts",
+      "description": "Get all contacts",
+      "method": "GET",
+      "path": "/crm/v3/objects/contacts",
+      "queryParams": {
+        "limit": "100",
+        "after": "{paginationToken}"
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/contacts"
+    },
+    {
+      "id": "get-recent-contacts",
+      "name": "Get Recently Created/Updated Contacts",
+      "description": "Get recently created or updated contacts",
+      "method": "GET",
+      "path": "/crm/v3/objects/contacts/recent",
+      "queryParams": {
+        "limit": "100",
+        "since": "{timestamp}"
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/contacts/recent"
+    },
+    {
+      "id": "search-contacts",
+      "name": "Search Contacts",
+      "description": "Search for contacts",
+      "method": "POST",
+      "path": "/crm/v3/objects/contacts/search",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "required": true, "description": "Search query" },
+          "limit": { "type": "number", "description": "Number of results", "default": 100 },
+          "after": { "type": "string", "description": "Pagination token" },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "propertyName": { "type": "string" },
+                "direction": { "type": "string", "enum": ["ASCENDING", "DESCENDING"] }
+              }
+            },
+            "description": "Sort options"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/contacts/search"
+    },
+    {
+      "id": "upsert-contacts",
+      "name": "Upsert Contacts",
+      "description": "Create or update contacts in batch",
+      "method": "POST",
+      "path": "/crm/v3/objects/contacts/batch/upsert",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "idProperty": { "type": "string", "description": "Property to use for matching (e.g., 'email')" },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "email": { "type": "string" },
+                    "firstname": { "type": "string" },
+                    "lastname": { "type": "string" }
+                  }
+                }
+              }
+            },
+            "required": true,
+            "description": "Array of contact objects to upsert"
+          }
+        },
+        "required": ["inputs"]
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/contacts/batch/upsert"
+    },
+    {
+      "id": "add-contact-to-list",
+      "name": "Add Contact to List",
+      "description": "Add a contact to a contact list",
+      "method": "PUT",
+      "path": "/contacts/v1/lists/{listId}/add",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "emails": {
+            "type": "array",
+            "items": { "type": "string" },
+            "required": true,
+            "description": "Array of email addresses to add"
+          },
+          "vids": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "Array of contact IDs to add"
+          }
+        }
+      },
+      "urlTemplate": "https://api.hubapi.com/contacts/v1/lists/{listId}/add"
+    },
+    {
+      "id": "get-all-deals",
+      "name": "Get All Deals",
+      "description": "Get all deals",
+      "method": "GET",
+      "path": "/crm/v3/objects/deals",
+      "queryParams": {
+        "limit": "100",
+        "after": "{paginationToken}"
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/deals"
+    },
+    {
+      "id": "search-deals",
+      "name": "Search Deals",
+      "description": "Search for deals",
+      "method": "POST",
+      "path": "/crm/v3/objects/deals/search",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "required": true, "description": "Search query" },
+          "limit": { "type": "number", "description": "Number of results", "default": 100 },
+          "after": { "type": "string", "description": "Pagination token" }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/deals/search"
+    },
+    {
+      "id": "create-engagement",
+      "name": "Create Engagement",
+      "description": "Create a new engagement (call, email, meeting, etc.)",
+      "method": "POST",
+      "path": "/engagements/v1/engagements",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "engagement": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "required": true, "description": "Engagement type (CALL, EMAIL, MEETING, NOTE, TASK)", "enum": ["CALL", "EMAIL", "MEETING", "NOTE", "TASK"] },
+              "ownerId": { "type": "number", "description": "Owner ID" }
+            },
+            "required": ["type"]
+          },
+          "associations": {
+            "type": "object",
+            "properties": {
+              "contactIds": { "type": "array", "items": { "type": "number" }, "description": "Associated contact IDs" },
+              "companyIds": { "type": "array", "items": { "type": "number" }, "description": "Associated company IDs" },
+              "dealIds": { "type": "array", "items": { "type": "number" }, "description": "Associated deal IDs" }
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Engagement-specific metadata (varies by type)"
+          }
+        },
+        "required": ["engagement"]
+      },
+      "urlTemplate": "https://api.hubapi.com/engagements/v1/engagements"
+    },
+    {
+      "id": "get-engagement",
+      "name": "Get Engagement",
+      "description": "Get engagement details by ID",
+      "method": "GET",
+      "path": "/engagements/v1/engagements/{id}",
+      "urlTemplate": "https://api.hubapi.com/engagements/v1/engagements/{id}"
+    },
+    {
+      "id": "get-all-engagements",
+      "name": "Get All Engagements",
+      "description": "Get all engagements",
+      "method": "GET",
+      "path": "/engagements/v1/engagements",
+      "queryParams": {
+        "limit": "100",
+        "offset": "0"
+      },
+      "urlTemplate": "https://api.hubapi.com/engagements/v1/engagements"
+    },
+    {
+      "id": "get-ticket",
+      "name": "Get Ticket",
+      "description": "Get ticket details by ID",
+      "method": "GET",
+      "path": "/crm/v3/objects/tickets/{id}",
+      "queryParams": {
+        "properties": "subject,content,status"
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/tickets/{id}"
+    },
+    {
+      "id": "get-all-tickets",
+      "name": "Get All Tickets",
+      "description": "Get all tickets",
+      "method": "GET",
+      "path": "/crm/v3/objects/tickets",
+      "queryParams": {
+        "limit": "100",
+        "after": "{paginationToken}"
+      },
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/tickets"
+    },
+    {
+      "id": "delete-ticket",
+      "name": "Delete Ticket",
+      "description": "Delete a ticket by ID",
+      "method": "DELETE",
+      "path": "/crm/v3/objects/tickets/{id}",
+      "urlTemplate": "https://api.hubapi.com/crm/v3/objects/tickets/{id}"
+    }
+  ]
+}

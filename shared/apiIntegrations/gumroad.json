@@ -1,0 +1,75 @@
+{
+  "id": "gumroad",
+  "name": "Gumroad",
+  "icon": "🛒",
+  "logoUrl": "https://cdn.simpleicons.org/gumroad/36A9AE",
+  "description": "Digital product marketplace",
+  "baseUrl": "https://api.gumroad.com/v2",
+  "color": {
+    "bg": "from-teal-100 to-emerald-100",
+    "border": "border-teal-500",
+    "icon": "text-teal-700",
+    "handle": "bg-teal-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "{apiKey}",
+    "secretKey": "GUMROAD_ACCESS_TOKEN",
+    "queryParamName": "access_token"
+  },
+  "endpoints": [
+    {
+      "id": "get-product",
+      "name": "Get Product",
+      "description": "Get product details by ID",
+      "method": "GET",
+      "path": "/products/{productId}",
+      "headers": {},
+      "queryParams": {
+        "access_token": "{accessToken}"
+      },
+      "urlTemplate": "https://api.gumroad.com/v2/products/{productId}"
+    },
+    {
+      "id": "list-products",
+      "name": "List Products",
+      "description": "List all products",
+      "method": "GET",
+      "path": "/products",
+      "headers": {},
+      "queryParams": {
+        "access_token": "{accessToken}"
+      },
+      "urlTemplate": "https://api.gumroad.com/v2/products"
+    },
+    {
+      "id": "get-sale",
+      "name": "Get Sale",
+      "description": "Get sale details by ID",
+      "method": "GET",
+      "path": "/sales/{saleId}",
+      "headers": {},
+      "queryParams": {
+        "access_token": "{accessToken}"
+      },
+      "urlTemplate": "https://api.gumroad.com/v2/sales/{saleId}"
+    },
+    {
+      "id": "list-sales",
+      "name": "List Sales",
+      "description": "List all sales",
+      "method": "GET",
+      "path": "/sales",
+      "headers": {},
+      "queryParams": {
+        "access_token": "{accessToken}",
+        "page": "1",
+        "after": "{afterDate}",
+        "before": "{beforeDate}"
+      },
+      "urlTemplate": "https://api.gumroad.com/v2/sales"
+    }
+  ]
+}
+

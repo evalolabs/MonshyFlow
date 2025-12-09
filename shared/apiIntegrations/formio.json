@@ -1,0 +1,212 @@
+{
+  "id": "formio",
+  "name": "Form.io",
+  "icon": "📋",
+  "logoUrl": "https://cdn.simpleicons.org/formio/000000",
+  "description": "Form builder and data management platform",
+  "baseUrl": "https://api.form.io",
+  "color": {
+    "bg": "from-gray-100 to-zinc-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "x-jwt-token",
+    "headerFormat": "{apiKey}",
+    "secretKey": "FORMIO_SESSION_TOKEN",
+    "usernameSecretKey": "FORMIO_EMAIL",
+    "note": "Host should be provided in baseUrl placeholder {host} or as FORMIO_BASE_URL secret key for self-hosted instances. Session token is obtained by authenticating with email and password via /user/login endpoint."
+  },
+  "endpoints": [
+    {
+      "id": "create-form",
+      "name": "Create Form",
+      "description": "Create a new form",
+      "method": "POST",
+      "path": "/form",
+      "headers": {
+        "Content-Type": "application/json",
+        "x-jwt-token": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Form title" },
+          "name": { "type": "string", "required": true, "description": "Form name (slug)" },
+          "display": { "type": "string", "enum": ["form", "wizard", "pdf"], "default": "form", "description": "Display type" },
+          "type": { "type": "string", "default": "form", "description": "Form type" },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Form component",
+              "additionalProperties": true
+            },
+            "description": "Form components"
+          },
+          "settings": {
+            "type": "object",
+            "description": "Form settings",
+            "additionalProperties": true
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          }
+        },
+        "required": ["title", "name"]
+      },
+      "urlTemplate": "https://api.form.io/form"
+    },
+    {
+      "id": "get-form",
+      "name": "Get Form",
+      "description": "Get form by ID",
+      "method": "GET",
+      "path": "/form/{formId}",
+      "headers": {
+        "x-jwt-token": "{apiKey}"
+      },
+      "urlTemplate": "https://api.form.io/form/{formId}"
+    },
+    {
+      "id": "list-forms",
+      "name": "List Forms",
+      "description": "List all forms",
+      "method": "GET",
+      "path": "/form",
+      "headers": {
+        "x-jwt-token": "{apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" },
+        "skip": { "type": "integer", "default": 0, "description": "Skip for pagination" },
+        "tags": { "type": "string", "description": "Filter by tags (comma-separated)" }
+      },
+      "urlTemplate": "https://api.form.io/form"
+    },
+    {
+      "id": "update-form",
+      "name": "Update Form",
+      "description": "Update a form",
+      "method": "PUT",
+      "path": "/form/{formId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "x-jwt-token": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Form title" },
+          "name": { "type": "string", "description": "Form name" },
+          "display": { "type": "string", "enum": ["form", "wizard", "pdf"], "description": "Display type" },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "urlTemplate": "https://api.form.io/form/{formId}"
+    },
+    {
+      "id": "delete-form",
+      "name": "Delete Form",
+      "description": "Delete a form",
+      "method": "DELETE",
+      "path": "/form/{formId}",
+      "headers": {
+        "x-jwt-token": "{apiKey}"
+      },
+      "urlTemplate": "https://api.form.io/form/{formId}"
+    },
+    {
+      "id": "create-submission",
+      "name": "Create Submission",
+      "description": "Create a new submission",
+      "method": "POST",
+      "path": "/form/{formId}/submission",
+      "headers": {
+        "Content-Type": "application/json",
+        "x-jwt-token": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Submission data (field names as keys)",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://api.form.io/form/{formId}/submission"
+    },
+    {
+      "id": "get-submission",
+      "name": "Get Submission",
+      "description": "Get submission by ID",
+      "method": "GET",
+      "path": "/form/{formId}/submission/{submissionId}",
+      "headers": {
+        "x-jwt-token": "{apiKey}"
+      },
+      "urlTemplate": "https://api.form.io/form/{formId}/submission/{submissionId}"
+    },
+    {
+      "id": "list-submissions",
+      "name": "List Submissions",
+      "description": "List all submissions for a form",
+      "method": "GET",
+      "path": "/form/{formId}/submission",
+      "headers": {
+        "x-jwt-token": "{apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" },
+        "skip": { "type": "integer", "default": 0, "description": "Skip for pagination" },
+        "select": { "type": "string", "description": "Select fields (comma-separated)" },
+        "sort": { "type": "string", "description": "Sort expression" }
+      },
+      "urlTemplate": "https://api.form.io/form/{formId}/submission"
+    },
+    {
+      "id": "update-submission",
+      "name": "Update Submission",
+      "description": "Update a submission",
+      "method": "PUT",
+      "path": "/form/{formId}/submission/{submissionId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "x-jwt-token": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Submission data to update (field names as keys)",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://api.form.io/form/{formId}/submission/{submissionId}"
+    },
+    {
+      "id": "delete-submission",
+      "name": "Delete Submission",
+      "description": "Delete a submission",
+      "method": "DELETE",
+      "path": "/form/{formId}/submission/{submissionId}",
+      "headers": {
+        "x-jwt-token": "{apiKey}"
+      },
+      "urlTemplate": "https://api.form.io/form/{formId}/submission/{submissionId}"
+    }
+  ]
+}
+

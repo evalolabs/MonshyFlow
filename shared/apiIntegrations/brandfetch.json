@@ -1,0 +1,79 @@
+{
+  "id": "brandfetch",
+  "name": "Brandfetch",
+  "icon": "🎨",
+  "logoUrl": "https://cdn.simpleicons.org/brandfetch/000000",
+  "description": "Brand asset API for logos, colors, fonts, and other brand information",
+  "baseUrl": "https://api.brandfetch.io/v2",
+  "color": {
+    "bg": "from-purple-100 to-indigo-100",
+    "border": "border-purple-500",
+    "icon": "text-purple-700",
+    "handle": "bg-purple-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "BRANDFETCH_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "get-brand",
+      "name": "Get Brand",
+      "description": "Get brand information by domain",
+      "method": "GET",
+      "path": "/brands/{domain}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.brandfetch.io/v2/brands/{domain}"
+    },
+    {
+      "id": "get-brand-colors",
+      "name": "Get Brand Colors",
+      "description": "Get brand colors by domain",
+      "method": "GET",
+      "path": "/brands/{domain}/colors",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.brandfetch.io/v2/brands/{domain}/colors"
+    },
+    {
+      "id": "get-brand-fonts",
+      "name": "Get Brand Fonts",
+      "description": "Get brand fonts by domain",
+      "method": "GET",
+      "path": "/brands/{domain}/fonts",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.brandfetch.io/v2/brands/{domain}/fonts"
+    },
+    {
+      "id": "get-brand-industry",
+      "name": "Get Brand Industry",
+      "description": "Get brand industry by domain",
+      "method": "GET",
+      "path": "/brands/{domain}/industry",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.brandfetch.io/v2/brands/{domain}/industry"
+    },
+    {
+      "id": "get-brand-logo",
+      "name": "Get Brand Logo",
+      "description": "Get brand logo by domain (can be downloaded as binary)",
+      "method": "GET",
+      "path": "/brands/{domain}/logo",
+      "headers": {
+        "Authorization": "Bearer {apiKey}",
+        "Accept": "image/*"
+      },
+      "urlTemplate": "https://api.brandfetch.io/v2/brands/{domain}/logo"
+    }
+  ]
+}
+

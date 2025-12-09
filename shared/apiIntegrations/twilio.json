@@ -1,0 +1,171 @@
+{
+  "id": "twilio",
+  "name": "Twilio",
+  "icon": "📱",
+  "logoUrl": "https://cdn.simpleicons.org/twilio/F22F46",
+  "description": "Cloud communications platform for SMS, voice, and messaging",
+  "baseUrl": "https://api.twilio.com/2010-04-01/Accounts/{AccountSid}",
+  "color": {
+    "bg": "from-red-100 to-rose-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(AccountSid:AuthToken)}",
+    "secretKey": "TWILIO_AUTH_TOKEN",
+    "accountSidSecretKey": "TWILIO_ACCOUNT_SID"
+  },
+  "endpoints": [
+    {
+      "id": "send-sms",
+      "name": "Send SMS",
+      "description": "Send an SMS message",
+      "method": "POST",
+      "path": "/Messages.json",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "From": { "type": "string", "required": true, "description": "Sender phone number (Twilio number or verified number)" },
+          "To": { "type": "string", "required": true, "description": "Recipient phone number (E.164 format)" },
+          "Body": { "type": "string", "required": true, "description": "Message body" },
+          "StatusCallback": { "type": "string", "description": "Webhook URL for status updates" },
+          "StatusCallbackMethod": { "type": "string", "enum": ["GET", "POST"], "description": "HTTP method for status callback", "default": "POST" }
+        },
+        "required": ["From", "To", "Body"]
+      },
+      "urlTemplate": "https://api.twilio.com/2010-04-01/Accounts/{AccountSid}/Messages.json"
+    },
+    {
+      "id": "get-message",
+      "name": "Get Message",
+      "description": "Get message details by SID",
+      "method": "GET",
+      "path": "/Messages/{MessageSid}.json",
+      "urlTemplate": "https://api.twilio.com/2010-04-01/Accounts/{AccountSid}/Messages/{MessageSid}.json"
+    },
+    {
+      "id": "list-messages",
+      "name": "List Messages",
+      "description": "List all messages",
+      "method": "GET",
+      "path": "/Messages.json",
+      "queryParams": {
+        "To": "{toNumber}",
+        "From": "{fromNumber}",
+        "DateSent": "{date}",
+        "PageSize": "50",
+        "Page": "0"
+      },
+      "urlTemplate": "https://api.twilio.com/2010-04-01/Accounts/{AccountSid}/Messages.json"
+    },
+    {
+      "id": "delete-message",
+      "name": "Delete Message",
+      "description": "Delete a message by SID",
+      "method": "DELETE",
+      "path": "/Messages/{MessageSid}.json",
+      "urlTemplate": "https://api.twilio.com/2010-04-01/Accounts/{AccountSid}/Messages/{MessageSid}.json"
+    },
+    {
+      "id": "make-call",
+      "name": "Make Call",
+      "description": "Make a phone call",
+      "method": "POST",
+      "path": "/Calls.json",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "From": { "type": "string", "required": true, "description": "Caller phone number (Twilio number)" },
+          "To": { "type": "string", "required": true, "description": "Recipient phone number (E.164 format)" },
+          "Url": { "type": "string", "required": true, "description": "TwiML URL or TwiML instructions" },
+          "Method": { "type": "string", "enum": ["GET", "POST"], "description": "HTTP method for URL", "default": "POST" },
+          "StatusCallback": { "type": "string", "description": "Webhook URL for status updates" },
+          "StatusCallbackMethod": { "type": "string", "enum": ["GET", "POST"], "description": "HTTP method for status callback", "default": "POST" },
+          "StatusCallbackEvent": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["initiated", "ringing", "answered", "completed"] },
+            "description": "Events to receive callbacks for"
+          }
+        },
+        "required": ["From", "To", "Url"]
+      },
+      "urlTemplate": "https://api.twilio.com/2010-04-01/Accounts/{AccountSid}/Calls.json"
+    },
+    {
+      "id": "get-call",
+      "name": "Get Call",
+      "description": "Get call details by SID",
+      "method": "GET",
+      "path": "/Calls/{CallSid}.json",
+      "urlTemplate": "https://api.twilio.com/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}.json"
+    },
+    {
+      "id": "list-calls",
+      "name": "List Calls",
+      "description": "List all calls",
+      "method": "GET",
+      "path": "/Calls.json",
+      "queryParams": {
+        "To": "{toNumber}",
+        "From": "{fromNumber}",
+        "Status": "{status}",
+        "StartTime": "{startTime}",
+        "EndTime": "{endTime}",
+        "PageSize": "50",
+        "Page": "0"
+      },
+      "urlTemplate": "https://api.twilio.com/2010-04-01/Accounts/{AccountSid}/Calls.json"
+    },
+    {
+      "id": "update-call",
+      "name": "Update Call",
+      "description": "Update an active call",
+      "method": "POST",
+      "path": "/Calls/{CallSid}.json",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Status": { "type": "string", "enum": ["queued", "ringing", "in-progress", "completed", "busy", "failed", "no-answer", "canceled"], "description": "Call status" },
+          "Url": { "type": "string", "description": "New TwiML URL" },
+          "Method": { "type": "string", "enum": ["GET", "POST"], "description": "HTTP method for URL" }
+        }
+      },
+      "urlTemplate": "https://api.twilio.com/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}.json"
+    },
+    {
+      "id": "get-account",
+      "name": "Get Account",
+      "description": "Get account details",
+      "method": "GET",
+      "path": ".json",
+      "urlTemplate": "https://api.twilio.com/2010-04-01/Accounts/{AccountSid}.json"
+    },
+    {
+      "id": "list-phone-numbers",
+      "name": "List Phone Numbers",
+      "description": "List all phone numbers in the account",
+      "method": "GET",
+      "path": "/IncomingPhoneNumbers.json",
+      "queryParams": {
+        "PhoneNumber": "{phoneNumber}",
+        "FriendlyName": "{friendlyName}",
+        "PageSize": "50",
+        "Page": "0"
+      },
+      "urlTemplate": "https://api.twilio.com/2010-04-01/Accounts/{AccountSid}/IncomingPhoneNumbers.json"
+    }
+  ]
+}
+

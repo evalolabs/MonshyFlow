@@ -1,0 +1,107 @@
+{
+  "id": "gotify",
+  "name": "Gotify",
+  "icon": "📱",
+  "logoUrl": "https://cdn.simpleicons.org/gotify/000000",
+  "description": "Self-hosted push notification service",
+  "baseUrl": "https://{your-gotify-instance}",
+  "color": {
+    "bg": "from-stone-100 to-gray-100",
+    "border": "border-stone-500",
+    "icon": "text-stone-700",
+    "handle": "bg-stone-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "X-Gotify-Key",
+    "secretKey": "GOTIFY_APPLICATION_TOKEN",
+    "note": "Base URL should be provided in baseUrl placeholder {your-gotify-instance} or as GOTIFY_BASE_URL secret key."
+  },
+  "endpoints": [
+    {
+      "id": "create-message",
+      "name": "Create Message",
+      "description": "Send a push notification",
+      "method": "POST",
+      "path": "/message",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Gotify-Key": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "required": true,
+            "description": "Message title"
+          },
+          "message": {
+            "type": "string",
+            "required": true,
+            "description": "Message text"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "default": 5,
+            "description": "Priority (0=lowest, 10=highest)"
+          },
+          "extras": {
+            "type": "object",
+            "description": "Extra data (client display, actions, etc.)",
+            "additionalProperties": true
+          }
+        },
+        "required": ["title", "message"]
+      },
+      "urlTemplate": "https://{your-gotify-instance}/message"
+    },
+    {
+      "id": "get-message",
+      "name": "Get Message",
+      "description": "Get message by ID",
+      "method": "GET",
+      "path": "/message/{messageId}",
+      "headers": {
+        "X-Gotify-Key": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-gotify-instance}/message/{messageId}"
+    },
+    {
+      "id": "list-messages",
+      "name": "List Messages",
+      "description": "List all messages",
+      "method": "GET",
+      "path": "/message",
+      "headers": {
+        "X-Gotify-Key": "{apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 100,
+          "description": "Number of results"
+        },
+        "since": {
+          "type": "integer",
+          "description": "Unix timestamp (filter messages after this time)"
+        }
+      },
+      "urlTemplate": "https://{your-gotify-instance}/message"
+    },
+    {
+      "id": "delete-message",
+      "name": "Delete Message",
+      "description": "Delete a message",
+      "method": "DELETE",
+      "path": "/message/{messageId}",
+      "headers": {
+        "X-Gotify-Key": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-gotify-instance}/message/{messageId}"
+    }
+  ]
+}
+

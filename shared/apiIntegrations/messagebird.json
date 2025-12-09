@@ -1,0 +1,246 @@
+{
+  "id": "messagebird",
+  "name": "MessageBird",
+  "icon": "📱",
+  "logoUrl": "https://cdn.simpleicons.org/messagebird/2481FF",
+  "description": "SMS, voice, and messaging platform",
+  "baseUrl": "https://rest.messagebird.com",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "AccessKey {apiKey}",
+    "secretKey": "MESSAGEBIRD_ACCESS_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "send-sms",
+      "name": "Send SMS",
+      "description": "Send an SMS message",
+      "method": "POST",
+      "path": "/messages",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "originator": { "type": "string", "required": true, "description": "Sender ID or phone number" },
+          "recipients": {
+            "type": "array",
+            "items": { "type": "string" },
+            "required": true,
+            "description": "Recipient phone numbers (E.164 format)"
+          },
+          "body": { "type": "string", "required": true, "description": "Message text" },
+          "reference": { "type": "string", "description": "Reference ID for tracking" },
+          "reportUrl": { "type": "string", "format": "uri", "description": "Webhook URL for delivery reports" },
+          "validity": { "type": "number", "description": "Validity period in seconds" },
+          "gateway": { "type": "string", "description": "Gateway ID" },
+          "type": { "type": "string", "enum": ["sms", "binary"], "default": "sms", "description": "Message type" },
+          "typeDetails": {
+            "type": "object",
+            "properties": {
+              "udh": { "type": "string", "description": "User Data Header (for binary messages)" }
+            },
+            "description": "Type details for binary messages"
+          },
+          "scheduledDatetime": { "type": "string", "format": "date-time", "description": "Scheduled send time" },
+          "createdDatetime": { "type": "string", "format": "date-time", "description": "Creation time" }
+        },
+        "required": ["originator", "recipients", "body"]
+      },
+      "urlTemplate": "https://rest.messagebird.com/messages"
+    },
+    {
+      "id": "get-message",
+      "name": "Get Message",
+      "description": "Get message details by ID",
+      "method": "GET",
+      "path": "/messages/{id}",
+      "headers": {},
+      "urlTemplate": "https://rest.messagebird.com/messages/{id}"
+    },
+    {
+      "id": "list-messages",
+      "name": "List Messages",
+      "description": "List messages",
+      "method": "GET",
+      "path": "/messages",
+      "headers": {},
+      "queryParams": {
+        "offset": "0",
+        "limit": "20"
+      },
+      "urlTemplate": "https://rest.messagebird.com/messages"
+    },
+    {
+      "id": "send-voice-message",
+      "name": "Send Voice Message",
+      "description": "Send a voice message",
+      "method": "POST",
+      "path": "/voicemessages",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "recipients": {
+            "type": "array",
+            "items": { "type": "string" },
+            "required": true,
+            "description": "Recipient phone numbers"
+          },
+          "originator": { "type": "string", "required": true, "description": "Caller ID" },
+          "body": { "type": "string", "required": true, "description": "Text to convert to speech" },
+          "reference": { "type": "string", "description": "Reference ID" },
+          "language": { "type": "string", "default": "en-gb", "description": "Language for text-to-speech" },
+          "voice": { "type": "string", "enum": ["male", "female"], "default": "female", "description": "Voice gender" },
+          "repeat": { "type": "number", "default": 1, "description": "Number of times to repeat" },
+          "ifMachine": { "type": "string", "enum": ["continue", "hangup"], "default": "continue", "description": "Action if answering machine detected" },
+          "machineTimeout": { "type": "number", "default": 7000, "description": "Timeout for machine detection in milliseconds" }
+        },
+        "required": ["recipients", "originator", "body"]
+      },
+      "urlTemplate": "https://rest.messagebird.com/voicemessages"
+    },
+    {
+      "id": "get-voice-message",
+      "name": "Get Voice Message",
+      "description": "Get voice message details by ID",
+      "method": "GET",
+      "path": "/voicemessages/{id}",
+      "headers": {},
+      "urlTemplate": "https://rest.messagebird.com/voicemessages/{id}"
+    },
+    {
+      "id": "list-voice-messages",
+      "name": "List Voice Messages",
+      "description": "List voice messages",
+      "method": "GET",
+      "path": "/voicemessages",
+      "headers": {},
+      "queryParams": {
+        "offset": "0",
+        "limit": "20"
+      },
+      "urlTemplate": "https://rest.messagebird.com/voicemessages"
+    },
+    {
+      "id": "get-balance",
+      "name": "Get Balance",
+      "description": "Get account balance",
+      "method": "GET",
+      "path": "/balance",
+      "headers": {},
+      "urlTemplate": "https://rest.messagebird.com/balance"
+    },
+    {
+      "id": "get-phone-number",
+      "name": "Get Phone Number",
+      "description": "Get phone number details by ID",
+      "method": "GET",
+      "path": "/phone-numbers/{id}",
+      "headers": {},
+      "urlTemplate": "https://rest.messagebird.com/phone-numbers/{id}"
+    },
+    {
+      "id": "list-phone-numbers",
+      "name": "List Phone Numbers",
+      "description": "List phone numbers",
+      "method": "GET",
+      "path": "/phone-numbers",
+      "headers": {},
+      "queryParams": {
+        "offset": "0",
+        "limit": "20"
+      },
+      "urlTemplate": "https://rest.messagebird.com/phone-numbers"
+    },
+    {
+      "id": "create-webhook",
+      "name": "Create Webhook",
+      "description": "Create a webhook for message events",
+      "method": "POST",
+      "path": "/webhooks",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "format": "uri", "required": true, "description": "Webhook URL" },
+          "events": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["message.sent", "message.delivered", "message.failed", "message.received"] },
+            "required": true,
+            "description": "Events to subscribe to"
+          },
+          "token": { "type": "string", "description": "Webhook token for verification" }
+        },
+        "required": ["url", "events"]
+      },
+      "urlTemplate": "https://rest.messagebird.com/webhooks"
+    },
+    {
+      "id": "get-webhook",
+      "name": "Get Webhook",
+      "description": "Get webhook details by ID",
+      "method": "GET",
+      "path": "/webhooks/{id}",
+      "headers": {},
+      "urlTemplate": "https://rest.messagebird.com/webhooks/{id}"
+    },
+    {
+      "id": "list-webhooks",
+      "name": "List Webhooks",
+      "description": "List all webhooks",
+      "method": "GET",
+      "path": "/webhooks",
+      "headers": {},
+      "queryParams": {
+        "offset": "0",
+        "limit": "20"
+      },
+      "urlTemplate": "https://rest.messagebird.com/webhooks"
+    },
+    {
+      "id": "update-webhook",
+      "name": "Update Webhook",
+      "description": "Update a webhook",
+      "method": "PATCH",
+      "path": "/webhooks/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "format": "uri", "description": "Webhook URL" },
+          "events": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["message.sent", "message.delivered", "message.failed", "message.received"] }
+          },
+          "token": { "type": "string", "description": "Webhook token" }
+        }
+      },
+      "urlTemplate": "https://rest.messagebird.com/webhooks/{id}"
+    },
+    {
+      "id": "delete-webhook",
+      "name": "Delete Webhook",
+      "description": "Delete a webhook",
+      "method": "DELETE",
+      "path": "/webhooks/{id}",
+      "headers": {},
+      "urlTemplate": "https://rest.messagebird.com/webhooks/{id}"
+    }
+  ]
+}
+

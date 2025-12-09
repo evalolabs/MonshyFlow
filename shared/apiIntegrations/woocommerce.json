@@ -1,0 +1,589 @@
+{
+  "id": "woocommerce",
+  "name": "WooCommerce",
+  "icon": "🛒",
+  "logoUrl": "https://cdn.simpleicons.org/woocommerce/96588A",
+  "description": "E-commerce platform for WordPress",
+  "baseUrl": "https://{store}.com/wp-json/wc/v3",
+  "color": {
+    "bg": "from-purple-100 to-violet-100",
+    "border": "border-purple-500",
+    "icon": "text-purple-700",
+    "handle": "bg-purple-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(consumerKey:consumerSecret)}",
+    "secretKey": "WOocommerce_CONSUMER_SECRET",
+    "emailSecretKey": "WOocommerce_CONSUMER_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-product",
+      "name": "Create Product",
+      "description": "Create a new product",
+      "method": "POST",
+      "path": "/products",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Product name" },
+          "type": { "type": "string", "enum": ["simple", "grouped", "external", "variable"], "default": "simple", "description": "Product type" },
+          "regular_price": { "type": "string", "description": "Regular price" },
+          "sale_price": { "type": "string", "description": "Sale price" },
+          "description": { "type": "string", "description": "Product description (HTML)" },
+          "short_description": { "type": "string", "description": "Product short description" },
+          "sku": { "type": "string", "description": "SKU" },
+          "manage_stock": { "type": "boolean", "default": false, "description": "Manage stock" },
+          "stock_quantity": { "type": "number", "description": "Stock quantity" },
+          "stock_status": { "type": "string", "enum": ["instock", "outofstock", "onbackorder"], "default": "instock" },
+          "weight": { "type": "string", "description": "Product weight" },
+          "dimensions": {
+            "type": "object",
+            "properties": {
+              "length": { "type": "string" },
+              "width": { "type": "string" },
+              "height": { "type": "string" }
+            }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "number" },
+                "name": { "type": "string" }
+              }
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "number" },
+                "name": { "type": "string" }
+              }
+            }
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "src": { "type": "string", "format": "uri", "required": true },
+                "name": { "type": "string" },
+                "alt": { "type": "string" }
+              },
+              "required": ["src"]
+            }
+          },
+          "status": { "type": "string", "enum": ["draft", "pending", "private", "publish"], "default": "publish" },
+          "featured": { "type": "boolean", "default": false },
+          "catalog_visibility": { "type": "string", "enum": ["visible", "catalog", "search", "hidden"], "default": "visible" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/products"
+    },
+    {
+      "id": "get-product",
+      "name": "Get Product",
+      "description": "Get product details by ID",
+      "method": "GET",
+      "path": "/products/{id}",
+      "headers": {},
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/products/{id}"
+    },
+    {
+      "id": "list-products",
+      "name": "List Products",
+      "description": "List all products",
+      "method": "GET",
+      "path": "/products",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "10",
+        "search": "{searchTerm}",
+        "status": "publish",
+        "category": "{categoryId}",
+        "tag": "{tagId}",
+        "featured": "true",
+        "orderby": "date",
+        "order": "desc"
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/products"
+    },
+    {
+      "id": "update-product",
+      "name": "Update Product",
+      "description": "Update an existing product",
+      "method": "PUT",
+      "path": "/products/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Product name" },
+          "regular_price": { "type": "string", "description": "Regular price" },
+          "sale_price": { "type": "string", "description": "Sale price" },
+          "description": { "type": "string", "description": "Product description" },
+          "stock_quantity": { "type": "number", "description": "Stock quantity" },
+          "status": { "type": "string", "enum": ["draft", "pending", "private", "publish"] },
+          "featured": { "type": "boolean" }
+        }
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/products/{id}"
+    },
+    {
+      "id": "delete-product",
+      "name": "Delete Product",
+      "description": "Delete a product",
+      "method": "DELETE",
+      "path": "/products/{id}",
+      "headers": {},
+      "queryParams": {
+        "force": "true"
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/products/{id}?force=true"
+    },
+    {
+      "id": "create-order",
+      "name": "Create Order",
+      "description": "Create a new order",
+      "method": "POST",
+      "path": "/orders",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "payment_method": { "type": "string", "required": true, "description": "Payment method" },
+          "payment_method_title": { "type": "string", "description": "Payment method title" },
+          "set_paid": { "type": "boolean", "default": false, "description": "Set order as paid" },
+          "billing": {
+            "type": "object",
+            "properties": {
+              "first_name": { "type": "string", "required": true },
+              "last_name": { "type": "string", "required": true },
+              "company": { "type": "string" },
+              "address_1": { "type": "string", "required": true },
+              "address_2": { "type": "string" },
+              "city": { "type": "string", "required": true },
+              "state": { "type": "string", "required": true },
+              "postcode": { "type": "string", "required": true },
+              "country": { "type": "string", "required": true },
+              "email": { "type": "string", "format": "email", "required": true },
+              "phone": { "type": "string" }
+            },
+            "required": true
+          },
+          "shipping": {
+            "type": "object",
+            "properties": {
+              "first_name": { "type": "string", "required": true },
+              "last_name": { "type": "string", "required": true },
+              "company": { "type": "string" },
+              "address_1": { "type": "string", "required": true },
+              "address_2": { "type": "string" },
+              "city": { "type": "string", "required": true },
+              "state": { "type": "string", "required": true },
+              "postcode": { "type": "string", "required": true },
+              "country": { "type": "string", "required": true }
+            },
+            "required": true
+          },
+          "line_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_id": { "type": "number", "required": true },
+                "quantity": { "type": "number", "required": true },
+                "variation_id": { "type": "number" },
+                "subtotal": { "type": "string" },
+                "total": { "type": "string" }
+              },
+              "required": ["product_id", "quantity"]
+            },
+            "required": true
+          },
+          "shipping_lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "method_id": { "type": "string", "required": true },
+                "method_title": { "type": "string", "required": true },
+                "total": { "type": "string", "required": true }
+              },
+              "required": ["method_id", "method_title", "total"]
+            }
+          },
+          "fee_lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "required": true },
+                "total": { "type": "string", "required": true },
+                "taxable": { "type": "boolean", "default": false }
+              },
+              "required": ["name", "total"]
+            }
+          },
+          "coupon_lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": { "type": "string", "required": true }
+              },
+              "required": ["code"]
+            }
+          },
+          "status": { "type": "string", "enum": ["pending", "processing", "on-hold", "completed", "cancelled", "refunded", "failed"], "default": "pending" },
+          "customer_id": { "type": "number", "description": "Customer ID" },
+          "customer_note": { "type": "string", "description": "Customer note" },
+          "meta_data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": { "type": "string", "required": true },
+                "value": { "type": ["string", "number", "boolean", "object"], "required": true }
+              },
+              "required": ["key", "value"]
+            }
+          }
+        },
+        "required": ["payment_method", "billing", "shipping", "line_items"]
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/orders"
+    },
+    {
+      "id": "get-order",
+      "name": "Get Order",
+      "description": "Get order details by ID",
+      "method": "GET",
+      "path": "/orders/{id}",
+      "headers": {},
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/orders/{id}"
+    },
+    {
+      "id": "list-orders",
+      "name": "List Orders",
+      "description": "List all orders",
+      "method": "GET",
+      "path": "/orders",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "10",
+        "status": "any",
+        "customer": "{customerId}",
+        "product": "{productId}",
+        "orderby": "date",
+        "order": "desc",
+        "after": "{date}",
+        "before": "{date}"
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/orders"
+    },
+    {
+      "id": "update-order",
+      "name": "Update Order",
+      "description": "Update an existing order",
+      "method": "PUT",
+      "path": "/orders/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["pending", "processing", "on-hold", "completed", "cancelled", "refunded", "failed"] },
+          "customer_note": { "type": "string" },
+          "billing": {
+            "type": "object",
+            "properties": {
+              "first_name": { "type": "string" },
+              "last_name": { "type": "string" },
+              "email": { "type": "string", "format": "email" },
+              "phone": { "type": "string" }
+            }
+          },
+          "shipping": {
+            "type": "object",
+            "properties": {
+              "first_name": { "type": "string" },
+              "last_name": { "type": "string" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/orders/{id}"
+    },
+    {
+      "id": "delete-order",
+      "name": "Delete Order",
+      "description": "Delete an order",
+      "method": "DELETE",
+      "path": "/orders/{id}",
+      "headers": {},
+      "queryParams": {
+        "force": "true"
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/orders/{id}?force=true"
+    },
+    {
+      "id": "create-customer",
+      "name": "Create Customer",
+      "description": "Create a new customer",
+      "method": "POST",
+      "path": "/customers",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email", "required": true, "description": "Customer email" },
+          "first_name": { "type": "string", "description": "First name" },
+          "last_name": { "type": "string", "description": "Last name" },
+          "username": { "type": "string", "description": "Username (auto-generated from email if not provided)" },
+          "password": { "type": "string", "description": "Password" },
+          "billing": {
+            "type": "object",
+            "properties": {
+              "first_name": { "type": "string" },
+              "last_name": { "type": "string" },
+              "company": { "type": "string" },
+              "address_1": { "type": "string" },
+              "address_2": { "type": "string" },
+              "city": { "type": "string" },
+              "state": { "type": "string" },
+              "postcode": { "type": "string" },
+              "country": { "type": "string" },
+              "email": { "type": "string", "format": "email" },
+              "phone": { "type": "string" }
+            }
+          },
+          "shipping": {
+            "type": "object",
+            "properties": {
+              "first_name": { "type": "string" },
+              "last_name": { "type": "string" },
+              "company": { "type": "string" },
+              "address_1": { "type": "string" },
+              "address_2": { "type": "string" },
+              "city": { "type": "string" },
+              "state": { "type": "string" },
+              "postcode": { "type": "string" },
+              "country": { "type": "string" }
+            }
+          },
+          "meta_data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": { "type": "string", "required": true },
+                "value": { "type": ["string", "number", "boolean", "object"], "required": true }
+              }
+            }
+          }
+        },
+        "required": ["email"]
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/customers"
+    },
+    {
+      "id": "get-customer",
+      "name": "Get Customer",
+      "description": "Get customer details by ID",
+      "method": "GET",
+      "path": "/customers/{id}",
+      "headers": {},
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/customers/{id}"
+    },
+    {
+      "id": "list-customers",
+      "name": "List Customers",
+      "description": "List all customers",
+      "method": "GET",
+      "path": "/customers",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "10",
+        "search": "{searchTerm}",
+        "email": "{email}",
+        "role": "customer",
+        "orderby": "registered_date",
+        "order": "desc"
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/customers"
+    },
+    {
+      "id": "update-customer",
+      "name": "Update Customer",
+      "description": "Update an existing customer",
+      "method": "PUT",
+      "path": "/customers/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "billing": {
+            "type": "object",
+            "properties": {
+              "first_name": { "type": "string" },
+              "last_name": { "type": "string" },
+              "email": { "type": "string", "format": "email" },
+              "phone": { "type": "string" }
+            }
+          },
+          "shipping": {
+            "type": "object",
+            "properties": {
+              "first_name": { "type": "string" },
+              "last_name": { "type": "string" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/customers/{id}"
+    },
+    {
+      "id": "delete-customer",
+      "name": "Delete Customer",
+      "description": "Delete a customer",
+      "method": "DELETE",
+      "path": "/customers/{id}",
+      "headers": {},
+      "queryParams": {
+        "force": "true"
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/customers/{id}?force=true"
+    },
+    {
+      "id": "create-coupon",
+      "name": "Create Coupon",
+      "description": "Create a new coupon",
+      "method": "POST",
+      "path": "/coupons",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "required": true, "description": "Coupon code" },
+          "discount_type": { "type": "string", "enum": ["fixed_cart", "fixed_product", "percent"], "required": true, "description": "Discount type" },
+          "amount": { "type": "string", "required": true, "description": "Discount amount" },
+          "individual_use": { "type": "boolean", "default": false, "description": "Individual use only" },
+          "exclude_sale_items": { "type": "boolean", "default": false, "description": "Exclude sale items" },
+          "minimum_amount": { "type": "string", "description": "Minimum order amount" },
+          "maximum_amount": { "type": "string", "description": "Maximum order amount" },
+          "usage_limit": { "type": "number", "description": "Usage limit per coupon" },
+          "usage_limit_per_user": { "type": "number", "description": "Usage limit per user" },
+          "limit_usage_to_x_items": { "type": "number", "description": "Limit to X items" },
+          "free_shipping": { "type": "boolean", "default": false, "description": "Free shipping" },
+          "product_ids": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "Product IDs (if applicable)"
+          },
+          "excluded_product_ids": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "Excluded product IDs"
+          },
+          "product_categories": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "Product category IDs"
+          },
+          "excluded_product_categories": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "Excluded category IDs"
+          },
+          "expiry_date": { "type": "string", "format": "date-time", "description": "Expiry date" }
+        },
+        "required": ["code", "discount_type", "amount"]
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/coupons"
+    },
+    {
+      "id": "get-coupon",
+      "name": "Get Coupon",
+      "description": "Get coupon details by ID",
+      "method": "GET",
+      "path": "/coupons/{id}",
+      "headers": {},
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/coupons/{id}"
+    },
+    {
+      "id": "list-coupons",
+      "name": "List Coupons",
+      "description": "List all coupons",
+      "method": "GET",
+      "path": "/coupons",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "10",
+        "search": "{searchTerm}",
+        "orderby": "date",
+        "order": "desc"
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/coupons"
+    },
+    {
+      "id": "update-coupon",
+      "name": "Update Coupon",
+      "description": "Update an existing coupon",
+      "method": "PUT",
+      "path": "/coupons/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "amount": { "type": "string", "description": "Discount amount" },
+          "usage_limit": { "type": "number", "description": "Usage limit" },
+          "expiry_date": { "type": "string", "format": "date-time", "description": "Expiry date" }
+        }
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/coupons/{id}"
+    },
+    {
+      "id": "delete-coupon",
+      "name": "Delete Coupon",
+      "description": "Delete a coupon",
+      "method": "DELETE",
+      "path": "/coupons/{id}",
+      "headers": {},
+      "queryParams": {
+        "force": "true"
+      },
+      "urlTemplate": "https://{store}.com/wp-json/wc/v3/coupons/{id}?force=true"
+    }
+  ]
+}
+

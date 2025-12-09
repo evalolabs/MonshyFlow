@@ -1,0 +1,252 @@
+{
+  "id": "splunk",
+  "name": "Splunk",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/splunk/000000",
+  "description": "Data analytics platform for log analysis and monitoring",
+  "baseUrl": "https://{your-splunk-instance}:{port}/services",
+  "color": {
+    "bg": "from-zinc-100 to-gray-100",
+    "border": "border-zinc-500",
+    "icon": "text-zinc-700",
+    "handle": "bg-zinc-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "SPLUNK_PASSWORD",
+    "usernameSecretKey": "SPLUNK_USERNAME",
+    "note": "Base URL should be provided with host placeholder {your-splunk-instance} and port placeholder {port}, or as SPLUNK_BASE_URL secret key. Supports Basic Auth (username/password) or Token authentication (SPLUNK_TOKEN). Default port is 8089."
+  },
+  "endpoints": [
+    {
+      "id": "execute-search",
+      "name": "Execute Search",
+      "description": "Execute a search job",
+      "method": "POST",
+      "path": "/search/jobs",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "search": {
+            "type": "string",
+            "required": true,
+            "description": "Search query (SPL - Search Processing Language)"
+          },
+          "earliest_time": {
+            "type": "string",
+            "description": "Earliest time for search (e.g., '-1h', '2023-01-01T00:00:00')"
+          },
+          "latest_time": {
+            "type": "string",
+            "description": "Latest time for search"
+          },
+          "exec_mode": {
+            "type": "string",
+            "enum": ["blocking", "normal"],
+            "default": "normal",
+            "description": "Execution mode"
+          },
+          "output_mode": {
+            "type": "string",
+            "enum": ["json", "xml", "csv"],
+            "default": "json",
+            "description": "Output format"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Maximum number of results"
+          }
+        },
+        "required": ["search"]
+      },
+      "urlTemplate": "https://{your-splunk-instance}:{port}/services/search/jobs"
+    },
+    {
+      "id": "get-search-results",
+      "name": "Get Search Results",
+      "description": "Get results from a search job",
+      "method": "GET",
+      "path": "/search/jobs/{searchId}/results",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "output_mode": {
+          "type": "string",
+          "enum": ["json", "xml", "csv"],
+          "default": "json",
+          "description": "Output format"
+        },
+        "count": {
+          "type": "integer",
+          "description": "Maximum number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0,
+          "description": "Offset for pagination"
+        }
+      },
+      "urlTemplate": "https://{your-splunk-instance}:{port}/services/search/jobs/{searchId}/results"
+    },
+    {
+      "id": "get-search-status",
+      "name": "Get Search Status",
+      "description": "Get status of a search job",
+      "method": "GET",
+      "path": "/search/jobs/{searchId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-splunk-instance}:{port}/services/search/jobs/{searchId}"
+    },
+    {
+      "id": "create-saved-search",
+      "name": "Create Saved Search",
+      "description": "Create a new saved search",
+      "method": "POST",
+      "path": "/saved/searches",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Saved search name"
+          },
+          "search": {
+            "type": "string",
+            "required": true,
+            "description": "Search query (SPL)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Search description"
+          },
+          "cron_schedule": {
+            "type": "string",
+            "description": "Cron schedule for scheduled searches"
+          },
+          "disabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Disable saved search"
+          }
+        },
+        "required": ["name", "search"]
+      },
+      "urlTemplate": "https://{your-splunk-instance}:{port}/services/saved/searches"
+    },
+    {
+      "id": "get-saved-search",
+      "name": "Get Saved Search",
+      "description": "Get saved search by name",
+      "method": "GET",
+      "path": "/saved/searches/{savedSearchName}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-splunk-instance}:{port}/services/saved/searches/{savedSearchName}"
+    },
+    {
+      "id": "list-saved-searches",
+      "name": "List Saved Searches",
+      "description": "List all saved searches",
+      "method": "GET",
+      "path": "/saved/searches",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "count": {
+          "type": "integer",
+          "description": "Maximum number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0
+        },
+        "search": {
+          "type": "string",
+          "description": "Search filter"
+        }
+      },
+      "urlTemplate": "https://{your-splunk-instance}:{port}/services/saved/searches"
+    },
+    {
+      "id": "update-saved-search",
+      "name": "Update Saved Search",
+      "description": "Update a saved search",
+      "method": "POST",
+      "path": "/saved/searches/{savedSearchName}",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Saved search data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-splunk-instance}:{port}/services/saved/searches/{savedSearchName}"
+    },
+    {
+      "id": "delete-saved-search",
+      "name": "Delete Saved Search",
+      "description": "Delete a saved search",
+      "method": "DELETE",
+      "path": "/saved/searches/{savedSearchName}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-splunk-instance}:{port}/services/saved/searches/{savedSearchName}"
+    },
+    {
+      "id": "get-index",
+      "name": "Get Index",
+      "description": "Get index by name",
+      "method": "GET",
+      "path": "/data/indexes/{indexName}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-splunk-instance}:{port}/services/data/indexes/{indexName}"
+    },
+    {
+      "id": "list-indexes",
+      "name": "List Indexes",
+      "description": "List all indexes",
+      "method": "GET",
+      "path": "/data/indexes",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "count": {
+          "type": "integer",
+          "description": "Maximum number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0
+        },
+        "search": {
+          "type": "string",
+          "description": "Search filter"
+        }
+      },
+      "urlTemplate": "https://{your-splunk-instance}:{port}/services/data/indexes"
+    }
+  ]
+}
+

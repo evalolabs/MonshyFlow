@@ -1,0 +1,80 @@
+{
+  "id": "gong",
+  "name": "Gong",
+  "icon": "📞",
+  "logoUrl": "https://cdn.simpleicons.org/gong/000000",
+  "description": "Revenue intelligence platform for sales teams",
+  "baseUrl": "https://{your-gong-instance}",
+  "color": {
+    "bg": "from-purple-100 to-violet-100",
+    "border": "border-purple-500",
+    "icon": "text-purple-700",
+    "handle": "bg-purple-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GONG_OAUTH2_ACCESS_TOKEN",
+    "note": "Base URL should be provided in baseUrl placeholder {your-gong-instance} or as GONG_BASE_URL secret key. Use GONG_ACCESS_TOKEN for Access Token authentication or GONG_OAUTH2_ACCESS_TOKEN for OAuth2."
+  },
+  "endpoints": [
+    {
+      "id": "get-call",
+      "name": "Get Call",
+      "description": "Get call by ID",
+      "method": "GET",
+      "path": "/v2/calls/{callId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-gong-instance}/v2/calls/{callId}"
+    },
+    {
+      "id": "list-calls",
+      "name": "List Calls",
+      "description": "List all calls",
+      "method": "GET",
+      "path": "/v2/calls",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "fromDateTime": { "type": "string", "format": "date-time", "description": "Start date filter (ISO 8601)" },
+        "toDateTime": { "type": "string", "format": "date-time", "description": "End date filter (ISO 8601)" },
+        "userId": { "type": "string", "description": "Filter by user ID" },
+        "direction": { "type": "string", "enum": ["inbound", "outbound"], "description": "Filter by call direction" },
+        "cursor": { "type": "string", "description": "Cursor for pagination" },
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" }
+      },
+      "urlTemplate": "https://{your-gong-instance}/v2/calls"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user by ID",
+      "method": "GET",
+      "path": "/v2/users/{userId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-gong-instance}/v2/users/{userId}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/v2/users",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "cursor": { "type": "string", "description": "Cursor for pagination" },
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" }
+      },
+      "urlTemplate": "https://{your-gong-instance}/v2/users"
+    }
+  ]
+}
+

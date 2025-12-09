@@ -1,0 +1,504 @@
+{
+  "id": "thehive",
+  "name": "TheHive",
+  "icon": "🛡️",
+  "logoUrl": "https://cdn.simpleicons.org/thehive/000000",
+  "description": "Security incident response platform",
+  "baseUrl": "https://{your-thehive-instance}/api",
+  "color": {
+    "bg": "from-red-100 to-yellow-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "THEHIVE_API_KEY",
+    "note": "Base URL should be provided in baseUrl placeholder {your-thehive-instance} or as THEHIVE_BASE_URL secret key."
+  },
+  "endpoints": [
+    {
+      "id": "create-alert",
+      "name": "Create Alert",
+      "description": "Create a new alert",
+      "method": "POST",
+      "path": "/alert",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "required": true,
+            "description": "Alert title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Alert description"
+          },
+          "type": {
+            "type": "string",
+            "description": "Alert type"
+          },
+          "source": {
+            "type": "string",
+            "description": "Alert source"
+          },
+          "sourceRef": {
+            "type": "string",
+            "description": "Source reference"
+          },
+          "externalLink": {
+            "type": "string",
+            "format": "uri",
+            "description": "External link"
+          },
+          "severity": {
+            "type": "integer",
+            "enum": [1, 2, 3, 4],
+            "description": "Severity (1=low, 2=medium, 3=high, 4=critical)"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Alert date (ISO 8601)"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dataType": { "type": "string" },
+                "data": { "type": "string" },
+                "message": { "type": "string" },
+                "tags": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              },
+              "required": ["dataType", "data"]
+            },
+            "description": "Artifacts"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Custom fields",
+            "additionalProperties": true
+          }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/alert"
+    },
+    {
+      "id": "get-alert",
+      "name": "Get Alert",
+      "description": "Get alert by ID",
+      "method": "GET",
+      "path": "/alert/{alertId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/alert/{alertId}"
+    },
+    {
+      "id": "list-alerts",
+      "name": "List Alerts",
+      "description": "List all alerts",
+      "method": "GET",
+      "path": "/alert",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "range": {
+          "type": "string",
+          "description": "Range for pagination (e.g., '0-24')"
+        },
+        "sort": {
+          "type": "string",
+          "description": "Sort field"
+        }
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/alert"
+    },
+    {
+      "id": "update-alert",
+      "name": "Update Alert",
+      "description": "Update an alert",
+      "method": "PATCH",
+      "path": "/alert/{alertId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Alert data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/alert/{alertId}"
+    },
+    {
+      "id": "create-case",
+      "name": "Create Case",
+      "description": "Create a new case",
+      "method": "POST",
+      "path": "/case",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "required": true,
+            "description": "Case title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Case description"
+          },
+          "severity": {
+            "type": "integer",
+            "enum": [1, 2, 3, 4],
+            "description": "Severity (1=low, 2=medium, 3=high, 4=critical)"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start date (ISO 8601)"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Custom fields",
+            "additionalProperties": true
+          }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case"
+    },
+    {
+      "id": "get-case",
+      "name": "Get Case",
+      "description": "Get case by ID",
+      "method": "GET",
+      "path": "/case/{caseId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}"
+    },
+    {
+      "id": "list-cases",
+      "name": "List Cases",
+      "description": "List all cases",
+      "method": "GET",
+      "path": "/case",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "range": {
+          "type": "string",
+          "description": "Range for pagination (e.g., '0-24')"
+        },
+        "sort": {
+          "type": "string",
+          "description": "Sort field"
+        }
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case"
+    },
+    {
+      "id": "update-case",
+      "name": "Update Case",
+      "description": "Update a case",
+      "method": "PATCH",
+      "path": "/case/{caseId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Case data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}"
+    },
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new task in a case",
+      "method": "POST",
+      "path": "/case/{caseId}/task",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "required": true,
+            "description": "Task title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Task description"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Waiting", "InProgress", "Completed", "Cancel"],
+            "default": "Waiting",
+            "description": "Task status"
+          },
+          "flag": {
+            "type": "boolean",
+            "default": false,
+            "description": "Task flag"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start date (ISO 8601)"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Due date (ISO 8601)"
+          },
+          "assignee": {
+            "type": "string",
+            "description": "Assignee username"
+          }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}/task"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get task by ID",
+      "method": "GET",
+      "path": "/case/{caseId}/task/{taskId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}/task/{taskId}"
+    },
+    {
+      "id": "list-tasks",
+      "name": "List Tasks",
+      "description": "List all tasks in a case",
+      "method": "GET",
+      "path": "/case/{caseId}/task",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}/task"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update a task",
+      "method": "PATCH",
+      "path": "/case/{caseId}/task/{taskId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Task data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}/task/{taskId}"
+    },
+    {
+      "id": "create-observable",
+      "name": "Create Observable",
+      "description": "Create a new observable in a case",
+      "method": "POST",
+      "path": "/case/{caseId}/observable",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dataType": {
+            "type": "string",
+            "required": true,
+            "description": "Data type (e.g., 'ip', 'domain', 'url', 'file', 'hash')"
+          },
+          "data": {
+            "type": "string",
+            "required": true,
+            "description": "Observable data"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "ioc": {
+            "type": "boolean",
+            "default": false,
+            "description": "Is indicator of compromise"
+          },
+          "sighted": {
+            "type": "boolean",
+            "default": false,
+            "description": "Is sighted"
+          },
+          "tlp": {
+            "type": "integer",
+            "enum": [0, 1, 2, 3],
+            "description": "Traffic Light Protocol (0=white, 1=green, 2=amber, 3=red)"
+          },
+          "pap": {
+            "type": "integer",
+            "enum": [0, 1, 2, 3],
+            "description": "Permissible Actions Protocol (0=white, 1=green, 2=amber, 3=red)"
+          }
+        },
+        "required": ["dataType", "data"]
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}/observable"
+    },
+    {
+      "id": "get-observable",
+      "name": "Get Observable",
+      "description": "Get observable by ID",
+      "method": "GET",
+      "path": "/case/{caseId}/observable/{observableId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}/observable/{observableId}"
+    },
+    {
+      "id": "list-observables",
+      "name": "List Observables",
+      "description": "List all observables in a case",
+      "method": "GET",
+      "path": "/case/{caseId}/observable",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}/observable"
+    },
+    {
+      "id": "update-observable",
+      "name": "Update Observable",
+      "description": "Update an observable",
+      "method": "PATCH",
+      "path": "/case/{caseId}/observable/{observableId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Observable data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}/observable/{observableId}"
+    },
+    {
+      "id": "create-log",
+      "name": "Create Log",
+      "description": "Create a new log entry for a task",
+      "method": "POST",
+      "path": "/case/{caseId}/task/{taskId}/log",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "required": true,
+            "description": "Log message"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start date (ISO 8601)"
+          }
+        },
+        "required": ["message"]
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}/task/{taskId}/log"
+    },
+    {
+      "id": "get-log",
+      "name": "Get Log",
+      "description": "Get log by ID",
+      "method": "GET",
+      "path": "/case/{caseId}/task/{taskId}/log/{logId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}/task/{taskId}/log/{logId}"
+    },
+    {
+      "id": "list-logs",
+      "name": "List Logs",
+      "description": "List all logs for a task",
+      "method": "GET",
+      "path": "/case/{caseId}/task/{taskId}/log",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}/task/{taskId}/log"
+    },
+    {
+      "id": "update-log",
+      "name": "Update Log",
+      "description": "Update a log entry",
+      "method": "PATCH",
+      "path": "/case/{caseId}/task/{taskId}/log/{logId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Log data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-thehive-instance}/api/case/{caseId}/task/{taskId}/log/{logId}"
+    }
+  ]
+}
+

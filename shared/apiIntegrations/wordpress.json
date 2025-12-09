@@ -1,0 +1,355 @@
+{
+  "id": "wordpress",
+  "name": "WordPress",
+  "icon": "📝",
+  "logoUrl": "https://cdn.simpleicons.org/wordpress/21759B",
+  "description": "Content management system",
+  "baseUrl": "{url}/wp-json/wp/v2",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(username:password)}",
+    "secretKey": "WORDPRESS_APPLICATION_PASSWORD",
+    "usernameSecretKey": "WORDPRESS_USERNAME"
+  },
+  "endpoints": [
+    {
+      "id": "create-post",
+      "name": "Create Post",
+      "description": "Create a new post",
+      "method": "POST",
+      "path": "/posts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Post title" },
+          "content": { "type": "string", "description": "Post content (HTML)" },
+          "excerpt": { "type": "string", "description": "Post excerpt" },
+          "status": { "type": "string", "enum": ["publish", "future", "draft", "pending", "private"], "default": "draft", "description": "Post status" },
+          "featured_media": { "type": "integer", "description": "Featured media ID" },
+          "categories": { "type": "array", "items": { "type": "integer" }, "description": "Category IDs" },
+          "tags": { "type": "array", "items": { "type": "integer" }, "description": "Tag IDs" },
+          "author": { "type": "integer", "description": "Author ID" },
+          "comment_status": { "type": "string", "enum": ["open", "closed"], "default": "open", "description": "Comment status" },
+          "ping_status": { "type": "string", "enum": ["open", "closed"], "default": "open", "description": "Ping status" },
+          "format": { "type": "string", "enum": ["standard", "aside", "chat", "gallery", "link", "image", "quote", "status", "video", "audio"], "default": "standard", "description": "Post format" },
+          "sticky": { "type": "boolean", "default": false, "description": "Sticky post" },
+          "template": { "type": "string", "description": "Template file name" },
+          "meta": { "type": "object", "description": "Custom meta fields" },
+          "date": { "type": "string", "format": "date-time", "description": "Publication date" },
+          "date_gmt": { "type": "string", "format": "date-time", "description": "Publication date (GMT)" },
+          "slug": { "type": "string", "description": "Post slug" },
+          "password": { "type": "string", "description": "Post password (for password-protected posts)" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/posts"
+    },
+    {
+      "id": "get-post",
+      "name": "Get Post",
+      "description": "Get a post by ID",
+      "method": "GET",
+      "path": "/posts/{id}",
+      "queryParams": {
+        "context": { "type": "string", "enum": ["view", "edit", "embed"], "default": "view", "description": "Context" },
+        "password": { "type": "string", "description": "Password for password-protected posts" }
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/posts/{id}"
+    },
+    {
+      "id": "list-posts",
+      "name": "List Posts",
+      "description": "List all posts",
+      "method": "GET",
+      "path": "/posts",
+      "queryParams": {
+        "context": { "type": "string", "enum": ["view", "edit", "embed"], "default": "view", "description": "Context" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 10, "description": "Posts per page" },
+        "search": { "type": "string", "description": "Search query" },
+        "after": { "type": "string", "format": "date-time", "description": "Posts after date" },
+        "before": { "type": "string", "format": "date-time", "description": "Posts before date" },
+        "author": { "type": "array", "items": { "type": "integer" }, "description": "Author IDs" },
+        "author_exclude": { "type": "array", "items": { "type": "integer" }, "description": "Exclude author IDs" },
+        "exclude": { "type": "array", "items": { "type": "integer" }, "description": "Exclude post IDs" },
+        "include": { "type": "array", "items": { "type": "integer" }, "description": "Include post IDs" },
+        "offset": { "type": "integer", "description": "Offset" },
+        "order": { "type": "string", "enum": ["asc", "desc"], "default": "desc", "description": "Sort order" },
+        "orderby": { "type": "string", "enum": ["date", "id", "include", "relevance", "slug", "title"], "default": "date", "description": "Sort by" },
+        "slug": { "type": "string", "description": "Post slug" },
+        "status": { "type": "string", "enum": ["publish", "future", "draft", "pending", "private"], "description": "Post status" },
+        "categories": { "type": "array", "items": { "type": "integer" }, "description": "Category IDs" },
+        "categories_exclude": { "type": "array", "items": { "type": "integer" }, "description": "Exclude category IDs" },
+        "tags": { "type": "array", "items": { "type": "integer" }, "description": "Tag IDs" },
+        "tags_exclude": { "type": "array", "items": { "type": "integer" }, "description": "Exclude tag IDs" },
+        "sticky": { "type": "boolean", "description": "Sticky posts only" }
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/posts"
+    },
+    {
+      "id": "update-post",
+      "name": "Update Post",
+      "description": "Update an existing post",
+      "method": "PUT",
+      "path": "/posts/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Post title" },
+          "content": { "type": "string", "description": "Post content (HTML)" },
+          "excerpt": { "type": "string", "description": "Post excerpt" },
+          "status": { "type": "string", "enum": ["publish", "future", "draft", "pending", "private"], "description": "Post status" },
+          "featured_media": { "type": "integer", "description": "Featured media ID" },
+          "categories": { "type": "array", "items": { "type": "integer" }, "description": "Category IDs" },
+          "tags": { "type": "array", "items": { "type": "integer" }, "description": "Tag IDs" },
+          "comment_status": { "type": "string", "enum": ["open", "closed"], "description": "Comment status" },
+          "ping_status": { "type": "string", "enum": ["open", "closed"], "description": "Ping status" },
+          "format": { "type": "string", "enum": ["standard", "aside", "chat", "gallery", "link", "image", "quote", "status", "video", "audio"], "description": "Post format" },
+          "sticky": { "type": "boolean", "description": "Sticky post" },
+          "template": { "type": "string", "description": "Template file name" },
+          "meta": { "type": "object", "description": "Custom meta fields" },
+          "date": { "type": "string", "format": "date-time", "description": "Publication date" },
+          "slug": { "type": "string", "description": "Post slug" }
+        }
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/posts/{id}"
+    },
+    {
+      "id": "delete-post",
+      "name": "Delete Post",
+      "description": "Delete a post",
+      "method": "DELETE",
+      "path": "/posts/{id}",
+      "queryParams": {
+        "force": { "type": "boolean", "default": false, "description": "Force delete (bypass trash)" }
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/posts/{id}"
+    },
+    {
+      "id": "create-page",
+      "name": "Create Page",
+      "description": "Create a new page",
+      "method": "POST",
+      "path": "/pages",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Page title" },
+          "content": { "type": "string", "description": "Page content (HTML)" },
+          "excerpt": { "type": "string", "description": "Page excerpt" },
+          "status": { "type": "string", "enum": ["publish", "future", "draft", "pending", "private"], "default": "draft", "description": "Page status" },
+          "featured_media": { "type": "integer", "description": "Featured media ID" },
+          "parent": { "type": "integer", "description": "Parent page ID" },
+          "menu_order": { "type": "integer", "default": 0, "description": "Menu order" },
+          "author": { "type": "integer", "description": "Author ID" },
+          "comment_status": { "type": "string", "enum": ["open", "closed"], "default": "open", "description": "Comment status" },
+          "ping_status": { "type": "string", "enum": ["open", "closed"], "default": "open", "description": "Ping status" },
+          "template": { "type": "string", "description": "Template file name" },
+          "meta": { "type": "object", "description": "Custom meta fields" },
+          "date": { "type": "string", "format": "date-time", "description": "Publication date" },
+          "slug": { "type": "string", "description": "Page slug" },
+          "password": { "type": "string", "description": "Page password (for password-protected pages)" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/pages"
+    },
+    {
+      "id": "get-page",
+      "name": "Get Page",
+      "description": "Get a page by ID",
+      "method": "GET",
+      "path": "/pages/{id}",
+      "queryParams": {
+        "context": { "type": "string", "enum": ["view", "edit", "embed"], "default": "view", "description": "Context" },
+        "password": { "type": "string", "description": "Password for password-protected pages" }
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/pages/{id}"
+    },
+    {
+      "id": "list-pages",
+      "name": "List Pages",
+      "description": "List all pages",
+      "method": "GET",
+      "path": "/pages",
+      "queryParams": {
+        "context": { "type": "string", "enum": ["view", "edit", "embed"], "default": "view", "description": "Context" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 10, "description": "Pages per page" },
+        "search": { "type": "string", "description": "Search query" },
+        "after": { "type": "string", "format": "date-time", "description": "Pages after date" },
+        "before": { "type": "string", "format": "date-time", "description": "Pages before date" },
+        "author": { "type": "array", "items": { "type": "integer" }, "description": "Author IDs" },
+        "author_exclude": { "type": "array", "items": { "type": "integer" }, "description": "Exclude author IDs" },
+        "exclude": { "type": "array", "items": { "type": "integer" }, "description": "Exclude page IDs" },
+        "include": { "type": "array", "items": { "type": "integer" }, "description": "Include page IDs" },
+        "offset": { "type": "integer", "description": "Offset" },
+        "order": { "type": "string", "enum": ["asc", "desc"], "default": "desc", "description": "Sort order" },
+        "orderby": { "type": "string", "enum": ["date", "id", "include", "relevance", "slug", "title", "menu_order"], "default": "date", "description": "Sort by" },
+        "slug": { "type": "string", "description": "Page slug" },
+        "status": { "type": "string", "enum": ["publish", "future", "draft", "pending", "private"], "description": "Page status" },
+        "parent": { "type": "integer", "description": "Parent page ID" },
+        "parent_exclude": { "type": "array", "items": { "type": "integer" }, "description": "Exclude parent page IDs" }
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/pages"
+    },
+    {
+      "id": "update-page",
+      "name": "Update Page",
+      "description": "Update an existing page",
+      "method": "PUT",
+      "path": "/pages/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Page title" },
+          "content": { "type": "string", "description": "Page content (HTML)" },
+          "excerpt": { "type": "string", "description": "Page excerpt" },
+          "status": { "type": "string", "enum": ["publish", "future", "draft", "pending", "private"], "description": "Page status" },
+          "featured_media": { "type": "integer", "description": "Featured media ID" },
+          "parent": { "type": "integer", "description": "Parent page ID" },
+          "menu_order": { "type": "integer", "description": "Menu order" },
+          "comment_status": { "type": "string", "enum": ["open", "closed"], "description": "Comment status" },
+          "ping_status": { "type": "string", "enum": ["open", "closed"], "description": "Ping status" },
+          "template": { "type": "string", "description": "Template file name" },
+          "meta": { "type": "object", "description": "Custom meta fields" },
+          "date": { "type": "string", "format": "date-time", "description": "Publication date" },
+          "slug": { "type": "string", "description": "Page slug" }
+        }
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/pages/{id}"
+    },
+    {
+      "id": "delete-page",
+      "name": "Delete Page",
+      "description": "Delete a page",
+      "method": "DELETE",
+      "path": "/pages/{id}",
+      "queryParams": {
+        "force": { "type": "boolean", "default": false, "description": "Force delete (bypass trash)" }
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/pages/{id}"
+    },
+    {
+      "id": "create-user",
+      "name": "Create User",
+      "description": "Create a new user",
+      "method": "POST",
+      "path": "/users",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "username": { "type": "string", "required": true, "description": "Username" },
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "password": { "type": "string", "required": true, "description": "Password" },
+          "name": { "type": "string", "description": "Display name" },
+          "first_name": { "type": "string", "description": "First name" },
+          "last_name": { "type": "string", "description": "Last name" },
+          "url": { "type": "string", "format": "uri", "description": "User website URL" },
+          "description": { "type": "string", "description": "User description" },
+          "nickname": { "type": "string", "description": "Nickname" },
+          "slug": { "type": "string", "description": "User slug" },
+          "roles": { "type": "array", "items": { "type": "string" }, "description": "User roles" },
+          "meta": { "type": "object", "description": "Custom meta fields" }
+        },
+        "required": ["username", "email", "password"]
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/users"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get a user by ID",
+      "method": "GET",
+      "path": "/users/{id}",
+      "queryParams": {
+        "context": { "type": "string", "enum": ["view", "edit", "embed"], "default": "view", "description": "Context" }
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/users/{id}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/users",
+      "queryParams": {
+        "context": { "type": "string", "enum": ["view", "edit", "embed"], "default": "view", "description": "Context" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 10, "description": "Users per page" },
+        "search": { "type": "string", "description": "Search query" },
+        "exclude": { "type": "array", "items": { "type": "integer" }, "description": "Exclude user IDs" },
+        "include": { "type": "array", "items": { "type": "integer" }, "description": "Include user IDs" },
+        "offset": { "type": "integer", "description": "Offset" },
+        "order": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort order" },
+        "orderby": { "type": "string", "enum": ["id", "include", "name", "registered_date", "slug", "email", "url"], "default": "name", "description": "Sort by" },
+        "slug": { "type": "string", "description": "User slug" },
+        "roles": { "type": "array", "items": { "type": "string" }, "description": "User roles" },
+        "who": { "type": "string", "enum": ["authors"], "description": "Filter by authors" }
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/users"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update an existing user",
+      "method": "PUT",
+      "path": "/users/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "password": { "type": "string", "description": "Password" },
+          "name": { "type": "string", "description": "Display name" },
+          "first_name": { "type": "string", "description": "First name" },
+          "last_name": { "type": "string", "description": "Last name" },
+          "url": { "type": "string", "format": "uri", "description": "User website URL" },
+          "description": { "type": "string", "description": "User description" },
+          "nickname": { "type": "string", "description": "Nickname" },
+          "slug": { "type": "string", "description": "User slug" },
+          "roles": { "type": "array", "items": { "type": "string" }, "description": "User roles" },
+          "meta": { "type": "object", "description": "Custom meta fields" }
+        }
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/users/{id}"
+    },
+    {
+      "id": "delete-user",
+      "name": "Delete User",
+      "description": "Delete a user",
+      "method": "DELETE",
+      "path": "/users/{id}",
+      "queryParams": {
+        "force": { "type": "boolean", "default": false, "description": "Force delete" },
+        "reassign": { "type": "integer", "description": "Reassign posts to user ID" }
+      },
+      "urlTemplate": "{url}/wp-json/wp/v2/users/{id}"
+    }
+  ]
+}
+

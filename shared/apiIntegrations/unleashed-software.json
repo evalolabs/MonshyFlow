@@ -1,0 +1,66 @@
+{
+  "id": "unleashed-software",
+  "name": "Unleashed Software",
+  "icon": "📦",
+  "logoUrl": "https://cdn.simpleicons.org/unleashedsoftware/000000",
+  "description": "Inventory management and ERP system",
+  "baseUrl": "https://api.unleashedsoftware.com",
+  "color": {
+    "bg": "from-gray-100 to-stone-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "api-auth-id",
+    "secretKey": "UNLEASHED_API_ID",
+    "note": "Requires HMAC SHA256 signature authentication. API ID is sent in 'api-auth-id' header, and API Key is used to generate HMAC SHA256 signature sent in 'api-auth-signature' header. The signature is generated from the request method, URI, query string, and request body. This is a complex authentication method that requires backend implementation."
+  },
+  "endpoints": [
+    {
+      "id": "list-sales-orders",
+      "name": "List Sales Orders",
+      "description": "List all sales orders",
+      "method": "GET",
+      "path": "/SalesOrders",
+      "headers": {
+        "api-auth-id": "{apiKey}",
+        "api-auth-signature": "{signature}",
+        "Accept": "application/json"
+      },
+      "queryParams": {
+        "pageSize": { "type": "integer", "default": 100, "description": "Number of results per page" },
+        "pageNumber": { "type": "integer", "default": 1, "description": "Page number" },
+        "modifiedSince": { "type": "string", "format": "date-time", "description": "Filter by modified since (ISO 8601)" },
+        "orderStatus": {
+          "type": "string",
+          "enum": ["Placed", "BackOrder", "FullyAllocated", "FullyShipped", "FullyInvoiced", "Completed", "Cancelled"],
+          "description": "Filter by order status"
+        }
+      },
+      "urlTemplate": "https://api.unleashedsoftware.com/SalesOrders"
+    },
+    {
+      "id": "list-stock-on-hand",
+      "name": "List Stock On Hand",
+      "description": "List stock on hand for all products",
+      "method": "GET",
+      "path": "/StockOnHand",
+      "headers": {
+        "api-auth-id": "{apiKey}",
+        "api-auth-signature": "{signature}",
+        "Accept": "application/json"
+      },
+      "queryParams": {
+        "pageSize": { "type": "integer", "default": 100, "description": "Number of results per page" },
+        "pageNumber": { "type": "integer", "default": 1, "description": "Page number" },
+        "modifiedSince": { "type": "string", "format": "date-time", "description": "Filter by modified since (ISO 8601)" },
+        "productCode": { "type": "string", "description": "Filter by product code" },
+        "warehouseCode": { "type": "string", "description": "Filter by warehouse code" }
+      },
+      "urlTemplate": "https://api.unleashedsoftware.com/StockOnHand"
+    }
+  ]
+}
+

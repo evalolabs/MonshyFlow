@@ -1,0 +1,345 @@
+{
+  "id": "emelia",
+  "name": "Emelia",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/emelia/000000",
+  "description": "Cold email marketing platform with GraphQL API",
+  "baseUrl": "https://graphql.emelia.io",
+  "color": {
+    "bg": "from-purple-100 to-indigo-100",
+    "border": "border-purple-500",
+    "icon": "text-purple-700",
+    "handle": "bg-purple-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "{apiKey}",
+    "secretKey": "EMELIA_API_KEY",
+    "note": "Uses GraphQL instead of REST API. All requests are POST to /graphql endpoint with GraphQL query/mutation in the body."
+  },
+  "endpoints": [
+    {
+      "id": "graphql-query",
+      "name": "GraphQL Query",
+      "description": "Execute a GraphQL query or mutation",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query or mutation string"
+          },
+          "variables": {
+            "type": "object",
+            "description": "GraphQL variables",
+            "additionalProperties": true
+          },
+          "operationName": {
+            "type": "string",
+            "description": "Operation name (for queries with multiple operations)"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://graphql.emelia.io/graphql"
+    },
+    {
+      "id": "create-campaign",
+      "name": "Create Campaign",
+      "description": "Create a new campaign (GraphQL mutation: createCampaign)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "mutation CreateCampaign($input: CreateCampaignInput!) { createCampaign(input: $input) { id name } }",
+            "description": "GraphQL mutation for createCampaign"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "input": {
+                "type": "object",
+                "description": "CreateCampaignInput",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://graphql.emelia.io/graphql"
+    },
+    {
+      "id": "get-campaign",
+      "name": "Get Campaign",
+      "description": "Get campaign by ID (GraphQL query: campaign)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "query GetCampaign($id: ID!) { campaign(id: $id) { id name } }",
+            "description": "GraphQL query for campaign"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Campaign ID"
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://graphql.emelia.io/graphql"
+    },
+    {
+      "id": "list-campaigns",
+      "name": "List Campaigns",
+      "description": "List all campaigns (GraphQL query: campaigns)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "query ListCampaigns { campaigns { id name } }",
+            "description": "GraphQL query for campaigns"
+          },
+          "variables": {
+            "type": "object",
+            "description": "GraphQL variables",
+            "additionalProperties": true
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://graphql.emelia.io/graphql"
+    },
+    {
+      "id": "duplicate-campaign",
+      "name": "Duplicate Campaign",
+      "description": "Duplicate a campaign (GraphQL mutation: duplicateCampaign)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "mutation DuplicateCampaign($id: ID!) { duplicateCampaign(id: $id) { id name } }",
+            "description": "GraphQL mutation for duplicateCampaign"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Campaign ID to duplicate"
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://graphql.emelia.io/graphql"
+    },
+    {
+      "id": "start-campaign",
+      "name": "Start Campaign",
+      "description": "Start a campaign (GraphQL mutation: startCampaign)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "mutation StartCampaign($id: ID!) { startCampaign(id: $id) { id name } }",
+            "description": "GraphQL mutation for startCampaign"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Campaign ID"
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://graphql.emelia.io/graphql"
+    },
+    {
+      "id": "pause-campaign",
+      "name": "Pause Campaign",
+      "description": "Pause a campaign (GraphQL mutation: pauseCampaign)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "mutation PauseCampaign($id: ID!) { pauseCampaign(id: $id) { id name } }",
+            "description": "GraphQL mutation for pauseCampaign"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Campaign ID"
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://graphql.emelia.io/graphql"
+    },
+    {
+      "id": "add-contact-to-campaign",
+      "name": "Add Contact to Campaign",
+      "description": "Add a contact to a campaign (GraphQL mutation: addContactToCampaign)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "mutation AddContactToCampaign($campaignId: ID!, $contactId: ID!) { addContactToCampaign(campaignId: $campaignId, contactId: $contactId) { id } }",
+            "description": "GraphQL mutation for addContactToCampaign"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "campaignId": {
+                "type": "string",
+                "description": "Campaign ID"
+              },
+              "contactId": {
+                "type": "string",
+                "description": "Contact ID"
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://graphql.emelia.io/graphql"
+    },
+    {
+      "id": "list-contact-lists",
+      "name": "List Contact Lists",
+      "description": "List all contact lists (GraphQL query: contactLists)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "query ListContactLists { contactLists { id name } }",
+            "description": "GraphQL query for contactLists"
+          },
+          "variables": {
+            "type": "object",
+            "description": "GraphQL variables",
+            "additionalProperties": true
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://graphql.emelia.io/graphql"
+    },
+    {
+      "id": "add-contact-to-list",
+      "name": "Add Contact to List",
+      "description": "Add a contact to a list (GraphQL mutation: addContactToList)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "mutation AddContactToList($listId: ID!, $contactId: ID!) { addContactToList(listId: $listId, contactId: $contactId) { id } }",
+            "description": "GraphQL mutation for addContactToList"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "listId": {
+                "type": "string",
+                "description": "List ID"
+              },
+              "contactId": {
+                "type": "string",
+                "description": "Contact ID"
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://graphql.emelia.io/graphql"
+    }
+  ]
+}
+

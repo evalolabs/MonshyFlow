@@ -1,0 +1,171 @@
+{
+  "id": "egoi",
+  "name": "E-goi (Egoi)",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/egoi/000000",
+  "description": "Email marketing and automation platform",
+  "baseUrl": "https://api.egoiapp.com",
+  "color": {
+    "bg": "from-gray-100 to-stone-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Apikey",
+    "secretKey": "EGOI_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact in a list",
+      "method": "POST",
+      "path": "/lists/{listId}/contacts",
+      "headers": {
+        "Content-Type": "application/json",
+        "Apikey": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Email address"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "inactive", "unsubscribed", "removed"],
+            "default": "active",
+            "description": "Contact status"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "birth_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Birth date (YYYY-MM-DD)"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "extra": {
+            "type": "object",
+            "description": "Extra fields",
+            "additionalProperties": true
+          }
+        },
+        "required": ["email"]
+      },
+      "urlTemplate": "https://api.egoiapp.com/lists/{listId}/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact by ID",
+      "method": "GET",
+      "path": "/lists/{listId}/contacts/{contactId}",
+      "headers": {
+        "Apikey": "{apiKey}"
+      },
+      "urlTemplate": "https://api.egoiapp.com/lists/{listId}/contacts/{contactId}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts in a list",
+      "method": "GET",
+      "path": "/lists/{listId}/contacts",
+      "headers": {
+        "Apikey": "{apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 100,
+          "description": "Number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0,
+          "description": "Offset for pagination"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "inactive", "unsubscribed", "removed"],
+          "description": "Filter by status"
+        }
+      },
+      "urlTemplate": "https://api.egoiapp.com/lists/{listId}/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update a contact",
+      "method": "PATCH",
+      "path": "/lists/{listId}/contacts/{contactId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Apikey": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "inactive", "unsubscribed", "removed"],
+            "description": "Contact status"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "birth_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Birth date (YYYY-MM-DD)"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "extra": {
+            "type": "object",
+            "description": "Extra fields",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://api.egoiapp.com/lists/{listId}/contacts/{contactId}"
+    }
+  ]
+}
+

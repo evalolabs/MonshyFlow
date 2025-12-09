@@ -1,0 +1,181 @@
+{
+  "id": "netlify",
+  "name": "Netlify",
+  "icon": "🌐",
+  "logoUrl": "https://cdn.simpleicons.org/netlify/00C7B7",
+  "description": "Web hosting and deployment platform",
+  "baseUrl": "https://api.netlify.com/api/v1",
+  "color": {
+    "bg": "from-teal-100 to-cyan-100",
+    "border": "border-teal-500",
+    "icon": "text-teal-700",
+    "handle": "bg-teal-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "NETLIFY_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "get-site",
+      "name": "Get Site",
+      "description": "Get site details by ID",
+      "method": "GET",
+      "path": "/sites/{siteId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.netlify.com/api/v1/sites/{siteId}"
+    },
+    {
+      "id": "list-sites",
+      "name": "List Sites",
+      "description": "List all sites",
+      "method": "GET",
+      "path": "/sites",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "name": { "type": "string", "description": "Filter by name" },
+        "filter": { "type": "string", "description": "Filter expression" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 30, "description": "Sites per page" }
+      },
+      "urlTemplate": "https://api.netlify.com/api/v1/sites"
+    },
+    {
+      "id": "update-site",
+      "name": "Update Site",
+      "description": "Update site settings",
+      "method": "PATCH",
+      "path": "/sites/{siteId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Site name" },
+          "custom_domain": { "type": "string", "description": "Custom domain" },
+          "password": { "type": "string", "description": "Password protection" },
+          "notification_email": { "type": "string", "format": "email", "description": "Notification email" },
+          "ssl_url": { "type": "string", "format": "uri", "description": "SSL URL" },
+          "force_ssl": { "type": "boolean", "description": "Force SSL" },
+          "managed_dns": { "type": "boolean", "description": "Managed DNS" },
+          "plan": { "type": "string", "description": "Plan name" },
+          "processing_settings": {
+            "type": "object",
+            "properties": {
+              "skip": { "type": "boolean", "description": "Skip processing" },
+              "css": {
+                "type": "object",
+                "properties": {
+                  "bundle": { "type": "boolean", "description": "Bundle CSS" },
+                  "minify": { "type": "boolean", "description": "Minify CSS" }
+                }
+              },
+              "js": {
+                "type": "object",
+                "properties": {
+                  "bundle": { "type": "boolean", "description": "Bundle JS" },
+                  "minify": { "type": "boolean", "description": "Minify JS" }
+                }
+              },
+              "html": {
+                "type": "object",
+                "properties": {
+                  "pretty_urls": { "type": "boolean", "description": "Pretty URLs" },
+                  "tidy_html": { "type": "boolean", "description": "Tidy HTML" }
+                }
+              },
+              "images": {
+                "type": "object",
+                "properties": {
+                  "optimize": { "type": "boolean", "description": "Optimize images" }
+                }
+              }
+            }
+          },
+          "build_settings": {
+            "type": "object",
+            "properties": {
+              "cmd": { "type": "string", "description": "Build command" },
+              "dir": { "type": "string", "description": "Build directory" },
+              "env": {
+                "type": "object",
+                "description": "Environment variables",
+                "additionalProperties": { "type": "string" }
+              },
+              "functions_dir": { "type": "string", "description": "Functions directory" },
+              "provider": { "type": "string", "description": "Build provider" },
+              "repo_url": { "type": "string", "format": "uri", "description": "Repository URL" },
+              "repo_branch": { "type": "string", "description": "Repository branch" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.netlify.com/api/v1/sites/{siteId}"
+    },
+    {
+      "id": "get-deploy",
+      "name": "Get Deploy",
+      "description": "Get deploy details by ID",
+      "method": "GET",
+      "path": "/deploys/{deployId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.netlify.com/api/v1/deploys/{deployId}"
+    },
+    {
+      "id": "list-deploys",
+      "name": "List Deploys",
+      "description": "List all deploys for a site",
+      "method": "GET",
+      "path": "/sites/{siteId}/deploys",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 30, "description": "Deploys per page" },
+        "state": { "type": "string", "enum": ["new", "pending", "ready", "error"], "description": "Filter by state" }
+      },
+      "urlTemplate": "https://api.netlify.com/api/v1/sites/{siteId}/deploys"
+    },
+    {
+      "id": "cancel-deploy",
+      "name": "Cancel Deploy",
+      "description": "Cancel a deploy",
+      "method": "POST",
+      "path": "/deploys/{deployId}/cancel",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.netlify.com/api/v1/deploys/{deployId}/cancel"
+    },
+    {
+      "id": "rollback-deploy",
+      "name": "Rollback Deploy",
+      "description": "Rollback to a previous deploy",
+      "method": "POST",
+      "path": "/sites/{siteId}/rollback",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "deploy_id": { "type": "string", "description": "Deploy ID to rollback to" }
+        }
+      },
+      "urlTemplate": "https://api.netlify.com/api/v1/sites/{siteId}/rollback"
+    }
+  ]
+}
+

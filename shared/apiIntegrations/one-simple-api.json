@@ -1,0 +1,143 @@
+{
+  "id": "one-simple-api",
+  "name": "One Simple API",
+  "icon": "🔧",
+  "logoUrl": "https://cdn.simpleicons.org/onesimpleapi/000000",
+  "description": "No-code utilities toolbox for web operations",
+  "baseUrl": "https://onesimpleapi.com/api",
+  "color": {
+    "bg": "from-gray-100 to-zinc-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "secretKey": "ONESIMPLEAPI_API_TOKEN",
+    "queryParamName": "token",
+    "note": "API Token is sent as query parameter 'token'."
+  },
+  "endpoints": [
+    {
+      "id": "generate-pdf",
+      "name": "Generate PDF",
+      "description": "Generate PDF from a website URL",
+      "method": "GET",
+      "path": "/website/pdf",
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "required": true,
+          "description": "Website URL to convert to PDF"
+        }
+      },
+      "urlTemplate": "https://onesimpleapi.com/api/website/pdf"
+    },
+    {
+      "id": "get-seo-data",
+      "name": "Get SEO Data",
+      "description": "Get SEO data for a website URL",
+      "method": "GET",
+      "path": "/website/seo",
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "required": true,
+          "description": "Website URL to analyze"
+        }
+      },
+      "urlTemplate": "https://onesimpleapi.com/api/website/seo"
+    },
+    {
+      "id": "take-screenshot",
+      "name": "Take Screenshot",
+      "description": "Take a screenshot of a website URL",
+      "method": "GET",
+      "path": "/website/screenshot",
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "required": true,
+          "description": "Website URL to screenshot"
+        }
+      },
+      "urlTemplate": "https://onesimpleapi.com/api/website/screenshot"
+    },
+    {
+      "id": "get-social-profile",
+      "name": "Get Social Profile",
+      "description": "Get social profile information from a URL",
+      "method": "GET",
+      "path": "/social-profile",
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "required": true,
+          "description": "Social profile URL"
+        }
+      },
+      "urlTemplate": "https://onesimpleapi.com/api/social-profile"
+    },
+    {
+      "id": "get-information",
+      "name": "Get Information",
+      "description": "Get information about a URL",
+      "method": "GET",
+      "path": "/information",
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "required": true,
+          "description": "URL to get information about"
+        }
+      },
+      "urlTemplate": "https://onesimpleapi.com/api/information"
+    },
+    {
+      "id": "utility-operation",
+      "name": "Utility Operation",
+      "description": "Execute a utility operation",
+      "method": "GET",
+      "path": "/utility/{operation}",
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "urlTemplate": "https://onesimpleapi.com/api/utility/{operation}"
+    }
+  ]
+}
+

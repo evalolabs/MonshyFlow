@@ -1,0 +1,267 @@
+{
+  "id": "gotowebinar",
+  "name": "GoToWebinar",
+  "icon": "🎥",
+  "logoUrl": "https://cdn.simpleicons.org/gotomeeting/000000",
+  "description": "Webinar hosting and management platform",
+  "baseUrl": "https://api.getgo.com/G2W/rest/v2",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GOTOWEBINAR_OAUTH2_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-webinar",
+      "name": "Create Webinar",
+      "description": "Create a new webinar",
+      "method": "POST",
+      "path": "/webinars",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "required": true, "description": "Webinar subject/title" },
+          "description": { "type": "string", "description": "Webinar description" },
+          "times": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startTime": { "type": "string", "format": "date-time", "required": true, "description": "Start time (ISO 8601)" },
+                "endTime": { "type": "string", "format": "date-time", "required": true, "description": "End time (ISO 8601)" }
+              },
+              "required": ["startTime", "endTime"]
+            },
+            "required": true,
+            "description": "Webinar times"
+          },
+          "timeZone": { "type": "string", "default": "America/New_York", "description": "Timezone (e.g., 'America/New_York')" },
+          "locale": { "type": "string", "default": "en_US", "description": "Locale (e.g., 'en_US')" },
+          "organizerKey": { "type": "string", "description": "Organizer key" },
+          "isPasswordProtected": { "type": "boolean", "default": false, "description": "Require password to join" },
+          "password": { "type": "string", "description": "Webinar password (if password protected)" },
+          "conferenceCallInfo": { "type": "string", "enum": ["hybrid", "phone", "voip"], "default": "hybrid", "description": "Conference call type" },
+          "registrationSettings": {
+            "type": "object",
+            "properties": {
+              "registrantsLimit": { "type": "integer", "description": "Maximum number of registrants" },
+              "requireApproval": { "type": "boolean", "default": false, "description": "Require approval for registration" },
+              "allowRegistrationAfterStart": { "type": "boolean", "default": false, "description": "Allow registration after start" },
+              "sendReminderEmails": { "type": "boolean", "default": true, "description": "Send reminder emails" },
+              "reminderEmailMinutes": {
+                "type": "array",
+                "items": { "type": "integer" },
+                "description": "Minutes before webinar to send reminders (e.g., [1440, 60])"
+              }
+            },
+            "description": "Registration settings"
+          },
+          "emailSettings": {
+            "type": "object",
+            "properties": {
+              "confirmationEmail": { "type": "boolean", "default": true, "description": "Send confirmation email" },
+              "reminderEmail": { "type": "boolean", "default": true, "description": "Send reminder email" },
+              "followUpEmail": { "type": "boolean", "default": false, "description": "Send follow-up email" }
+            },
+            "description": "Email settings"
+          }
+        },
+        "required": ["subject", "times"]
+      },
+      "urlTemplate": "https://api.getgo.com/G2W/rest/v2/webinars"
+    },
+    {
+      "id": "get-webinar",
+      "name": "Get Webinar",
+      "description": "Get webinar by key",
+      "method": "GET",
+      "path": "/webinars/{webinarKey}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.getgo.com/G2W/rest/v2/webinars/{webinarKey}"
+    },
+    {
+      "id": "list-webinars",
+      "name": "List Webinars",
+      "description": "List all webinars",
+      "method": "GET",
+      "path": "/webinars",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "fromTime": { "type": "string", "format": "date-time", "description": "Start time filter (ISO 8601)" },
+        "toTime": { "type": "string", "format": "date-time", "description": "End time filter (ISO 8601)" },
+        "organizerKey": { "type": "string", "description": "Filter by organizer key" },
+        "page": { "type": "integer", "default": 0, "description": "Page number (0-based)" },
+        "pageSize": { "type": "integer", "default": 100, "description": "Page size" }
+      },
+      "urlTemplate": "https://api.getgo.com/G2W/rest/v2/webinars"
+    },
+    {
+      "id": "update-webinar",
+      "name": "Update Webinar",
+      "description": "Update a webinar",
+      "method": "PUT",
+      "path": "/webinars/{webinarKey}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "description": "Webinar subject/title" },
+          "description": { "type": "string", "description": "Webinar description" },
+          "times": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startTime": { "type": "string", "format": "date-time" },
+                "endTime": { "type": "string", "format": "date-time" }
+              },
+              "required": ["startTime", "endTime"]
+            }
+          },
+          "timeZone": { "type": "string", "description": "Timezone" },
+          "locale": { "type": "string", "description": "Locale" },
+          "isPasswordProtected": { "type": "boolean", "description": "Require password to join" },
+          "password": { "type": "string", "description": "Webinar password" },
+          "conferenceCallInfo": { "type": "string", "enum": ["hybrid", "phone", "voip"], "description": "Conference call type" },
+          "registrationSettings": {
+            "type": "object",
+            "properties": {
+              "registrantsLimit": { "type": "integer" },
+              "requireApproval": { "type": "boolean" },
+              "allowRegistrationAfterStart": { "type": "boolean" },
+              "sendReminderEmails": { "type": "boolean" },
+              "reminderEmailMinutes": {
+                "type": "array",
+                "items": { "type": "integer" }
+              }
+            }
+          },
+          "emailSettings": {
+            "type": "object",
+            "properties": {
+              "confirmationEmail": { "type": "boolean" },
+              "reminderEmail": { "type": "boolean" },
+              "followUpEmail": { "type": "boolean" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.getgo.com/G2W/rest/v2/webinars/{webinarKey}"
+    },
+    {
+      "id": "create-registrant",
+      "name": "Create Registrant",
+      "description": "Register a new attendee for a webinar",
+      "method": "POST",
+      "path": "/webinars/{webinarKey}/registrants",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string", "required": true, "description": "First name" },
+          "lastName": { "type": "string", "required": true, "description": "Last name" },
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "organization": { "type": "string", "description": "Organization" },
+          "source": { "type": "string", "description": "Registration source" },
+          "address": { "type": "string", "description": "Address" },
+          "city": { "type": "string", "description": "City" },
+          "state": { "type": "string", "description": "State/Province" },
+          "zipCode": { "type": "string", "description": "ZIP/Postal code" },
+          "country": { "type": "string", "description": "Country" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "timeZone": { "type": "string", "description": "Timezone" },
+          "customQuestions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "questionKey": { "type": "string" },
+                "answer": { "type": "string" }
+              },
+              "required": ["questionKey", "answer"]
+            },
+            "description": "Custom question answers"
+          },
+          "resendConfirmation": { "type": "boolean", "default": false, "description": "Resend confirmation email" }
+        },
+        "required": ["firstName", "lastName", "email"]
+      },
+      "urlTemplate": "https://api.getgo.com/G2W/rest/v2/webinars/{webinarKey}/registrants"
+    },
+    {
+      "id": "get-registrant",
+      "name": "Get Registrant",
+      "description": "Get registrant by key",
+      "method": "GET",
+      "path": "/webinars/{webinarKey}/registrants/{registrantKey}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.getgo.com/G2W/rest/v2/webinars/{webinarKey}/registrants/{registrantKey}"
+    },
+    {
+      "id": "list-registrants",
+      "name": "List Registrants",
+      "description": "List all registrants for a webinar",
+      "method": "GET",
+      "path": "/webinars/{webinarKey}/registrants",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 0, "description": "Page number (0-based)" },
+        "pageSize": { "type": "integer", "default": 100, "description": "Page size" },
+        "status": { "type": "string", "enum": ["WAITING", "APPROVED", "DENIED", "REGISTERED", "COMPLETED"], "description": "Filter by status" }
+      },
+      "urlTemplate": "https://api.getgo.com/G2W/rest/v2/webinars/{webinarKey}/registrants"
+    },
+    {
+      "id": "get-attendee",
+      "name": "Get Attendee",
+      "description": "Get attendee by key",
+      "method": "GET",
+      "path": "/webinars/{webinarKey}/attendees/{attendeeKey}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.getgo.com/G2W/rest/v2/webinars/{webinarKey}/attendees/{attendeeKey}"
+    },
+    {
+      "id": "list-attendees",
+      "name": "List Attendees",
+      "description": "List all attendees for a webinar",
+      "method": "GET",
+      "path": "/webinars/{webinarKey}/attendees",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 0, "description": "Page number (0-based)" },
+        "pageSize": { "type": "integer", "default": 100, "description": "Page size" }
+      },
+      "urlTemplate": "https://api.getgo.com/G2W/rest/v2/webinars/{webinarKey}/attendees"
+    }
+  ]
+}
+

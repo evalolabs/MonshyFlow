@@ -1,0 +1,108 @@
+{
+  "id": "grist",
+  "name": "Grist",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/grist/000000",
+  "description": "Spreadsheet-database hybrid platform",
+  "baseUrl": "https://docs.getgrist.com/api",
+  "color": {
+    "bg": "from-violet-100 to-purple-100",
+    "border": "border-violet-500",
+    "icon": "text-violet-700",
+    "handle": "bg-violet-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GRIST_API_KEY",
+    "note": "Base URL should be 'https://docs.getgrist.com/api' for Free Plan, 'https://{customSubdomain}.getgrist.com/api' for Paid Plan, or provided as GRIST_SELF_HOSTED_URL for Self-hosted. Use GRIST_PLAN_TYPE secret key (free, paid, selfHosted) and GRIST_CUSTOM_SUBDOMAIN for Paid Plan."
+  },
+  "endpoints": [
+    {
+      "id": "create-record",
+      "name": "Create Record",
+      "description": "Create a new record (row)",
+      "method": "POST",
+      "path": "/docs/{docId}/tables/{tableId}/records",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Record data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://docs.getgrist.com/api/docs/{docId}/tables/{tableId}/records"
+    },
+    {
+      "id": "list-records",
+      "name": "List Records",
+      "description": "List all records",
+      "method": "GET",
+      "path": "/docs/{docId}/tables/{tableId}/records",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "filter": {
+          "type": "string",
+          "description": "Filter conditions"
+        },
+        "sort": {
+          "type": "string",
+          "description": "Sort order"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum number of results"
+        }
+      },
+      "urlTemplate": "https://docs.getgrist.com/api/docs/{docId}/tables/{tableId}/records"
+    },
+    {
+      "id": "update-records",
+      "name": "Update Records",
+      "description": "Update records",
+      "method": "PATCH",
+      "path": "/docs/{docId}/tables/{tableId}/records",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Record data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://docs.getgrist.com/api/docs/{docId}/tables/{tableId}/records"
+    },
+    {
+      "id": "delete-records",
+      "name": "Delete Records",
+      "description": "Delete records",
+      "method": "POST",
+      "path": "/docs/{docId}/tables/{tableId}/data/delete",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "Array of record IDs to delete"
+          }
+        },
+        "required": ["ids"]
+      },
+      "urlTemplate": "https://docs.getgrist.com/api/docs/{docId}/tables/{tableId}/data/delete"
+    }
+  ]
+}

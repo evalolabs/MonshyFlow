@@ -1,0 +1,428 @@
+{
+  "id": "beeminder",
+  "name": "Beeminder",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/beeminder/000000",
+  "description": "Goal tracking and data visualization platform",
+  "baseUrl": "https://www.beeminder.com/api/v1",
+  "color": {
+    "bg": "from-yellow-100 to-amber-100",
+    "border": "border-yellow-500",
+    "icon": "text-yellow-700",
+    "handle": "bg-yellow-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "secretKey": "BEEMINDER_API_TOKEN",
+    "queryParamName": "auth_token",
+    "note": "API Token is sent as query parameter 'auth_token'. OAuth2 is also supported (BEEMINDER_OAUTH2_ACCESS_TOKEN)."
+  },
+  "endpoints": [
+    {
+      "id": "create-goal",
+      "name": "Create Goal",
+      "description": "Create a new goal",
+      "method": "POST",
+      "path": "/users/{username}/goals.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "required": true,
+            "description": "Goal slug (unique identifier)"
+          },
+          "title": {
+            "type": "string",
+            "description": "Goal title"
+          },
+          "goal_type": {
+            "type": "string",
+            "enum": ["hustler", "biker", "fatloser", "gainer", "inboxer", "drinker", "custom", "exercise"],
+            "description": "Goal type"
+          },
+          "goalval": {
+            "type": "number",
+            "description": "Goal value"
+          },
+          "goaldate": {
+            "type": "integer",
+            "description": "Goal date (Unix timestamp)"
+          },
+          "rate": {
+            "type": "number",
+            "description": "Rate of change"
+          },
+          "yaw": {
+            "type": "number",
+            "description": "Yaw value"
+          },
+          "lane": {
+            "type": "integer",
+            "description": "Lane number"
+          },
+          "roadall": {
+            "type": "boolean",
+            "default": false,
+            "description": "Road all"
+          },
+          "autodata": {
+            "type": "boolean",
+            "default": false,
+            "description": "Auto data"
+          },
+          "ephem": {
+            "type": "boolean",
+            "default": false,
+            "description": "Ephemeral goal"
+          },
+          "graph_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Graph URL"
+          },
+          "graph_type": {
+            "type": "string",
+            "description": "Graph type"
+          },
+          "secret": {
+            "type": "boolean",
+            "default": false,
+            "description": "Secret goal"
+          }
+        },
+        "required": ["slug"]
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals.json"
+    },
+    {
+      "id": "get-goal",
+      "name": "Get Goal",
+      "description": "Get goal by name",
+      "method": "GET",
+      "path": "/users/{username}/goals/{goalName}.json",
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals/{goalName}.json"
+    },
+    {
+      "id": "list-goals",
+      "name": "List Goals",
+      "description": "List all goals",
+      "method": "GET",
+      "path": "/users/{username}/goals.json",
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals.json"
+    },
+    {
+      "id": "list-archived-goals",
+      "name": "List Archived Goals",
+      "description": "List archived goals",
+      "method": "GET",
+      "path": "/users/{username}/goals.json",
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        },
+        "filter": {
+          "type": "string",
+          "default": "frontburner",
+          "description": "Filter for archived goals"
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals.json"
+    },
+    {
+      "id": "update-goal",
+      "name": "Update Goal",
+      "description": "Update a goal",
+      "method": "PUT",
+      "path": "/users/{username}/goals/{goalName}.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Goal data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals/{goalName}.json"
+    },
+    {
+      "id": "refresh-goal",
+      "name": "Refresh Goal",
+      "description": "Refresh a goal",
+      "method": "POST",
+      "path": "/users/{username}/goals/{goalName}/refresh.json",
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals/{goalName}/refresh.json"
+    },
+    {
+      "id": "short-circuit-goal",
+      "name": "Short Circuit Goal",
+      "description": "Short circuit a goal",
+      "method": "POST",
+      "path": "/users/{username}/goals/{goalName}/shortcircuit.json",
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals/{goalName}/shortcircuit.json"
+    },
+    {
+      "id": "step-down-goal",
+      "name": "Step Down Goal",
+      "description": "Step down a goal",
+      "method": "POST",
+      "path": "/users/{username}/goals/{goalName}/stepdown.json",
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals/{goalName}/stepdown.json"
+    },
+    {
+      "id": "cancel-step-down-goal",
+      "name": "Cancel Step Down Goal",
+      "description": "Cancel step down for a goal",
+      "method": "POST",
+      "path": "/users/{username}/goals/{goalName}/cancel_stepdown.json",
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals/{goalName}/cancel_stepdown.json"
+    },
+    {
+      "id": "create-datapoint",
+      "name": "Create Datapoint",
+      "description": "Create a new datapoint",
+      "method": "POST",
+      "path": "/users/{username}/goals/{goalName}/datapoints.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "required": true,
+            "description": "Datapoint value"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Unix timestamp (defaults to now)"
+          },
+          "comment": {
+            "type": "string",
+            "description": "Comment"
+          },
+          "requestid": {
+            "type": "string",
+            "description": "Request ID for deduplication"
+          }
+        },
+        "required": ["value"]
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals/{goalName}/datapoints.json"
+    },
+    {
+      "id": "create-datapoints",
+      "name": "Create Datapoints",
+      "description": "Create multiple datapoints (with array)",
+      "method": "POST",
+      "path": "/users/{username}/goals/{goalName}/datapoints.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "bodySchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "value": { "type": "number", "required": true },
+            "timestamp": { "type": "integer" },
+            "comment": { "type": "string" },
+            "requestid": { "type": "string" }
+          },
+          "required": ["value"]
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals/{goalName}/datapoints.json"
+    },
+    {
+      "id": "get-datapoint",
+      "name": "Get Datapoint",
+      "description": "Get datapoint by ID",
+      "method": "GET",
+      "path": "/users/{username}/goals/{goalName}/datapoints/{datapointId}.json",
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals/{goalName}/datapoints/{datapointId}.json"
+    },
+    {
+      "id": "list-datapoints",
+      "name": "List Datapoints",
+      "description": "List all datapoints for a goal",
+      "method": "GET",
+      "path": "/users/{username}/goals/{goalName}/datapoints.json",
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals/{goalName}/datapoints.json"
+    },
+    {
+      "id": "update-datapoint",
+      "name": "Update Datapoint",
+      "description": "Update a datapoint",
+      "method": "PUT",
+      "path": "/users/{username}/goals/{goalName}/datapoints/{datapointId}.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "value": { "type": "number" },
+          "timestamp": { "type": "integer" },
+          "comment": { "type": "string" }
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals/{goalName}/datapoints/{datapointId}.json"
+    },
+    {
+      "id": "delete-datapoint",
+      "name": "Delete Datapoint",
+      "description": "Delete a datapoint",
+      "method": "DELETE",
+      "path": "/users/{username}/goals/{goalName}/datapoints/{datapointId}.json",
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals/{goalName}/datapoints/{datapointId}.json"
+    },
+    {
+      "id": "create-charge",
+      "name": "Create Charge",
+      "description": "Create a charge for a goal",
+      "method": "POST",
+      "path": "/users/{username}/goals/{goalName}/charges.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "Charge amount"
+          }
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}/goals/{goalName}/charges.json"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user by username",
+      "method": "GET",
+      "path": "/users/{username}.json",
+      "queryParams": {
+        "auth_token": {
+          "type": "string",
+          "required": true,
+          "description": "API token"
+        }
+      },
+      "urlTemplate": "https://www.beeminder.com/api/v1/users/{username}.json"
+    }
+  ]
+}
+

@@ -1,0 +1,176 @@
+{
+  "id": "microsoft-excel",
+  "name": "Microsoft Excel",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/microsoftexcel/217346",
+  "description": "Excel spreadsheet management via Microsoft Graph API",
+  "baseUrl": "https://graph.microsoft.com/v1.0/me",
+  "color": {
+    "bg": "from-green-100 to-lime-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "MICROSOFT_EXCEL_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "list-workbooks",
+      "name": "List Workbooks",
+      "description": "Search for Excel workbooks",
+      "method": "GET",
+      "path": "/drive/root/search(q='.xlsx')",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "$filter": { "type": "string", "description": "OData filter expression" },
+        "$orderby": { "type": "string", "description": "OData order by expression" },
+        "$top": { "type": "integer", "description": "Number of results" },
+        "$skip": { "type": "integer", "description": "Skip results" }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/root/search(q='.xlsx')"
+    },
+    {
+      "id": "delete-workbook",
+      "name": "Delete Workbook",
+      "description": "Delete a workbook",
+      "method": "DELETE",
+      "path": "/drive/items/{workbookId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{workbookId}"
+    },
+    {
+      "id": "add-worksheet",
+      "name": "Add Worksheet",
+      "description": "Add a new worksheet to a workbook",
+      "method": "POST",
+      "path": "/drive/items/{workbookId}/workbook/worksheets",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Worksheet name" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{workbookId}/workbook/worksheets"
+    },
+    {
+      "id": "list-worksheets",
+      "name": "List Worksheets",
+      "description": "List all worksheets in a workbook",
+      "method": "GET",
+      "path": "/drive/items/{workbookId}/workbook/worksheets",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{workbookId}/workbook/worksheets"
+    },
+    {
+      "id": "delete-worksheet",
+      "name": "Delete Worksheet",
+      "description": "Delete a worksheet",
+      "method": "DELETE",
+      "path": "/drive/items/{workbookId}/workbook/worksheets/{worksheetId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{workbookId}/workbook/worksheets/{worksheetId}"
+    },
+    {
+      "id": "read-range",
+      "name": "Read Range",
+      "description": "Read a range of cells",
+      "method": "GET",
+      "path": "/drive/items/{workbookId}/workbook/worksheets/{worksheetId}/range(address='{range}')",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{workbookId}/workbook/worksheets/{worksheetId}/range(address='{range}')"
+    },
+    {
+      "id": "update-range",
+      "name": "Update Range",
+      "description": "Update a range of cells",
+      "method": "PATCH",
+      "path": "/drive/items/{workbookId}/workbook/worksheets/{worksheetId}/range(address='{range}')",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "type": ["string", "number", "boolean"] }
+            },
+            "required": true,
+            "description": "2D array of cell values"
+          }
+        },
+        "required": ["values"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{workbookId}/workbook/worksheets/{worksheetId}/range(address='{range}')"
+    },
+    {
+      "id": "clear-range",
+      "name": "Clear Range",
+      "description": "Clear a range of cells",
+      "method": "POST",
+      "path": "/drive/items/{workbookId}/workbook/worksheets/{worksheetId}/range(address='{range}')/clear",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "applyTo": { "type": "string", "enum": ["All", "Formats", "Contents"], "default": "All", "description": "What to clear" }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{workbookId}/workbook/worksheets/{worksheetId}/range(address='{range}')/clear"
+    },
+    {
+      "id": "append-table-rows",
+      "name": "Append Table Rows",
+      "description": "Append rows to a table",
+      "method": "POST",
+      "path": "/drive/items/{workbookId}/workbook/worksheets/{worksheetId}/tables/{tableId}/rows/add",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "type": ["string", "number", "boolean"] }
+            },
+            "required": true,
+            "description": "2D array of row values"
+          },
+          "index": { "type": "integer", "description": "Index to insert at" }
+        },
+        "required": ["values"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{workbookId}/workbook/worksheets/{worksheetId}/tables/{tableId}/rows/add"
+    }
+  ]
+}
+

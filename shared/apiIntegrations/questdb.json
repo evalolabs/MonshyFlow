@@ -1,0 +1,71 @@
+{
+  "id": "questdb",
+  "name": "QuestDB",
+  "icon": "🗄️",
+  "logoUrl": "https://cdn.simpleicons.org/questdb/000000",
+  "description": "High-performance time-series database",
+  "baseUrl": "postgresql://{host}:{port}/{database}",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(username:password)}",
+    "secretKey": "QUESTDB_PASSWORD",
+    "usernameSecretKey": "QUESTDB_USERNAME",
+    "note": "Base URL should be provided as PostgreSQL connection string (postgresql://{host}:{port}/{database}) or as separate QUESTDB_HOST, QUESTDB_PORT (default: 8812), QUESTDB_DATABASE secret keys. Uses PostgreSQL-compatible SQL queries."
+  },
+  "endpoints": [
+    {
+      "id": "execute-query",
+      "name": "Execute Query",
+      "description": "Execute a SQL query (PostgreSQL-compatible)",
+      "method": "POST",
+      "path": "/exec",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "SQL query statement"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "postgresql://{host}:{port}/{database}/exec"
+    },
+    {
+      "id": "insert-into-table",
+      "name": "Insert Into Table",
+      "description": "Insert data into a table",
+      "method": "POST",
+      "path": "/exec",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "INSERT INTO {table} ... SQL statement"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "postgresql://{host}:{port}/{database}/exec"
+    }
+  ]
+}
+

@@ -1,0 +1,220 @@
+{
+  "id": "nextcloud",
+  "name": "NextCloud",
+  "icon": "☁️",
+  "logoUrl": "https://cdn.simpleicons.org/nextcloud/0082C9",
+  "description": "Self-hosted file sharing and collaboration platform",
+  "baseUrl": "https://{host}",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "NEXTCLOUD_ACCESS_TOKEN",
+    "note": "Host should be provided in baseUrl placeholder {host} or as NEXTCLOUD_BASE_URL secret key. NextCloud uses WebDAV for file operations (PROPFIND, MKCOL, COPY) and OCS API for user management. OAuth2 can also be used with NEXTCLOUD_OAUTH2_ACCESS_TOKEN."
+  },
+  "endpoints": [
+    {
+      "id": "download-file",
+      "name": "Download File",
+      "description": "Download a file",
+      "method": "GET",
+      "path": "/remote.php/dav/files/{userId}/{filePath}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/remote.php/dav/files/{userId}/{filePath}"
+    },
+    {
+      "id": "upload-file",
+      "name": "Upload File",
+      "description": "Upload a file",
+      "method": "PUT",
+      "path": "/remote.php/dav/files/{userId}/{filePath}",
+      "headers": {
+        "Content-Type": "application/octet-stream",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "string",
+        "format": "binary",
+        "description": "File content (binary data)"
+      },
+      "urlTemplate": "https://{host}/remote.php/dav/files/{userId}/{filePath}"
+    },
+    {
+      "id": "get-file-info",
+      "name": "Get File Info",
+      "description": "Get file information (WebDAV PROPFIND)",
+      "method": "PROPFIND",
+      "path": "/remote.php/dav/files/{userId}/{filePath}",
+      "headers": {
+        "Depth": "0",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/remote.php/dav/files/{userId}/{filePath}"
+    },
+    {
+      "id": "list-folder",
+      "name": "List Folder",
+      "description": "List folder contents (WebDAV PROPFIND)",
+      "method": "PROPFIND",
+      "path": "/remote.php/dav/files/{userId}/{folderPath}",
+      "headers": {
+        "Depth": "1",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/remote.php/dav/files/{userId}/{folderPath}"
+    },
+    {
+      "id": "copy-file",
+      "name": "Copy File",
+      "description": "Copy a file (WebDAV COPY)",
+      "method": "COPY",
+      "path": "/remote.php/dav/files/{userId}/{filePath}",
+      "headers": {
+        "Destination": "{destinationPath}",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/remote.php/dav/files/{userId}/{filePath}"
+    },
+    {
+      "id": "delete-file",
+      "name": "Delete File",
+      "description": "Delete a file",
+      "method": "DELETE",
+      "path": "/remote.php/dav/files/{userId}/{filePath}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/remote.php/dav/files/{userId}/{filePath}"
+    },
+    {
+      "id": "create-folder",
+      "name": "Create Folder",
+      "description": "Create a folder (WebDAV MKCOL)",
+      "method": "MKCOL",
+      "path": "/remote.php/dav/files/{userId}/{folderPath}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/remote.php/dav/files/{userId}/{folderPath}"
+    },
+    {
+      "id": "delete-folder",
+      "name": "Delete Folder",
+      "description": "Delete a folder",
+      "method": "DELETE",
+      "path": "/remote.php/dav/files/{userId}/{folderPath}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/remote.php/dav/files/{userId}/{folderPath}"
+    },
+    {
+      "id": "get-folder-info",
+      "name": "Get Folder Info",
+      "description": "Get folder information (WebDAV PROPFIND)",
+      "method": "PROPFIND",
+      "path": "/remote.php/dav/files/{userId}/{folderPath}",
+      "headers": {
+        "Depth": "0",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/remote.php/dav/files/{userId}/{folderPath}"
+    },
+    {
+      "id": "create-user",
+      "name": "Create User",
+      "description": "Create a new user (OCS API)",
+      "method": "POST",
+      "path": "/ocs/v2.php/cloud/users",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "OCS-APIRequest": "true",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "userid": { "type": "string", "required": true, "description": "User ID" },
+          "password": { "type": "string", "required": true, "description": "Password" },
+          "displayName": { "type": "string", "description": "Display name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "quota": { "type": "string", "description": "Storage quota (e.g., 1GB, unlimited)" },
+          "language": { "type": "string", "description": "Language code" }
+        },
+        "required": ["userid", "password"]
+      },
+      "urlTemplate": "https://{host}/ocs/v2.php/cloud/users"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user information (OCS API)",
+      "method": "GET",
+      "path": "/ocs/v2.php/cloud/users/{userId}",
+      "headers": {
+        "OCS-APIRequest": "true",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/ocs/v2.php/cloud/users/{userId}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users (OCS API)",
+      "method": "GET",
+      "path": "/ocs/v2.php/cloud/users",
+      "headers": {
+        "OCS-APIRequest": "true",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "search": { "type": "string", "description": "Search query" },
+        "limit": { "type": "integer", "description": "Number of results" },
+        "offset": { "type": "integer", "description": "Offset for pagination" }
+      },
+      "urlTemplate": "https://{host}/ocs/v2.php/cloud/users"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update a user (OCS API)",
+      "method": "PUT",
+      "path": "/ocs/v2.php/cloud/users/{userId}",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "OCS-APIRequest": "true",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string", "required": true, "description": "Field key (e.g., email, displayname, quota, password)" },
+          "value": { "type": "string", "required": true, "description": "Field value" }
+        },
+        "required": ["key", "value"]
+      },
+      "urlTemplate": "https://{host}/ocs/v2.php/cloud/users/{userId}"
+    },
+    {
+      "id": "delete-user",
+      "name": "Delete User",
+      "description": "Delete a user (OCS API)",
+      "method": "DELETE",
+      "path": "/ocs/v2.php/cloud/users/{userId}",
+      "headers": {
+        "OCS-APIRequest": "true",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/ocs/v2.php/cloud/users/{userId}"
+    }
+  ]
+}
+

@@ -1,0 +1,383 @@
+{
+  "id": "bitwarden",
+  "name": "Bitwarden",
+  "icon": "🔐",
+  "logoUrl": "https://cdn.simpleicons.org/bitwarden/175DDC",
+  "description": "Password manager with cloud and self-hosted support",
+  "baseUrl": "https://api.bitwarden.com",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "BITWARDEN_CLIENT_ID",
+    "note": "OAuth2 authentication with Client ID and Client Secret. Base URL can be Cloud (https://api.bitwarden.com) or Self-hosted (https://{your-bitwarden-instance}/api). Use BITWARDEN_CLIENT_SECRET for client secret and BITWARDEN_BASE_URL for self-hosted instances."
+  },
+  "endpoints": [
+    {
+      "id": "create-collection",
+      "name": "Create Collection",
+      "description": "Create a new collection",
+      "method": "POST",
+      "path": "/collections",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Collection name"
+          },
+          "externalId": {
+            "type": "string",
+            "description": "External ID"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "readOnly": { "type": "boolean", "default": false }
+              }
+            },
+            "description": "Groups with access"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.bitwarden.com/collections"
+    },
+    {
+      "id": "get-collection",
+      "name": "Get Collection",
+      "description": "Get collection by ID",
+      "method": "GET",
+      "path": "/collections/{collectionId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.bitwarden.com/collections/{collectionId}"
+    },
+    {
+      "id": "list-collections",
+      "name": "List Collections",
+      "description": "List all collections",
+      "method": "GET",
+      "path": "/collections",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.bitwarden.com/collections"
+    },
+    {
+      "id": "update-collection",
+      "name": "Update Collection",
+      "description": "Update a collection",
+      "method": "PUT",
+      "path": "/collections/{collectionId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "externalId": { "type": "string" },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "readOnly": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.bitwarden.com/collections/{collectionId}"
+    },
+    {
+      "id": "delete-collection",
+      "name": "Delete Collection",
+      "description": "Delete a collection",
+      "method": "DELETE",
+      "path": "/collections/{collectionId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.bitwarden.com/collections/{collectionId}"
+    },
+    {
+      "id": "create-group",
+      "name": "Create Group",
+      "description": "Create a new group",
+      "method": "POST",
+      "path": "/groups",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Group name"
+          },
+          "accessAll": {
+            "type": "boolean",
+            "default": false,
+            "description": "Access all collections"
+          },
+          "externalId": {
+            "type": "string",
+            "description": "External ID"
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "readOnly": { "type": "boolean", "default": false }
+              }
+            },
+            "description": "Collections with access"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.bitwarden.com/groups"
+    },
+    {
+      "id": "get-group",
+      "name": "Get Group",
+      "description": "Get group by ID",
+      "method": "GET",
+      "path": "/groups/{groupId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.bitwarden.com/groups/{groupId}"
+    },
+    {
+      "id": "list-groups",
+      "name": "List Groups",
+      "description": "List all groups",
+      "method": "GET",
+      "path": "/groups",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.bitwarden.com/groups"
+    },
+    {
+      "id": "update-group",
+      "name": "Update Group",
+      "description": "Update a group",
+      "method": "PUT",
+      "path": "/groups/{groupId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "accessAll": { "type": "boolean" },
+          "externalId": { "type": "string" },
+          "collections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "readOnly": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.bitwarden.com/groups/{groupId}"
+    },
+    {
+      "id": "delete-group",
+      "name": "Delete Group",
+      "description": "Delete a group",
+      "method": "DELETE",
+      "path": "/groups/{groupId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.bitwarden.com/groups/{groupId}"
+    },
+    {
+      "id": "create-member",
+      "name": "Create Member",
+      "description": "Create a new member",
+      "method": "POST",
+      "path": "/members",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Member email"
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "readOnly": { "type": "boolean", "default": false }
+              }
+            },
+            "description": "Collections with access"
+          },
+          "type": {
+            "type": "integer",
+            "enum": [0, 1, 2, 3, 4, 5],
+            "description": "Member type (0=Owner, 1=Admin, 2=User, 3=Manager, 4=Custom, 5=Provider)"
+          },
+          "accessAll": {
+            "type": "boolean",
+            "default": false,
+            "description": "Access all collections"
+          },
+          "externalId": {
+            "type": "string",
+            "description": "External ID"
+          }
+        },
+        "required": ["email"]
+      },
+      "urlTemplate": "https://api.bitwarden.com/members"
+    },
+    {
+      "id": "get-member",
+      "name": "Get Member",
+      "description": "Get member by ID",
+      "method": "GET",
+      "path": "/members/{memberId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.bitwarden.com/members/{memberId}"
+    },
+    {
+      "id": "list-members",
+      "name": "List Members",
+      "description": "List all members",
+      "method": "GET",
+      "path": "/members",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.bitwarden.com/members"
+    },
+    {
+      "id": "update-member",
+      "name": "Update Member",
+      "description": "Update a member",
+      "method": "PUT",
+      "path": "/members/{memberId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "collections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "readOnly": { "type": "boolean" }
+              }
+            }
+          },
+          "type": {
+            "type": "integer",
+            "enum": [0, 1, 2, 3, 4, 5]
+          },
+          "accessAll": { "type": "boolean" },
+          "externalId": { "type": "string" }
+        }
+      },
+      "urlTemplate": "https://api.bitwarden.com/members/{memberId}"
+    },
+    {
+      "id": "delete-member",
+      "name": "Delete Member",
+      "description": "Delete a member",
+      "method": "DELETE",
+      "path": "/members/{memberId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.bitwarden.com/members/{memberId}"
+    },
+    {
+      "id": "get-event",
+      "name": "Get Event",
+      "description": "Get event by ID",
+      "method": "GET",
+      "path": "/events/{eventId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.bitwarden.com/events/{eventId}"
+    },
+    {
+      "id": "list-events",
+      "name": "List Events",
+      "description": "List all events",
+      "method": "GET",
+      "path": "/events",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Start date (ISO 8601)"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "description": "End date (ISO 8601)"
+        },
+        "continuationToken": {
+          "type": "string",
+          "description": "Continuation token for pagination"
+        }
+      },
+      "urlTemplate": "https://api.bitwarden.com/events"
+    }
+  ]
+}
+

@@ -1,0 +1,81 @@
+{
+  "id": "perplexity",
+  "name": "Perplexity",
+  "icon": "🔍",
+  "logoUrl": "https://cdn.simpleicons.org/perplexity/000000",
+  "description": "AI search engine that generates answers with citations",
+  "baseUrl": "https://api.perplexity.ai",
+  "color": {
+    "bg": "from-indigo-100 to-purple-100",
+    "border": "border-indigo-500",
+    "icon": "text-indigo-700",
+    "handle": "bg-indigo-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "PERPLEXITY_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "chat-completions",
+      "name": "Chat Completions",
+      "description": "Generate chat completions with citations",
+      "method": "POST",
+      "path": "/chat/completions",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "enum": ["llama-3.1-sonar-small-128k-online", "llama-3.1-sonar-large-128k-online", "llama-3.1-sonar-huge-128k-online", "llama-3.1-sonar-small-128k-chat", "llama-3.1-sonar-large-128k-chat", "llama-3.1-sonar-huge-128k-chat"],
+            "required": true,
+            "description": "Model to use"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "role": { "type": "string", "enum": ["system", "user", "assistant"], "required": true },
+                "content": { "type": "string", "required": true }
+              },
+              "required": ["role", "content"]
+            },
+            "required": true,
+            "description": "Conversation messages"
+          },
+          "temperature": { "type": "number", "minimum": 0, "maximum": 2, "default": 0.2, "description": "Sampling temperature" },
+          "top_p": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.9, "description": "Nucleus sampling parameter" },
+          "top_k": { "type": "integer", "minimum": 0, "default": 0, "description": "Top-k sampling parameter" },
+          "stream": { "type": "boolean", "default": false, "description": "Stream responses" },
+          "presence_penalty": { "type": "number", "minimum": -2, "maximum": 2, "default": 0, "description": "Presence penalty" },
+          "frequency_penalty": { "type": "number", "minimum": -2, "maximum": 2, "default": 0, "description": "Frequency penalty" },
+          "return_citations": { "type": "boolean", "default": true, "description": "Return citations in response" },
+          "return_related_questions": { "type": "boolean", "default": false, "description": "Return related questions" },
+          "return_images": { "type": "boolean", "default": false, "description": "Return images in response" },
+          "return_raw_text": { "type": "boolean", "default": false, "description": "Return raw text" },
+          "search_domain_filter": {
+            "type": "array",
+            "items": { "type": "string", "format": "uri" },
+            "description": "Filter search to specific domains"
+          },
+          "search_recency_filter": {
+            "type": "string",
+            "enum": ["month", "week", "day", "hour"],
+            "description": "Filter search by recency"
+          },
+          "max_tokens": { "type": "integer", "description": "Maximum tokens to generate" }
+        },
+        "required": ["model", "messages"]
+      },
+      "urlTemplate": "https://api.perplexity.ai/chat/completions"
+    }
+  ]
+}
+

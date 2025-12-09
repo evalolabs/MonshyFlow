@@ -1,0 +1,82 @@
+{
+  "id": "travisci",
+  "name": "TravisCI",
+  "icon": "🔧",
+  "logoUrl": "https://cdn.simpleicons.org/travisci/3EAAAF",
+  "description": "Continuous integration and deployment platform",
+  "baseUrl": "https://api.travis-ci.com",
+  "color": {
+    "bg": "from-teal-100 to-cyan-100",
+    "border": "border-teal-500",
+    "icon": "text-teal-700",
+    "handle": "bg-teal-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "token {apiKey}",
+    "secretKey": "TRAVISCI_API_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "get-build",
+      "name": "Get Build",
+      "description": "Get build details by ID",
+      "method": "GET",
+      "path": "/build/{buildId}",
+      "headers": {
+        "Authorization": "token {apiKey}",
+        "Travis-API-Version": "3"
+      },
+      "urlTemplate": "https://api.travis-ci.com/build/{buildId}"
+    },
+    {
+      "id": "list-builds",
+      "name": "List Builds",
+      "description": "List all builds",
+      "method": "GET",
+      "path": "/builds",
+      "headers": {
+        "Authorization": "token {apiKey}",
+        "Travis-API-Version": "3"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 25, "description": "Number of results" },
+        "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" },
+        "sort_by": { "type": "string", "enum": ["id", "started_at", "finished_at"], "default": "id", "description": "Sort field" },
+        "sort_by.desc": { "type": "boolean", "default": true, "description": "Sort descending" },
+        "repository.id": { "type": "integer", "description": "Filter by repository ID" },
+        "repository.slug": { "type": "string", "description": "Filter by repository slug" },
+        "state": { "type": "string", "enum": ["created", "started", "passed", "failed", "errored", "canceled"], "description": "Filter by build state" }
+      },
+      "urlTemplate": "https://api.travis-ci.com/builds"
+    },
+    {
+      "id": "cancel-build",
+      "name": "Cancel Build",
+      "description": "Cancel a running build",
+      "method": "POST",
+      "path": "/build/{buildId}/cancel",
+      "headers": {
+        "Authorization": "token {apiKey}",
+        "Travis-API-Version": "3",
+        "Content-Type": "application/json"
+      },
+      "urlTemplate": "https://api.travis-ci.com/build/{buildId}/cancel"
+    },
+    {
+      "id": "restart-build",
+      "name": "Restart Build",
+      "description": "Restart a build",
+      "method": "POST",
+      "path": "/build/{buildId}/restart",
+      "headers": {
+        "Authorization": "token {apiKey}",
+        "Travis-API-Version": "3",
+        "Content-Type": "application/json"
+      },
+      "urlTemplate": "https://api.travis-ci.com/build/{buildId}/restart"
+    }
+  ]
+}
+

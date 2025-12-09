@@ -1,0 +1,323 @@
+{
+  "id": "telegram",
+  "name": "Telegram",
+  "icon": "✈️",
+  "logoUrl": "https://cdn.simpleicons.org/telegram/26A5E4",
+  "description": "Messaging and bot platform",
+  "baseUrl": "https://api.telegram.org/bot{token}",
+  "color": {
+    "bg": "from-cyan-100 to-blue-100",
+    "border": "border-cyan-500",
+    "icon": "text-cyan-700",
+    "handle": "bg-cyan-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "TELEGRAM_BOT_TOKEN",
+    "urlPlaceholder": "{token}"
+  },
+  "endpoints": [
+    {
+      "id": "send-message",
+      "name": "Send Message",
+      "description": "Send a text message",
+      "method": "POST",
+      "path": "/sendMessage",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "chat_id": { "type": ["string", "number"], "required": true, "description": "Chat ID or username (e.g., @username)" },
+          "text": { "type": "string", "required": true, "description": "Message text (up to 4096 characters)" },
+          "parse_mode": { "type": "string", "enum": ["HTML", "Markdown", "MarkdownV2"], "description": "Parse mode for formatting" },
+          "disable_web_page_preview": { "type": "boolean", "default": false, "description": "Disable link previews" },
+          "disable_notification": { "type": "boolean", "default": false, "description": "Send silently" },
+          "reply_to_message_id": { "type": "number", "description": "Reply to message ID" },
+          "reply_markup": {
+            "type": "object",
+            "properties": {
+              "inline_keyboard": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "text": { "type": "string", "required": true },
+                      "url": { "type": "string", "format": "uri" },
+                      "callback_data": { "type": "string" },
+                      "web_app": { "type": "object" }
+                    },
+                    "required": ["text"]
+                  }
+                }
+              },
+              "keyboard": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "text": { "type": "string", "required": true },
+                      "request_contact": { "type": "boolean" },
+                      "request_location": { "type": "boolean" }
+                    },
+                    "required": ["text"]
+                  }
+                }
+              },
+              "resize_keyboard": { "type": "boolean" },
+              "one_time_keyboard": { "type": "boolean" },
+              "remove_keyboard": { "type": "boolean" }
+            },
+            "description": "Reply markup (keyboard or inline keyboard)"
+          }
+        },
+        "required": ["chat_id", "text"]
+      },
+      "urlTemplate": "https://api.telegram.org/bot{token}/sendMessage"
+    },
+    {
+      "id": "send-photo",
+      "name": "Send Photo",
+      "description": "Send a photo",
+      "method": "POST",
+      "path": "/sendPhoto",
+      "headers": {
+        "Content-Type": "multipart/form-data"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "chat_id": { "type": ["string", "number"], "required": true },
+          "photo": { "type": "string", "required": true, "description": "File ID, URL, or file path" },
+          "caption": { "type": "string", "description": "Photo caption (up to 1024 characters)" },
+          "parse_mode": { "type": "string", "enum": ["HTML", "Markdown", "MarkdownV2"] },
+          "disable_notification": { "type": "boolean", "default": false },
+          "reply_to_message_id": { "type": "number" },
+          "reply_markup": {
+            "type": "object",
+            "description": "Reply markup object"
+          }
+        },
+        "required": ["chat_id", "photo"]
+      },
+      "urlTemplate": "https://api.telegram.org/bot{token}/sendPhoto"
+    },
+    {
+      "id": "send-document",
+      "name": "Send Document",
+      "description": "Send a document",
+      "method": "POST",
+      "path": "/sendDocument",
+      "headers": {
+        "Content-Type": "multipart/form-data"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "chat_id": { "type": ["string", "number"], "required": true },
+          "document": { "type": "string", "required": true, "description": "File ID, URL, or file path" },
+          "caption": { "type": "string", "description": "Document caption" },
+          "parse_mode": { "type": "string", "enum": ["HTML", "Markdown", "MarkdownV2"] },
+          "disable_notification": { "type": "boolean", "default": false },
+          "reply_to_message_id": { "type": "number" },
+          "reply_markup": {
+            "type": "object",
+            "description": "Reply markup object"
+          }
+        },
+        "required": ["chat_id", "document"]
+      },
+      "urlTemplate": "https://api.telegram.org/bot{token}/sendDocument"
+    },
+    {
+      "id": "edit-message-text",
+      "name": "Edit Message Text",
+      "description": "Edit a text message",
+      "method": "POST",
+      "path": "/editMessageText",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "chat_id": { "type": ["string", "number"], "description": "Chat ID (required for regular chats)" },
+          "message_id": { "type": "number", "description": "Message ID (required for regular chats)" },
+          "inline_message_id": { "type": "string", "description": "Inline message ID (for inline messages)" },
+          "text": { "type": "string", "required": true, "description": "New message text" },
+          "parse_mode": { "type": "string", "enum": ["HTML", "Markdown", "MarkdownV2"] },
+          "disable_web_page_preview": { "type": "boolean", "default": false },
+          "reply_markup": {
+            "type": "object",
+            "description": "Reply markup object"
+          }
+        },
+        "required": ["text"]
+      },
+      "urlTemplate": "https://api.telegram.org/bot{token}/editMessageText"
+    },
+    {
+      "id": "delete-message",
+      "name": "Delete Message",
+      "description": "Delete a message",
+      "method": "POST",
+      "path": "/deleteMessage",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "chat_id": { "type": ["string", "number"], "required": true, "description": "Chat ID" },
+          "message_id": { "type": "number", "required": true, "description": "Message ID" }
+        },
+        "required": ["chat_id", "message_id"]
+      },
+      "urlTemplate": "https://api.telegram.org/bot{token}/deleteMessage"
+    },
+    {
+      "id": "get-updates",
+      "name": "Get Updates",
+      "description": "Get incoming updates (long polling)",
+      "method": "GET",
+      "path": "/getUpdates",
+      "headers": {},
+      "queryParams": {
+        "offset": "{offset}",
+        "limit": "100",
+        "timeout": "0",
+        "allowed_updates": "[\"message\", \"callback_query\"]"
+      },
+      "urlTemplate": "https://api.telegram.org/bot{token}/getUpdates"
+    },
+    {
+      "id": "get-chat",
+      "name": "Get Chat",
+      "description": "Get chat information",
+      "method": "GET",
+      "path": "/getChat",
+      "headers": {},
+      "queryParams": {
+        "chat_id": "{chatId}"
+      },
+      "urlTemplate": "https://api.telegram.org/bot{token}/getChat?chat_id={chatId}"
+    },
+    {
+      "id": "get-chat-member",
+      "name": "Get Chat Member",
+      "description": "Get information about a member of a chat",
+      "method": "GET",
+      "path": "/getChatMember",
+      "headers": {},
+      "queryParams": {
+        "chat_id": "{chatId}",
+        "user_id": "{userId}"
+      },
+      "urlTemplate": "https://api.telegram.org/bot{token}/getChatMember?chat_id={chatId}&user_id={userId}"
+    },
+    {
+      "id": "answer-callback-query",
+      "name": "Answer Callback Query",
+      "description": "Answer a callback query from inline keyboard",
+      "method": "POST",
+      "path": "/answerCallbackQuery",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "callback_query_id": { "type": "string", "required": true, "description": "Callback query ID" },
+          "text": { "type": "string", "description": "Notification text (up to 200 characters)" },
+          "show_alert": { "type": "boolean", "default": false, "description": "Show alert instead of notification" },
+          "url": { "type": "string", "format": "uri", "description": "URL to open" },
+          "cache_time": { "type": "number", "description": "Cache time in seconds" }
+        },
+        "required": ["callback_query_id"]
+      },
+      "urlTemplate": "https://api.telegram.org/bot{token}/answerCallbackQuery"
+    },
+    {
+      "id": "get-file",
+      "name": "Get File",
+      "description": "Get file information by file ID",
+      "method": "GET",
+      "path": "/getFile",
+      "headers": {},
+      "queryParams": {
+        "file_id": "{fileId}"
+      },
+      "urlTemplate": "https://api.telegram.org/bot{token}/getFile?file_id={fileId}"
+    },
+    {
+      "id": "set-webhook",
+      "name": "Set Webhook",
+      "description": "Set webhook URL for receiving updates",
+      "method": "POST",
+      "path": "/setWebhook",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "format": "uri", "required": true, "description": "HTTPS URL for webhook" },
+          "certificate": { "type": "string", "description": "Certificate file (optional)" },
+          "ip_address": { "type": "string", "description": "Fixed IP address" },
+          "max_connections": { "type": "number", "default": 40, "description": "Maximum connections" },
+          "allowed_updates": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of update types to receive"
+          },
+          "drop_pending_updates": { "type": "boolean", "default": false, "description": "Drop pending updates" }
+        },
+        "required": ["url"]
+      },
+      "urlTemplate": "https://api.telegram.org/bot{token}/setWebhook"
+    },
+    {
+      "id": "delete-webhook",
+      "name": "Delete Webhook",
+      "description": "Remove webhook integration",
+      "method": "POST",
+      "path": "/deleteWebhook",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "drop_pending_updates": { "type": "boolean", "default": false }
+        }
+      },
+      "urlTemplate": "https://api.telegram.org/bot{token}/deleteWebhook"
+    },
+    {
+      "id": "get-webhook-info",
+      "name": "Get Webhook Info",
+      "description": "Get current webhook status",
+      "method": "GET",
+      "path": "/getWebhookInfo",
+      "headers": {},
+      "urlTemplate": "https://api.telegram.org/bot{token}/getWebhookInfo"
+    },
+    {
+      "id": "get-me",
+      "name": "Get Me",
+      "description": "Get bot information",
+      "method": "GET",
+      "path": "/getMe",
+      "headers": {},
+      "urlTemplate": "https://api.telegram.org/bot{token}/getMe"
+    }
+  ]
+}
+

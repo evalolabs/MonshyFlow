@@ -1,0 +1,54 @@
+{
+  "id": "mistral-ai",
+  "name": "Mistral AI",
+  "icon": "🌊",
+  "logoUrl": "https://cdn.simpleicons.org/mistralai/FF6B35",
+  "description": "AI platform for language models",
+  "baseUrl": "https://api.mistral.ai",
+  "color": {
+    "bg": "from-orange-100 to-amber-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "MISTRAL_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "extract-text-batch",
+      "name": "Extract Text (Batch)",
+      "description": "Extract text from documents using batch processing",
+      "method": "POST",
+      "path": "/v1/batch",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "requests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "model": { "type": "string", "description": "Model to use" },
+                "input": { "type": "string", "description": "Input text or document" },
+                "instructions": { "type": "string", "description": "Processing instructions" }
+              }
+            },
+            "required": true,
+            "description": "Array of batch requests"
+          }
+        },
+        "required": ["requests"]
+      },
+      "urlTemplate": "https://api.mistral.ai/v1/batch"
+    }
+  ]
+}
+

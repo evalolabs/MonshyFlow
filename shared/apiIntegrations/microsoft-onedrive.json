@@ -1,0 +1,293 @@
+{
+  "id": "microsoft-onedrive",
+  "name": "Microsoft OneDrive",
+  "icon": "☁️",
+  "logoUrl": "https://cdn.simpleicons.org/microsoftonedrive/0078D4",
+  "description": "Cloud storage and file sharing",
+  "baseUrl": "https://graph.microsoft.com/v1.0",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {accessToken}",
+    "secretKey": "MICROSOFT_ONEDRIVE_ACCESS_TOKEN",
+    "tokenUrl": "https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token",
+    "clientIdSecretKey": "MICROSOFT_ONEDRIVE_CLIENT_ID",
+    "clientSecretSecretKey": "MICROSOFT_ONEDRIVE_CLIENT_SECRET"
+  },
+  "endpoints": [
+    {
+      "id": "upload-file",
+      "name": "Upload File",
+      "description": "Upload a file to OneDrive",
+      "method": "PUT",
+      "path": "/me/drive/items/{parentItemId}:/{fileName}:/content",
+      "headers": {
+        "Content-Type": "application/octet-stream"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "content": { "type": "string", "required": true, "description": "Base64 encoded file content or binary data" }
+        },
+        "required": ["content"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{parentItemId}:/{fileName}:/content"
+    },
+    {
+      "id": "upload-file-simple",
+      "name": "Upload File (Simple)",
+      "description": "Upload a file to root folder",
+      "method": "PUT",
+      "path": "/me/drive/root:/{fileName}:/content",
+      "headers": {
+        "Content-Type": "application/octet-stream"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "content": { "type": "string", "required": true, "description": "Base64 encoded file content or binary data" }
+        },
+        "required": ["content"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/root:/{fileName}:/content"
+    },
+    {
+      "id": "download-file",
+      "name": "Download File",
+      "description": "Download a file from OneDrive",
+      "method": "GET",
+      "path": "/me/drive/items/{itemId}/content",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{itemId}/content"
+    },
+    {
+      "id": "get-file",
+      "name": "Get File",
+      "description": "Get file metadata by ID",
+      "method": "GET",
+      "path": "/me/drive/items/{itemId}",
+      "headers": {},
+      "queryParams": {
+        "$select": "id,name,size,webUrl,createdDateTime,lastModifiedDateTime"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{itemId}"
+    },
+    {
+      "id": "list-files",
+      "name": "List Files",
+      "description": "List files in a folder",
+      "method": "GET",
+      "path": "/me/drive/items/{itemId}/children",
+      "headers": {},
+      "queryParams": {
+        "$top": "100",
+        "$filter": "{filter}",
+        "$orderby": "name",
+        "$select": "id,name,size,webUrl"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{itemId}/children"
+    },
+    {
+      "id": "list-root-files",
+      "name": "List Root Files",
+      "description": "List files in root folder",
+      "method": "GET",
+      "path": "/me/drive/root/children",
+      "headers": {},
+      "queryParams": {
+        "$top": "100",
+        "$filter": "{filter}",
+        "$orderby": "name"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/root/children"
+    },
+    {
+      "id": "update-file",
+      "name": "Update File",
+      "description": "Update file metadata",
+      "method": "PATCH",
+      "path": "/me/drive/items/{itemId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "File name" },
+          "description": { "type": "string", "description": "File description" }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{itemId}"
+    },
+    {
+      "id": "delete-file",
+      "name": "Delete File",
+      "description": "Delete a file",
+      "method": "DELETE",
+      "path": "/me/drive/items/{itemId}",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{itemId}"
+    },
+    {
+      "id": "copy-file",
+      "name": "Copy File",
+      "description": "Copy a file to another location",
+      "method": "POST",
+      "path": "/me/drive/items/{itemId}/copy",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "parentReference": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Parent folder ID" },
+              "driveId": { "type": "string", "description": "Drive ID" },
+              "path": { "type": "string", "description": "Parent folder path" }
+            },
+            "required": true
+          },
+          "name": { "type": "string", "description": "New file name" }
+        },
+        "required": ["parentReference"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{itemId}/copy"
+    },
+    {
+      "id": "move-file",
+      "name": "Move File",
+      "description": "Move a file to another location",
+      "method": "PATCH",
+      "path": "/me/drive/items/{itemId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "parentReference": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Parent folder ID" },
+              "driveId": { "type": "string", "description": "Drive ID" },
+              "path": { "type": "string", "description": "Parent folder path" }
+            },
+            "required": true
+          },
+          "name": { "type": "string", "description": "New file name" }
+        },
+        "required": ["parentReference"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{itemId}"
+    },
+    {
+      "id": "create-folder",
+      "name": "Create Folder",
+      "description": "Create a new folder",
+      "method": "POST",
+      "path": "/me/drive/items/{parentItemId}/children",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Folder name" },
+          "folder": {
+            "type": "object",
+            "description": "Folder object (empty object)",
+            "additionalProperties": false
+          },
+          "@microsoft.graph.conflictBehavior": { "type": "string", "enum": ["rename", "replace", "fail"], "default": "rename", "description": "Conflict behavior" }
+        },
+        "required": ["name", "folder"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{parentItemId}/children"
+    },
+    {
+      "id": "create-root-folder",
+      "name": "Create Root Folder",
+      "description": "Create a folder in root",
+      "method": "POST",
+      "path": "/me/drive/root/children",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Folder name" },
+          "folder": {
+            "type": "object",
+            "description": "Folder object",
+            "additionalProperties": false
+          },
+          "@microsoft.graph.conflictBehavior": { "type": "string", "enum": ["rename", "replace", "fail"], "default": "rename" }
+        },
+        "required": ["name", "folder"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/root/children"
+    },
+    {
+      "id": "get-folder",
+      "name": "Get Folder",
+      "description": "Get folder metadata by ID",
+      "method": "GET",
+      "path": "/me/drive/items/{itemId}",
+      "headers": {},
+      "queryParams": {
+        "$select": "id,name,webUrl,createdDateTime,lastModifiedDateTime"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{itemId}"
+    },
+    {
+      "id": "search-files",
+      "name": "Search Files",
+      "description": "Search for files and folders",
+      "method": "GET",
+      "path": "/me/drive/root/search(q='{searchQuery}')",
+      "headers": {},
+      "queryParams": {
+        "$top": "100"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/root/search(q='{searchQuery}')"
+    },
+    {
+      "id": "create-sharing-link",
+      "name": "Create Sharing Link",
+      "description": "Create a sharing link for a file or folder",
+      "method": "POST",
+      "path": "/me/drive/items/{itemId}/createLink",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["view", "edit", "embed"], "required": true, "description": "Link type" },
+          "scope": { "type": "string", "enum": ["anonymous", "organization"], "default": "anonymous", "description": "Link scope" }
+        },
+        "required": ["type"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive/items/{itemId}/createLink"
+    },
+    {
+      "id": "get-drive",
+      "name": "Get Drive",
+      "description": "Get drive information",
+      "method": "GET",
+      "path": "/me/drive",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/drive"
+    }
+  ]
+}
+

@@ -1,0 +1,495 @@
+{
+  "id": "keap",
+  "name": "Keap (Infusionsoft)",
+  "icon": "💼",
+  "logoUrl": "https://cdn.simpleicons.org/keap/00A9E0",
+  "description": "CRM and marketing automation platform",
+  "baseUrl": "https://api.infusionsoft.com/crm/rest/v1",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "tokenUrl": "https://api.infusionsoft.com/token",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {accessToken}",
+    "secretKey": "KEAP_CLIENT_SECRET",
+    "clientIdSecretKey": "KEAP_CLIENT_ID"
+  },
+  "endpoints": [
+    {
+      "id": "create-company",
+      "name": "Create Company",
+      "description": "Create a new company",
+      "method": "POST",
+      "path": "/companies",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "company_name": { "type": "string", "required": true, "description": "Company name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "website": { "type": "string", "format": "uri", "description": "Website URL" },
+          "address": {
+            "type": "object",
+            "properties": {
+              "street_address1": { "type": "string" },
+              "street_address2": { "type": "string" },
+              "city": { "type": "string" },
+              "state": { "type": "string" },
+              "postal_code": { "type": "string" },
+              "country": { "type": "string" }
+            }
+          },
+          "custom_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "number", "required": true },
+                "content": { "type": "string", "required": true }
+              }
+            }
+          }
+        },
+        "required": ["company_name"]
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/companies"
+    },
+    {
+      "id": "get-company",
+      "name": "Get Company",
+      "description": "Get company details by ID",
+      "method": "GET",
+      "path": "/companies/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/companies/{id}"
+    },
+    {
+      "id": "list-companies",
+      "name": "List Companies",
+      "description": "List all companies",
+      "method": "GET",
+      "path": "/companies",
+      "headers": {},
+      "queryParams": {
+        "limit": "1000",
+        "offset": "0"
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/companies"
+    },
+    {
+      "id": "update-company",
+      "name": "Update Company",
+      "description": "Update an existing company",
+      "method": "PATCH",
+      "path": "/companies/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "company_name": { "type": "string", "description": "Company name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "website": { "type": "string", "format": "uri", "description": "Website URL" }
+        }
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/companies/{id}"
+    },
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/contacts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "given_name": { "type": "string", "description": "First name" },
+          "family_name": { "type": "string", "description": "Last name" },
+          "email_addresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email", "required": true },
+                "field": { "type": "string", "enum": ["EMAIL1", "EMAIL2", "EMAIL3"], "default": "EMAIL1" }
+              },
+              "required": ["email"]
+            }
+          },
+          "phone_numbers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "number": { "type": "string", "required": true },
+                "field": { "type": "string", "enum": ["PHONE1", "PHONE2", "PHONE3", "PHONE4", "PHONE5"], "default": "PHONE1" }
+              },
+              "required": ["number"]
+            }
+          },
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": { "type": "string", "enum": ["BILLING", "SHIPPING", "OTHER"], "default": "BILLING" },
+                "street_address1": { "type": "string" },
+                "street_address2": { "type": "string" },
+                "city": { "type": "string" },
+                "state": { "type": "string" },
+                "postal_code": { "type": "string" },
+                "country": { "type": "string" }
+              }
+            }
+          },
+          "company": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "number", "required": true }
+            }
+          },
+          "custom_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "number", "required": true },
+                "content": { "type": "string", "required": true }
+              }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact details by ID",
+      "method": "GET",
+      "path": "/contacts/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/contacts/{id}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/contacts",
+      "headers": {},
+      "queryParams": {
+        "limit": "1000",
+        "offset": "0"
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update an existing contact",
+      "method": "PATCH",
+      "path": "/contacts/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "given_name": { "type": "string", "description": "First name" },
+          "family_name": { "type": "string", "description": "Last name" },
+          "email_addresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email", "required": true },
+                "field": { "type": "string", "enum": ["EMAIL1", "EMAIL2", "EMAIL3"] }
+              }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/contacts/{id}"
+    },
+    {
+      "id": "create-contact-note",
+      "name": "Create Contact Note",
+      "description": "Create a note for a contact",
+      "method": "POST",
+      "path": "/contacts/{contactId}/notes",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "contact_id": { "type": "number", "required": true },
+          "body": { "type": "string", "required": true, "description": "Note content" },
+          "user_id": { "type": "number", "description": "User ID who created the note" }
+        },
+        "required": ["contact_id", "body"]
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/contacts/{contactId}/notes"
+    },
+    {
+      "id": "get-contact-note",
+      "name": "Get Contact Note",
+      "description": "Get a contact note by ID",
+      "method": "GET",
+      "path": "/contacts/{contactId}/notes/{noteId}",
+      "headers": {},
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/contacts/{contactId}/notes/{noteId}"
+    },
+    {
+      "id": "list-contact-notes",
+      "name": "List Contact Notes",
+      "description": "List all notes for a contact",
+      "method": "GET",
+      "path": "/contacts/{contactId}/notes",
+      "headers": {},
+      "queryParams": {
+        "limit": "1000",
+        "offset": "0"
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/contacts/{contactId}/notes"
+    },
+    {
+      "id": "update-contact-note",
+      "name": "Update Contact Note",
+      "description": "Update a contact note",
+      "method": "PATCH",
+      "path": "/contacts/{contactId}/notes/{noteId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "body": { "type": "string", "description": "Note content" }
+        }
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/contacts/{contactId}/notes/{noteId}"
+    },
+    {
+      "id": "add-contact-tag",
+      "name": "Add Contact Tag",
+      "description": "Add a tag to a contact",
+      "method": "POST",
+      "path": "/contacts/{contactId}/tags/{tagId}",
+      "headers": {},
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/contacts/{contactId}/tags/{tagId}"
+    },
+    {
+      "id": "remove-contact-tag",
+      "name": "Remove Contact Tag",
+      "description": "Remove a tag from a contact",
+      "method": "DELETE",
+      "path": "/contacts/{contactId}/tags/{tagId}",
+      "headers": {},
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/contacts/{contactId}/tags/{tagId}"
+    },
+    {
+      "id": "create-order",
+      "name": "Create Ecommerce Order",
+      "description": "Create a new e-commerce order",
+      "method": "POST",
+      "path": "/orders",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "contact_id": { "type": "number", "required": true, "description": "Contact ID" },
+          "order_date": { "type": "string", "format": "date-time", "required": true, "description": "Order date" },
+          "order_type": { "type": "string", "enum": ["Online", "Offline"], "default": "Online", "description": "Order type" },
+          "order_title": { "type": "string", "description": "Order title" },
+          "order_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_id": { "type": "number", "required": true },
+                "quantity": { "type": "number", "required": true },
+                "price": { "type": "number", "description": "Item price" },
+                "description": { "type": "string" }
+              },
+              "required": ["product_id", "quantity"]
+            },
+            "required": true
+          },
+          "shipping_address": {
+            "type": "object",
+            "properties": {
+              "street_address1": { "type": "string" },
+              "city": { "type": "string" },
+              "state": { "type": "string" },
+              "postal_code": { "type": "string" },
+              "country": { "type": "string" }
+            }
+          }
+        },
+        "required": ["contact_id", "order_date", "order_items"]
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/orders"
+    },
+    {
+      "id": "get-order",
+      "name": "Get Ecommerce Order",
+      "description": "Get order details by ID",
+      "method": "GET",
+      "path": "/orders/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/orders/{id}"
+    },
+    {
+      "id": "list-orders",
+      "name": "List Ecommerce Orders",
+      "description": "List all orders",
+      "method": "GET",
+      "path": "/orders",
+      "headers": {},
+      "queryParams": {
+        "limit": "1000",
+        "offset": "0"
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/orders"
+    },
+    {
+      "id": "update-order",
+      "name": "Update Ecommerce Order",
+      "description": "Update an existing order",
+      "method": "PATCH",
+      "path": "/orders/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "order_title": { "type": "string", "description": "Order title" }
+        }
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/orders/{id}"
+    },
+    {
+      "id": "create-product",
+      "name": "Create Ecommerce Product",
+      "description": "Create a new e-commerce product",
+      "method": "POST",
+      "path": "/products",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "product_name": { "type": "string", "required": true, "description": "Product name" },
+          "product_price": { "type": "number", "required": true, "description": "Product price" },
+          "sku": { "type": "string", "description": "SKU" },
+          "description": { "type": "string", "description": "Product description" },
+          "status": { "type": "string", "enum": ["ACTIVE", "INACTIVE"], "default": "ACTIVE", "description": "Product status" }
+        },
+        "required": ["product_name", "product_price"]
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/products"
+    },
+    {
+      "id": "get-product",
+      "name": "Get Ecommerce Product",
+      "description": "Get product details by ID",
+      "method": "GET",
+      "path": "/products/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/products/{id}"
+    },
+    {
+      "id": "list-products",
+      "name": "List Ecommerce Products",
+      "description": "List all products",
+      "method": "GET",
+      "path": "/products",
+      "headers": {},
+      "queryParams": {
+        "limit": "1000",
+        "offset": "0"
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/products"
+    },
+    {
+      "id": "update-product",
+      "name": "Update Ecommerce Product",
+      "description": "Update an existing product",
+      "method": "PATCH",
+      "path": "/products/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "product_name": { "type": "string", "description": "Product name" },
+          "product_price": { "type": "number", "description": "Product price" },
+          "status": { "type": "string", "enum": ["ACTIVE", "INACTIVE"], "description": "Product status" }
+        }
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/products/{id}"
+    },
+    {
+      "id": "send-email",
+      "name": "Send Email",
+      "description": "Send an email",
+      "method": "POST",
+      "path": "/emails",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "contact_id": { "type": "number", "required": true, "description": "Contact ID" },
+          "subject": { "type": "string", "required": true, "description": "Email subject" },
+          "body": { "type": "string", "required": true, "description": "Email body (HTML or plain text)" },
+          "email_type": { "type": "string", "enum": ["HTML", "TEXT"], "default": "HTML", "description": "Email type" }
+        },
+        "required": ["contact_id", "subject", "body"]
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/emails"
+    },
+    {
+      "id": "upload-file",
+      "name": "Upload File",
+      "description": "Upload a file",
+      "method": "POST",
+      "path": "/files",
+      "headers": {
+        "Content-Type": "multipart/form-data"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "file_name": { "type": "string", "required": true, "description": "File name" },
+          "file_data": { "type": "string", "required": true, "description": "Base64 encoded file data" },
+          "contact_id": { "type": "number", "description": "Associated contact ID" }
+        },
+        "required": ["file_name", "file_data"]
+      },
+      "urlTemplate": "https://api.infusionsoft.com/crm/rest/v1/files"
+    }
+  ]
+}
+

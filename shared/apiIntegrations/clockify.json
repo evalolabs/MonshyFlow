@@ -1,0 +1,439 @@
+{
+  "id": "clockify",
+  "name": "Clockify",
+  "icon": "⏰",
+  "logoUrl": "https://cdn.simpleicons.org/clockify/03A9F4",
+  "description": "Free time tracking software",
+  "baseUrl": "https://api.clockify.me/api/v1",
+  "color": {
+    "bg": "from-cyan-100 to-blue-100",
+    "border": "border-cyan-500",
+    "icon": "text-cyan-700",
+    "handle": "bg-cyan-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "X-Api-Key",
+    "headerFormat": "{apiKey}",
+    "secretKey": "CLOCKIFY_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-client",
+      "name": "Create Client",
+      "description": "Create a new client",
+      "method": "POST",
+      "path": "/workspaces/{workspaceId}/clients",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Client name" },
+          "note": { "type": "string", "description": "Client notes" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/clients"
+    },
+    {
+      "id": "get-client",
+      "name": "Get Client",
+      "description": "Get client details by ID",
+      "method": "GET",
+      "path": "/workspaces/{workspaceId}/clients/{clientId}",
+      "headers": {},
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/clients/{clientId}"
+    },
+    {
+      "id": "list-clients",
+      "name": "List Clients",
+      "description": "List all clients in a workspace",
+      "method": "GET",
+      "path": "/workspaces/{workspaceId}/clients",
+      "headers": {},
+      "queryParams": {
+        "name": "{name}",
+        "archived": "false"
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/clients"
+    },
+    {
+      "id": "update-client",
+      "name": "Update Client",
+      "description": "Update an existing client",
+      "method": "PUT",
+      "path": "/workspaces/{workspaceId}/clients/{clientId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Client name" },
+          "note": { "type": "string", "description": "Client notes" },
+          "archived": { "type": "boolean", "description": "Is archived" }
+        }
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/clients/{clientId}"
+    },
+    {
+      "id": "delete-client",
+      "name": "Delete Client",
+      "description": "Delete a client",
+      "method": "DELETE",
+      "path": "/workspaces/{workspaceId}/clients/{clientId}",
+      "headers": {},
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/clients/{clientId}"
+    },
+    {
+      "id": "create-project",
+      "name": "Create Project",
+      "description": "Create a new project",
+      "method": "POST",
+      "path": "/workspaces/{workspaceId}/projects",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Project name" },
+          "clientId": { "type": "string", "description": "Client ID" },
+          "isPublic": { "type": "boolean", "default": false, "description": "Is public" },
+          "color": { "type": "string", "description": "Project color (hex code)" },
+          "note": { "type": "string", "description": "Project notes" },
+          "billable": { "type": "boolean", "default": false, "description": "Is billable" },
+          "hourlyRate": {
+            "type": "object",
+            "properties": {
+              "amount": { "type": "number", "required": true },
+              "currency": { "type": "string", "default": "USD" }
+            }
+          },
+          "costRate": {
+            "type": "object",
+            "properties": {
+              "amount": { "type": "number", "required": true },
+              "currency": { "type": "string", "default": "USD" }
+            }
+          },
+          "budgetEstimate": { "type": "number", "description": "Budget estimate" },
+          "timeEstimate": { "type": "number", "description": "Time estimate in seconds" },
+          "status": { "type": "string", "enum": ["ACTIVE", "ARCHIVED", "DONE"], "default": "ACTIVE", "description": "Project status" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/projects"
+    },
+    {
+      "id": "get-project",
+      "name": "Get Project",
+      "description": "Get project details by ID",
+      "method": "GET",
+      "path": "/workspaces/{workspaceId}/projects/{projectId}",
+      "headers": {},
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/projects/{projectId}"
+    },
+    {
+      "id": "list-projects",
+      "name": "List Projects",
+      "description": "List all projects in a workspace",
+      "method": "GET",
+      "path": "/workspaces/{workspaceId}/projects",
+      "headers": {},
+      "queryParams": {
+        "name": "{name}",
+        "archived": "false",
+        "clients": "{clientIds}",
+        "contains-client": "{containsClient}",
+        "page": "1",
+        "page-size": "50"
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/projects"
+    },
+    {
+      "id": "update-project",
+      "name": "Update Project",
+      "description": "Update an existing project",
+      "method": "PUT",
+      "path": "/workspaces/{workspaceId}/projects/{projectId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Project name" },
+          "clientId": { "type": "string", "description": "Client ID" },
+          "isPublic": { "type": "boolean", "description": "Is public" },
+          "color": { "type": "string", "description": "Project color" },
+          "note": { "type": "string", "description": "Project notes" },
+          "billable": { "type": "boolean", "description": "Is billable" },
+          "status": { "type": "string", "enum": ["ACTIVE", "ARCHIVED", "DONE"] }
+        }
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/projects/{projectId}"
+    },
+    {
+      "id": "delete-project",
+      "name": "Delete Project",
+      "description": "Delete a project",
+      "method": "DELETE",
+      "path": "/workspaces/{workspaceId}/projects/{projectId}",
+      "headers": {},
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/projects/{projectId}"
+    },
+    {
+      "id": "create-tag",
+      "name": "Create Tag",
+      "description": "Create a new tag",
+      "method": "POST",
+      "path": "/workspaces/{workspaceId}/tags",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Tag name" },
+          "archived": { "type": "boolean", "default": false, "description": "Is archived" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/tags"
+    },
+    {
+      "id": "get-tag",
+      "name": "Get Tag",
+      "description": "Get tag details by ID",
+      "method": "GET",
+      "path": "/workspaces/{workspaceId}/tags/{tagId}",
+      "headers": {},
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/tags/{tagId}"
+    },
+    {
+      "id": "list-tags",
+      "name": "List Tags",
+      "description": "List all tags in a workspace",
+      "method": "GET",
+      "path": "/workspaces/{workspaceId}/tags",
+      "headers": {},
+      "queryParams": {
+        "archived": "false",
+        "name": "{name}"
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/tags"
+    },
+    {
+      "id": "update-tag",
+      "name": "Update Tag",
+      "description": "Update an existing tag",
+      "method": "PUT",
+      "path": "/workspaces/{workspaceId}/tags/{tagId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Tag name" },
+          "archived": { "type": "boolean", "description": "Is archived" }
+        }
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/tags/{tagId}"
+    },
+    {
+      "id": "delete-tag",
+      "name": "Delete Tag",
+      "description": "Delete a tag",
+      "method": "DELETE",
+      "path": "/workspaces/{workspaceId}/tags/{tagId}",
+      "headers": {},
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/tags/{tagId}"
+    },
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new task in a project",
+      "method": "POST",
+      "path": "/workspaces/{workspaceId}/projects/{projectId}/tasks",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Task name" },
+          "assigneeIds": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Assignee user IDs"
+          },
+          "estimate": { "type": "number", "description": "Time estimate in seconds" },
+          "status": { "type": "string", "enum": ["ACTIVE", "DONE"], "default": "ACTIVE", "description": "Task status" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/projects/{projectId}/tasks"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get task details by ID",
+      "method": "GET",
+      "path": "/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}",
+      "headers": {},
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}"
+    },
+    {
+      "id": "list-tasks",
+      "name": "List Tasks",
+      "description": "List all tasks in a project",
+      "method": "GET",
+      "path": "/workspaces/{workspaceId}/projects/{projectId}/tasks",
+      "headers": {},
+      "queryParams": {
+        "is-active": "true",
+        "name": "{name}",
+        "page": "1",
+        "page-size": "50"
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/projects/{projectId}/tasks"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update an existing task",
+      "method": "PUT",
+      "path": "/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Task name" },
+          "assigneeIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "estimate": { "type": "number", "description": "Time estimate in seconds" },
+          "status": { "type": "string", "enum": ["ACTIVE", "DONE"] }
+        }
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}"
+    },
+    {
+      "id": "delete-task",
+      "name": "Delete Task",
+      "description": "Delete a task",
+      "method": "DELETE",
+      "path": "/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}",
+      "headers": {},
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}"
+    },
+    {
+      "id": "create-time-entry",
+      "name": "Create Time Entry",
+      "description": "Create a new time entry",
+      "method": "POST",
+      "path": "/workspaces/{workspaceId}/time-entries",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "start": { "type": "string", "format": "date-time", "required": true, "description": "Start time (ISO 8601)" },
+          "billable": { "type": "boolean", "default": false, "description": "Is billable" },
+          "description": { "type": "string", "description": "Description" },
+          "projectId": { "type": "string", "description": "Project ID" },
+          "taskId": { "type": "string", "description": "Task ID" },
+          "tagIds": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tag IDs"
+          },
+          "end": { "type": "string", "format": "date-time", "description": "End time (ISO 8601)" },
+          "timeInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "string", "format": "date-time", "required": true },
+              "end": { "type": "string", "format": "date-time" },
+              "duration": { "type": "string", "description": "Duration (e.g., 'PT1H30M' for 1 hour 30 minutes)" }
+            },
+            "required": ["start"]
+          }
+        },
+        "required": ["start"]
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/time-entries"
+    },
+    {
+      "id": "get-time-entry",
+      "name": "Get Time Entry",
+      "description": "Get time entry details by ID",
+      "method": "GET",
+      "path": "/workspaces/{workspaceId}/time-entries/{timeEntryId}",
+      "headers": {},
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/time-entries/{timeEntryId}"
+    },
+    {
+      "id": "list-time-entries",
+      "name": "List Time Entries",
+      "description": "List all time entries in a workspace",
+      "method": "GET",
+      "path": "/workspaces/{workspaceId}/time-entries",
+      "headers": {},
+      "queryParams": {
+        "start": "{startDate}",
+        "end": "{endDate}",
+        "project": "{projectId}",
+        "task": "{taskId}",
+        "tags": "{tagIds}",
+        "in-progress": "{inProgress}",
+        "page": "1",
+        "page-size": "50"
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/time-entries"
+    },
+    {
+      "id": "update-time-entry",
+      "name": "Update Time Entry",
+      "description": "Update an existing time entry",
+      "method": "PUT",
+      "path": "/workspaces/{workspaceId}/time-entries/{timeEntryId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "start": { "type": "string", "format": "date-time", "description": "Start time" },
+          "billable": { "type": "boolean", "description": "Is billable" },
+          "description": { "type": "string", "description": "Description" },
+          "projectId": { "type": "string", "description": "Project ID" },
+          "taskId": { "type": "string", "description": "Task ID" },
+          "tagIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "end": { "type": "string", "format": "date-time", "description": "End time" }
+        }
+      },
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/time-entries/{timeEntryId}"
+    },
+    {
+      "id": "delete-time-entry",
+      "name": "Delete Time Entry",
+      "description": "Delete a time entry",
+      "method": "DELETE",
+      "path": "/workspaces/{workspaceId}/time-entries/{timeEntryId}",
+      "headers": {},
+      "urlTemplate": "https://api.clockify.me/api/v1/workspaces/{workspaceId}/time-entries/{timeEntryId}"
+    }
+  ]
+}
+

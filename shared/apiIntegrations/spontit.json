@@ -1,0 +1,88 @@
+{
+  "id": "spontit",
+  "name": "Spontit",
+  "icon": "📢",
+  "logoUrl": "https://cdn.simpleicons.org/spontit/000000",
+  "description": "Push notification service",
+  "baseUrl": "https://api.spontit.com/v3",
+  "color": {
+    "bg": "from-zinc-100 to-slate-100",
+    "border": "border-zinc-500",
+    "icon": "text-zinc-700",
+    "handle": "bg-zinc-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "X-Authorization",
+    "secretKey": "SPONTIT_API_KEY",
+    "usernameSecretKey": "SPONTIT_USERNAME",
+    "note": "Requires both X-Authorization header (API Key) and X-UserId header (Username)."
+  },
+  "endpoints": [
+    {
+      "id": "create-push",
+      "name": "Create Push",
+      "description": "Send a push notification",
+      "method": "POST",
+      "path": "/push",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Authorization": "{apiKey}",
+        "X-UserId": "{username}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "required": true,
+            "description": "Notification title"
+          },
+          "body": {
+            "type": "string",
+            "required": true,
+            "description": "Notification body"
+          },
+          "channel": {
+            "type": "string",
+            "description": "Channel name (optional, defaults to main channel)"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to open when notification is clicked"
+          },
+          "image": {
+            "type": "string",
+            "format": "uri",
+            "description": "Image URL to display in notification"
+          },
+          "sound": {
+            "type": "string",
+            "enum": ["default", "none"],
+            "default": "default",
+            "description": "Notification sound"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["low", "normal", "high"],
+            "default": "normal",
+            "description": "Notification priority"
+          },
+          "ttl": {
+            "type": "integer",
+            "description": "Time to live in seconds"
+          },
+          "schedule": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Schedule notification time (ISO 8601)"
+          }
+        },
+        "required": ["title", "body"]
+      },
+      "urlTemplate": "https://api.spontit.com/v3/push"
+    }
+  ]
+}
+

@@ -1,0 +1,206 @@
+{
+  "id": "box",
+  "name": "Box",
+  "icon": "📦",
+  "logoUrl": "https://cdn.simpleicons.org/box/0061D5",
+  "description": "Cloud content management and file sharing service",
+  "baseUrl": "https://api.box.com/2.0",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "BOX_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "copy-file",
+      "name": "Copy File",
+      "description": "Copy a file",
+      "method": "POST",
+      "path": "/files/{fileId}/copy",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "New file name" },
+          "parent": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "required": true, "description": "Parent folder ID" }
+            },
+            "required": ["id"]
+          }
+        },
+        "required": ["parent"]
+      },
+      "urlTemplate": "https://api.box.com/2.0/files/{fileId}/copy"
+    },
+    {
+      "id": "get-file",
+      "name": "Get File",
+      "description": "Get file metadata by ID",
+      "method": "GET",
+      "path": "/files/{fileId}",
+      "headers": {},
+      "queryParams": {
+        "fields": "*"
+      },
+      "urlTemplate": "https://api.box.com/2.0/files/{fileId}"
+    },
+    {
+      "id": "download-file",
+      "name": "Download File",
+      "description": "Download file content",
+      "method": "GET",
+      "path": "/files/{fileId}/content",
+      "headers": {},
+      "urlTemplate": "https://api.box.com/2.0/files/{fileId}/content"
+    },
+    {
+      "id": "delete-file",
+      "name": "Delete File",
+      "description": "Delete a file",
+      "method": "DELETE",
+      "path": "/files/{fileId}",
+      "headers": {},
+      "queryParams": {
+        "if-match": "{ifMatch}"
+      },
+      "urlTemplate": "https://api.box.com/2.0/files/{fileId}"
+    },
+    {
+      "id": "search-files",
+      "name": "Search Files",
+      "description": "Search for files and folders",
+      "method": "GET",
+      "path": "/search",
+      "headers": {},
+      "queryParams": {
+        "query": "{query}",
+        "type": "file",
+        "limit": "30",
+        "offset": "0",
+        "mdfilters": "{mdfilters}",
+        "content_types": "{contentTypes}",
+        "file_extensions": "{fileExtensions}"
+      },
+      "urlTemplate": "https://api.box.com/2.0/search"
+    },
+    {
+      "id": "upload-file",
+      "name": "Upload File",
+      "description": "Upload a new file",
+      "method": "POST",
+      "path": "/files/content",
+      "headers": {
+        "Content-Type": "multipart/form-data"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "attributes": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "required": true, "description": "File name" },
+              "parent": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "required": true, "description": "Parent folder ID" }
+                },
+                "required": ["id"]
+              },
+              "content_created_at": { "type": "string", "format": "date-time", "description": "Content creation date" },
+              "content_modified_at": { "type": "string", "format": "date-time", "description": "Content modification date" }
+            },
+            "required": ["name", "parent"]
+          },
+          "file": { "type": "string", "format": "binary", "required": true, "description": "File content (binary data)" }
+        },
+        "required": ["attributes", "file"]
+      },
+      "urlTemplate": "https://api.box.com/2.0/files/content"
+    },
+    {
+      "id": "create-folder",
+      "name": "Create Folder",
+      "description": "Create a new folder",
+      "method": "POST",
+      "path": "/folders",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Folder name" },
+          "parent": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "required": true, "description": "Parent folder ID (0 for root)" }
+            },
+            "required": ["id"]
+          },
+          "folder_upload_email": {
+            "type": "object",
+            "properties": {
+              "access": { "type": "string", "enum": ["open", "collaborators"], "description": "Upload email access" }
+            }
+          },
+          "sync_state": { "type": "string", "enum": ["synced", "not_synced", "partially_synced"], "description": "Sync state" }
+        },
+        "required": ["name", "parent"]
+      },
+      "urlTemplate": "https://api.box.com/2.0/folders"
+    },
+    {
+      "id": "get-folder",
+      "name": "Get Folder",
+      "description": "Get folder metadata by ID",
+      "method": "GET",
+      "path": "/folders/{folderId}",
+      "headers": {},
+      "queryParams": {
+        "fields": "*"
+      },
+      "urlTemplate": "https://api.box.com/2.0/folders/{folderId}"
+    },
+    {
+      "id": "delete-folder",
+      "name": "Delete Folder",
+      "description": "Delete a folder",
+      "method": "DELETE",
+      "path": "/folders/{folderId}",
+      "headers": {},
+      "queryParams": {
+        "recursive": "false",
+        "if-match": "{ifMatch}"
+      },
+      "urlTemplate": "https://api.box.com/2.0/folders/{folderId}"
+    },
+    {
+      "id": "search-folders",
+      "name": "Search Folders",
+      "description": "Search for folders (same endpoint as files but with type=folder)",
+      "method": "GET",
+      "path": "/search",
+      "headers": {},
+      "queryParams": {
+        "query": "{query}",
+        "type": "folder",
+        "limit": "30",
+        "offset": "0",
+        "mdfilters": "{mdfilters}"
+      },
+      "urlTemplate": "https://api.box.com/2.0/search"
+    }
+  ]
+}
+

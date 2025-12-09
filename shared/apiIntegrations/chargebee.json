@@ -1,0 +1,104 @@
+{
+  "id": "chargebee",
+  "name": "Chargebee",
+  "icon": "💳",
+  "logoUrl": "https://cdn.simpleicons.org/chargebee/6C63FF",
+  "description": "Subscription billing and revenue management",
+  "baseUrl": "https://{accountName}.chargebee.com/api/v2",
+  "color": {
+    "bg": "from-indigo-100 to-violet-100",
+    "border": "border-indigo-500",
+    "icon": "text-indigo-700",
+    "handle": "bg-indigo-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(apiKey:)}",
+    "secretKey": "CHARGEBEE_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-customer",
+      "name": "Create Customer",
+      "description": "Create a new customer",
+      "method": "POST",
+      "path": "/customers",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Customer ID (auto-generated if not provided)" },
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "first_name": { "type": "string", "description": "First name" },
+          "last_name": { "type": "string", "description": "Last name" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "company": { "type": "string", "description": "Company name" },
+          "auto_collection": { "type": "string", "enum": ["on", "off"], "default": "on", "description": "Auto collection setting" },
+          "taxability": { "type": "string", "enum": ["taxable", "exempt"], "default": "taxable", "description": "Taxability" },
+          "exempt_number": { "type": "string", "description": "Tax exemption number" },
+          "meta_data": {
+            "type": "object",
+            "description": "Custom metadata (key-value pairs)",
+            "additionalProperties": true
+          }
+        },
+        "required": ["email"]
+      },
+      "urlTemplate": "https://{accountName}.chargebee.com/api/v2/customers"
+    },
+    {
+      "id": "get-invoice",
+      "name": "Get Invoice",
+      "description": "Get invoice details by ID",
+      "method": "GET",
+      "path": "/invoices/{id}",
+      "headers": {},
+      "urlTemplate": "https://{accountName}.chargebee.com/api/v2/invoices/{id}"
+    },
+    {
+      "id": "list-invoices",
+      "name": "List Invoices",
+      "description": "List all invoices",
+      "method": "GET",
+      "path": "/invoices",
+      "headers": {},
+      "queryParams": {
+        "limit": "100",
+        "offset": "0",
+        "customer_id": "{customerId}",
+        "subscription_id": "{subscriptionId}",
+        "status": "{status}"
+      },
+      "urlTemplate": "https://{accountName}.chargebee.com/api/v2/invoices"
+    },
+    {
+      "id": "get-subscription",
+      "name": "Get Subscription",
+      "description": "Get subscription details by ID",
+      "method": "GET",
+      "path": "/subscriptions/{id}",
+      "headers": {},
+      "urlTemplate": "https://{accountName}.chargebee.com/api/v2/subscriptions/{id}"
+    },
+    {
+      "id": "list-subscriptions",
+      "name": "List Subscriptions",
+      "description": "List all subscriptions",
+      "method": "GET",
+      "path": "/subscriptions",
+      "headers": {},
+      "queryParams": {
+        "limit": "100",
+        "offset": "0",
+        "customer_id": "{customerId}",
+        "plan_id": "{planId}",
+        "status": "{status}"
+      },
+      "urlTemplate": "https://{accountName}.chargebee.com/api/v2/subscriptions"
+    }
+  ]
+}
+

@@ -1,0 +1,266 @@
+{
+  "id": "microsoft-sharepoint",
+  "name": "Microsoft SharePoint",
+  "icon": "📄",
+  "logoUrl": "https://cdn.simpleicons.org/microsoftsharepoint/0078D4",
+  "description": "Collaboration and document management platform",
+  "baseUrl": "https://graph.microsoft.com/v1.0",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {accessToken}",
+    "secretKey": "MICROSOFT_SHAREPOINT_ACCESS_TOKEN",
+    "tokenUrl": "https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token",
+    "clientIdSecretKey": "MICROSOFT_SHAREPOINT_CLIENT_ID",
+    "clientSecretSecretKey": "MICROSOFT_SHAREPOINT_CLIENT_SECRET"
+  },
+  "endpoints": [
+    {
+      "id": "upload-file",
+      "name": "Upload File",
+      "description": "Upload a file to SharePoint",
+      "method": "PUT",
+      "path": "/sites/{siteId}/drive/items/{parentItemId}:/{fileName}:/content",
+      "headers": {
+        "Content-Type": "application/octet-stream"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "content": { "type": "string", "required": true, "description": "Base64 encoded file content or binary data" }
+        },
+        "required": ["content"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/drive/items/{parentItemId}:/{fileName}:/content"
+    },
+    {
+      "id": "download-file",
+      "name": "Download File",
+      "description": "Download a file from SharePoint",
+      "method": "GET",
+      "path": "/sites/{siteId}/drive/items/{itemId}/content",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/drive/items/{itemId}/content"
+    },
+    {
+      "id": "get-file",
+      "name": "Get File",
+      "description": "Get file metadata by ID",
+      "method": "GET",
+      "path": "/sites/{siteId}/drive/items/{itemId}",
+      "headers": {},
+      "queryParams": {
+        "$select": "id,name,size,webUrl,createdDateTime,lastModifiedDateTime"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/drive/items/{itemId}"
+    },
+    {
+      "id": "list-files",
+      "name": "List Files",
+      "description": "List files in a folder",
+      "method": "GET",
+      "path": "/sites/{siteId}/drive/items/{itemId}/children",
+      "headers": {},
+      "queryParams": {
+        "$top": "100",
+        "$filter": "{filter}",
+        "$orderby": "name"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/drive/items/{itemId}/children"
+    },
+    {
+      "id": "update-file",
+      "name": "Update File",
+      "description": "Update file metadata",
+      "method": "PATCH",
+      "path": "/sites/{siteId}/drive/items/{itemId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "File name" },
+          "description": { "type": "string", "description": "File description" }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/drive/items/{itemId}"
+    },
+    {
+      "id": "delete-file",
+      "name": "Delete File",
+      "description": "Delete a file",
+      "method": "DELETE",
+      "path": "/sites/{siteId}/drive/items/{itemId}",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/drive/items/{itemId}"
+    },
+    {
+      "id": "create-folder",
+      "name": "Create Folder",
+      "description": "Create a new folder",
+      "method": "POST",
+      "path": "/sites/{siteId}/drive/items/{parentItemId}/children",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Folder name" },
+          "folder": {
+            "type": "object",
+            "description": "Folder object (empty object)",
+            "additionalProperties": false
+          },
+          "@microsoft.graph.conflictBehavior": { "type": "string", "enum": ["rename", "replace", "fail"], "default": "rename" }
+        },
+        "required": ["name", "folder"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/drive/items/{parentItemId}/children"
+    },
+    {
+      "id": "create-list-item",
+      "name": "Create List Item",
+      "description": "Create a new item in a SharePoint list",
+      "method": "POST",
+      "path": "/sites/{siteId}/lists/{listId}/items",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "object",
+            "description": "List item fields (key-value pairs)",
+            "additionalProperties": {
+              "type": ["string", "number", "boolean", "null"]
+            },
+            "required": true
+          }
+        },
+        "required": ["fields"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{listId}/items"
+    },
+    {
+      "id": "get-list-item",
+      "name": "Get List Item",
+      "description": "Get list item details by ID",
+      "method": "GET",
+      "path": "/sites/{siteId}/lists/{listId}/items/{itemId}",
+      "headers": {},
+      "queryParams": {
+        "$expand": "fields",
+        "$select": "id,fields"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{listId}/items/{itemId}"
+    },
+    {
+      "id": "list-items",
+      "name": "List Items",
+      "description": "List items in a SharePoint list",
+      "method": "GET",
+      "path": "/sites/{siteId}/lists/{listId}/items",
+      "headers": {},
+      "queryParams": {
+        "$top": "100",
+        "$filter": "{filter}",
+        "$orderby": "{orderBy}",
+        "$expand": "fields",
+        "$select": "id,fields"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{listId}/items"
+    },
+    {
+      "id": "update-list-item",
+      "name": "Update List Item",
+      "description": "Update a list item",
+      "method": "PATCH",
+      "path": "/sites/{siteId}/lists/{listId}/items/{itemId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "object",
+            "description": "List item fields to update",
+            "additionalProperties": {
+              "type": ["string", "number", "boolean", "null"]
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{listId}/items/{itemId}"
+    },
+    {
+      "id": "delete-list-item",
+      "name": "Delete List Item",
+      "description": "Delete a list item",
+      "method": "DELETE",
+      "path": "/sites/{siteId}/lists/{listId}/items/{itemId}",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{listId}/items/{itemId}"
+    },
+    {
+      "id": "get-list",
+      "name": "Get List",
+      "description": "Get SharePoint list details by ID",
+      "method": "GET",
+      "path": "/sites/{siteId}/lists/{listId}",
+      "headers": {},
+      "queryParams": {
+        "$select": "id,name,displayName,description"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{listId}"
+    },
+    {
+      "id": "list-lists",
+      "name": "List Lists",
+      "description": "List all lists in a SharePoint site",
+      "method": "GET",
+      "path": "/sites/{siteId}/lists",
+      "headers": {},
+      "queryParams": {
+        "$top": "100",
+        "$select": "id,name,displayName"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}/lists"
+    },
+    {
+      "id": "get-site",
+      "name": "Get Site",
+      "description": "Get SharePoint site details by ID",
+      "method": "GET",
+      "path": "/sites/{siteId}",
+      "headers": {},
+      "queryParams": {
+        "$select": "id,name,displayName,webUrl"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites/{siteId}"
+    },
+    {
+      "id": "search-sites",
+      "name": "Search Sites",
+      "description": "Search for SharePoint sites",
+      "method": "GET",
+      "path": "/sites",
+      "headers": {},
+      "queryParams": {
+        "$search": "{searchQuery}",
+        "$top": "100"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/sites"
+    }
+  ]
+}
+

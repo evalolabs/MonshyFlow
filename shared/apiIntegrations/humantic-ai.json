@@ -1,0 +1,47 @@
+{
+  "id": "humantic-ai",
+  "name": "Humantic AI",
+  "icon": "🧠",
+  "logoUrl": "https://cdn.simpleicons.org/humanticai/000000",
+  "description": "Personality profiling based on text data",
+  "baseUrl": "https://api.humantic.ai/v1",
+  "color": {
+    "bg": "from-indigo-100 to-blue-100",
+    "border": "border-indigo-500",
+    "icon": "text-indigo-700",
+    "handle": "bg-indigo-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "secretKey": "HUMANTICAI_API_KEY",
+    "queryParamName": "apikey",
+    "note": "API Key is sent as query parameter 'apikey'."
+  },
+  "endpoints": [
+    {
+      "id": "get-user-profile",
+      "name": "Get User Profile",
+      "description": "Get personality profile for a user",
+      "method": "GET",
+      "path": "/user-profile",
+      "queryParams": {
+        "apikey": { "type": "string", "required": true, "description": "API key" },
+        "userid": { "type": "string", "required": true, "description": "User ID" },
+        "version": {
+          "type": "string",
+          "enum": ["v1", "v2", "v3"],
+          "default": "v2",
+          "description": "Profile version"
+        },
+        "persona": {
+          "type": "string",
+          "enum": ["sales", "marketing", "hr", "general"],
+          "default": "general",
+          "description": "Persona type"
+        }
+      },
+      "urlTemplate": "https://api.humantic.ai/v1/user-profile"
+    }
+  ]
+}
+

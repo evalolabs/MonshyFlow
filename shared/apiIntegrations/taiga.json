@@ -1,0 +1,436 @@
+{
+  "id": "taiga",
+  "name": "Taiga",
+  "icon": "🎯",
+  "logoUrl": "https://cdn.simpleicons.org/taiga/444444",
+  "description": "Project management platform for agile teams",
+  "baseUrl": "https://api.taiga.io/api/v1",
+  "color": {
+    "bg": "from-gray-100 to-slate-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "TAIGA_SESSION_TOKEN",
+    "usernameSecretKey": "TAIGA_USERNAME",
+    "note": "Host should be provided in baseUrl placeholder {host} or as TAIGA_BASE_URL secret key for self-hosted instances. Session token is obtained by authenticating with username and password via /auth endpoint."
+  },
+  "endpoints": [
+    {
+      "id": "create-issue",
+      "name": "Create Issue",
+      "description": "Create a new issue",
+      "method": "POST",
+      "path": "/issues",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "required": true, "description": "Issue subject" },
+          "description": { "type": "string", "description": "Issue description" },
+          "project": { "type": "integer", "required": true, "description": "Project ID" },
+          "status": { "type": "integer", "description": "Status ID" },
+          "priority": { "type": "integer", "description": "Priority ID" },
+          "severity": { "type": "integer", "description": "Severity ID" },
+          "type": { "type": "integer", "description": "Type ID" },
+          "assigned_to": { "type": "integer", "description": "Assigned user ID" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "watchers": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Watcher user IDs"
+          }
+        },
+        "required": ["subject", "project"]
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/issues"
+    },
+    {
+      "id": "get-issue",
+      "name": "Get Issue",
+      "description": "Get issue by ID",
+      "method": "GET",
+      "path": "/issues/{id}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/issues/{id}"
+    },
+    {
+      "id": "list-issues",
+      "name": "List Issues",
+      "description": "List all issues",
+      "method": "GET",
+      "path": "/issues",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "project": { "type": "integer", "description": "Filter by project ID" },
+        "assigned_to": { "type": "integer", "description": "Filter by assigned user ID" },
+        "status": { "type": "integer", "description": "Filter by status ID" }
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/issues"
+    },
+    {
+      "id": "update-issue",
+      "name": "Update Issue",
+      "description": "Update an issue",
+      "method": "PATCH",
+      "path": "/issues/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "description": "Issue subject" },
+          "description": { "type": "string", "description": "Issue description" },
+          "status": { "type": "integer", "description": "Status ID" },
+          "priority": { "type": "integer", "description": "Priority ID" },
+          "severity": { "type": "integer", "description": "Severity ID" },
+          "type": { "type": "integer", "description": "Type ID" },
+          "assigned_to": { "type": "integer", "description": "Assigned user ID" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "watchers": {
+            "type": "array",
+            "items": { "type": "integer" }
+          }
+        }
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/issues/{id}"
+    },
+    {
+      "id": "delete-issue",
+      "name": "Delete Issue",
+      "description": "Delete an issue",
+      "method": "DELETE",
+      "path": "/issues/{id}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/issues/{id}"
+    },
+    {
+      "id": "create-user-story",
+      "name": "Create User Story",
+      "description": "Create a new user story",
+      "method": "POST",
+      "path": "/userstories",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "required": true, "description": "User story subject" },
+          "description": { "type": "string", "description": "User story description" },
+          "project": { "type": "integer", "required": true, "description": "Project ID" },
+          "status": { "type": "integer", "description": "Status ID" },
+          "epic": { "type": "integer", "description": "Epic ID" },
+          "sprint": { "type": "integer", "description": "Sprint ID" },
+          "assigned_to": { "type": "integer", "description": "Assigned user ID" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "watchers": {
+            "type": "array",
+            "items": { "type": "integer" }
+          }
+        },
+        "required": ["subject", "project"]
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/userstories"
+    },
+    {
+      "id": "get-user-story",
+      "name": "Get User Story",
+      "description": "Get user story by ID",
+      "method": "GET",
+      "path": "/userstories/{id}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/userstories/{id}"
+    },
+    {
+      "id": "list-user-stories",
+      "name": "List User Stories",
+      "description": "List all user stories",
+      "method": "GET",
+      "path": "/userstories",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "project": { "type": "integer", "description": "Filter by project ID" },
+        "assigned_to": { "type": "integer", "description": "Filter by assigned user ID" },
+        "status": { "type": "integer", "description": "Filter by status ID" },
+        "epic": { "type": "integer", "description": "Filter by epic ID" },
+        "sprint": { "type": "integer", "description": "Filter by sprint ID" }
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/userstories"
+    },
+    {
+      "id": "update-user-story",
+      "name": "Update User Story",
+      "description": "Update a user story",
+      "method": "PATCH",
+      "path": "/userstories/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "type": "integer" },
+          "epic": { "type": "integer" },
+          "sprint": { "type": "integer" },
+          "assigned_to": { "type": "integer" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "watchers": {
+            "type": "array",
+            "items": { "type": "integer" }
+          }
+        }
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/userstories/{id}"
+    },
+    {
+      "id": "delete-user-story",
+      "name": "Delete User Story",
+      "description": "Delete a user story",
+      "method": "DELETE",
+      "path": "/userstories/{id}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/userstories/{id}"
+    },
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new task",
+      "method": "POST",
+      "path": "/tasks",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "required": true, "description": "Task subject" },
+          "description": { "type": "string", "description": "Task description" },
+          "project": { "type": "integer", "required": true, "description": "Project ID" },
+          "status": { "type": "integer", "description": "Status ID" },
+          "user_story": { "type": "integer", "description": "User story ID" },
+          "milestone": { "type": "integer", "description": "Milestone ID" },
+          "assigned_to": { "type": "integer", "description": "Assigned user ID" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "watchers": {
+            "type": "array",
+            "items": { "type": "integer" }
+          }
+        },
+        "required": ["subject", "project"]
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/tasks"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get task by ID",
+      "method": "GET",
+      "path": "/tasks/{id}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/tasks/{id}"
+    },
+    {
+      "id": "list-tasks",
+      "name": "List Tasks",
+      "description": "List all tasks",
+      "method": "GET",
+      "path": "/tasks",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "project": { "type": "integer", "description": "Filter by project ID" },
+        "assigned_to": { "type": "integer", "description": "Filter by assigned user ID" },
+        "status": { "type": "integer", "description": "Filter by status ID" },
+        "user_story": { "type": "integer", "description": "Filter by user story ID" },
+        "milestone": { "type": "integer", "description": "Filter by milestone ID" }
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/tasks"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update a task",
+      "method": "PATCH",
+      "path": "/tasks/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "type": "integer" },
+          "user_story": { "type": "integer" },
+          "milestone": { "type": "integer" },
+          "assigned_to": { "type": "integer" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "watchers": {
+            "type": "array",
+            "items": { "type": "integer" }
+          }
+        }
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/tasks/{id}"
+    },
+    {
+      "id": "delete-task",
+      "name": "Delete Task",
+      "description": "Delete a task",
+      "method": "DELETE",
+      "path": "/tasks/{id}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/tasks/{id}"
+    },
+    {
+      "id": "create-epic",
+      "name": "Create Epic",
+      "description": "Create a new epic",
+      "method": "POST",
+      "path": "/epics",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "required": true, "description": "Epic subject" },
+          "description": { "type": "string", "description": "Epic description" },
+          "project": { "type": "integer", "required": true, "description": "Project ID" },
+          "status": { "type": "integer", "description": "Status ID" },
+          "color": { "type": "string", "description": "Color code" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "watchers": {
+            "type": "array",
+            "items": { "type": "integer" }
+          }
+        },
+        "required": ["subject", "project"]
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/epics"
+    },
+    {
+      "id": "get-epic",
+      "name": "Get Epic",
+      "description": "Get epic by ID",
+      "method": "GET",
+      "path": "/epics/{id}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/epics/{id}"
+    },
+    {
+      "id": "list-epics",
+      "name": "List Epics",
+      "description": "List all epics",
+      "method": "GET",
+      "path": "/epics",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "project": { "type": "integer", "description": "Filter by project ID" },
+        "status": { "type": "integer", "description": "Filter by status ID" }
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/epics"
+    },
+    {
+      "id": "update-epic",
+      "name": "Update Epic",
+      "description": "Update an epic",
+      "method": "PATCH",
+      "path": "/epics/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "type": "integer" },
+          "color": { "type": "string" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "watchers": {
+            "type": "array",
+            "items": { "type": "integer" }
+          }
+        }
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/epics/{id}"
+    },
+    {
+      "id": "delete-epic",
+      "name": "Delete Epic",
+      "description": "Delete an epic",
+      "method": "DELETE",
+      "path": "/epics/{id}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.taiga.io/api/v1/epics/{id}"
+    }
+  ]
+}
+

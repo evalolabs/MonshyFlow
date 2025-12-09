@@ -1,0 +1,128 @@
+{
+  "id": "microsoft-graph-security",
+  "name": "Microsoft Graph Security",
+  "icon": "🔒",
+  "logoUrl": "https://cdn.simpleicons.org/microsoft/0078D4",
+  "description": "Microsoft Graph Security API for security insights and threat intelligence",
+  "baseUrl": "https://graph.microsoft.com/v1.0/security",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "MICROSOFT_GRAPH_SECURITY_OAUTH2_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "get-secure-score",
+      "name": "Get Secure Score",
+      "description": "Get secure score by ID",
+      "method": "GET",
+      "path": "/secureScores/{secureScoreId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/security/secureScores/{secureScoreId}"
+    },
+    {
+      "id": "list-secure-scores",
+      "name": "List Secure Scores",
+      "description": "List all secure scores",
+      "method": "GET",
+      "path": "/secureScores",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "$top": {
+          "type": "integer",
+          "description": "Number of results"
+        },
+        "$skip": {
+          "type": "integer",
+          "description": "Skip for pagination"
+        },
+        "$filter": {
+          "type": "string",
+          "description": "OData filter expression"
+        },
+        "$orderby": {
+          "type": "string",
+          "description": "OData order by expression"
+        },
+        "$select": {
+          "type": "string",
+          "description": "OData select expression (comma-separated fields)"
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/security/secureScores"
+    },
+    {
+      "id": "get-secure-score-control-profile",
+      "name": "Get Secure Score Control Profile",
+      "description": "Get secure score control profile by ID",
+      "method": "GET",
+      "path": "/secureScoreControlProfiles/{secureScoreControlProfileId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/security/secureScoreControlProfiles/{secureScoreControlProfileId}"
+    },
+    {
+      "id": "list-secure-score-control-profiles",
+      "name": "List Secure Score Control Profiles",
+      "description": "List all secure score control profiles",
+      "method": "GET",
+      "path": "/secureScoreControlProfiles",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "$top": {
+          "type": "integer",
+          "description": "Number of results"
+        },
+        "$skip": {
+          "type": "integer",
+          "description": "Skip for pagination"
+        },
+        "$filter": {
+          "type": "string",
+          "description": "OData filter expression"
+        },
+        "$orderby": {
+          "type": "string",
+          "description": "OData order by expression"
+        },
+        "$select": {
+          "type": "string",
+          "description": "OData select expression (comma-separated fields)"
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/security/secureScoreControlProfiles"
+    },
+    {
+      "id": "update-secure-score-control-profile",
+      "name": "Update Secure Score Control Profile",
+      "description": "Update a secure score control profile",
+      "method": "PATCH",
+      "path": "/secureScoreControlProfiles/{secureScoreControlProfileId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Secure score control profile data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/security/secureScoreControlProfiles/{secureScoreControlProfileId}"
+    }
+  ]
+}
+

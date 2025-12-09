@@ -1,0 +1,278 @@
+{
+  "id": "asana",
+  "name": "Asana",
+  "icon": "✅",
+  "logoUrl": "https://cdn.simpleicons.org/asana/F06A6A",
+  "description": "Project management and team collaboration",
+  "baseUrl": "https://app.asana.com/api/1.0",
+  "color": {
+    "bg": "from-pink-100 to-rose-100",
+    "border": "border-pink-500",
+    "icon": "text-pink-700",
+    "handle": "bg-pink-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "ASANA_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new task",
+      "method": "POST",
+      "path": "/tasks",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "required": true, "description": "Task name" },
+              "notes": { "type": "string", "description": "Task notes" },
+              "assignee": { "type": "string", "description": "Assignee user ID or 'me'" },
+              "assignee_section": { "type": "string", "description": "Assignee section ID" },
+              "completed": { "type": "boolean", "description": "Mark task as completed", "default": false },
+              "due_on": { "type": "string", "format": "date", "description": "Due date (YYYY-MM-DD)" },
+              "due_at": { "type": "string", "format": "date-time", "description": "Due date and time (ISO 8601)" },
+              "projects": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Project IDs"
+              },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Tag IDs"
+              },
+              "workspace": { "type": "string", "description": "Workspace ID" }
+            },
+            "required": ["name"]
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://app.asana.com/api/1.0/tasks"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get task details by ID",
+      "method": "GET",
+      "path": "/tasks/{taskId}",
+      "queryParams": {
+        "opt_fields": "name,notes,assignee,due_on,completed,projects,tags",
+        "opt_expand": "projects"
+      },
+      "urlTemplate": "https://app.asana.com/api/1.0/tasks/{taskId}"
+    },
+    {
+      "id": "list-tasks",
+      "name": "List Tasks",
+      "description": "List tasks",
+      "method": "GET",
+      "path": "/tasks",
+      "queryParams": {
+        "assignee": "{assigneeId}",
+        "project": "{projectId}",
+        "workspace": "{workspaceId}",
+        "completed_since": "{timestamp}",
+        "modified_since": "{timestamp}",
+        "opt_fields": "name,notes,assignee,due_on,completed",
+        "limit": "100",
+        "offset": "{offset}"
+      },
+      "urlTemplate": "https://app.asana.com/api/1.0/tasks"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update an existing task",
+      "method": "PUT",
+      "path": "/tasks/{taskId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Task name" },
+              "notes": { "type": "string", "description": "Task notes" },
+              "assignee": { "type": "string", "description": "Assignee user ID or 'me'" },
+              "completed": { "type": "boolean", "description": "Mark task as completed" },
+              "due_on": { "type": "string", "format": "date", "description": "Due date (YYYY-MM-DD)" },
+              "due_at": { "type": "string", "format": "date-time", "description": "Due date and time" },
+              "projects": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://app.asana.com/api/1.0/tasks/{taskId}"
+    },
+    {
+      "id": "delete-task",
+      "name": "Delete Task",
+      "description": "Delete a task",
+      "method": "DELETE",
+      "path": "/tasks/{taskId}",
+      "urlTemplate": "https://app.asana.com/api/1.0/tasks/{taskId}"
+    },
+    {
+      "id": "create-project",
+      "name": "Create Project",
+      "description": "Create a new project",
+      "method": "POST",
+      "path": "/projects",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "required": true, "description": "Project name" },
+              "notes": { "type": "string", "description": "Project notes" },
+              "workspace": { "type": "string", "required": true, "description": "Workspace ID" },
+              "team": { "type": "string", "description": "Team ID" },
+              "color": { "type": "string", "enum": ["dark-pink", "dark-green", "dark-blue", "dark-red", "dark-teal", "dark-brown", "dark-orange", "dark-purple", "dark-warm-gray", "light-pink", "light-green", "light-blue", "light-red", "light-teal", "light-brown", "light-orange", "light-purple", "light-warm-gray"], "description": "Project color" },
+              "archived": { "type": "boolean", "description": "Archive the project", "default": false }
+            },
+            "required": ["name", "workspace"]
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://app.asana.com/api/1.0/projects"
+    },
+    {
+      "id": "get-project",
+      "name": "Get Project",
+      "description": "Get project details by ID",
+      "method": "GET",
+      "path": "/projects/{projectId}",
+      "queryParams": {
+        "opt_fields": "name,notes,color,archived,workspace,team",
+        "opt_expand": "team"
+      },
+      "urlTemplate": "https://app.asana.com/api/1.0/projects/{projectId}"
+    },
+    {
+      "id": "list-projects",
+      "name": "List Projects",
+      "description": "List projects",
+      "method": "GET",
+      "path": "/projects",
+      "queryParams": {
+        "workspace": "{workspaceId}",
+        "team": "{teamId}",
+        "archived": "false",
+        "opt_fields": "name,notes,color,archived",
+        "limit": "100",
+        "offset": "{offset}"
+      },
+      "urlTemplate": "https://app.asana.com/api/1.0/projects"
+    },
+    {
+      "id": "update-project",
+      "name": "Update Project",
+      "description": "Update an existing project",
+      "method": "PUT",
+      "path": "/projects/{projectId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Project name" },
+              "notes": { "type": "string", "description": "Project notes" },
+              "color": { "type": "string", "enum": ["dark-pink", "dark-green", "dark-blue", "dark-red", "dark-teal", "dark-brown", "dark-orange", "dark-purple", "dark-warm-gray", "light-pink", "light-green", "light-blue", "light-red", "light-teal", "light-brown", "light-orange", "light-purple", "light-warm-gray"] },
+              "archived": { "type": "boolean", "description": "Archive the project" }
+            }
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://app.asana.com/api/1.0/projects/{projectId}"
+    },
+    {
+      "id": "get-workspace",
+      "name": "Get Workspace",
+      "description": "Get workspace details by ID",
+      "method": "GET",
+      "path": "/workspaces/{workspaceId}",
+      "queryParams": {
+        "opt_fields": "name,is_organization"
+      },
+      "urlTemplate": "https://app.asana.com/api/1.0/workspaces/{workspaceId}"
+    },
+    {
+      "id": "list-workspaces",
+      "name": "List Workspaces",
+      "description": "List all workspaces",
+      "method": "GET",
+      "path": "/workspaces",
+      "queryParams": {
+        "opt_fields": "name,is_organization"
+      },
+      "urlTemplate": "https://app.asana.com/api/1.0/workspaces"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user details by ID",
+      "method": "GET",
+      "path": "/users/{userId}",
+      "queryParams": {
+        "opt_fields": "name,email,photo"
+      },
+      "urlTemplate": "https://app.asana.com/api/1.0/users/{userId}"
+    },
+    {
+      "id": "get-me",
+      "name": "Get Me",
+      "description": "Get authenticated user details",
+      "method": "GET",
+      "path": "/users/me",
+      "queryParams": {
+        "opt_fields": "name,email,photo,workspaces"
+      },
+      "urlTemplate": "https://app.asana.com/api/1.0/users/me"
+    },
+    {
+      "id": "list-team-members",
+      "name": "List Team Members",
+      "description": "List members of a team",
+      "method": "GET",
+      "path": "/teams/{teamId}/users",
+      "queryParams": {
+        "opt_fields": "name,email,photo",
+        "limit": "100",
+        "offset": "{offset}"
+      },
+      "urlTemplate": "https://app.asana.com/api/1.0/teams/{teamId}/users"
+    }
+  ]
+}
+

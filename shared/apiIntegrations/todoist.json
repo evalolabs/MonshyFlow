@@ -1,0 +1,340 @@
+{
+  "id": "todoist",
+  "name": "Todoist",
+  "icon": "✅",
+  "logoUrl": "https://cdn.simpleicons.org/todoist/E44332",
+  "description": "Task management and productivity app",
+  "baseUrl": "https://api.todoist.com/rest/v2",
+  "color": {
+    "bg": "from-red-100 to-pink-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "TODOIST_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-project",
+      "name": "Create Project",
+      "description": "Create a new project",
+      "method": "POST",
+      "path": "/projects",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Project name" },
+          "parent_id": { "type": "number", "description": "Parent project ID" },
+          "color": { "type": "string", "enum": ["berry_red", "red", "orange", "yellow", "olive_green", "lime_green", "green", "mint_green", "teal", "sky_blue", "light_blue", "blue", "grape", "violet", "lavender", "magenta", "salmon", "charcoal", "grey", "taupe"], "description": "Project color" },
+          "is_favorite": { "type": "boolean", "default": false, "description": "Is favorite" },
+          "view_style": { "type": "string", "enum": ["list", "board"], "default": "list", "description": "View style" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.todoist.com/rest/v2/projects"
+    },
+    {
+      "id": "get-project",
+      "name": "Get Project",
+      "description": "Get project details by ID",
+      "method": "GET",
+      "path": "/projects/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.todoist.com/rest/v2/projects/{id}"
+    },
+    {
+      "id": "list-projects",
+      "name": "List Projects",
+      "description": "List all projects",
+      "method": "GET",
+      "path": "/projects",
+      "headers": {},
+      "urlTemplate": "https://api.todoist.com/rest/v2/projects"
+    },
+    {
+      "id": "update-project",
+      "name": "Update Project",
+      "description": "Update an existing project",
+      "method": "POST",
+      "path": "/projects/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Project name" },
+          "color": { "type": "string", "enum": ["berry_red", "red", "orange", "yellow", "olive_green", "lime_green", "green", "mint_green", "teal", "sky_blue", "light_blue", "blue", "grape", "violet", "lavender", "magenta", "salmon", "charcoal", "grey", "taupe"] },
+          "is_favorite": { "type": "boolean", "description": "Is favorite" },
+          "view_style": { "type": "string", "enum": ["list", "board"] }
+        }
+      },
+      "urlTemplate": "https://api.todoist.com/rest/v2/projects/{id}"
+    },
+    {
+      "id": "delete-project",
+      "name": "Delete Project",
+      "description": "Delete a project",
+      "method": "DELETE",
+      "path": "/projects/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.todoist.com/rest/v2/projects/{id}"
+    },
+    {
+      "id": "create-section",
+      "name": "Create Section",
+      "description": "Create a new section in a project",
+      "method": "POST",
+      "path": "/sections",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Section name" },
+          "project_id": { "type": "number", "required": true, "description": "Project ID" },
+          "order": { "type": "number", "description": "Order/position" }
+        },
+        "required": ["name", "project_id"]
+      },
+      "urlTemplate": "https://api.todoist.com/rest/v2/sections"
+    },
+    {
+      "id": "get-section",
+      "name": "Get Section",
+      "description": "Get section details by ID",
+      "method": "GET",
+      "path": "/sections/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.todoist.com/rest/v2/sections/{id}"
+    },
+    {
+      "id": "list-sections",
+      "name": "List Sections",
+      "description": "List all sections",
+      "method": "GET",
+      "path": "/sections",
+      "headers": {},
+      "queryParams": {
+        "project_id": "{projectId}"
+      },
+      "urlTemplate": "https://api.todoist.com/rest/v2/sections"
+    },
+    {
+      "id": "update-section",
+      "name": "Update Section",
+      "description": "Update an existing section",
+      "method": "POST",
+      "path": "/sections/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Section name" },
+          "order": { "type": "number", "description": "Order/position" }
+        }
+      },
+      "urlTemplate": "https://api.todoist.com/rest/v2/sections/{id}"
+    },
+    {
+      "id": "delete-section",
+      "name": "Delete Section",
+      "description": "Delete a section",
+      "method": "DELETE",
+      "path": "/sections/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.todoist.com/rest/v2/sections/{id}"
+    },
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new task",
+      "method": "POST",
+      "path": "/tasks",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "content": { "type": "string", "required": true, "description": "Task content" },
+          "description": { "type": "string", "description": "Task description" },
+          "project_id": { "type": "number", "description": "Project ID" },
+          "section_id": { "type": "number", "description": "Section ID" },
+          "parent_id": { "type": "number", "description": "Parent task ID (for subtasks)" },
+          "order": { "type": "number", "description": "Order/position" },
+          "labels": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Label names"
+          },
+          "priority": { "type": "number", "enum": [1, 2, 3, 4], "default": 1, "description": "Priority (1=Normal, 2=High, 3=Very High, 4=Urgent)" },
+          "due_string": { "type": "string", "description": "Due date as string (e.g., 'tomorrow', 'next Monday')" },
+          "due_date": { "type": "string", "format": "date", "description": "Due date (YYYY-MM-DD)" },
+          "due_datetime": { "type": "string", "format": "date-time", "description": "Due date and time" },
+          "due_lang": { "type": "string", "default": "en", "description": "Language for due_string parsing" }
+        },
+        "required": ["content"]
+      },
+      "urlTemplate": "https://api.todoist.com/rest/v2/tasks"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get task details by ID",
+      "method": "GET",
+      "path": "/tasks/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.todoist.com/rest/v2/tasks/{id}"
+    },
+    {
+      "id": "list-tasks",
+      "name": "List Tasks",
+      "description": "List all tasks",
+      "method": "GET",
+      "path": "/tasks",
+      "headers": {},
+      "queryParams": {
+        "project_id": "{projectId}",
+        "section_id": "{sectionId}",
+        "label_id": "{labelId}",
+        "filter": "{filter}",
+        "lang": "en",
+        "ids": "{ids}"
+      },
+      "urlTemplate": "https://api.todoist.com/rest/v2/tasks"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update an existing task",
+      "method": "POST",
+      "path": "/tasks/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "content": { "type": "string", "description": "Task content" },
+          "description": { "type": "string", "description": "Task description" },
+          "labels": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "priority": { "type": "number", "enum": [1, 2, 3, 4] },
+          "due_string": { "type": "string" },
+          "due_date": { "type": "string", "format": "date" },
+          "due_datetime": { "type": "string", "format": "date-time" }
+        }
+      },
+      "urlTemplate": "https://api.todoist.com/rest/v2/tasks/{id}"
+    },
+    {
+      "id": "close-task",
+      "name": "Close Task",
+      "description": "Close (complete) a task",
+      "method": "POST",
+      "path": "/tasks/{id}/close",
+      "headers": {},
+      "urlTemplate": "https://api.todoist.com/rest/v2/tasks/{id}/close"
+    },
+    {
+      "id": "reopen-task",
+      "name": "Reopen Task",
+      "description": "Reopen a closed task",
+      "method": "POST",
+      "path": "/tasks/{id}/reopen",
+      "headers": {},
+      "urlTemplate": "https://api.todoist.com/rest/v2/tasks/{id}/reopen"
+    },
+    {
+      "id": "delete-task",
+      "name": "Delete Task",
+      "description": "Delete a task",
+      "method": "DELETE",
+      "path": "/tasks/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.todoist.com/rest/v2/tasks/{id}"
+    },
+    {
+      "id": "create-label",
+      "name": "Create Label",
+      "description": "Create a new label",
+      "method": "POST",
+      "path": "/labels",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Label name" },
+          "order": { "type": "number", "description": "Order/position" },
+          "color": { "type": "string", "enum": ["berry_red", "red", "orange", "yellow", "olive_green", "lime_green", "green", "mint_green", "teal", "sky_blue", "light_blue", "blue", "grape", "violet", "lavender", "magenta", "salmon", "charcoal", "grey", "taupe"], "description": "Label color" },
+          "is_favorite": { "type": "boolean", "default": false, "description": "Is favorite" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.todoist.com/rest/v2/labels"
+    },
+    {
+      "id": "get-label",
+      "name": "Get Label",
+      "description": "Get label details by ID",
+      "method": "GET",
+      "path": "/labels/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.todoist.com/rest/v2/labels/{id}"
+    },
+    {
+      "id": "list-labels",
+      "name": "List Labels",
+      "description": "List all labels",
+      "method": "GET",
+      "path": "/labels",
+      "headers": {},
+      "urlTemplate": "https://api.todoist.com/rest/v2/labels"
+    },
+    {
+      "id": "update-label",
+      "name": "Update Label",
+      "description": "Update an existing label",
+      "method": "POST",
+      "path": "/labels/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Label name" },
+          "order": { "type": "number", "description": "Order/position" },
+          "color": { "type": "string", "enum": ["berry_red", "red", "orange", "yellow", "olive_green", "lime_green", "green", "mint_green", "teal", "sky_blue", "light_blue", "blue", "grape", "violet", "lavender", "magenta", "salmon", "charcoal", "grey", "taupe"] },
+          "is_favorite": { "type": "boolean", "description": "Is favorite" }
+        }
+      },
+      "urlTemplate": "https://api.todoist.com/rest/v2/labels/{id}"
+    },
+    {
+      "id": "delete-label",
+      "name": "Delete Label",
+      "description": "Delete a label",
+      "method": "DELETE",
+      "path": "/labels/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.todoist.com/rest/v2/labels/{id}"
+    }
+  ]
+}
+

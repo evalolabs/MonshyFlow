@@ -1,0 +1,186 @@
+{
+  "id": "mailjet",
+  "name": "Mailjet",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/mailjet/FF8900",
+  "description": "Email and SMS delivery service",
+  "baseUrl": "https://api.mailjet.com",
+  "color": {
+    "bg": "from-orange-100 to-yellow-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "MAILJET_API_SECRET",
+    "usernameSecretKey": "MAILJET_API_KEY",
+    "note": "Basic Auth with API Key as username and API Secret as password. Format: Basic base64(apiKey:apiSecret)"
+  },
+  "endpoints": [
+    {
+      "id": "send-email",
+      "name": "Send Email",
+      "description": "Send a transactional email",
+      "method": "POST",
+      "path": "/v3.1/send",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "From": {
+                  "type": "object",
+                  "properties": {
+                    "Email": { "type": "string", "format": "email", "required": true, "description": "From email address" },
+                    "Name": { "type": "string", "description": "From name" }
+                  },
+                  "required": ["Email"]
+                },
+                "To": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Email": { "type": "string", "format": "email", "required": true, "description": "Recipient email" },
+                      "Name": { "type": "string", "description": "Recipient name" }
+                    },
+                    "required": ["Email"]
+                  },
+                  "description": "Recipients"
+                },
+                "Cc": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Email": { "type": "string", "format": "email" },
+                      "Name": { "type": "string" }
+                    }
+                  },
+                  "description": "CC recipients"
+                },
+                "Bcc": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Email": { "type": "string", "format": "email" },
+                      "Name": { "type": "string" }
+                    }
+                  },
+                  "description": "BCC recipients"
+                },
+                "Subject": { "type": "string", "description": "Email subject" },
+                "TextPart": { "type": "string", "description": "Plain text content" },
+                "HTMLPart": { "type": "string", "description": "HTML content" },
+                "TemplateID": { "type": "integer", "description": "Template ID" },
+                "TemplateLanguage": { "type": "boolean", "default": true, "description": "Enable template language" },
+                "Variables": {
+                  "type": "object",
+                  "description": "Template variables",
+                  "additionalProperties": true
+                },
+                "Attachments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ContentType": { "type": "string", "description": "MIME type" },
+                      "Filename": { "type": "string", "description": "File name" },
+                      "Base64Content": { "type": "string", "description": "Base64-encoded content" }
+                    }
+                  },
+                  "description": "Attachments"
+                },
+                "InlinedAttachments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ContentType": { "type": "string", "description": "MIME type" },
+                      "Filename": { "type": "string", "description": "File name" },
+                      "ContentID": { "type": "string", "description": "Content ID (CID)" },
+                      "Base64Content": { "type": "string", "description": "Base64-encoded content" }
+                    }
+                  },
+                  "description": "Inline attachments"
+                },
+                "Headers": {
+                  "type": "object",
+                  "description": "Custom headers",
+                  "additionalProperties": true
+                },
+                "CustomID": { "type": "string", "description": "Custom ID" },
+                "EventPayload": { "type": "string", "description": "Event payload" },
+                "URLTags": { "type": "string", "description": "URL tags" },
+                "Priority": { "type": "integer", "enum": [1, 2, 3, 4, 5], "default": 2, "description": "Priority (1=highest, 5=lowest)" },
+                "CustomCampaign": { "type": "string", "description": "Custom campaign" },
+                "DeduplicateCampaign": { "type": "boolean", "default": false, "description": "Deduplicate campaign" },
+                "TrackOpens": { "type": "string", "enum": ["account_default", "enabled", "disabled"], "default": "account_default", "description": "Track opens" },
+                "TrackClicks": { "type": "string", "enum": ["account_default", "enabled", "disabled"], "default": "account_default", "description": "Track clicks" }
+              },
+              "required": ["From", "To"]
+            },
+            "required": true,
+            "description": "Messages array"
+          },
+          "SandboxMode": { "type": "boolean", "default": false, "description": "Enable sandbox mode" },
+          "Globals": {
+            "type": "object",
+            "properties": {
+              "From": {
+                "type": "object",
+                "properties": {
+                  "Email": { "type": "string", "format": "email" },
+                  "Name": { "type": "string" }
+                }
+              },
+              "Subject": { "type": "string" },
+              "TemplateLanguage": { "type": "boolean" },
+              "Variables": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "description": "Global message properties"
+          }
+        },
+        "required": ["Messages"]
+      },
+      "urlTemplate": "https://api.mailjet.com/v3.1/send"
+    },
+    {
+      "id": "send-sms",
+      "name": "Send SMS",
+      "description": "Send an SMS message",
+      "method": "POST",
+      "path": "/v4/sms-send",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Text": { "type": "string", "required": true, "description": "SMS text (max 160 characters for single SMS, 153 characters per part for multi-part SMS)" },
+          "To": { "type": "string", "required": true, "description": "Recipient phone number (E.164 format, e.g., +33600000000)" },
+          "From": { "type": "string", "description": "Sender name or phone number" },
+          "SmsID": { "type": "string", "description": "SMS ID for tracking" }
+        },
+        "required": ["Text", "To"]
+      },
+      "urlTemplate": "https://api.mailjet.com/v4/sms-send"
+    }
+  ]
+}
+

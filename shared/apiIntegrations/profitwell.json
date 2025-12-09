@@ -1,0 +1,218 @@
+{
+  "id": "profitwell",
+  "name": "ProfitWell",
+  "icon": "💰",
+  "logoUrl": "https://cdn.simpleicons.org/profitwell/000000",
+  "description": "Subscription analytics and revenue recognition platform",
+  "baseUrl": "https://api.profitwell.com/v2",
+  "color": {
+    "bg": "from-gray-100 to-stone-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "{apiKey}",
+    "secretKey": "PROFITWELL_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "get-daily-metrics",
+      "name": "Get Daily Metrics",
+      "description": "Get daily metrics",
+      "method": "GET",
+      "path": "/metrics/daily",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "queryParams": {
+        "start_date": { "type": "string", "format": "date", "description": "Start date (YYYY-MM-DD)" },
+        "end_date": { "type": "string", "format": "date", "description": "End date (YYYY-MM-DD)" },
+        "metrics": { "type": "string", "description": "Comma-separated metrics (e.g., mrr,arr,ltv,cac)" }
+      },
+      "urlTemplate": "https://api.profitwell.com/v2/metrics/daily"
+    },
+    {
+      "id": "create-user",
+      "name": "Create User",
+      "description": "Create a new user",
+      "method": "POST",
+      "path": "/users",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "string", "required": true, "description": "User ID" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "first_name": { "type": "string", "description": "First name" },
+          "last_name": { "type": "string", "description": "Last name" },
+          "registration_date": { "type": "string", "format": "date-time", "description": "Registration date (ISO 8601)" },
+          "custom_attributes": {
+            "type": "object",
+            "description": "Custom attributes",
+            "additionalProperties": true
+          }
+        },
+        "required": ["user_id"]
+      },
+      "urlTemplate": "https://api.profitwell.com/v2/users"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user by ID",
+      "method": "GET",
+      "path": "/users/{userId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://api.profitwell.com/v2/users/{userId}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/users",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" },
+        "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" }
+      },
+      "urlTemplate": "https://api.profitwell.com/v2/users"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update a user",
+      "method": "PUT",
+      "path": "/users/{userId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "first_name": { "type": "string", "description": "First name" },
+          "last_name": { "type": "string", "description": "Last name" },
+          "custom_attributes": {
+            "type": "object",
+            "description": "Custom attributes",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://api.profitwell.com/v2/users/{userId}"
+    },
+    {
+      "id": "delete-user",
+      "name": "Delete User",
+      "description": "Delete a user",
+      "method": "DELETE",
+      "path": "/users/{userId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://api.profitwell.com/v2/users/{userId}"
+    },
+    {
+      "id": "create-subscription",
+      "name": "Create Subscription",
+      "description": "Create a new subscription",
+      "method": "POST",
+      "path": "/subscriptions",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "string", "required": true, "description": "User ID" },
+          "subscription_id": { "type": "string", "description": "Subscription ID" },
+          "plan_id": { "type": "string", "required": true, "description": "Plan ID" },
+          "plan_interval": { "type": "string", "enum": ["day", "week", "month", "year"], "required": true, "description": "Plan interval" },
+          "plan_currency": { "type": "string", "required": true, "description": "Currency code (e.g., USD, EUR)" },
+          "value": { "type": "number", "required": true, "description": "Subscription value" },
+          "effective_date": { "type": "string", "format": "date-time", "required": true, "description": "Effective date (ISO 8601)" },
+          "status": { "type": "string", "enum": ["active", "canceled", "trialing", "past_due"], "default": "active", "description": "Subscription status" },
+          "canceled_at": { "type": "string", "format": "date-time", "description": "Cancellation date (ISO 8601)" }
+        },
+        "required": ["user_id", "plan_id", "plan_interval", "plan_currency", "value", "effective_date"]
+      },
+      "urlTemplate": "https://api.profitwell.com/v2/subscriptions"
+    },
+    {
+      "id": "get-subscription",
+      "name": "Get Subscription",
+      "description": "Get subscription by ID",
+      "method": "GET",
+      "path": "/subscriptions/{subscriptionId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://api.profitwell.com/v2/subscriptions/{subscriptionId}"
+    },
+    {
+      "id": "list-subscriptions",
+      "name": "List Subscriptions",
+      "description": "List all subscriptions",
+      "method": "GET",
+      "path": "/subscriptions",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "queryParams": {
+        "user_id": { "type": "string", "description": "Filter by user ID" },
+        "status": { "type": "string", "enum": ["active", "canceled", "trialing", "past_due"], "description": "Filter by status" },
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" },
+        "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" }
+      },
+      "urlTemplate": "https://api.profitwell.com/v2/subscriptions"
+    },
+    {
+      "id": "update-subscription",
+      "name": "Update Subscription",
+      "description": "Update a subscription",
+      "method": "PUT",
+      "path": "/subscriptions/{subscriptionId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "plan_id": { "type": "string", "description": "Plan ID" },
+          "plan_interval": { "type": "string", "enum": ["day", "week", "month", "year"], "description": "Plan interval" },
+          "plan_currency": { "type": "string", "description": "Currency code" },
+          "value": { "type": "number", "description": "Subscription value" },
+          "status": { "type": "string", "enum": ["active", "canceled", "trialing", "past_due"], "description": "Subscription status" },
+          "canceled_at": { "type": "string", "format": "date-time", "description": "Cancellation date" }
+        }
+      },
+      "urlTemplate": "https://api.profitwell.com/v2/subscriptions/{subscriptionId}"
+    },
+    {
+      "id": "delete-subscription",
+      "name": "Delete Subscription",
+      "description": "Delete a subscription",
+      "method": "DELETE",
+      "path": "/subscriptions/{subscriptionId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://api.profitwell.com/v2/subscriptions/{subscriptionId}"
+    }
+  ]
+}
+

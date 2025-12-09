@@ -1,0 +1,257 @@
+{
+  "id": "workable",
+  "name": "Workable",
+  "icon": "💼",
+  "logoUrl": "https://cdn.simpleicons.org/workable/000000",
+  "description": "Recruiting and applicant tracking system",
+  "baseUrl": "https://{subdomain}.workable.com/spi/v3",
+  "color": {
+    "bg": "from-gray-100 to-zinc-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "WORKABLE_API_KEY",
+    "note": "Base URL should be provided with subdomain placeholder {subdomain}, or as WORKABLE_SUBDOMAIN secret key."
+  },
+  "endpoints": [
+    {
+      "id": "create-candidate",
+      "name": "Create Candidate",
+      "description": "Create a new candidate",
+      "method": "POST",
+      "path": "/candidates",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstname": {
+            "type": "string",
+            "required": true,
+            "description": "First name"
+          },
+          "lastname": {
+            "type": "string",
+            "required": true,
+            "description": "Last name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Email address"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "headline": {
+            "type": "string",
+            "description": "Professional headline"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Summary"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address"
+          },
+          "cover_letter": {
+            "type": "string",
+            "description": "Cover letter"
+          },
+          "education_entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "degree": { "type": "string" },
+                "school": { "type": "string" },
+                "field_of_study": { "type": "string" },
+                "start_date": { "type": "string", "format": "date" },
+                "end_date": { "type": "string", "format": "date" }
+              }
+            },
+            "description": "Education entries"
+          },
+          "experience_entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string" },
+                "company": { "type": "string" },
+                "summary": { "type": "string" },
+                "start_date": { "type": "string", "format": "date" },
+                "end_date": { "type": "string", "format": "date" },
+                "current": { "type": "boolean", "default": false }
+              }
+            },
+            "description": "Experience entries"
+          },
+          "skills": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Skills"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "social_profiles": {
+            "type": "object",
+            "properties": {
+              "linkedin": { "type": "string", "format": "uri" },
+              "twitter": { "type": "string", "format": "uri" },
+              "facebook": { "type": "string", "format": "uri" },
+              "website": { "type": "string", "format": "uri" }
+            },
+            "description": "Social profiles"
+          },
+          "disqualified": {
+            "type": "boolean",
+            "default": false,
+            "description": "Disqualified status"
+          },
+          "sourced": {
+            "type": "boolean",
+            "default": false,
+            "description": "Sourced candidate"
+          }
+        },
+        "required": ["firstname", "lastname", "email"]
+      },
+      "urlTemplate": "https://{subdomain}.workable.com/spi/v3/candidates"
+    },
+    {
+      "id": "get-candidate",
+      "name": "Get Candidate",
+      "description": "Get candidate by ID",
+      "method": "GET",
+      "path": "/candidates/{candidateId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.workable.com/spi/v3/candidates/{candidateId}"
+    },
+    {
+      "id": "list-candidates",
+      "name": "List Candidates",
+      "description": "List all candidates",
+      "method": "GET",
+      "path": "/candidates",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum number of results"
+        },
+        "since_id": {
+          "type": "string",
+          "description": "Get candidates after this ID"
+        },
+        "created_after": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Filter by creation date (ISO 8601)"
+        },
+        "updated_after": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Filter by update date (ISO 8601)"
+        },
+        "stage_id": {
+          "type": "string",
+          "description": "Filter by stage ID"
+        },
+        "job_shortcode": {
+          "type": "string",
+          "description": "Filter by job shortcode"
+        },
+        "disqualified": {
+          "type": "boolean",
+          "description": "Filter by disqualified status"
+        }
+      },
+      "urlTemplate": "https://{subdomain}.workable.com/spi/v3/candidates"
+    },
+    {
+      "id": "update-candidate",
+      "name": "Update Candidate",
+      "description": "Update a candidate",
+      "method": "PUT",
+      "path": "/candidates/{candidateId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Candidate data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{subdomain}.workable.com/spi/v3/candidates/{candidateId}"
+    },
+    {
+      "id": "get-job",
+      "name": "Get Job",
+      "description": "Get job by ID",
+      "method": "GET",
+      "path": "/jobs/{jobId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.workable.com/spi/v3/jobs/{jobId}"
+    },
+    {
+      "id": "list-jobs",
+      "name": "List Jobs",
+      "description": "List all jobs",
+      "method": "GET",
+      "path": "/jobs",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "state": {
+          "type": "string",
+          "enum": ["published", "draft", "archived", "closed"],
+          "description": "Filter by job state"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 100
+        },
+        "since_id": {
+          "type": "string",
+          "description": "Get jobs after this ID"
+        }
+      },
+      "urlTemplate": "https://{subdomain}.workable.com/spi/v3/jobs"
+    },
+    {
+      "id": "list-stages",
+      "name": "List Stages",
+      "description": "List all stages for a job",
+      "method": "GET",
+      "path": "/jobs/{jobId}/stages",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.workable.com/spi/v3/jobs/{jobId}/stages"
+    }
+  ]
+}
+

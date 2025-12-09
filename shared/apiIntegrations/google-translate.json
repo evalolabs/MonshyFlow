@@ -1,0 +1,121 @@
+{
+  "id": "google-translate",
+  "name": "Google Translate",
+  "icon": "🌐",
+  "logoUrl": "https://cdn.simpleicons.org/googletranslate/4285F4",
+  "description": "Google Cloud Translation API for translating text and detecting languages",
+  "baseUrl": "https://translation.googleapis.com/v3",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GOOGLE_TRANSLATE_OAUTH2_ACCESS_TOKEN",
+    "note": "Supports OAuth2 (GOOGLE_TRANSLATE_OAUTH2_ACCESS_TOKEN) or Service Account (GOOGLE_TRANSLATE_SERVICE_ACCOUNT_KEY) authentication. Requires a Google Cloud Project with Translation API enabled."
+  },
+  "endpoints": [
+    {
+      "id": "translate-text",
+      "name": "Translate Text",
+      "description": "Translate text from one language to another",
+      "method": "POST",
+      "path": "/projects/{projectId}/locations/{location}:translateText",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "contents": {
+            "type": "array",
+            "items": { "type": "string" },
+            "required": true,
+            "description": "Array of text strings to translate"
+          },
+          "sourceLanguageCode": {
+            "type": "string",
+            "description": "Source language code (e.g., 'en', 'de', 'fr'). If not specified, language will be auto-detected."
+          },
+          "targetLanguageCode": {
+            "type": "string",
+            "required": true,
+            "description": "Target language code (e.g., 'en', 'de', 'fr')"
+          },
+          "mimeType": {
+            "type": "string",
+            "enum": ["text/plain", "text/html"],
+            "default": "text/plain",
+            "description": "MIME type of the text"
+          },
+          "model": {
+            "type": "string",
+            "description": "Translation model (e.g., 'base', 'nmt')"
+          },
+          "glossaryConfig": {
+            "type": "object",
+            "properties": {
+              "glossary": {
+                "type": "string",
+                "description": "Glossary resource name"
+              },
+              "ignoreCase": {
+                "type": "boolean",
+                "default": false,
+                "description": "Ignore case when matching"
+              }
+            },
+            "description": "Glossary configuration"
+          },
+          "labels": {
+            "type": "object",
+            "description": "Labels for the request",
+            "additionalProperties": { "type": "string" }
+          }
+        },
+        "required": ["contents", "targetLanguageCode"]
+      },
+      "urlTemplate": "https://translation.googleapis.com/v3/projects/{projectId}/locations/{location}:translateText"
+    },
+    {
+      "id": "detect-language",
+      "name": "Detect Language",
+      "description": "Detect the language of text",
+      "method": "POST",
+      "path": "/projects/{projectId}/locations/{location}:detectLanguage",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "required": true,
+            "description": "Text to detect language for"
+          },
+          "mimeType": {
+            "type": "string",
+            "enum": ["text/plain", "text/html"],
+            "default": "text/plain",
+            "description": "MIME type of the text"
+          },
+          "labels": {
+            "type": "object",
+            "description": "Labels for the request",
+            "additionalProperties": { "type": "string" }
+          }
+        },
+        "required": ["content"]
+      },
+      "urlTemplate": "https://translation.googleapis.com/v3/projects/{projectId}/locations/{location}:detectLanguage"
+    }
+  ]
+}
+

@@ -1,0 +1,284 @@
+{
+  "id": "mattermost",
+  "name": "Mattermost",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/mattermost/0072C6",
+  "description": "Open-source team collaboration platform",
+  "baseUrl": "https://{domain}/api/v4",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "MATTERMOST_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-post",
+      "name": "Create Post",
+      "description": "Create a new post in a channel",
+      "method": "POST",
+      "path": "/posts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "channel_id": { "type": "string", "required": true, "description": "Channel ID" },
+          "message": { "type": "string", "required": true, "description": "Post message" },
+          "root_id": { "type": "string", "description": "Root post ID (for replies)" },
+          "file_ids": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "File IDs (uploaded separately)"
+          },
+          "props": {
+            "type": "object",
+            "description": "Post properties (attachments, etc.)",
+            "additionalProperties": true
+          },
+          "create_at": { "type": "number", "description": "Creation timestamp (Unix milliseconds)" }
+        },
+        "required": ["channel_id", "message"]
+      },
+      "urlTemplate": "https://{domain}/api/v4/posts"
+    },
+    {
+      "id": "get-post",
+      "name": "Get Post",
+      "description": "Get post details by ID",
+      "method": "GET",
+      "path": "/posts/{postId}",
+      "headers": {},
+      "urlTemplate": "https://{domain}/api/v4/posts/{postId}"
+    },
+    {
+      "id": "list-posts",
+      "name": "List Posts",
+      "description": "List posts in a channel",
+      "method": "GET",
+      "path": "/channels/{channelId}/posts",
+      "headers": {},
+      "queryParams": {
+        "page": "0",
+        "per_page": "60",
+        "since": "{since}",
+        "before": "{before}",
+        "after": "{after}"
+      },
+      "urlTemplate": "https://{domain}/api/v4/channels/{channelId}/posts"
+    },
+    {
+      "id": "update-post",
+      "name": "Update Post",
+      "description": "Update a post",
+      "method": "PUT",
+      "path": "/posts/{postId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "required": true, "description": "Post ID" },
+          "message": { "type": "string", "description": "Updated message" },
+          "file_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "has_reactions": { "type": "boolean", "description": "Has reactions" },
+          "props": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://{domain}/api/v4/posts/{postId}"
+    },
+    {
+      "id": "delete-post",
+      "name": "Delete Post",
+      "description": "Delete a post",
+      "method": "DELETE",
+      "path": "/posts/{postId}",
+      "headers": {},
+      "urlTemplate": "https://{domain}/api/v4/posts/{postId}"
+    },
+    {
+      "id": "create-channel",
+      "name": "Create Channel",
+      "description": "Create a new channel",
+      "method": "POST",
+      "path": "/channels",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "team_id": { "type": "string", "required": true, "description": "Team ID" },
+          "name": { "type": "string", "required": true, "description": "Channel name" },
+          "display_name": { "type": "string", "required": true, "description": "Channel display name" },
+          "type": { "type": "string", "enum": ["O", "P"], "default": "O", "description": "Channel type (O=Open, P=Private)" },
+          "header": { "type": "string", "description": "Channel header" },
+          "purpose": { "type": "string", "description": "Channel purpose" }
+        },
+        "required": ["team_id", "name", "display_name"]
+      },
+      "urlTemplate": "https://{domain}/api/v4/channels"
+    },
+    {
+      "id": "get-channel",
+      "name": "Get Channel",
+      "description": "Get channel details by ID",
+      "method": "GET",
+      "path": "/channels/{channelId}",
+      "headers": {},
+      "urlTemplate": "https://{domain}/api/v4/channels/{channelId}"
+    },
+    {
+      "id": "list-channels",
+      "name": "List Channels",
+      "description": "List channels",
+      "method": "GET",
+      "path": "/channels",
+      "headers": {},
+      "queryParams": {
+        "team_id": "{teamId}",
+        "page": "0",
+        "per_page": "60"
+      },
+      "urlTemplate": "https://{domain}/api/v4/channels"
+    },
+    {
+      "id": "update-channel",
+      "name": "Update Channel",
+      "description": "Update a channel",
+      "method": "PUT",
+      "path": "/channels/{channelId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "required": true },
+          "name": { "type": "string", "description": "Channel name" },
+          "display_name": { "type": "string", "description": "Display name" },
+          "header": { "type": "string", "description": "Channel header" },
+          "purpose": { "type": "string", "description": "Channel purpose" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://{domain}/api/v4/channels/{channelId}"
+    },
+    {
+      "id": "delete-channel",
+      "name": "Delete Channel",
+      "description": "Delete a channel",
+      "method": "DELETE",
+      "path": "/channels/{channelId}",
+      "headers": {},
+      "urlTemplate": "https://{domain}/api/v4/channels/{channelId}"
+    },
+    {
+      "id": "upload-file",
+      "name": "Upload File",
+      "description": "Upload a file",
+      "method": "POST",
+      "path": "/files",
+      "headers": {
+        "Content-Type": "multipart/form-data"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "channel_id": { "type": "string", "required": true, "description": "Channel ID" },
+          "files": {
+            "type": "array",
+            "items": { "type": "string" },
+            "required": true,
+            "description": "File paths or base64 encoded content"
+          },
+          "client_ids": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Client IDs for file tracking"
+          }
+        },
+        "required": ["channel_id", "files"]
+      },
+      "urlTemplate": "https://{domain}/api/v4/files"
+    },
+    {
+      "id": "get-file",
+      "name": "Get File",
+      "description": "Get file information by ID",
+      "method": "GET",
+      "path": "/files/{fileId}",
+      "headers": {},
+      "urlTemplate": "https://{domain}/api/v4/files/{fileId}"
+    },
+    {
+      "id": "download-file",
+      "name": "Download File",
+      "description": "Download a file",
+      "method": "GET",
+      "path": "/files/{fileId}",
+      "headers": {},
+      "queryParams": {
+        "download": "true"
+      },
+      "urlTemplate": "https://{domain}/api/v4/files/{fileId}?download=true"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user details by ID",
+      "method": "GET",
+      "path": "/users/{userId}",
+      "headers": {},
+      "urlTemplate": "https://{domain}/api/v4/users/{userId}"
+    },
+    {
+      "id": "get-me",
+      "name": "Get Me",
+      "description": "Get authenticated user details",
+      "method": "GET",
+      "path": "/users/me",
+      "headers": {},
+      "urlTemplate": "https://{domain}/api/v4/users/me"
+    },
+    {
+      "id": "search-users",
+      "name": "Search Users",
+      "description": "Search for users",
+      "method": "POST",
+      "path": "/users/search",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "term": { "type": "string", "required": true, "description": "Search term" },
+          "team_id": { "type": "string", "description": "Team ID to search in" },
+          "in_channel": { "type": "string", "description": "Channel ID to search in" },
+          "not_in_channel": { "type": "string", "description": "Exclude users from channel" },
+          "not_in_team": { "type": "string", "description": "Exclude users from team" },
+          "without_team": { "type": "boolean", "default": false, "description": "Search users without team" }
+        },
+        "required": ["term"]
+      },
+      "urlTemplate": "https://{domain}/api/v4/users/search"
+    }
+  ]
+}
+

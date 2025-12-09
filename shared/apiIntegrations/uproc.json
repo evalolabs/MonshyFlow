@@ -1,0 +1,61 @@
+{
+  "id": "uproc",
+  "name": "uProc",
+  "icon": "⚙️",
+  "logoUrl": "https://cdn.simpleicons.org/uproc/000000",
+  "description": "API toolbox with various tools for data processing",
+  "baseUrl": "https://api.uproc.io/api/v2",
+  "color": {
+    "bg": "from-gray-100 to-zinc-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "{apiKey}",
+    "secretKey": "UPROC_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-process",
+      "name": "Create Process",
+      "description": "Create a new process with a tool",
+      "method": "POST",
+      "path": "/process",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "tool": {
+            "type": "string",
+            "required": true,
+            "description": "Tool name (e.g., 'audio-to-text', 'image-resize', 'text-translate')"
+          },
+          "input": {
+            "type": "object",
+            "description": "Tool-specific input parameters",
+            "additionalProperties": true
+          },
+          "webhook": {
+            "type": "string",
+            "format": "uri",
+            "description": "Webhook URL for asynchronous processing"
+          },
+          "async": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to process asynchronously"
+          }
+        },
+        "required": ["tool"]
+      },
+      "urlTemplate": "https://api.uproc.io/api/v2/process"
+    }
+  ]
+}
+

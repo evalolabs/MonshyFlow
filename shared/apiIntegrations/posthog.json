@@ -1,0 +1,190 @@
+{
+  "id": "posthog",
+  "name": "PostHog",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/posthog/E01F5E",
+  "description": "Product analytics and feature flags platform",
+  "baseUrl": "{url}",
+  "color": {
+    "bg": "from-pink-100 to-fuchsia-100",
+    "border": "border-pink-500",
+    "icon": "text-pink-700",
+    "handle": "bg-pink-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Content-Type",
+    "headerFormat": "application/json",
+    "secretKey": "POSTHOG_API_KEY",
+    "queryParamName": "api_key",
+    "note": "API key is sent as api_key query parameter or in form data"
+  },
+  "endpoints": [
+    {
+      "id": "batch-alias",
+      "name": "Batch Alias",
+      "description": "Create alias events in batch",
+      "method": "POST",
+      "path": "/batch",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "batch": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "enum": ["alias"], "required": true, "description": "Event type" },
+                "distinct_id": { "type": "string", "required": true, "description": "Distinct ID" },
+                "alias": { "type": "string", "required": true, "description": "Alias ID" },
+                "properties": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Event properties"
+                },
+                "timestamp": { "type": "string", "format": "date-time", "description": "Event timestamp" }
+              },
+              "required": ["type", "distinct_id", "alias"]
+            },
+            "required": true
+          }
+        },
+        "required": ["api_key", "batch"]
+      },
+      "urlTemplate": "{url}/batch"
+    },
+    {
+      "id": "batch-event",
+      "name": "Batch Event",
+      "description": "Create events in batch",
+      "method": "POST",
+      "path": "/batch",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "batch": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "event": { "type": "string", "required": true, "description": "Event name" },
+                "distinct_id": { "type": "string", "required": true, "description": "Distinct ID" },
+                "properties": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Event properties"
+                },
+                "timestamp": { "type": "string", "format": "date-time", "description": "Event timestamp" },
+                "groups": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Group properties"
+                }
+              },
+              "required": ["event", "distinct_id"]
+            },
+            "required": true
+          }
+        },
+        "required": ["api_key", "batch"]
+      },
+      "urlTemplate": "{url}/batch"
+    },
+    {
+      "id": "batch-identity",
+      "name": "Batch Identity",
+      "description": "Identify users in batch",
+      "method": "POST",
+      "path": "/batch",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "batch": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "enum": ["identify"], "required": true, "description": "Event type" },
+                "distinct_id": { "type": "string", "required": true, "description": "Distinct ID" },
+                "$set": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "User properties to set"
+                },
+                "$set_once": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "User properties to set once"
+                },
+                "$unset": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "User properties to unset"
+                },
+                "timestamp": { "type": "string", "format": "date-time", "description": "Event timestamp" }
+              },
+              "required": ["type", "distinct_id"]
+            },
+            "required": true
+          }
+        },
+        "required": ["api_key", "batch"]
+      },
+      "urlTemplate": "{url}/batch"
+    },
+    {
+      "id": "batch-track",
+      "name": "Batch Track",
+      "description": "Track events in batch (same as batch-event)",
+      "method": "POST",
+      "path": "/batch",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "batch": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "event": { "type": "string", "required": true, "description": "Event name" },
+                "distinct_id": { "type": "string", "required": true, "description": "Distinct ID" },
+                "properties": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Event properties"
+                },
+                "timestamp": { "type": "string", "format": "date-time", "description": "Event timestamp" },
+                "groups": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Group properties"
+                }
+              },
+              "required": ["event", "distinct_id"]
+            },
+            "required": true
+          }
+        },
+        "required": ["api_key", "batch"]
+      },
+      "urlTemplate": "{url}/batch"
+    }
+  ]
+}
+

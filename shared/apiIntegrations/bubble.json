@@ -1,0 +1,123 @@
+{
+  "id": "bubble",
+  "name": "Bubble",
+  "icon": "🫧",
+  "logoUrl": "https://cdn.simpleicons.org/bubble/000000",
+  "description": "No-code platform for web apps",
+  "baseUrl": "https://{appName}.bubbleapps.io/api/1.1",
+  "color": {
+    "bg": "from-cyan-100 to-teal-100",
+    "border": "border-cyan-500",
+    "icon": "text-cyan-700",
+    "handle": "bg-cyan-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "BUBBLE_API_TOKEN",
+    "note": "Base URL can be Bubble-hosted (https://{appName}.bubbleapps.io/api/1.1) or self-hosted ({domain}/api/1.1). Use BUBBLE_APP_NAME for Bubble-hosted or BUBBLE_DOMAIN for self-hosted. Use BUBBLE_ENVIRONMENT (development or live) for environment selection."
+  },
+  "endpoints": [
+    {
+      "id": "create-object",
+      "name": "Create Object",
+      "description": "Create a new object of a specific type",
+      "method": "POST",
+      "path": "/obj/{typeName}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Object data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{appName}.bubbleapps.io/api/1.1/obj/{typeName}"
+    },
+    {
+      "id": "get-object",
+      "name": "Get Object",
+      "description": "Get an object by ID",
+      "method": "GET",
+      "path": "/obj/{typeName}/{objectId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{appName}.bubbleapps.io/api/1.1/obj/{typeName}/{objectId}"
+    },
+    {
+      "id": "list-objects",
+      "name": "List Objects",
+      "description": "List all objects of a specific type",
+      "method": "GET",
+      "path": "/obj/{typeName}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": { "type": "string" },
+              "constraint_type": { "type": "string" },
+              "value": { "type": "string" }
+            }
+          },
+          "description": "Filter constraints"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum number of results"
+        },
+        "cursor": {
+          "type": "integer",
+          "description": "Cursor for pagination"
+        },
+        "sort_field": {
+          "type": "string",
+          "description": "Field to sort by"
+        },
+        "descending": {
+          "type": "boolean",
+          "default": false,
+          "description": "Sort in descending order"
+        }
+      },
+      "urlTemplate": "https://{appName}.bubbleapps.io/api/1.1/obj/{typeName}"
+    },
+    {
+      "id": "update-object",
+      "name": "Update Object",
+      "description": "Update an object",
+      "method": "PATCH",
+      "path": "/obj/{typeName}/{objectId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Object data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{appName}.bubbleapps.io/api/1.1/obj/{typeName}/{objectId}"
+    },
+    {
+      "id": "delete-object",
+      "name": "Delete Object",
+      "description": "Delete an object",
+      "method": "DELETE",
+      "path": "/obj/{typeName}/{objectId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{appName}.bubbleapps.io/api/1.1/obj/{typeName}/{objectId}"
+    }
+  ]
+}
+

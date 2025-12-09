@@ -1,0 +1,105 @@
+{
+  "id": "jina-ai",
+  "name": "Jina AI",
+  "icon": "🤖",
+  "logoUrl": "https://cdn.simpleicons.org/jinaai/000000",
+  "description": "AI-powered reader, search, and research platform",
+  "baseUrl": "https://r.jina.ai",
+  "color": {
+    "bg": "from-violet-100 to-purple-100",
+    "border": "border-violet-500",
+    "icon": "text-violet-700",
+    "handle": "bg-violet-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "X-API-Key",
+    "secretKey": "JINAAI_API_KEY",
+    "note": "Jina AI offers multiple services with different base URLs: Reader (https://r.jina.ai), Search (https://s.jina.ai), and Research (https://deepsearch.jina.ai/v1). Each endpoint specifies its base URL in the urlTemplate."
+  },
+  "endpoints": [
+    {
+      "id": "read-url",
+      "name": "Read URL",
+      "description": "Extract and read content from a URL",
+      "method": "GET",
+      "path": "/{url}",
+      "headers": {
+        "X-API-Key": "{apiKey}",
+        "X-Return-Format": "text"
+      },
+      "queryParams": {
+        "url": { "type": "string", "format": "uri", "required": true, "description": "URL to read" },
+        "output": { "type": "string", "enum": ["text", "markdown", "html", "raw"], "default": "text", "description": "Output format" },
+        "mode": { "type": "string", "enum": ["no-cache", "cache"], "default": "cache", "description": "Caching mode" },
+        "fallback": { "type": "boolean", "default": true, "description": "Use fallback if extraction fails" }
+      },
+      "urlTemplate": "https://r.jina.ai/{url}"
+    },
+    {
+      "id": "search-web",
+      "name": "Search Web",
+      "description": "Search the web",
+      "method": "GET",
+      "path": "/",
+      "headers": {
+        "X-API-Key": "{apiKey}"
+      },
+      "queryParams": {
+        "query": { "type": "string", "required": true, "description": "Search query" },
+        "limit": { "type": "integer", "default": 10, "description": "Number of results" },
+        "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" }
+      },
+      "urlTemplate": "https://s.jina.ai/"
+    },
+    {
+      "id": "deep-research-completions",
+      "name": "Deep Research Completions",
+      "description": "Generate deep research completions",
+      "method": "POST",
+      "path": "/chat/completions",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-Key": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "enum": ["jina-researcher-v1"],
+            "default": "jina-researcher-v1",
+            "description": "Model to use"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "role": { "type": "string", "enum": ["system", "user", "assistant"], "required": true },
+                "content": { "type": "string", "required": true }
+              },
+              "required": ["role", "content"]
+            },
+            "required": true,
+            "description": "Conversation messages"
+          },
+          "temperature": { "type": "number", "minimum": 0, "maximum": 2, "default": 0.7, "description": "Sampling temperature" },
+          "top_p": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.9, "description": "Nucleus sampling parameter" },
+          "max_tokens": { "type": "integer", "description": "Maximum tokens to generate" },
+          "stream": { "type": "boolean", "default": false, "description": "Stream responses" },
+          "research_depth": {
+            "type": "string",
+            "enum": ["basic", "advanced", "deep"],
+            "default": "basic",
+            "description": "Research depth"
+          },
+          "include_sources": { "type": "boolean", "default": true, "description": "Include sources in response" }
+        },
+        "required": ["messages"]
+      },
+      "urlTemplate": "https://deepsearch.jina.ai/v1/chat/completions"
+    }
+  ]
+}
+

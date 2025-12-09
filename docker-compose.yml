@@ -1,0 +1,199 @@
+services:
+  execution-service:
+    build:
+      context: .
+      dockerfile: packages/execution-service/Dockerfile
+    container_name: monshyflow-execution-service
+    restart: unless-stopped
+    ports:
+      - "5004:5004"
+    environment:
+      - NODE_ENV=development
+      - PORT=5004
+      - MONGODB_URL=mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin
+      - REDIS_URL=redis://:redis123@redis:6379
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - AGENT_SERVICE_URL=http://api-service:80
+    depends_on:
+      - monshyflow-mongodb
+      - redis
+      - rabbitmq
+    networks:
+      - agentbuilder-network
+
+  # Node.js Services
+  api-service:
+    build:
+      context: .
+      dockerfile: packages/api-service/Dockerfile
+    container_name: monshyflow-api-service
+    restart: unless-stopped
+    ports:
+      - "5001:80"
+    environment:
+      - NODE_ENV=development
+      - PORT=80
+      - MONGODB_URL=mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin
+      - REDIS_URL=redis://:redis123@redis:6379
+      - AUTH_SERVICE_URL=http://auth-service:80
+      - SECRETS_SERVICE_URL=http://secrets-service:80
+      - EXECUTION_SERVICE_URL=http://execution-service:5004
+      - SCHEDULER_SERVICE_URL=http://scheduler-service:80
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-secret-key-min-32-chars}
+      - JWT_ISSUER=monshy-auth-service
+      - JWT_AUDIENCE=monshy-services
+    depends_on:
+      - monshyflow-mongodb
+      - redis
+    networks:
+      - agentbuilder-network
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: packages/auth-service/Dockerfile
+    container_name: monshyflow-auth-service
+    restart: unless-stopped
+    ports:
+      - "5002:80"
+    environment:
+      - NODE_ENV=development
+      - PORT=80
+      - MONGODB_URL=mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-secret-key-min-32-chars}
+      - JWT_ISSUER=monshy-auth-service
+      - JWT_AUDIENCE=monshy-services
+    depends_on:
+      - monshyflow-mongodb
+    networks:
+      - agentbuilder-network
+
+  secrets-service:
+    build:
+      context: .
+      dockerfile: packages/secrets-service/Dockerfile
+    container_name: monshyflow-secrets-service
+    restart: unless-stopped
+    ports:
+      - "5003:80"
+    environment:
+      - NODE_ENV=development
+      - PORT=80
+      - MONGODB_URL=mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin
+      - SECRETS_ENCRYPTION_KEY=${SECRETS_ENCRYPTION_KEY:-secrets-encryption-key-min-32-chars}
+      - INTERNAL_SERVICE_KEY=${INTERNAL_SERVICE_KEY:-internal-service-key}
+    depends_on:
+      - monshyflow-mongodb
+    networks:
+      - agentbuilder-network
+
+  scheduler-service:
+    build:
+      context: .
+      dockerfile: packages/scheduler-service/Dockerfile
+    container_name: monshyflow-scheduler-service
+    restart: unless-stopped
+    ports:
+      - "5005:80"
+    environment:
+      - NODE_ENV=development
+      - PORT=80
+      - MONGODB_URL=mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin
+      - EXECUTION_SERVICE_URL=http://execution-service:5004
+    depends_on:
+      - monshyflow-mongodb
+      - execution-service
+    networks:
+      - agentbuilder-network
+
+  # MongoDB für MonshyFlow (Node.js Services)
+  monshyflow-mongodb:
+    image: mongo:7.0
+    container_name: MonshyFlow-mongodb
+    restart: unless-stopped
+    ports:
+      - "27018:27017"  # Anderer Port, um Konflikt mit agentbuilder-mongodb zu vermeiden
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: MonshyFlow
+    volumes:
+      - monshyflow_mongodb_data:/data/db
+    networks:
+      - agentbuilder-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: agentbuilder-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass redis123
+    volumes:
+      - redis_data:/data
+    networks:
+      - agentbuilder-network
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: agentbuilder-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - agentbuilder-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Optional: Redis Commander (UI for Redis)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: agentbuilder-redis-commander
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: local:redis:6379:0:redis123
+    depends_on:
+      - redis
+    networks:
+      - agentbuilder-network
+
+  # Optional: Mongo Express (UI for MongoDB)
+  mongo-express:
+    image: mongo-express:latest
+    container_name: agentbuilder-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: admin123
+      ME_CONFIG_MONGODB_URL: mongodb://admin:admin123@MonshyFlow-mongodb:27017/
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - monshyflow-mongodb
+    networks:
+      - agentbuilder-network
+
+volumes:
+  monshyflow_mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+
+networks:
+  agentbuilder-network:
+    driver: bridge

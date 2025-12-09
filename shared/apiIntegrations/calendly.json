@@ -1,0 +1,138 @@
+{
+  "id": "calendly",
+  "name": "Calendly",
+  "icon": "📅",
+  "logoUrl": "https://cdn.simpleicons.org/calendly/006BFF",
+  "description": "Scheduling and calendar management platform",
+  "baseUrl": "https://api.calendly.com",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "CALENDLY_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "get-event",
+      "name": "Get Event",
+      "description": "Get scheduled event details by ID",
+      "method": "GET",
+      "path": "/scheduled_events/{eventId}",
+      "headers": {},
+      "urlTemplate": "https://api.calendly.com/scheduled_events/{eventId}"
+    },
+    {
+      "id": "list-events",
+      "name": "List Events",
+      "description": "List all scheduled events",
+      "method": "GET",
+      "path": "/scheduled_events",
+      "headers": {},
+      "queryParams": {
+        "user": "{user}",
+        "organization": "{organization}",
+        "invitee_email": "{inviteeEmail}",
+        "count": "20",
+        "page_token": "{pageToken}",
+        "sort": "created_at:desc",
+        "status": "{status}"
+      },
+      "urlTemplate": "https://api.calendly.com/scheduled_events"
+    },
+    {
+      "id": "get-invitee",
+      "name": "Get Invitee",
+      "description": "Get invitee details by ID",
+      "method": "GET",
+      "path": "/scheduled_events/{eventId}/invitees/{inviteeId}",
+      "headers": {},
+      "urlTemplate": "https://api.calendly.com/scheduled_events/{eventId}/invitees/{inviteeId}"
+    },
+    {
+      "id": "list-invitees",
+      "name": "List Invitees",
+      "description": "List all invitees for an event",
+      "method": "GET",
+      "path": "/scheduled_events/{eventId}/invitees",
+      "headers": {},
+      "queryParams": {
+        "count": "20",
+        "page_token": "{pageToken}",
+        "sort": "created_at:desc",
+        "email": "{email}",
+        "status": "{status}"
+      },
+      "urlTemplate": "https://api.calendly.com/scheduled_events/{eventId}/invitees"
+    },
+    {
+      "id": "create-webhook",
+      "name": "Create Webhook",
+      "description": "Create a new webhook subscription",
+      "method": "POST",
+      "path": "/webhook_subscriptions",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "format": "uri", "required": true, "description": "Webhook URL" },
+          "events": {
+            "type": "array",
+            "items": { "type": "string" },
+            "required": true,
+            "description": "Event types to subscribe to (e.g., invitee.created, invitee.canceled)"
+          },
+          "organization": { "type": "string", "format": "uri", "description": "Organization URI" },
+          "user": { "type": "string", "format": "uri", "description": "User URI" },
+          "scope": { "type": "string", "enum": ["user", "organization"], "description": "Webhook scope" },
+          "signing_key": { "type": "string", "description": "Signing key for webhook verification" }
+        },
+        "required": ["url", "events"]
+      },
+      "urlTemplate": "https://api.calendly.com/webhook_subscriptions"
+    },
+    {
+      "id": "get-webhook",
+      "name": "Get Webhook",
+      "description": "Get webhook subscription details by ID",
+      "method": "GET",
+      "path": "/webhook_subscriptions/{webhookId}",
+      "headers": {},
+      "urlTemplate": "https://api.calendly.com/webhook_subscriptions/{webhookId}"
+    },
+    {
+      "id": "list-webhooks",
+      "name": "List Webhooks",
+      "description": "List all webhook subscriptions",
+      "method": "GET",
+      "path": "/webhook_subscriptions",
+      "headers": {},
+      "queryParams": {
+        "organization": "{organization}",
+        "user": "{user}",
+        "scope": "{scope}",
+        "count": "20",
+        "page_token": "{pageToken}",
+        "sort": "created_at:desc"
+      },
+      "urlTemplate": "https://api.calendly.com/webhook_subscriptions"
+    },
+    {
+      "id": "delete-webhook",
+      "name": "Delete Webhook",
+      "description": "Delete a webhook subscription",
+      "method": "DELETE",
+      "path": "/webhook_subscriptions/{webhookId}",
+      "headers": {},
+      "urlTemplate": "https://api.calendly.com/webhook_subscriptions/{webhookId}"
+    }
+  ]
+}
+

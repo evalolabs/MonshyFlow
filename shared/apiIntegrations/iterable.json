@@ -1,0 +1,340 @@
+{
+  "id": "iterable",
+  "name": "Iterable",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/iterable/000000",
+  "description": "Marketing automation platform for customer engagement",
+  "baseUrl": "https://api.iterable.com/api",
+  "color": {
+    "bg": "from-neutral-100 to-gray-100",
+    "border": "border-neutral-500",
+    "icon": "text-neutral-700",
+    "handle": "bg-neutral-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Api-Key",
+    "headerFormat": "{apiKey}",
+    "secretKey": "ITERABLE_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-user",
+      "name": "Create User",
+      "description": "Create or update a user",
+      "method": "POST",
+      "path": "/users/update",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User email"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User ID (alternative to email)"
+          },
+          "dataFields": {
+            "type": "object",
+            "description": "User data fields",
+            "additionalProperties": true
+          },
+          "mergeNestedObjects": {
+            "type": "boolean",
+            "default": false,
+            "description": "Merge nested objects"
+          },
+          "preferUserId": {
+            "type": "boolean",
+            "default": false,
+            "description": "Prefer user ID over email"
+          }
+        },
+        "oneOf": [
+          { "required": ["email"] },
+          { "required": ["userId"] }
+        ]
+      },
+      "urlTemplate": "https://api.iterable.com/api/users/update"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update a user",
+      "method": "POST",
+      "path": "/users/update",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "dataFields": {
+            "type": "object",
+            "description": "User data fields",
+            "additionalProperties": true
+          },
+          "mergeNestedObjects": {
+            "type": "boolean",
+            "default": false
+          },
+          "preferUserId": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "oneOf": [
+          { "required": ["email"] },
+          { "required": ["userId"] }
+        ]
+      },
+      "urlTemplate": "https://api.iterable.com/api/users/update"
+    },
+    {
+      "id": "get-user-by-email",
+      "name": "Get User by Email",
+      "description": "Get user by email",
+      "method": "GET",
+      "path": "/users/byEmail/{email}",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "urlTemplate": "https://api.iterable.com/api/users/byEmail/{email}"
+    },
+    {
+      "id": "get-user-by-id",
+      "name": "Get User by ID",
+      "description": "Get user by user ID",
+      "method": "GET",
+      "path": "/users/byUserId/{userId}",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "urlTemplate": "https://api.iterable.com/api/users/byUserId/{userId}"
+    },
+    {
+      "id": "delete-user-by-email",
+      "name": "Delete User by Email",
+      "description": "Delete user by email",
+      "method": "DELETE",
+      "path": "/users/{email}",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "urlTemplate": "https://api.iterable.com/api/users/{email}"
+    },
+    {
+      "id": "delete-user-by-id",
+      "name": "Delete User by ID",
+      "description": "Delete user by user ID",
+      "method": "DELETE",
+      "path": "/users/byUserId/{userId}",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "urlTemplate": "https://api.iterable.com/api/users/byUserId/{userId}"
+    },
+    {
+      "id": "track-event",
+      "name": "Track Event",
+      "description": "Track a single event",
+      "method": "POST",
+      "path": "/events/track",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User email"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User ID (alternative to email)"
+          },
+          "eventName": {
+            "type": "string",
+            "required": true,
+            "description": "Event name"
+          },
+          "id": {
+            "type": "string",
+            "description": "Event ID for deduplication"
+          },
+          "createdAt": {
+            "type": "integer",
+            "description": "Unix timestamp (defaults to now)"
+          },
+          "dataFields": {
+            "type": "object",
+            "description": "Event data fields",
+            "additionalProperties": true
+          },
+          "campaignId": {
+            "type": "integer",
+            "description": "Campaign ID"
+          },
+          "templateId": {
+            "type": "integer",
+            "description": "Template ID"
+          }
+        },
+        "required": ["eventName"],
+        "oneOf": [
+          { "required": ["email"] },
+          { "required": ["userId"] }
+        ]
+      },
+      "urlTemplate": "https://api.iterable.com/api/events/track"
+    },
+    {
+      "id": "track-bulk-events",
+      "name": "Track Bulk Events",
+      "description": "Track multiple events at once",
+      "method": "POST",
+      "path": "/events/trackBulk",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email" },
+                "userId": { "type": "string" },
+                "eventName": { "type": "string", "required": true },
+                "id": { "type": "string" },
+                "createdAt": { "type": "integer" },
+                "dataFields": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "campaignId": { "type": "integer" },
+                "templateId": { "type": "integer" }
+              },
+              "required": ["eventName"],
+              "oneOf": [
+                { "required": ["email"] },
+                { "required": ["userId"] }
+              ]
+            },
+            "required": true,
+            "description": "Array of events to track"
+          }
+        },
+        "required": ["events"]
+      },
+      "urlTemplate": "https://api.iterable.com/api/events/trackBulk"
+    },
+    {
+      "id": "subscribe-to-list",
+      "name": "Subscribe to List",
+      "description": "Subscribe users to a list",
+      "method": "POST",
+      "path": "/lists/{listId}/subscribe",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subscribers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email" },
+                "userId": { "type": "string" },
+                "dataFields": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "oneOf": [
+                { "required": ["email"] },
+                { "required": ["userId"] }
+              ]
+            },
+            "required": true,
+            "description": "Array of subscribers"
+          }
+        },
+        "required": ["subscribers"]
+      },
+      "urlTemplate": "https://api.iterable.com/api/lists/{listId}/subscribe"
+    },
+    {
+      "id": "unsubscribe-from-list",
+      "name": "Unsubscribe from List",
+      "description": "Unsubscribe users from a list",
+      "method": "POST",
+      "path": "/lists/{listId}/unsubscribe",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subscribers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Array of email addresses or user IDs"
+          }
+        },
+        "required": ["subscribers"]
+      },
+      "urlTemplate": "https://api.iterable.com/api/lists/{listId}/unsubscribe"
+    },
+    {
+      "id": "get-list",
+      "name": "Get List",
+      "description": "Get list by ID",
+      "method": "GET",
+      "path": "/lists/{listId}",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "urlTemplate": "https://api.iterable.com/api/lists/{listId}"
+    },
+    {
+      "id": "list-lists",
+      "name": "List Lists",
+      "description": "List all lists",
+      "method": "GET",
+      "path": "/lists",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "urlTemplate": "https://api.iterable.com/api/lists"
+    }
+  ]
+}
+

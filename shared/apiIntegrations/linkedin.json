@@ -1,0 +1,270 @@
+{
+  "id": "linkedin",
+  "name": "LinkedIn",
+  "icon": "💼",
+  "logoUrl": "https://cdn.simpleicons.org/linkedin/0A66C2",
+  "description": "Professional networking and career platform",
+  "baseUrl": "https://api.linkedin.com/v2",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {accessToken}",
+    "secretKey": "LINKEDIN_ACCESS_TOKEN",
+    "tokenUrl": "https://www.linkedin.com/oauth/v2/accessToken",
+    "clientIdSecretKey": "LINKEDIN_CLIENT_ID",
+    "clientSecretSecretKey": "LINKEDIN_CLIENT_SECRET"
+  },
+  "endpoints": [
+    {
+      "id": "create-post",
+      "name": "Create Post",
+      "description": "Create a new post (UGC Post)",
+      "method": "POST",
+      "path": "/ugcPosts",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Restli-Protocol-Version": "2.0.0"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "author": { "type": "string", "required": true, "description": "Author URN (e.g., urn:li:person:{id})" },
+          "lifecycleState": { "type": "string", "enum": ["PUBLISHED", "DRAFT"], "default": "PUBLISHED", "description": "Post lifecycle state" },
+          "specificContent": {
+            "type": "object",
+            "properties": {
+              "com.linkedin.ugc.ShareContent": {
+                "type": "object",
+                "properties": {
+                  "shareCommentary": {
+                    "type": "object",
+                    "properties": {
+                      "text": { "type": "string", "required": true, "description": "Post text" }
+                    },
+                    "required": true
+                  },
+                  "shareMediaCategory": { "type": "string", "enum": ["NONE", "ARTICLE", "IMAGE"], "default": "NONE" },
+                  "media": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "status": { "type": "string", "enum": ["READY"], "default": "READY" },
+                        "description": {
+                          "type": "object",
+                          "properties": {
+                            "text": { "type": "string" }
+                          }
+                        },
+                        "media": { "type": "string", "description": "Media URN" },
+                        "title": {
+                          "type": "object",
+                          "properties": {
+                            "text": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": true
+              }
+            },
+            "required": true
+          },
+          "visibility": {
+            "type": "object",
+            "properties": {
+              "com.linkedin.ugc.MemberNetworkVisibility": { "type": "string", "enum": ["PUBLIC", "CONNECTIONS"], "default": "PUBLIC", "required": true }
+            },
+            "required": true
+          }
+        },
+        "required": ["author", "specificContent", "visibility"]
+      },
+      "urlTemplate": "https://api.linkedin.com/v2/ugcPosts"
+    },
+    {
+      "id": "get-post",
+      "name": "Get Post",
+      "description": "Get post details by ID",
+      "method": "GET",
+      "path": "/ugcPosts/{id}",
+      "headers": {
+        "X-Restli-Protocol-Version": "2.0.0"
+      },
+      "urlTemplate": "https://api.linkedin.com/v2/ugcPosts/{id}"
+    },
+    {
+      "id": "delete-post",
+      "name": "Delete Post",
+      "description": "Delete a post",
+      "method": "DELETE",
+      "path": "/ugcPosts/{id}",
+      "headers": {
+        "X-Restli-Protocol-Version": "2.0.0"
+      },
+      "urlTemplate": "https://api.linkedin.com/v2/ugcPosts/{id}"
+    },
+    {
+      "id": "upload-image",
+      "name": "Upload Image",
+      "description": "Upload an image for posts",
+      "method": "POST",
+      "path": "/images?action=initializeUpload",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Restli-Protocol-Version": "2.0.0"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "initializeUploadRequest": {
+            "type": "object",
+            "properties": {
+              "owner": { "type": "string", "required": true, "description": "Owner URN" },
+              "fileUploadRequest": {
+                "type": "object",
+                "properties": {
+                  "recipes": {
+                    "type": "array",
+                    "items": { "type": "string", "enum": ["urn:li:digitalmediaRecipe:feedshare-image"] },
+                    "required": true
+                  },
+                  "owner": { "type": "string", "required": true }
+                },
+                "required": true
+              }
+            },
+            "required": true
+          }
+        },
+        "required": ["initializeUploadRequest"]
+      },
+      "urlTemplate": "https://api.linkedin.com/v2/images?action=initializeUpload"
+    },
+    {
+      "id": "get-profile",
+      "name": "Get Profile",
+      "description": "Get user profile information",
+      "method": "GET",
+      "path": "/me",
+      "headers": {},
+      "queryParams": {
+        "projection": "(id,firstName,lastName,profilePicture(displayImage~:playableStreams))"
+      },
+      "urlTemplate": "https://api.linkedin.com/v2/me"
+    },
+    {
+      "id": "get-company",
+      "name": "Get Company",
+      "description": "Get company page information",
+      "method": "GET",
+      "path": "/organizations/{id}",
+      "headers": {},
+      "queryParams": {
+        "projection": "(id,name,logoV2(original~:playableStreams))"
+      },
+      "urlTemplate": "https://api.linkedin.com/v2/organizations/{id}"
+    },
+    {
+      "id": "create-company-post",
+      "name": "Create Company Post",
+      "description": "Create a post on behalf of a company page",
+      "method": "POST",
+      "path": "/ugcPosts",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Restli-Protocol-Version": "2.0.0"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "author": { "type": "string", "required": true, "description": "Company URN (e.g., urn:li:organization:{id})" },
+          "lifecycleState": { "type": "string", "enum": ["PUBLISHED", "DRAFT"], "default": "PUBLISHED" },
+          "specificContent": {
+            "type": "object",
+            "properties": {
+              "com.linkedin.ugc.ShareContent": {
+                "type": "object",
+                "properties": {
+                  "shareCommentary": {
+                    "type": "object",
+                    "properties": {
+                      "text": { "type": "string", "required": true }
+                    },
+                    "required": true
+                  },
+                  "shareMediaCategory": { "type": "string", "enum": ["NONE", "ARTICLE", "IMAGE"], "default": "NONE" },
+                  "media": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "description": "Media objects"
+                    }
+                  }
+                },
+                "required": true
+              }
+            },
+            "required": true
+          },
+          "visibility": {
+            "type": "object",
+            "properties": {
+              "com.linkedin.ugc.MemberNetworkVisibility": { "type": "string", "enum": ["PUBLIC", "CONNECTIONS"], "default": "PUBLIC", "required": true }
+            },
+            "required": true
+          }
+        },
+        "required": ["author", "specificContent", "visibility"]
+      },
+      "urlTemplate": "https://api.linkedin.com/v2/ugcPosts"
+    },
+    {
+      "id": "get-connections",
+      "name": "Get Connections",
+      "description": "Get user connections",
+      "method": "GET",
+      "path": "/people/~/connections",
+      "headers": {},
+      "queryParams": {
+        "start": "0",
+        "count": "500"
+      },
+      "urlTemplate": "https://api.linkedin.com/v1/people/~/connections"
+    },
+    {
+      "id": "send-message",
+      "name": "Send Message",
+      "description": "Send a message to a connection",
+      "method": "POST",
+      "path": "/messaging/conversations",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "recipients": {
+            "type": "array",
+            "items": { "type": "string" },
+            "required": true,
+            "description": "Recipient URNs"
+          },
+          "subject": { "type": "string", "description": "Message subject" },
+          "body": { "type": "string", "required": true, "description": "Message body" }
+        },
+        "required": ["recipients", "body"]
+      },
+      "urlTemplate": "https://api.linkedin.com/v2/messaging/conversations"
+    }
+  ]
+}
+

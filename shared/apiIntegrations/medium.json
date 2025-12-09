@@ -1,0 +1,64 @@
+{
+  "id": "medium",
+  "name": "Medium",
+  "icon": "✍️",
+  "logoUrl": "https://cdn.simpleicons.org/medium/000000",
+  "description": "Online publishing platform",
+  "baseUrl": "https://api.medium.com/v1",
+  "color": {
+    "bg": "from-gray-100 to-neutral-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "MEDIUM_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-post",
+      "name": "Create Post",
+      "description": "Create a new post",
+      "method": "POST",
+      "path": "/users/{userId}/posts",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Post title" },
+          "contentFormat": { "type": "string", "enum": ["html", "markdown"], "required": true, "description": "Content format" },
+          "content": { "type": "string", "required": true, "description": "Post content" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Post tags (max 5 tags)"
+          },
+          "publishStatus": { "type": "string", "enum": ["public", "draft", "unlisted"], "default": "public", "description": "Publish status" },
+          "notifyFollowers": { "type": "boolean", "default": true, "description": "Notify followers" },
+          "license": { "type": "string", "enum": ["all-rights-reserved", "cc-40-by", "cc-40-by-sa", "cc-40-by-nd", "cc-40-by-nc", "cc-40-by-nc-nd", "cc-40-by-nc-sa", "cc-40-zero", "public-domain"], "default": "all-rights-reserved", "description": "License type" },
+          "canonicalUrl": { "type": "string", "format": "uri", "description": "Canonical URL" }
+        },
+        "required": ["title", "contentFormat", "content"]
+      },
+      "urlTemplate": "https://api.medium.com/v1/users/{userId}/posts"
+    },
+    {
+      "id": "list-publications",
+      "name": "List Publications",
+      "description": "List all publications for a user",
+      "method": "GET",
+      "path": "/users/{userId}/publications",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.medium.com/v1/users/{userId}/publications"
+    }
+  ]
+}
+

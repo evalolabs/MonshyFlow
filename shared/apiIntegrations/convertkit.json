@@ -1,0 +1,308 @@
+{
+  "id": "convertkit",
+  "name": "ConvertKit",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/convertkit/FF6B6B",
+  "description": "Email marketing platform for creators",
+  "baseUrl": "https://api.convertkit.com/v3",
+  "color": {
+    "bg": "from-red-100 to-orange-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "{apiKey}",
+    "secretKey": "CONVERTKIT_API_SECRET",
+    "queryParamName": "api_secret"
+  },
+  "endpoints": [
+    {
+      "id": "create-custom-field",
+      "name": "Create Custom Field",
+      "description": "Create a new custom field",
+      "method": "POST",
+      "path": "/custom_fields",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_secret": { "type": "string", "required": true, "description": "API secret" },
+          "label": { "type": "string", "required": true, "description": "Field label" }
+        },
+        "required": ["api_secret", "label"]
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/custom_fields"
+    },
+    {
+      "id": "get-custom-field",
+      "name": "Get Custom Field",
+      "description": "Get custom field details by ID",
+      "method": "GET",
+      "path": "/custom_fields/{id}",
+      "headers": {},
+      "queryParams": {
+        "api_secret": "{apiSecret}"
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/custom_fields/{id}"
+    },
+    {
+      "id": "list-custom-fields",
+      "name": "List Custom Fields",
+      "description": "List all custom fields",
+      "method": "GET",
+      "path": "/custom_fields",
+      "headers": {},
+      "queryParams": {
+        "api_secret": "{apiSecret}"
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/custom_fields"
+    },
+    {
+      "id": "update-custom-field",
+      "name": "Update Custom Field",
+      "description": "Update an existing custom field",
+      "method": "PUT",
+      "path": "/custom_fields/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_secret": { "type": "string", "required": true },
+          "label": { "type": "string", "description": "Field label" }
+        },
+        "required": ["api_secret"]
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/custom_fields/{id}"
+    },
+    {
+      "id": "get-form",
+      "name": "Get Form",
+      "description": "Get form details by ID",
+      "method": "GET",
+      "path": "/forms/{id}",
+      "headers": {},
+      "queryParams": {
+        "api_secret": "{apiSecret}"
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/forms/{id}"
+    },
+    {
+      "id": "list-forms",
+      "name": "List Forms",
+      "description": "List all forms",
+      "method": "GET",
+      "path": "/forms",
+      "headers": {},
+      "queryParams": {
+        "api_secret": "{apiSecret}"
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/forms"
+    },
+    {
+      "id": "subscribe-to-form",
+      "name": "Subscribe to Form",
+      "description": "Subscribe a subscriber to a form",
+      "method": "POST",
+      "path": "/forms/{formId}/subscribe",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_secret": { "type": "string", "required": true, "description": "API secret" },
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "first_name": { "type": "string", "description": "First name" },
+          "fields": {
+            "type": "object",
+            "description": "Custom field values",
+            "additionalProperties": true
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "Tag IDs"
+          }
+        },
+        "required": ["api_secret", "email"]
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/forms/{formId}/subscribe"
+    },
+    {
+      "id": "get-sequence",
+      "name": "Get Sequence",
+      "description": "Get sequence (email course) details by ID",
+      "method": "GET",
+      "path": "/sequences/{id}",
+      "headers": {},
+      "queryParams": {
+        "api_secret": "{apiSecret}"
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/sequences/{id}"
+    },
+    {
+      "id": "list-sequences",
+      "name": "List Sequences",
+      "description": "List all sequences",
+      "method": "GET",
+      "path": "/sequences",
+      "headers": {},
+      "queryParams": {
+        "api_secret": "{apiSecret}"
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/sequences"
+    },
+    {
+      "id": "subscribe-to-sequence",
+      "name": "Subscribe to Sequence",
+      "description": "Subscribe a subscriber to a sequence",
+      "method": "POST",
+      "path": "/sequences/{sequenceId}/subscribe",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_secret": { "type": "string", "required": true },
+          "email": { "type": "string", "format": "email", "required": true },
+          "first_name": { "type": "string", "description": "First name" },
+          "fields": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "number" }
+          }
+        },
+        "required": ["api_secret", "email"]
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/sequences/{sequenceId}/subscribe"
+    },
+    {
+      "id": "create-tag",
+      "name": "Create Tag",
+      "description": "Create a new tag",
+      "method": "POST",
+      "path": "/tags",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_secret": { "type": "string", "required": true },
+          "tag": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "required": true, "description": "Tag name" }
+            },
+            "required": ["name"]
+          }
+        },
+        "required": ["api_secret", "tag"]
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/tags"
+    },
+    {
+      "id": "get-tag",
+      "name": "Get Tag",
+      "description": "Get tag details by ID",
+      "method": "GET",
+      "path": "/tags/{id}",
+      "headers": {},
+      "queryParams": {
+        "api_secret": "{apiSecret}"
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/tags/{id}"
+    },
+    {
+      "id": "list-tags",
+      "name": "List Tags",
+      "description": "List all tags",
+      "method": "GET",
+      "path": "/tags",
+      "headers": {},
+      "queryParams": {
+        "api_secret": "{apiSecret}"
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/tags"
+    },
+    {
+      "id": "update-tag",
+      "name": "Update Tag",
+      "description": "Update an existing tag",
+      "method": "PUT",
+      "path": "/tags/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_secret": { "type": "string", "required": true },
+          "tag": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Tag name" }
+            }
+          }
+        },
+        "required": ["api_secret"]
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/tags/{id}"
+    },
+    {
+      "id": "add-tag-subscriber",
+      "name": "Add Tag Subscriber",
+      "description": "Add a tag to a subscriber",
+      "method": "POST",
+      "path": "/tags/{tagId}/subscribe",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_secret": { "type": "string", "required": true },
+          "email": { "type": "string", "format": "email", "required": true },
+          "first_name": { "type": "string", "description": "First name" },
+          "fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["api_secret", "email"]
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/tags/{tagId}/subscribe"
+    },
+    {
+      "id": "remove-tag-subscriber",
+      "name": "Remove Tag Subscriber",
+      "description": "Remove a tag from a subscriber",
+      "method": "POST",
+      "path": "/tags/{tagId}/unsubscribe",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_secret": { "type": "string", "required": true },
+          "email": { "type": "string", "format": "email", "required": true }
+        },
+        "required": ["api_secret", "email"]
+      },
+      "urlTemplate": "https://api.convertkit.com/v3/tags/{tagId}/unsubscribe"
+    }
+  ]
+}
+

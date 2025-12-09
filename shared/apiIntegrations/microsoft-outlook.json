@@ -1,0 +1,475 @@
+{
+  "id": "microsoft-outlook",
+  "name": "Microsoft Outlook",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/microsoftoutlook/0078D4",
+  "description": "Email and calendar management",
+  "baseUrl": "https://graph.microsoft.com/v1.0",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {accessToken}",
+    "secretKey": "MICROSOFT_OUTLOOK_ACCESS_TOKEN",
+    "tokenUrl": "https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token",
+    "clientIdSecretKey": "MICROSOFT_OUTLOOK_CLIENT_ID",
+    "clientSecretSecretKey": "MICROSOFT_OUTLOOK_CLIENT_SECRET"
+  },
+  "endpoints": [
+    {
+      "id": "send-mail",
+      "name": "Send Mail",
+      "description": "Send an email",
+      "method": "POST",
+      "path": "/me/sendMail",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "object",
+            "properties": {
+              "subject": { "type": "string", "required": true, "description": "Email subject" },
+              "body": {
+                "type": "object",
+                "properties": {
+                  "contentType": { "type": "string", "enum": ["Text", "HTML"], "default": "HTML", "required": true },
+                  "content": { "type": "string", "required": true, "description": "Email body" }
+                },
+                "required": true
+              },
+              "toRecipients": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "emailAddress": {
+                      "type": "object",
+                      "properties": {
+                        "address": { "type": "string", "format": "email", "required": true },
+                        "name": { "type": "string" }
+                      },
+                      "required": true
+                    }
+                  },
+                  "required": true
+                },
+                "required": true
+              },
+              "ccRecipients": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "emailAddress": {
+                      "type": "object",
+                      "properties": {
+                        "address": { "type": "string", "format": "email", "required": true },
+                        "name": { "type": "string" }
+                      },
+                      "required": true
+                    }
+                  }
+                }
+              },
+              "bccRecipients": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "emailAddress": {
+                      "type": "object",
+                      "properties": {
+                        "address": { "type": "string", "format": "email", "required": true },
+                        "name": { "type": "string" }
+                      },
+                      "required": true
+                    }
+                  }
+                }
+              },
+              "importance": { "type": "string", "enum": ["low", "normal", "high"], "default": "normal" },
+              "isReadReceiptRequested": { "type": "boolean", "default": false },
+              "attachments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "@odata.type": { "type": "string", "default": "#microsoft.graph.fileAttachment" },
+                    "name": { "type": "string", "required": true },
+                    "contentBytes": { "type": "string", "required": true, "description": "Base64 encoded content" },
+                    "contentType": { "type": "string", "description": "MIME type" }
+                  },
+                  "required": ["name", "contentBytes"]
+                }
+              }
+            },
+            "required": true
+          },
+          "saveToSentItems": { "type": "boolean", "default": true, "description": "Save to sent items folder" }
+        },
+        "required": ["message"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/sendMail"
+    },
+    {
+      "id": "create-message",
+      "name": "Create Message",
+      "description": "Create a draft message",
+      "method": "POST",
+      "path": "/me/messages",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "description": "Email subject" },
+          "body": {
+            "type": "object",
+            "properties": {
+              "contentType": { "type": "string", "enum": ["Text", "HTML"], "default": "HTML" },
+              "content": { "type": "string" }
+            }
+          },
+          "toRecipients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "emailAddress": {
+                  "type": "object",
+                  "properties": {
+                    "address": { "type": "string", "format": "email", "required": true },
+                    "name": { "type": "string" }
+                  },
+                  "required": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/messages"
+    },
+    {
+      "id": "get-message",
+      "name": "Get Message",
+      "description": "Get message details by ID",
+      "method": "GET",
+      "path": "/me/messages/{id}",
+      "headers": {},
+      "queryParams": {
+        "$select": "id,subject,body,from,toRecipients,receivedDateTime"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/messages/{id}"
+    },
+    {
+      "id": "list-messages",
+      "name": "List Messages",
+      "description": "List messages in inbox",
+      "method": "GET",
+      "path": "/me/messages",
+      "headers": {},
+      "queryParams": {
+        "$top": "25",
+        "$filter": "{filter}",
+        "$orderby": "receivedDateTime desc",
+        "$select": "id,subject,from,receivedDateTime"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/messages"
+    },
+    {
+      "id": "update-message",
+      "name": "Update Message",
+      "description": "Update a message",
+      "method": "PATCH",
+      "path": "/me/messages/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string" },
+          "body": {
+            "type": "object",
+            "properties": {
+              "contentType": { "type": "string", "enum": ["Text", "HTML"] },
+              "content": { "type": "string" }
+            }
+          },
+          "isRead": { "type": "boolean", "description": "Mark as read/unread" }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/messages/{id}"
+    },
+    {
+      "id": "delete-message",
+      "name": "Delete Message",
+      "description": "Delete a message",
+      "method": "DELETE",
+      "path": "/me/messages/{id}",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/messages/{id}"
+    },
+    {
+      "id": "reply-to-message",
+      "name": "Reply to Message",
+      "description": "Reply to a message",
+      "method": "POST",
+      "path": "/me/messages/{id}/reply",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "object",
+            "properties": {
+              "body": {
+                "type": "object",
+                "properties": {
+                  "contentType": { "type": "string", "enum": ["Text", "HTML"], "default": "HTML", "required": true },
+                  "content": { "type": "string", "required": true }
+                },
+                "required": true
+              },
+              "toRecipients": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "emailAddress": {
+                      "type": "object",
+                      "properties": {
+                        "address": { "type": "string", "format": "email", "required": true }
+                      },
+                      "required": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "comment": { "type": "string", "description": "Reply comment" }
+        },
+        "required": ["message"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/messages/{id}/reply"
+    },
+    {
+      "id": "forward-message",
+      "name": "Forward Message",
+      "description": "Forward a message",
+      "method": "POST",
+      "path": "/me/messages/{id}/forward",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "object",
+            "properties": {
+              "toRecipients": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "emailAddress": {
+                      "type": "object",
+                      "properties": {
+                        "address": { "type": "string", "format": "email", "required": true },
+                        "name": { "type": "string" }
+                      },
+                      "required": true
+                    }
+                  },
+                  "required": true
+                },
+                "required": true
+              },
+              "comment": { "type": "string", "description": "Forward comment" }
+            },
+            "required": true
+          }
+        },
+        "required": ["message"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/messages/{id}/forward"
+    },
+    {
+      "id": "create-event",
+      "name": "Create Event",
+      "description": "Create a calendar event",
+      "method": "POST",
+      "path": "/me/events",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "required": true, "description": "Event subject" },
+          "body": {
+            "type": "object",
+            "properties": {
+              "contentType": { "type": "string", "enum": ["Text", "HTML"], "default": "HTML" },
+              "content": { "type": "string" }
+            }
+          },
+          "start": {
+            "type": "object",
+            "properties": {
+              "dateTime": { "type": "string", "format": "date-time", "required": true },
+              "timeZone": { "type": "string", "default": "UTC", "required": true }
+            },
+            "required": true
+          },
+          "end": {
+            "type": "object",
+            "properties": {
+              "dateTime": { "type": "string", "format": "date-time", "required": true },
+              "timeZone": { "type": "string", "default": "UTC", "required": true }
+            },
+            "required": true
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "displayName": { "type": "string" },
+              "address": {
+                "type": "object",
+                "properties": {
+                  "street": { "type": "string" },
+                  "city": { "type": "string" },
+                  "state": { "type": "string" },
+                  "countryOrRegion": { "type": "string" },
+                  "postalCode": { "type": "string" }
+                }
+              }
+            }
+          },
+          "attendees": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "emailAddress": {
+                  "type": "object",
+                  "properties": {
+                    "address": { "type": "string", "format": "email", "required": true },
+                    "name": { "type": "string" }
+                  },
+                  "required": true
+                },
+                "type": { "type": "string", "enum": ["required", "optional", "resource"], "default": "required" }
+              },
+              "required": true
+            }
+          },
+          "isAllDay": { "type": "boolean", "default": false },
+          "isOnlineMeeting": { "type": "boolean", "default": false },
+          "onlineMeetingProvider": { "type": "string", "enum": ["teamsForBusiness", "skypeForBusiness", "skypeForConsumer"] },
+          "reminderMinutesBeforeStart": { "type": "number", "default": 15, "description": "Reminder in minutes" },
+          "responseRequested": { "type": "boolean", "default": true }
+        },
+        "required": ["subject", "start", "end"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/events"
+    },
+    {
+      "id": "get-event",
+      "name": "Get Event",
+      "description": "Get event details by ID",
+      "method": "GET",
+      "path": "/me/events/{id}",
+      "headers": {},
+      "queryParams": {
+        "$select": "id,subject,start,end,location,attendees"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/events/{id}"
+    },
+    {
+      "id": "list-events",
+      "name": "List Events",
+      "description": "List calendar events",
+      "method": "GET",
+      "path": "/me/events",
+      "headers": {},
+      "queryParams": {
+        "$top": "25",
+        "$filter": "{filter}",
+        "$orderby": "start/dateTime",
+        "$select": "id,subject,start,end"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/events"
+    },
+    {
+      "id": "update-event",
+      "name": "Update Event",
+      "description": "Update a calendar event",
+      "method": "PATCH",
+      "path": "/me/events/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string" },
+          "start": {
+            "type": "object",
+            "properties": {
+              "dateTime": { "type": "string", "format": "date-time" },
+              "timeZone": { "type": "string" }
+            }
+          },
+          "end": {
+            "type": "object",
+            "properties": {
+              "dateTime": { "type": "string", "format": "date-time" },
+              "timeZone": { "type": "string" }
+            }
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "displayName": { "type": "string" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/events/{id}"
+    },
+    {
+      "id": "delete-event",
+      "name": "Delete Event",
+      "description": "Delete a calendar event",
+      "method": "DELETE",
+      "path": "/me/events/{id}",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/events/{id}"
+    },
+    {
+      "id": "get-me",
+      "name": "Get Me",
+      "description": "Get authenticated user details",
+      "method": "GET",
+      "path": "/me",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me"
+    }
+  ]
+}
+

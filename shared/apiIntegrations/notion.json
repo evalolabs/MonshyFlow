@@ -1,0 +1,347 @@
+{
+  "id": "notion",
+  "name": "Notion",
+  "icon": "📝",
+  "logoUrl": "https://cdn.simpleicons.org/notion/000000",
+  "description": "All-in-one workspace for notes, docs, and collaboration",
+  "baseUrl": "https://api.notion.com/v1",
+  "color": {
+    "bg": "from-stone-100 to-neutral-100",
+    "border": "border-stone-500",
+    "icon": "text-stone-700",
+    "handle": "bg-stone-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "NOTION_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "append-block-children",
+      "name": "Append Block Children",
+      "description": "Append children blocks to a block",
+      "method": "PATCH",
+      "path": "/blocks/{blockId}/children",
+      "headers": {
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Block object (varies by block type)"
+            },
+            "required": true,
+            "description": "Array of child blocks to append"
+          }
+        },
+        "required": ["children"]
+      },
+      "urlTemplate": "https://api.notion.com/v1/blocks/{blockId}/children"
+    },
+    {
+      "id": "get-block-children",
+      "name": "Get Block Children",
+      "description": "Get all children blocks of a block",
+      "method": "GET",
+      "path": "/blocks/{blockId}/children",
+      "headers": {
+        "Notion-Version": "2022-06-28"
+      },
+      "queryParams": {
+        "start_cursor": "{cursor}",
+        "page_size": "100"
+      },
+      "urlTemplate": "https://api.notion.com/v1/blocks/{blockId}/children"
+    },
+    {
+      "id": "get-block",
+      "name": "Get Block",
+      "description": "Get a block by ID",
+      "method": "GET",
+      "path": "/blocks/{blockId}",
+      "headers": {
+        "Notion-Version": "2022-06-28"
+      },
+      "urlTemplate": "https://api.notion.com/v1/blocks/{blockId}"
+    },
+    {
+      "id": "update-block",
+      "name": "Update Block",
+      "description": "Update a block",
+      "method": "PATCH",
+      "path": "/blocks/{blockId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "archived": { "type": "boolean", "description": "Archive the block" },
+          "type": { "type": "string", "description": "Block type" },
+          "properties": {
+            "type": "object",
+            "description": "Block properties (varies by block type)",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://api.notion.com/v1/blocks/{blockId}"
+    },
+    {
+      "id": "delete-block",
+      "name": "Delete Block",
+      "description": "Delete (archive) a block",
+      "method": "PATCH",
+      "path": "/blocks/{blockId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "archived": { "type": "boolean", "required": true, "description": "Set to true to archive/delete" }
+        },
+        "required": ["archived"]
+      },
+      "urlTemplate": "https://api.notion.com/v1/blocks/{blockId}"
+    },
+    {
+      "id": "create-database",
+      "name": "Create Database",
+      "description": "Create a new database",
+      "method": "POST",
+      "path": "/databases",
+      "headers": {
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "parent": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["page_id", "workspace"], "required": true },
+              "page_id": { "type": "string", "description": "Page ID if type is page_id" }
+            },
+            "required": true
+          },
+          "title": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "default": "text" },
+                "text": { "type": "object", "properties": { "content": { "type": "string" } } }
+              }
+            },
+            "required": true,
+            "description": "Database title"
+          },
+          "properties": {
+            "type": "object",
+            "required": true,
+            "description": "Database properties schema",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "enum": ["title", "rich_text", "number", "select", "multi_select", "date", "people", "files", "checkbox", "url", "email", "phone_number", "formula", "relation", "rollup", "created_time", "created_by", "last_edited_time", "last_edited_by"] },
+                "name": { "type": "string" }
+              }
+            }
+          }
+        },
+        "required": ["parent", "title", "properties"]
+      },
+      "urlTemplate": "https://api.notion.com/v1/databases"
+    },
+    {
+      "id": "get-database",
+      "name": "Get Database",
+      "description": "Get a database by ID",
+      "method": "GET",
+      "path": "/databases/{databaseId}",
+      "headers": {
+        "Notion-Version": "2022-06-28"
+      },
+      "urlTemplate": "https://api.notion.com/v1/databases/{databaseId}"
+    },
+    {
+      "id": "query-database",
+      "name": "Query Database",
+      "description": "Query a database with filters and sorts",
+      "method": "POST",
+      "path": "/databases/{databaseId}/query",
+      "headers": {
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "filter": {
+            "type": "object",
+            "description": "Filter object (varies by property type)"
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "property": { "type": "string" },
+                "direction": { "type": "string", "enum": ["ascending", "descending"] }
+              }
+            },
+            "description": "Sort options"
+          },
+          "start_cursor": { "type": "string", "description": "Pagination cursor" },
+          "page_size": { "type": "number", "description": "Number of results (max 100)", "default": 100 }
+        }
+      },
+      "urlTemplate": "https://api.notion.com/v1/databases/{databaseId}/query"
+    },
+    {
+      "id": "update-database",
+      "name": "Update Database",
+      "description": "Update a database",
+      "method": "PATCH",
+      "path": "/databases/{databaseId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "default": "text" },
+                "text": { "type": "object", "properties": { "content": { "type": "string" } } }
+              }
+            },
+            "description": "Database title"
+          },
+          "properties": {
+            "type": "object",
+            "description": "Database properties to update",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://api.notion.com/v1/databases/{databaseId}"
+    },
+    {
+      "id": "create-page",
+      "name": "Create Page",
+      "description": "Create a new page",
+      "method": "POST",
+      "path": "/pages",
+      "headers": {
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "parent": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["page_id", "database_id", "workspace"], "required": true },
+              "page_id": { "type": "string", "description": "Page ID if type is page_id" },
+              "database_id": { "type": "string", "description": "Database ID if type is database_id" }
+            },
+            "required": true
+          },
+          "properties": {
+            "type": "object",
+            "required": true,
+            "description": "Page properties",
+            "additionalProperties": {
+              "type": "object",
+              "description": "Property object (varies by property type)"
+            }
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Block object"
+            },
+            "description": "Initial blocks for the page"
+          }
+        },
+        "required": ["parent", "properties"]
+      },
+      "urlTemplate": "https://api.notion.com/v1/pages"
+    },
+    {
+      "id": "get-page",
+      "name": "Get Page",
+      "description": "Get a page by ID",
+      "method": "GET",
+      "path": "/pages/{pageId}",
+      "headers": {
+        "Notion-Version": "2022-06-28"
+      },
+      "urlTemplate": "https://api.notion.com/v1/pages/{pageId}"
+    },
+    {
+      "id": "update-page",
+      "name": "Update Page",
+      "description": "Update a page",
+      "method": "PATCH",
+      "path": "/pages/{pageId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "properties": {
+            "type": "object",
+            "description": "Page properties to update",
+            "additionalProperties": {
+              "type": "object",
+              "description": "Property object"
+            }
+          },
+          "archived": { "type": "boolean", "description": "Archive the page" }
+        }
+      },
+      "urlTemplate": "https://api.notion.com/v1/pages/{pageId}"
+    },
+    {
+      "id": "archive-page",
+      "name": "Archive Page",
+      "description": "Archive (delete) a page",
+      "method": "PATCH",
+      "path": "/pages/{pageId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "archived": { "type": "boolean", "required": true, "description": "Set to true to archive" }
+        },
+        "required": ["archived"]
+      },
+      "urlTemplate": "https://api.notion.com/v1/pages/{pageId}"
+    }
+  ]
+}
+

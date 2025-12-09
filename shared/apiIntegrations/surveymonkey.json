@@ -1,0 +1,241 @@
+{
+  "id": "surveymonkey",
+  "name": "SurveyMonkey",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/surveymonkey/DA291C",
+  "description": "Online survey and questionnaire platform",
+  "baseUrl": "https://api.surveymonkey.com/v3",
+  "color": {
+    "bg": "from-red-100 to-rose-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "SURVEYMONKEY_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-survey",
+      "name": "Create Survey",
+      "description": "Create a new survey",
+      "method": "POST",
+      "path": "/surveys",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Survey title" },
+          "nickname": { "type": "string", "description": "Survey nickname" },
+          "language": { "type": "string", "default": "en", "description": "Language code" },
+          "category": { "type": "string", "description": "Category ID" },
+          "question_count": { "type": "integer", "default": 0, "description": "Question count" },
+          "page_count": { "type": "integer", "default": 1, "description": "Page count" },
+          "date_created": { "type": "string", "format": "date-time", "description": "Creation date (ISO 8601)" },
+          "date_modified": { "type": "string", "format": "date-time", "description": "Modification date (ISO 8601)" },
+          "buttons_text": {
+            "type": "object",
+            "properties": {
+              "done_button": { "type": "string", "description": "Done button text" },
+              "prev_button": { "type": "string", "description": "Previous button text" },
+              "exit_button": { "type": "string", "description": "Exit button text" },
+              "next_button": { "type": "string", "description": "Next button text" }
+            },
+            "description": "Button texts"
+          },
+          "is_owner": { "type": "boolean", "default": true, "description": "Is owner" },
+          "folder_id": { "type": "string", "description": "Folder ID" },
+          "preview": { "type": "string", "format": "uri", "description": "Preview URL" },
+          "edit_url": { "type": "string", "format": "uri", "description": "Edit URL" },
+          "collect_url": { "type": "string", "format": "uri", "description": "Collect URL" },
+          "analyze_url": { "type": "string", "format": "uri", "description": "Analyze URL" },
+          "summary_url": { "type": "string", "format": "uri", "description": "Summary URL" },
+          "href": { "type": "string", "format": "uri", "description": "Survey URL" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://api.surveymonkey.com/v3/surveys"
+    },
+    {
+      "id": "get-survey",
+      "name": "Get Survey",
+      "description": "Get survey by ID",
+      "method": "GET",
+      "path": "/surveys/{surveyId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.surveymonkey.com/v3/surveys/{surveyId}"
+    },
+    {
+      "id": "list-surveys",
+      "name": "List Surveys",
+      "description": "List all surveys",
+      "method": "GET",
+      "path": "/surveys",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "title": { "type": "string", "description": "Filter by title" },
+        "start_modified_at": { "type": "string", "format": "date-time", "description": "Start modification date" },
+        "end_modified_at": { "type": "string", "format": "date-time", "description": "End modification date" },
+        "per_page": { "type": "integer", "default": 1000, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "sort_by": { "type": "string", "enum": ["title", "date_modified", "num_responses"], "default": "title", "description": "Sort field" },
+        "sort_order": { "type": "string", "enum": ["ASC", "DESC"], "default": "ASC", "description": "Sort order" }
+      },
+      "urlTemplate": "https://api.surveymonkey.com/v3/surveys"
+    },
+    {
+      "id": "update-survey",
+      "name": "Update Survey",
+      "description": "Update a survey",
+      "method": "PATCH",
+      "path": "/surveys/{surveyId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Survey title" },
+          "nickname": { "type": "string", "description": "Survey nickname" },
+          "language": { "type": "string", "description": "Language code" },
+          "category": { "type": "string", "description": "Category ID" },
+          "buttons_text": {
+            "type": "object",
+            "properties": {
+              "done_button": { "type": "string" },
+              "prev_button": { "type": "string" },
+              "exit_button": { "type": "string" },
+              "next_button": { "type": "string" }
+            }
+          },
+          "folder_id": { "type": "string", "description": "Folder ID" }
+        }
+      },
+      "urlTemplate": "https://api.surveymonkey.com/v3/surveys/{surveyId}"
+    },
+    {
+      "id": "create-collector",
+      "name": "Create Collector",
+      "description": "Create a new collector",
+      "method": "POST",
+      "path": "/surveys/{surveyId}/collectors",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["email", "weblink", "sms"], "required": true, "description": "Collector type" },
+          "name": { "type": "string", "description": "Collector name" },
+          "thank_you_message": { "type": "string", "description": "Thank you message" },
+          "disqualification_message": { "type": "string", "description": "Disqualification message" },
+          "close_date": { "type": "string", "format": "date-time", "description": "Close date (ISO 8601)" },
+          "closed_page_message": { "type": "string", "description": "Closed page message" },
+          "redirect_url": { "type": "string", "format": "uri", "description": "Redirect URL" },
+          "display_survey_results": { "type": "boolean", "default": false, "description": "Display survey results" },
+          "anonymous_type": { "type": "string", "enum": ["not_anonymous", "fully_anonymous", "partially_anonymous"], "default": "not_anonymous", "description": "Anonymous type" },
+          "allow_multiple_responses": { "type": "boolean", "default": false, "description": "Allow multiple responses" },
+          "response_limit": { "type": "integer", "description": "Response limit" }
+        },
+        "required": ["type"]
+      },
+      "urlTemplate": "https://api.surveymonkey.com/v3/surveys/{surveyId}/collectors"
+    },
+    {
+      "id": "get-collector",
+      "name": "Get Collector",
+      "description": "Get collector by ID",
+      "method": "GET",
+      "path": "/collectors/{collectorId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.surveymonkey.com/v3/collectors/{collectorId}"
+    },
+    {
+      "id": "list-collectors",
+      "name": "List Collectors",
+      "description": "List all collectors for a survey",
+      "method": "GET",
+      "path": "/surveys/{surveyId}/collectors",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "per_page": { "type": "integer", "default": 1000, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://api.surveymonkey.com/v3/surveys/{surveyId}/collectors"
+    },
+    {
+      "id": "update-collector",
+      "name": "Update Collector",
+      "description": "Update a collector",
+      "method": "PATCH",
+      "path": "/collectors/{collectorId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Collector name" },
+          "thank_you_message": { "type": "string", "description": "Thank you message" },
+          "disqualification_message": { "type": "string", "description": "Disqualification message" },
+          "close_date": { "type": "string", "format": "date-time", "description": "Close date" },
+          "closed_page_message": { "type": "string", "description": "Closed page message" },
+          "redirect_url": { "type": "string", "format": "uri", "description": "Redirect URL" },
+          "display_survey_results": { "type": "boolean", "description": "Display survey results" },
+          "anonymous_type": { "type": "string", "enum": ["not_anonymous", "fully_anonymous", "partially_anonymous"], "description": "Anonymous type" },
+          "allow_multiple_responses": { "type": "boolean", "description": "Allow multiple responses" },
+          "response_limit": { "type": "integer", "description": "Response limit" }
+        }
+      },
+      "urlTemplate": "https://api.surveymonkey.com/v3/collectors/{collectorId}"
+    },
+    {
+      "id": "get-response",
+      "name": "Get Response",
+      "description": "Get response by ID",
+      "method": "GET",
+      "path": "/collectors/{collectorId}/responses/{responseId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.surveymonkey.com/v3/collectors/{collectorId}/responses/{responseId}"
+    },
+    {
+      "id": "list-responses",
+      "name": "List Responses",
+      "description": "List all responses for a collector",
+      "method": "GET",
+      "path": "/collectors/{collectorId}/responses",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "per_page": { "type": "integer", "default": 1000, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "start_modified_at": { "type": "string", "format": "date-time", "description": "Start modification date" },
+        "end_modified_at": { "type": "string", "format": "date-time", "description": "End modification date" },
+        "sort_by": { "type": "string", "enum": ["date_modified", "response_status"], "default": "date_modified", "description": "Sort field" },
+        "sort_order": { "type": "string", "enum": ["ASC", "DESC"], "default": "DESC", "description": "Sort order" }
+      },
+      "urlTemplate": "https://api.surveymonkey.com/v3/collectors/{collectorId}/responses"
+    }
+  ]
+}
+

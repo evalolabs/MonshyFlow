@@ -1,0 +1,519 @@
+{
+  "id": "sendgrid",
+  "name": "SendGrid",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/sendgrid/1A82E2",
+  "description": "Email delivery and marketing platform",
+  "baseUrl": "https://api.sendgrid.com/v3",
+  "color": {
+    "bg": "from-sky-100 to-blue-100",
+    "border": "border-sky-500",
+    "icon": "text-sky-700",
+    "handle": "bg-sky-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "SENDGRID_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "send-email",
+      "name": "Send Email",
+      "description": "Send a single email",
+      "method": "POST",
+      "path": "/mail/send",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "personalizations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "to": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "email": { "type": "string", "format": "email", "required": true },
+                      "name": { "type": "string" }
+                    },
+                    "required": ["email"]
+                  },
+                  "required": true
+                },
+                "cc": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "email": { "type": "string", "format": "email" },
+                      "name": { "type": "string" }
+                    }
+                  }
+                },
+                "bcc": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "email": { "type": "string", "format": "email" },
+                      "name": { "type": "string" }
+                    }
+                  }
+                },
+                "subject": { "type": "string", "required": true },
+                "substitutions": {
+                  "type": "object",
+                  "additionalProperties": { "type": "string" }
+                },
+                "custom_args": {
+                  "type": "object",
+                  "additionalProperties": { "type": "string" }
+                }
+              },
+              "required": ["to", "subject"]
+            },
+            "required": true
+          },
+          "from": {
+            "type": "object",
+            "properties": {
+              "email": { "type": "string", "format": "email", "required": true },
+              "name": { "type": "string" }
+            },
+            "required": true
+          },
+          "reply_to": {
+            "type": "object",
+            "properties": {
+              "email": { "type": "string", "format": "email" },
+              "name": { "type": "string" }
+            }
+          },
+          "subject": { "type": "string", "description": "Global subject (if not in personalizations)" },
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "enum": ["text/plain", "text/html"], "required": true },
+                "value": { "type": "string", "required": true }
+              },
+              "required": ["type", "value"]
+            },
+            "required": true
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "content": { "type": "string", "required": true, "description": "Base64 encoded content" },
+                "type": { "type": "string", "description": "MIME type" },
+                "filename": { "type": "string", "required": true },
+                "disposition": { "type": "string", "enum": ["attachment", "inline"], "default": "attachment" },
+                "content_id": { "type": "string", "description": "For inline attachments" }
+              },
+              "required": ["content", "filename"]
+            }
+          },
+          "categories": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Categories for tracking"
+          },
+          "custom_args": {
+            "type": "object",
+            "additionalProperties": { "type": "string" },
+            "description": "Global custom arguments"
+          },
+          "send_at": { "type": "number", "description": "Unix timestamp for scheduled send" },
+          "batch_id": { "type": "string", "description": "Batch ID for canceling scheduled sends" },
+          "asm": {
+            "type": "object",
+            "properties": {
+              "group_id": { "type": "number", "required": true },
+              "groups_to_display": { "type": "array", "items": { "type": "number" } }
+            },
+            "description": "Advanced suppression management"
+          },
+          "ip_pool_name": { "type": "string", "description": "IP pool name" },
+          "mail_settings": {
+            "type": "object",
+            "properties": {
+              "bcc": {
+                "type": "object",
+                "properties": {
+                  "enable": { "type": "boolean" },
+                  "email": { "type": "string", "format": "email" }
+                }
+              },
+              "bypass_list_management": { "type": "boolean" },
+              "footer": {
+                "type": "object",
+                "properties": {
+                  "enable": { "type": "boolean" },
+                  "text": { "type": "string" },
+                  "html": { "type": "string" }
+                }
+              },
+              "sandbox_mode": { "type": "boolean" },
+              "spam_check": {
+                "type": "object",
+                "properties": {
+                  "enable": { "type": "boolean" },
+                  "threshold": { "type": "number" },
+                  "post_to_url": { "type": "string" }
+                }
+              }
+            }
+          },
+          "tracking_settings": {
+            "type": "object",
+            "properties": {
+              "click_tracking": {
+                "type": "object",
+                "properties": {
+                  "enable": { "type": "boolean" },
+                  "enable_text": { "type": "boolean" }
+                }
+              },
+              "open_tracking": {
+                "type": "object",
+                "properties": {
+                  "enable": { "type": "boolean" },
+                  "substitution_tag": { "type": "string" }
+                }
+              },
+              "subscription_tracking": {
+                "type": "object",
+                "properties": {
+                  "enable": { "type": "boolean" },
+                  "text": { "type": "string" },
+                  "html": { "type": "string" },
+                  "substitution_tag": { "type": "string" }
+                }
+              },
+              "ganalytics": {
+                "type": "object",
+                "properties": {
+                  "enable": { "type": "boolean" },
+                  "utm_source": { "type": "string" },
+                  "utm_medium": { "type": "string" },
+                  "utm_campaign": { "type": "string" },
+                  "utm_term": { "type": "string" },
+                  "utm_content": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "required": ["personalizations", "from", "content"]
+      },
+      "urlTemplate": "https://api.sendgrid.com/v3/mail/send"
+    },
+    {
+      "id": "add-contact",
+      "name": "Add Contact",
+      "description": "Add a contact to Marketing Contacts",
+      "method": "PUT",
+      "path": "/marketing/contacts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "contacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email", "required": true },
+                "first_name": { "type": "string" },
+                "last_name": { "type": "string" },
+                "phone_number": { "type": "string" },
+                "address_line_1": { "type": "string" },
+                "address_line_2": { "type": "string" },
+                "city": { "type": "string" },
+                "state_province_region": { "type": "string" },
+                "postal_code": { "type": "string" },
+                "country": { "type": "string" },
+                "custom_fields": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "list_ids": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              },
+              "required": ["email"]
+            },
+            "required": true
+          },
+          "list_ids": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Global list IDs for all contacts"
+          }
+        },
+        "required": ["contacts"]
+      },
+      "urlTemplate": "https://api.sendgrid.com/v3/marketing/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact details by email",
+      "method": "GET",
+      "path": "/marketing/contacts",
+      "headers": {},
+      "queryParams": {
+        "email": "{email}"
+      },
+      "urlTemplate": "https://api.sendgrid.com/v3/marketing/contacts?email={email}"
+    },
+    {
+      "id": "search-contacts",
+      "name": "Search Contacts",
+      "description": "Search contacts with query",
+      "method": "POST",
+      "path": "/marketing/contacts/search",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "required": true, "description": "Search query (e.g., 'email LIKE \"%@example.com\"')" },
+          "limit": { "type": "number", "default": 50, "description": "Number of results" }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.sendgrid.com/v3/marketing/contacts/search"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update a contact",
+      "method": "PATCH",
+      "path": "/marketing/contacts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email", "required": true },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "phone_number": { "type": "string" },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "list_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["email"]
+      },
+      "urlTemplate": "https://api.sendgrid.com/v3/marketing/contacts"
+    },
+    {
+      "id": "delete-contact",
+      "name": "Delete Contact",
+      "description": "Delete a contact by email",
+      "method": "DELETE",
+      "path": "/marketing/contacts",
+      "headers": {},
+      "queryParams": {
+        "ids": "{email}"
+      },
+      "urlTemplate": "https://api.sendgrid.com/v3/marketing/contacts?ids={email}"
+    },
+    {
+      "id": "create-list",
+      "name": "Create List",
+      "description": "Create a new contact list",
+      "method": "POST",
+      "path": "/marketing/lists",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "List name" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.sendgrid.com/v3/marketing/lists"
+    },
+    {
+      "id": "get-list",
+      "name": "Get List",
+      "description": "Get list details by ID",
+      "method": "GET",
+      "path": "/marketing/lists/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.sendgrid.com/v3/marketing/lists/{id}"
+    },
+    {
+      "id": "list-lists",
+      "name": "List Lists",
+      "description": "List all contact lists",
+      "method": "GET",
+      "path": "/marketing/lists",
+      "headers": {},
+      "queryParams": {
+        "page_size": "100",
+        "page_token": "{pageToken}"
+      },
+      "urlTemplate": "https://api.sendgrid.com/v3/marketing/lists"
+    },
+    {
+      "id": "update-list",
+      "name": "Update List",
+      "description": "Update a list",
+      "method": "PATCH",
+      "path": "/marketing/lists/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "List name" }
+        }
+      },
+      "urlTemplate": "https://api.sendgrid.com/v3/marketing/lists/{id}"
+    },
+    {
+      "id": "delete-list",
+      "name": "Delete List",
+      "description": "Delete a list",
+      "method": "DELETE",
+      "path": "/marketing/lists/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.sendgrid.com/v3/marketing/lists/{id}"
+    },
+    {
+      "id": "add-contacts-to-list",
+      "name": "Add Contacts to List",
+      "description": "Add contacts to a list",
+      "method": "POST",
+      "path": "/marketing/lists/{id}/contacts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "contact_ids": {
+            "type": "array",
+            "items": { "type": "string" },
+            "required": true,
+            "description": "Contact IDs or emails"
+          }
+        },
+        "required": ["contact_ids"]
+      },
+      "urlTemplate": "https://api.sendgrid.com/v3/marketing/lists/{id}/contacts"
+    },
+    {
+      "id": "remove-contacts-from-list",
+      "name": "Remove Contacts from List",
+      "description": "Remove contacts from a list",
+      "method": "DELETE",
+      "path": "/marketing/lists/{id}/contacts",
+      "headers": {},
+      "queryParams": {
+        "contact_ids": "{contactIds}"
+      },
+      "urlTemplate": "https://api.sendgrid.com/v3/marketing/lists/{id}/contacts?contact_ids={contactIds}"
+    },
+    {
+      "id": "create-sender-identity",
+      "name": "Create Sender Identity",
+      "description": "Create a new sender identity",
+      "method": "POST",
+      "path": "/verified_senders",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "nickname": { "type": "string", "required": true, "description": "Sender nickname" },
+          "from": {
+            "type": "object",
+            "properties": {
+              "email": { "type": "string", "format": "email", "required": true },
+              "name": { "type": "string" }
+            },
+            "required": true
+          },
+          "reply_to": {
+            "type": "object",
+            "properties": {
+              "email": { "type": "string", "format": "email", "required": true },
+              "name": { "type": "string" }
+            },
+            "required": true
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "address": { "type": "string", "required": true },
+              "address2": { "type": "string" },
+              "city": { "type": "string", "required": true },
+              "state": { "type": "string", "required": true },
+              "zip": { "type": "string", "required": true },
+              "country": { "type": "string", "required": true }
+            },
+            "required": true
+          }
+        },
+        "required": ["nickname", "from", "reply_to", "address"]
+      },
+      "urlTemplate": "https://api.sendgrid.com/v3/verified_senders"
+    },
+    {
+      "id": "get-sender-identity",
+      "name": "Get Sender Identity",
+      "description": "Get sender identity by ID",
+      "method": "GET",
+      "path": "/verified_senders/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.sendgrid.com/v3/verified_senders/{id}"
+    },
+    {
+      "id": "list-sender-identities",
+      "name": "List Sender Identities",
+      "description": "List all sender identities",
+      "method": "GET",
+      "path": "/verified_senders",
+      "headers": {},
+      "urlTemplate": "https://api.sendgrid.com/v3/verified_senders"
+    },
+    {
+      "id": "delete-sender-identity",
+      "name": "Delete Sender Identity",
+      "description": "Delete a sender identity",
+      "method": "DELETE",
+      "path": "/verified_senders/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.sendgrid.com/v3/verified_senders/{id}"
+    }
+  ]
+}
+

@@ -1,0 +1,458 @@
+{
+  "id": "paypal",
+  "name": "PayPal",
+  "icon": "💳",
+  "logoUrl": "https://cdn.simpleicons.org/paypal/00457C",
+  "description": "Payment processing and money transfer platform",
+  "baseUrl": "https://api-m.paypal.com",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {accessToken}",
+    "secretKey": "PAYPAL_ACCESS_TOKEN",
+    "tokenUrl": "https://api-m.paypal.com/v1/oauth2/token",
+    "clientIdSecretKey": "PAYPAL_CLIENT_ID",
+    "clientSecretSecretKey": "PAYPAL_CLIENT_SECRET"
+  },
+  "endpoints": [
+    {
+      "id": "create-order",
+      "name": "Create Order",
+      "description": "Create a new payment order",
+      "method": "POST",
+      "path": "/v2/checkout/orders",
+      "headers": {
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "intent": { "type": "string", "enum": ["CAPTURE", "AUTHORIZE"], "required": true, "description": "Payment intent" },
+          "purchase_units": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "reference_id": { "type": "string", "description": "Reference ID" },
+                "amount": {
+                  "type": "object",
+                  "properties": {
+                    "currency_code": { "type": "string", "required": true, "description": "Currency code (e.g., USD, EUR)" },
+                    "value": { "type": "string", "required": true, "description": "Amount value" },
+                    "breakdown": {
+                      "type": "object",
+                      "properties": {
+                        "item_total": {
+                          "type": "object",
+                          "properties": {
+                            "currency_code": { "type": "string" },
+                            "value": { "type": "string" }
+                          }
+                        },
+                        "shipping": {
+                          "type": "object",
+                          "properties": {
+                            "currency_code": { "type": "string" },
+                            "value": { "type": "string" }
+                          }
+                        },
+                        "handling": {
+                          "type": "object",
+                          "properties": {
+                            "currency_code": { "type": "string" },
+                            "value": { "type": "string" }
+                          }
+                        },
+                        "tax_total": {
+                          "type": "object",
+                          "properties": {
+                            "currency_code": { "type": "string" },
+                            "value": { "type": "string" }
+                          }
+                        },
+                        "discount": {
+                          "type": "object",
+                          "properties": {
+                            "currency_code": { "type": "string" },
+                            "value": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": true
+                },
+                "description": { "type": "string", "description": "Purchase unit description" },
+                "custom_id": { "type": "string", "description": "Custom ID" },
+                "invoice_id": { "type": "string", "description": "Invoice ID" },
+                "soft_descriptor": { "type": "string", "description": "Soft descriptor" },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string", "required": true },
+                      "unit_amount": {
+                        "type": "object",
+                        "properties": {
+                          "currency_code": { "type": "string", "required": true },
+                          "value": { "type": "string", "required": true }
+                        },
+                        "required": true
+                      },
+                      "tax": {
+                        "type": "object",
+                        "properties": {
+                          "currency_code": { "type": "string" },
+                          "value": { "type": "string" }
+                        }
+                      },
+                      "quantity": { "type": "string", "required": true },
+                      "description": { "type": "string" },
+                      "sku": { "type": "string" },
+                      "category": { "type": "string", "enum": ["DIGITAL_GOODS", "PHYSICAL_GOODS"] }
+                    },
+                    "required": ["name", "unit_amount", "quantity"]
+                  }
+                },
+                "shipping": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "object",
+                      "properties": {
+                        "full_name": { "type": "string" }
+                      }
+                    },
+                    "address": {
+                      "type": "object",
+                      "properties": {
+                        "address_line_1": { "type": "string" },
+                        "address_line_2": { "type": "string" },
+                        "admin_area_2": { "type": "string", "description": "City" },
+                        "admin_area_1": { "type": "string", "description": "State" },
+                        "postal_code": { "type": "string" },
+                        "country_code": { "type": "string", "required": true }
+                      },
+                      "required": ["country_code"]
+                    }
+                  }
+                }
+              },
+              "required": ["amount"]
+            },
+            "required": true
+          },
+          "application_context": {
+            "type": "object",
+            "properties": {
+              "brand_name": { "type": "string", "description": "Brand name" },
+              "locale": { "type": "string", "description": "Locale (e.g., en-US)" },
+              "landing_page": { "type": "string", "enum": ["LOGIN", "BILLING", "NO_PREFERENCE"], "description": "Landing page type" },
+              "shipping_preference": { "type": "string", "enum": ["GET_FROM_FILE", "NO_SHIPPING", "SET_PROVIDED_ADDRESS"], "description": "Shipping preference" },
+              "user_action": { "type": "string", "enum": ["CONTINUE", "PAY_NOW"], "description": "User action", "default": "CONTINUE" },
+              "payment_method": {
+                "type": "object",
+                "properties": {
+                  "payer_selected": { "type": "string", "enum": ["PAYPAL"] },
+                  "payee_preferred": { "type": "string", "enum": ["UNRESTRICTED", "IMMEDIATE_PAYMENT_REQUIRED"] }
+                }
+              },
+              "return_url": { "type": "string", "format": "uri", "description": "Return URL" },
+              "cancel_url": { "type": "string", "format": "uri", "description": "Cancel URL" }
+            }
+          },
+          "payment_source": {
+            "type": "object",
+            "properties": {
+              "paypal": {
+                "type": "object",
+                "properties": {
+                  "experience_context": {
+                    "type": "object",
+                    "properties": {
+                      "payment_method_preference": { "type": "string", "enum": ["UNRESTRICTED", "IMMEDIATE_PAYMENT_REQUIRED"] },
+                      "brand_name": { "type": "string" },
+                      "locale": { "type": "string" },
+                      "landing_page": { "type": "string", "enum": ["LOGIN", "BILLING", "NO_PREFERENCE"] },
+                      "shipping_preference": { "type": "string", "enum": ["GET_FROM_FILE", "NO_SHIPPING", "SET_PROVIDED_ADDRESS"] },
+                      "user_action": { "type": "string", "enum": ["CONTINUE", "PAY_NOW"] },
+                      "return_url": { "type": "string", "format": "uri" },
+                      "cancel_url": { "type": "string", "format": "uri" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": ["intent", "purchase_units"]
+      },
+      "urlTemplate": "https://api-m.paypal.com/v2/checkout/orders"
+    },
+    {
+      "id": "get-order",
+      "name": "Get Order",
+      "description": "Get order details by ID",
+      "method": "GET",
+      "path": "/v2/checkout/orders/{id}",
+      "headers": {},
+      "urlTemplate": "https://api-m.paypal.com/v2/checkout/orders/{id}"
+    },
+    {
+      "id": "capture-order",
+      "name": "Capture Order",
+      "description": "Capture payment for an authorized order",
+      "method": "POST",
+      "path": "/v2/checkout/orders/{id}/capture",
+      "headers": {
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "payment_source": {
+            "type": "object",
+            "description": "Payment source"
+          },
+          "processing_instruction": { "type": "string", "enum": ["ORDER_COMPLETE_ON_PAYMENT_APPROVAL", "NO_INSTRUCTION"], "description": "Processing instruction" },
+          "application_context": {
+            "type": "object",
+            "properties": {
+              "brand_name": { "type": "string" },
+              "locale": { "type": "string" },
+              "landing_page": { "type": "string", "enum": ["LOGIN", "BILLING", "NO_PREFERENCE"] }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api-m.paypal.com/v2/checkout/orders/{id}/capture"
+    },
+    {
+      "id": "authorize-order",
+      "name": "Authorize Order",
+      "description": "Authorize payment for an order",
+      "method": "POST",
+      "path": "/v2/checkout/orders/{id}/authorize",
+      "headers": {
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "payment_source": {
+            "type": "object",
+            "description": "Payment source"
+          },
+          "processing_instruction": { "type": "string", "enum": ["ORDER_COMPLETE_ON_PAYMENT_APPROVAL", "NO_INSTRUCTION"] },
+          "application_context": {
+            "type": "object",
+            "properties": {
+              "brand_name": { "type": "string" },
+              "locale": { "type": "string" },
+              "landing_page": { "type": "string", "enum": ["LOGIN", "BILLING", "NO_PREFERENCE"] }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api-m.paypal.com/v2/checkout/orders/{id}/authorize"
+    },
+    {
+      "id": "refund-payment",
+      "name": "Refund Payment",
+      "description": "Refund a captured payment",
+      "method": "POST",
+      "path": "/v2/payments/captures/{id}/refund",
+      "headers": {
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "object",
+            "properties": {
+              "currency_code": { "type": "string", "required": true },
+              "value": { "type": "string", "required": true }
+            },
+            "description": "Partial refund amount (optional for full refund)"
+          },
+          "invoice_id": { "type": "string", "description": "Invoice ID" },
+          "note_to_payer": { "type": "string", "description": "Note to payer" }
+        }
+      },
+      "urlTemplate": "https://api-m.paypal.com/v2/payments/captures/{id}/refund"
+    },
+    {
+      "id": "create-payout",
+      "name": "Create Payout",
+      "description": "Create a batch payout",
+      "method": "POST",
+      "path": "/v1/payments/payouts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "sender_batch_header": {
+            "type": "object",
+            "properties": {
+              "sender_batch_id": { "type": "string", "description": "Unique batch ID" },
+              "email_subject": { "type": "string", "required": true, "description": "Email subject" },
+              "email_message": { "type": "string", "description": "Email message" }
+            },
+            "required": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "recipient_type": { "type": "string", "enum": ["EMAIL", "PHONE", "PAYPAL_ID"], "default": "EMAIL" },
+                "amount": {
+                  "type": "object",
+                  "properties": {
+                    "value": { "type": "string", "required": true },
+                    "currency": { "type": "string", "required": true }
+                  },
+                  "required": true
+                },
+                "note": { "type": "string", "description": "Note to recipient" },
+                "sender_item_id": { "type": "string", "description": "Sender item ID" },
+                "receiver": { "type": "string", "required": true, "description": "Recipient email, phone, or PayPal ID" },
+                "recipient_wallet": { "type": "string", "enum": ["PAYPAL"], "description": "Recipient wallet" }
+              },
+              "required": ["amount", "receiver"]
+            },
+            "required": true
+          }
+        },
+        "required": ["sender_batch_header", "items"]
+      },
+      "urlTemplate": "https://api-m.paypal.com/v1/payments/payouts"
+    },
+    {
+      "id": "get-payout",
+      "name": "Get Payout",
+      "description": "Get payout details by batch ID",
+      "method": "GET",
+      "path": "/v1/payments/payouts/{id}",
+      "headers": {},
+      "urlTemplate": "https://api-m.paypal.com/v1/payments/payouts/{id}"
+    },
+    {
+      "id": "get-payout-item",
+      "name": "Get Payout Item",
+      "description": "Get payout item details by ID",
+      "method": "GET",
+      "path": "/v1/payments/payouts-item/{id}",
+      "headers": {},
+      "urlTemplate": "https://api-m.paypal.com/v1/payments/payouts-item/{id}"
+    },
+    {
+      "id": "cancel-payout-item",
+      "name": "Cancel Payout Item",
+      "description": "Cancel an unclaimed payout item",
+      "method": "POST",
+      "path": "/v1/payments/payouts-item/{id}/cancel",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "urlTemplate": "https://api-m.paypal.com/v2/payments/payouts-item/{id}/cancel"
+    },
+    {
+      "id": "create-webhook",
+      "name": "Create Webhook",
+      "description": "Create a webhook for event notifications",
+      "method": "POST",
+      "path": "/v1/notifications/webhooks",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "format": "uri", "required": true, "description": "Webhook URL" },
+          "event_types": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "required": true, "description": "Event type name (e.g., PAYMENT.CAPTURE.COMPLETED)" }
+              },
+              "required": ["name"]
+            },
+            "required": true
+          }
+        },
+        "required": ["url", "event_types"]
+      },
+      "urlTemplate": "https://api-m.paypal.com/v1/notifications/webhooks"
+    },
+    {
+      "id": "list-webhooks",
+      "name": "List Webhooks",
+      "description": "List all webhooks",
+      "method": "GET",
+      "path": "/v1/notifications/webhooks",
+      "headers": {},
+      "urlTemplate": "https://api-m.paypal.com/v1/notifications/webhooks"
+    },
+    {
+      "id": "get-webhook",
+      "name": "Get Webhook",
+      "description": "Get webhook details by ID",
+      "method": "GET",
+      "path": "/v1/notifications/webhooks/{id}",
+      "headers": {},
+      "urlTemplate": "https://api-m.paypal.com/v2/notifications/webhooks/{id}"
+    },
+    {
+      "id": "update-webhook",
+      "name": "Update Webhook",
+      "description": "Update a webhook",
+      "method": "PATCH",
+      "path": "/v1/notifications/webhooks/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "op": { "type": "string", "enum": ["add", "remove", "replace"], "required": true },
+            "path": { "type": "string", "required": true },
+            "value": {
+              "type": ["string", "array"],
+              "description": "Value for add/replace operations"
+            }
+          },
+          "required": ["op", "path"]
+        }
+      },
+      "urlTemplate": "https://api-m.paypal.com/v1/notifications/webhooks/{id}"
+    },
+    {
+      "id": "delete-webhook",
+      "name": "Delete Webhook",
+      "description": "Delete a webhook",
+      "method": "DELETE",
+      "path": "/v1/notifications/webhooks/{id}",
+      "headers": {},
+      "urlTemplate": "https://api-m.paypal.com/v1/notifications/webhooks/{id}"
+    }
+  ]
+}
+

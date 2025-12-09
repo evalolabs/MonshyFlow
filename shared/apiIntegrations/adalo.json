@@ -1,0 +1,91 @@
+{
+  "id": "adalo",
+  "name": "Adalo",
+  "icon": "📱",
+  "logoUrl": "https://cdn.simpleicons.org/adalo/000000",
+  "description": "No-code platform for mobile apps",
+  "baseUrl": "https://api.adalo.com/v0/apps/{appId}",
+  "color": {
+    "bg": "from-purple-100 to-rose-100",
+    "border": "border-purple-500",
+    "icon": "text-purple-700",
+    "handle": "bg-purple-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "ADALO_API_KEY",
+    "note": "App ID should be provided in baseUrl placeholder {appId} or as ADALO_APP_ID secret key."
+  },
+  "endpoints": [
+    {
+      "id": "create-collection",
+      "name": "Create Collection",
+      "description": "Create a new entry in a collection",
+      "method": "POST",
+      "path": "/collections/{collectionId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Collection entry data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://api.adalo.com/v0/apps/{appId}/collections/{collectionId}"
+    },
+    {
+      "id": "get-collection",
+      "name": "Get Collection",
+      "description": "Get a collection entry by ID",
+      "method": "GET",
+      "path": "/collections/{collectionId}/{rowId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.adalo.com/v0/apps/{appId}/collections/{collectionId}/{rowId}"
+    },
+    {
+      "id": "list-collections",
+      "name": "List Collections",
+      "description": "List all entries in a collection",
+      "method": "GET",
+      "path": "/collections/{collectionId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.adalo.com/v0/apps/{appId}/collections/{collectionId}"
+    },
+    {
+      "id": "update-collection",
+      "name": "Update Collection",
+      "description": "Update a collection entry",
+      "method": "PATCH",
+      "path": "/collections/{collectionId}/{rowId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Collection entry data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://api.adalo.com/v0/apps/{appId}/collections/{collectionId}/{rowId}"
+    },
+    {
+      "id": "delete-collection",
+      "name": "Delete Collection",
+      "description": "Delete a collection entry",
+      "method": "DELETE",
+      "path": "/collections/{collectionId}/{rowId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.adalo.com/v0/apps/{appId}/collections/{collectionId}/{rowId}"
+    }
+  ]
+}
+

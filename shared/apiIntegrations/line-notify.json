@@ -1,0 +1,49 @@
+{
+  "id": "line-notify",
+  "name": "Line (LINE Notify)",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/line/00C300",
+  "description": "LINE Notify for sending notifications",
+  "baseUrl": "https://notify-api.line.me/api/notify",
+  "color": {
+    "bg": "from-green-100 to-teal-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "LINE_NOTIFY_ACCESS_TOKEN",
+    "note": "LINE Notify will be discontinued on April 1, 2025."
+  },
+  "endpoints": [
+    {
+      "id": "send-notification",
+      "name": "Send Notification",
+      "description": "Send a notification message",
+      "method": "POST",
+      "path": "/notify",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "required": true, "description": "Message text (max 1000 characters)" },
+          "imageThumbnail": { "type": "string", "format": "uri", "description": "Thumbnail image URL (max 240x240px)" },
+          "imageFullsize": { "type": "string", "format": "uri", "description": "Full-size image URL (max 2048x2048px)" },
+          "imageFile": { "type": "string", "format": "binary", "description": "Image file (binary data, max 1MB)" },
+          "stickerPackageId": { "type": "integer", "description": "Sticker package ID" },
+          "stickerId": { "type": "integer", "description": "Sticker ID" },
+          "notificationDisabled": { "type": "boolean", "default": false, "description": "Disable notification sound" }
+        },
+        "required": ["message"]
+      },
+      "urlTemplate": "https://notify-api.line.me/api/notify"
+    }
+  ]
+}
+

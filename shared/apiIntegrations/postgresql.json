@@ -1,0 +1,247 @@
+{
+  "id": "postgresql",
+  "name": "PostgreSQL",
+  "icon": "🐘",
+  "logoUrl": "https://cdn.simpleicons.org/postgresql/4169E1",
+  "description": "Relational database management system",
+  "baseUrl": "https://api.postgresql.com/v1",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(username:password)}",
+    "secretKey": "POSTGRES_PASSWORD",
+    "emailSecretKey": "POSTGRES_USERNAME"
+  },
+  "endpoints": [
+    {
+      "id": "execute-query",
+      "name": "Execute Query",
+      "description": "Execute a custom SQL query",
+      "method": "POST",
+      "path": "/query",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "database": { "type": "string", "description": "Database name" },
+          "query": { "type": "string", "required": true, "description": "SQL query (e.g., SELECT * FROM users WHERE id = $1)" },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": ["string", "number", "boolean", "null"]
+            },
+            "description": "Query parameters (for parameterized queries)"
+          },
+          "timeout": { "type": "number", "description": "Query timeout in seconds", "default": 30 }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.postgresql.com/v1/query"
+    },
+    {
+      "id": "select",
+      "name": "Select",
+      "description": "Execute a SELECT query",
+      "method": "POST",
+      "path": "/select",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "database": { "type": "string", "description": "Database name" },
+          "table": { "type": "string", "required": true, "description": "Table name" },
+          "columns": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Columns to select (default: all columns)"
+          },
+          "where": {
+            "type": "object",
+            "description": "WHERE conditions (key-value pairs)",
+            "additionalProperties": {
+              "type": ["string", "number", "boolean", "null"]
+            }
+          },
+          "orderBy": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "column": { "type": "string", "required": true },
+                "direction": { "type": "string", "enum": ["ASC", "DESC"], "default": "ASC" }
+              },
+              "required": ["column"]
+            },
+            "description": "ORDER BY clauses"
+          },
+          "limit": { "type": "number", "description": "Maximum number of rows" },
+          "offset": { "type": "number", "description": "Number of rows to skip" }
+        },
+        "required": ["table"]
+      },
+      "urlTemplate": "https://api.postgresql.com/v1/select"
+    },
+    {
+      "id": "insert",
+      "name": "Insert",
+      "description": "Insert rows into a table",
+      "method": "POST",
+      "path": "/insert",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "database": { "type": "string", "description": "Database name" },
+          "table": { "type": "string", "required": true, "description": "Table name" },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Row data (key-value pairs)",
+              "additionalProperties": {
+                "type": ["string", "number", "boolean", "null"]
+              }
+            },
+            "required": true,
+            "description": "Rows to insert"
+          },
+          "returning": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Columns to return (RETURNING clause)"
+          },
+          "onConflict": {
+            "type": "object",
+            "properties": {
+              "target": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Conflict target columns"
+              },
+              "action": { "type": "string", "enum": ["DO NOTHING", "DO UPDATE"], "description": "Conflict action" },
+              "update": {
+                "type": "object",
+                "description": "Update values for DO UPDATE",
+                "additionalProperties": {
+                  "type": ["string", "number", "boolean", "null"]
+                }
+              }
+            },
+            "description": "ON CONFLICT clause"
+          }
+        },
+        "required": ["table", "rows"]
+      },
+      "urlTemplate": "https://api.postgresql.com/v1/insert"
+    },
+    {
+      "id": "update",
+      "name": "Update",
+      "description": "Update rows in a table",
+      "method": "POST",
+      "path": "/update",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "database": { "type": "string", "description": "Database name" },
+          "table": { "type": "string", "required": true, "description": "Table name" },
+          "set": {
+            "type": "object",
+            "description": "SET values (key-value pairs)",
+            "additionalProperties": {
+              "type": ["string", "number", "boolean", "null"]
+            },
+            "required": true
+          },
+          "where": {
+            "type": "object",
+            "description": "WHERE conditions (key-value pairs)",
+            "additionalProperties": {
+              "type": ["string", "number", "boolean", "null"]
+            },
+            "required": true
+          },
+          "returning": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Columns to return (RETURNING clause)"
+          }
+        },
+        "required": ["table", "set", "where"]
+      },
+      "urlTemplate": "https://api.postgresql.com/v1/update"
+    },
+    {
+      "id": "delete",
+      "name": "Delete",
+      "description": "Delete rows from a table",
+      "method": "POST",
+      "path": "/delete",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "database": { "type": "string", "description": "Database name" },
+          "table": { "type": "string", "required": true, "description": "Table name" },
+          "where": {
+            "type": "object",
+            "description": "WHERE conditions (key-value pairs)",
+            "additionalProperties": {
+              "type": ["string", "number", "boolean", "null"]
+            },
+            "required": true
+          },
+          "returning": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Columns to return (RETURNING clause)"
+          }
+        },
+        "required": ["table", "where"]
+      },
+      "urlTemplate": "https://api.postgresql.com/v1/delete"
+    },
+    {
+      "id": "list-tables",
+      "name": "List Tables",
+      "description": "List all tables in a database",
+      "method": "GET",
+      "path": "/tables",
+      "headers": {},
+      "queryParams": {
+        "database": "{database}"
+      },
+      "urlTemplate": "https://api.postgresql.com/v1/tables?database={database}"
+    },
+    {
+      "id": "describe-table",
+      "name": "Describe Table",
+      "description": "Get table schema information",
+      "method": "GET",
+      "path": "/tables/{table}",
+      "headers": {},
+      "queryParams": {
+        "database": "{database}"
+      },
+      "urlTemplate": "https://api.postgresql.com/v1/tables/{table}?database={database}"
+    }
+  ]
+}
+

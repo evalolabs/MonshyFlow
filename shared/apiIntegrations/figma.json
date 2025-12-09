@@ -1,0 +1,212 @@
+{
+  "id": "figma",
+  "name": "Figma",
+  "icon": "🎨",
+  "logoUrl": "https://cdn.simpleicons.org/figma/F24E1E",
+  "description": "Design collaboration platform for accessing design files, comments, projects, and versions",
+  "baseUrl": "https://api.figma.com/v1",
+  "color": {
+    "bg": "from-purple-100 to-violet-100",
+    "border": "border-purple-500",
+    "icon": "text-purple-700",
+    "handle": "bg-purple-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "X-Figma-Token",
+    "headerFormat": "{apiKey}",
+    "secretKey": "FIGMA_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "get-file",
+      "name": "Get File",
+      "description": "Get file by key",
+      "method": "GET",
+      "path": "/files/{fileKey}",
+      "headers": {
+        "X-Figma-Token": "{apiKey}"
+      },
+      "queryParams": {
+        "version": {
+          "type": "string",
+          "description": "File version ID"
+        },
+        "ids": {
+          "type": "string",
+          "description": "Comma-separated node IDs to retrieve"
+        },
+        "depth": {
+          "type": "integer",
+          "description": "Depth of traversal"
+        },
+        "geometry": {
+          "type": "string",
+          "enum": ["paths", "arcs"],
+          "description": "Geometry format"
+        },
+        "plugin_data": {
+          "type": "string",
+          "description": "Plugin data IDs (comma-separated)"
+        }
+      },
+      "urlTemplate": "https://api.figma.com/v1/files/{fileKey}"
+    },
+    {
+      "id": "get-nodes",
+      "name": "Get Nodes",
+      "description": "Get specific nodes from a file",
+      "method": "GET",
+      "path": "/files/{fileKey}/nodes",
+      "headers": {
+        "X-Figma-Token": "{apiKey}"
+      },
+      "queryParams": {
+        "ids": {
+          "type": "string",
+          "required": true,
+          "description": "Comma-separated node IDs"
+        },
+        "version": {
+          "type": "string",
+          "description": "File version ID"
+        },
+        "depth": {
+          "type": "integer",
+          "description": "Depth of traversal"
+        },
+        "geometry": {
+          "type": "string",
+          "enum": ["paths", "arcs"],
+          "description": "Geometry format"
+        },
+        "plugin_data": {
+          "type": "string",
+          "description": "Plugin data IDs (comma-separated)"
+        }
+      },
+      "urlTemplate": "https://api.figma.com/v1/files/{fileKey}/nodes"
+    },
+    {
+      "id": "create-comment",
+      "name": "Create Comment",
+      "description": "Create a new comment on a file",
+      "method": "POST",
+      "path": "/files/{fileKey}/comments",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Figma-Token": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "required": true,
+            "description": "Comment message"
+          },
+          "client_meta": {
+            "type": "object",
+            "properties": {
+              "x": { "type": "number" },
+              "y": { "type": "number" },
+              "node_id": { "type": "string" },
+              "node_offset": {
+                "type": "object",
+                "properties": {
+                  "x": { "type": "number" },
+                  "y": { "type": "number" }
+                }
+              }
+            },
+            "description": "Comment position metadata"
+          },
+          "comment_id": {
+            "type": "string",
+            "description": "Comment ID (for replies)"
+          }
+        },
+        "required": ["message"]
+      },
+      "urlTemplate": "https://api.figma.com/v1/files/{fileKey}/comments"
+    },
+    {
+      "id": "get-comment",
+      "name": "Get Comment",
+      "description": "Get comment by ID",
+      "method": "GET",
+      "path": "/files/{fileKey}/comments/{commentId}",
+      "headers": {
+        "X-Figma-Token": "{apiKey}"
+      },
+      "urlTemplate": "https://api.figma.com/v1/files/{fileKey}/comments/{commentId}"
+    },
+    {
+      "id": "list-comments",
+      "name": "List Comments",
+      "description": "List all comments for a file",
+      "method": "GET",
+      "path": "/files/{fileKey}/comments",
+      "headers": {
+        "X-Figma-Token": "{apiKey}"
+      },
+      "urlTemplate": "https://api.figma.com/v1/files/{fileKey}/comments"
+    },
+    {
+      "id": "delete-comment",
+      "name": "Delete Comment",
+      "description": "Delete a comment",
+      "method": "DELETE",
+      "path": "/files/{fileKey}/comments/{commentId}",
+      "headers": {
+        "X-Figma-Token": "{apiKey}"
+      },
+      "urlTemplate": "https://api.figma.com/v1/files/{fileKey}/comments/{commentId}"
+    },
+    {
+      "id": "get-project",
+      "name": "Get Project",
+      "description": "Get project by ID",
+      "method": "GET",
+      "path": "/projects/{projectId}",
+      "headers": {
+        "X-Figma-Token": "{apiKey}"
+      },
+      "urlTemplate": "https://api.figma.com/v1/projects/{projectId}"
+    },
+    {
+      "id": "list-projects",
+      "name": "List Projects",
+      "description": "List all projects for a team",
+      "method": "GET",
+      "path": "/teams/{teamId}/projects",
+      "headers": {
+        "X-Figma-Token": "{apiKey}"
+      },
+      "urlTemplate": "https://api.figma.com/v1/teams/{teamId}/projects"
+    },
+    {
+      "id": "get-file-version",
+      "name": "Get File Version",
+      "description": "Get file version by ID",
+      "method": "GET",
+      "path": "/files/{fileKey}/versions/{versionId}",
+      "headers": {
+        "X-Figma-Token": "{apiKey}"
+      },
+      "urlTemplate": "https://api.figma.com/v1/files/{fileKey}/versions/{versionId}"
+    },
+    {
+      "id": "list-file-versions",
+      "name": "List File Versions",
+      "description": "List all versions of a file",
+      "method": "GET",
+      "path": "/files/{fileKey}/versions",
+      "headers": {
+        "X-Figma-Token": "{apiKey}"
+      },
+      "urlTemplate": "https://api.figma.com/v1/files/{fileKey}/versions"
+    }
+  ]
+}
+

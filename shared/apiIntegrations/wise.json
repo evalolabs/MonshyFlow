@@ -1,0 +1,311 @@
+{
+  "id": "wise",
+  "name": "Wise (TransferWise)",
+  "icon": "💱",
+  "logoUrl": "https://cdn.simpleicons.org/wise/9FE870",
+  "description": "International money transfers and currency exchange",
+  "baseUrl": "https://api.transferwise.com",
+  "color": {
+    "bg": "from-green-100 to-emerald-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "WISE_API_TOKEN",
+    "note": "For sandbox environment, use baseUrl: https://api.sandbox.transferwise.tech"
+  },
+  "endpoints": [
+    {
+      "id": "get-account",
+      "name": "Get Account",
+      "description": "Get account details by ID",
+      "method": "GET",
+      "path": "/v1/accounts/{accountId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/accounts/{accountId}"
+    },
+    {
+      "id": "list-accounts",
+      "name": "List Accounts",
+      "description": "List all accounts",
+      "method": "GET",
+      "path": "/v1/accounts",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "profile": { "type": "integer", "description": "Filter by profile ID" },
+        "type": { "type": "string", "enum": ["STANDARD", "SAVINGS"], "description": "Account type" }
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/accounts"
+    },
+    {
+      "id": "get-account-statement",
+      "name": "Get Account Statement",
+      "description": "Get account statement",
+      "method": "GET",
+      "path": "/v1/accounts/{accountId}/statement.json",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "currency": { "type": "string", "description": "Currency code" },
+        "intervalStart": { "type": "string", "format": "date-time", "description": "Start date (ISO 8601)" },
+        "intervalEnd": { "type": "string", "format": "date-time", "description": "End date (ISO 8601)" },
+        "type": { "type": "string", "enum": ["COMPACT", "FLAT"], "default": "COMPACT", "description": "Statement type" }
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/accounts/{accountId}/statement.json"
+    },
+    {
+      "id": "get-exchange-rates",
+      "name": "Get Exchange Rates",
+      "description": "Get current exchange rates",
+      "method": "GET",
+      "path": "/v1/rates",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "source": { "type": "string", "description": "Source currency code" },
+        "target": { "type": "string", "description": "Target currency code" },
+        "time": { "type": "string", "format": "date-time", "description": "Time for historical rates" }
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/rates"
+    },
+    {
+      "id": "get-profile",
+      "name": "Get Profile",
+      "description": "Get profile details",
+      "method": "GET",
+      "path": "/v1/profiles/{profileId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/profiles/{profileId}"
+    },
+    {
+      "id": "list-profiles",
+      "name": "List Profiles",
+      "description": "List all profiles",
+      "method": "GET",
+      "path": "/v1/profiles",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/profiles"
+    },
+    {
+      "id": "create-quote",
+      "name": "Create Quote",
+      "description": "Create a new quote for a transfer",
+      "method": "POST",
+      "path": "/v3/quotes",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "sourceCurrency": { "type": "string", "required": true, "description": "Source currency code" },
+          "targetCurrency": { "type": "string", "required": true, "description": "Target currency code" },
+          "sourceAmount": { "type": "number", "description": "Source amount" },
+          "targetAmount": { "type": "number", "description": "Target amount" },
+          "profile": { "type": "integer", "description": "Profile ID" },
+          "payIn": { "type": "string", "enum": ["BANK_TRANSFER", "BALANCE", "SWIFT"], "description": "Pay-in method" },
+          "payOut": { "type": "string", "enum": ["BANK_TRANSFER", "BALANCE", "SWIFT"], "description": "Pay-out method" }
+        },
+        "required": ["sourceCurrency", "targetCurrency"]
+      },
+      "urlTemplate": "https://api.transferwise.com/v3/quotes"
+    },
+    {
+      "id": "get-quote",
+      "name": "Get Quote",
+      "description": "Get quote details",
+      "method": "GET",
+      "path": "/v3/quotes/{quoteId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.transferwise.com/v3/quotes/{quoteId}"
+    },
+    {
+      "id": "create-recipient",
+      "name": "Create Recipient",
+      "description": "Create a new recipient account",
+      "method": "POST",
+      "path": "/v1/accounts",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "profile": { "type": "integer", "required": true, "description": "Profile ID" },
+          "accountHolderName": { "type": "string", "required": true, "description": "Account holder name" },
+          "currency": { "type": "string", "required": true, "description": "Currency code" },
+          "type": { "type": "string", "enum": ["sort_code", "aba", "swift", "iban", "routing_number", "bsb", "account_number", "ifsc"], "description": "Account type" },
+          "legalType": { "type": "string", "enum": ["PRIVATE", "BUSINESS"], "description": "Legal type" },
+          "details": {
+            "type": "object",
+            "description": "Account details (varies by type)",
+            "additionalProperties": true
+          }
+        },
+        "required": ["profile", "accountHolderName", "currency"]
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/accounts"
+    },
+    {
+      "id": "get-recipient",
+      "name": "Get Recipient",
+      "description": "Get recipient account details",
+      "method": "GET",
+      "path": "/v1/accounts/{accountId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/accounts/{accountId}"
+    },
+    {
+      "id": "list-recipients",
+      "name": "List Recipients",
+      "description": "List all recipient accounts",
+      "method": "GET",
+      "path": "/v1/accounts",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "profile": { "type": "integer", "description": "Filter by profile ID" },
+        "type": { "type": "string", "enum": ["STANDARD", "SAVINGS"], "description": "Account type" }
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/accounts"
+    },
+    {
+      "id": "update-recipient",
+      "name": "Update Recipient",
+      "description": "Update a recipient account",
+      "method": "PUT",
+      "path": "/v1/accounts/{accountId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "accountHolderName": { "type": "string", "description": "Account holder name" },
+          "details": {
+            "type": "object",
+            "description": "Account details",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/accounts/{accountId}"
+    },
+    {
+      "id": "delete-recipient",
+      "name": "Delete Recipient",
+      "description": "Delete a recipient account",
+      "method": "DELETE",
+      "path": "/v1/accounts/{accountId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/accounts/{accountId}"
+    },
+    {
+      "id": "create-transfer",
+      "name": "Create Transfer",
+      "description": "Create a new transfer",
+      "method": "POST",
+      "path": "/v1/transfers",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "profile": { "type": "integer", "required": true, "description": "Profile ID" },
+          "quote": { "type": "integer", "required": true, "description": "Quote ID" },
+          "targetAccount": { "type": "integer", "required": true, "description": "Target account ID" },
+          "reference": { "type": "string", "description": "Transfer reference" },
+          "customerTransactionId": { "type": "string", "description": "Customer transaction ID" }
+        },
+        "required": ["profile", "quote", "targetAccount"]
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/transfers"
+    },
+    {
+      "id": "get-transfer",
+      "name": "Get Transfer",
+      "description": "Get transfer details",
+      "method": "GET",
+      "path": "/v1/transfers/{transferId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/transfers/{transferId}"
+    },
+    {
+      "id": "list-transfers",
+      "name": "List Transfers",
+      "description": "List all transfers",
+      "method": "GET",
+      "path": "/v1/transfers",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "profile": { "type": "integer", "description": "Filter by profile ID" },
+        "status": { "type": "string", "enum": ["incoming_payment_waiting", "processing", "funded", "bounced_back", "cancelled", "charges_refunded", "outgoing_payment_sent", "funds_refunded"], "description": "Filter by status" },
+        "limit": { "type": "integer", "default": 20, "description": "Number of results" },
+        "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" }
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/transfers"
+    },
+    {
+      "id": "cancel-transfer",
+      "name": "Cancel Transfer",
+      "description": "Cancel a transfer",
+      "method": "PUT",
+      "path": "/v1/transfers/{transferId}/cancel",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.transferwise.com/v1/transfers/{transferId}/cancel"
+    },
+    {
+      "id": "fund-transfer",
+      "name": "Fund Transfer",
+      "description": "Fund a transfer payment",
+      "method": "POST",
+      "path": "/v3/profiles/{profileId}/transfers/{transferId}/payments",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["BALANCE"], "required": true, "description": "Payment type" }
+        },
+        "required": ["type"]
+      },
+      "urlTemplate": "https://api.transferwise.com/v3/profiles/{profileId}/transfers/{transferId}/payments"
+    }
+  ]
+}
+

@@ -1,0 +1,318 @@
+{
+  "id": "mailchimp",
+  "name": "Mailchimp",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/mailchimp/FFE01B",
+  "description": "Email marketing and automation platform",
+  "baseUrl": "https://{dc}.api.mailchimp.com/3.0",
+  "color": {
+    "bg": "from-yellow-100 to-amber-100",
+    "border": "border-yellow-500",
+    "icon": "text-yellow-700",
+    "handle": "bg-yellow-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "MAILCHIMP_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-list",
+      "name": "Create List",
+      "description": "Create a new audience/list",
+      "method": "POST",
+      "path": "/lists",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "List name" },
+          "contact": {
+            "type": "object",
+            "properties": {
+              "company": { "type": "string", "description": "Company name" },
+              "address1": { "type": "string", "description": "Street address" },
+              "city": { "type": "string", "description": "City" },
+              "state": { "type": "string", "description": "State" },
+              "zip": { "type": "string", "description": "ZIP code" },
+              "country": { "type": "string", "description": "Country code" },
+              "phone": { "type": "string", "description": "Phone number" }
+            },
+            "required": true
+          },
+          "permission_reminder": { "type": "string", "required": true, "description": "Permission reminder text" },
+          "email_type_option": { "type": "boolean", "description": "Enable email type option", "default": false }
+        },
+        "required": ["name", "contact", "permission_reminder"]
+      },
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/lists"
+    },
+    {
+      "id": "get-list",
+      "name": "Get List",
+      "description": "Get list details by ID",
+      "method": "GET",
+      "path": "/lists/{listId}",
+      "queryParams": {
+        "fields": "id,name,stats,date_created"
+      },
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/lists/{listId}"
+    },
+    {
+      "id": "list-lists",
+      "name": "List Lists",
+      "description": "List all audiences/lists",
+      "method": "GET",
+      "path": "/lists",
+      "queryParams": {
+        "count": "1000",
+        "offset": "0",
+        "fields": "lists.id,lists.name,lists.stats"
+      },
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/lists"
+    },
+    {
+      "id": "update-list",
+      "name": "Update List",
+      "description": "Update a list",
+      "method": "PATCH",
+      "path": "/lists/{listId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "List name" },
+          "contact": {
+            "type": "object",
+            "properties": {
+              "company": { "type": "string" },
+              "address1": { "type": "string" },
+              "city": { "type": "string" },
+              "state": { "type": "string" },
+              "zip": { "type": "string" },
+              "country": { "type": "string" },
+              "phone": { "type": "string" }
+            }
+          },
+          "permission_reminder": { "type": "string", "description": "Permission reminder text" }
+        }
+      },
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/lists/{listId}"
+    },
+    {
+      "id": "add-list-member",
+      "name": "Add List Member",
+      "description": "Add or update a member in a list",
+      "method": "PUT",
+      "path": "/lists/{listId}/members/{subscriberHash}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email_address": { "type": "string", "format": "email", "required": true, "description": "Member email address" },
+          "status": { "type": "string", "enum": ["subscribed", "unsubscribed", "cleaned", "pending", "transactional"], "required": true, "description": "Subscription status" },
+          "merge_fields": {
+            "type": "object",
+            "description": "Merge fields (FNAME, LNAME, etc.)",
+            "additionalProperties": true
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Member tags"
+          },
+          "interests": {
+            "type": "object",
+            "description": "Interest groups (key-value pairs)",
+            "additionalProperties": { "type": "boolean" }
+          }
+        },
+        "required": ["email_address", "status"]
+      },
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/lists/{listId}/members/{subscriberHash}"
+    },
+    {
+      "id": "get-list-member",
+      "name": "Get List Member",
+      "description": "Get member details by email hash",
+      "method": "GET",
+      "path": "/lists/{listId}/members/{subscriberHash}",
+      "queryParams": {
+        "fields": "id,email_address,status,merge_fields,tags"
+      },
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/lists/{listId}/members/{subscriberHash}"
+    },
+    {
+      "id": "list-list-members",
+      "name": "List List Members",
+      "description": "List all members in a list",
+      "method": "GET",
+      "path": "/lists/{listId}/members",
+      "queryParams": {
+        "count": "1000",
+        "offset": "0",
+        "status": "subscribed",
+        "fields": "members.id,members.email_address,members.status"
+      },
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/lists/{listId}/members"
+    },
+    {
+      "id": "update-list-member",
+      "name": "Update List Member",
+      "description": "Update a member in a list",
+      "method": "PATCH",
+      "path": "/lists/{listId}/members/{subscriberHash}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email_address": { "type": "string", "format": "email", "description": "Member email address" },
+          "status": { "type": "string", "enum": ["subscribed", "unsubscribed", "cleaned", "pending", "transactional"] },
+          "merge_fields": {
+            "type": "object",
+            "description": "Merge fields",
+            "additionalProperties": true
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "interests": {
+            "type": "object",
+            "description": "Interest groups",
+            "additionalProperties": { "type": "boolean" }
+          }
+        }
+      },
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/lists/{listId}/members/{subscriberHash}"
+    },
+    {
+      "id": "delete-list-member",
+      "name": "Delete List Member",
+      "description": "Delete a member from a list",
+      "method": "DELETE",
+      "path": "/lists/{listId}/members/{subscriberHash}",
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/lists/{listId}/members/{subscriberHash}"
+    },
+    {
+      "id": "create-campaign",
+      "name": "Create Campaign",
+      "description": "Create a new email campaign",
+      "method": "POST",
+      "path": "/campaigns",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["regular", "plaintext", "absplit", "rss", "automation", "variate"], "required": true, "description": "Campaign type" },
+          "recipients": {
+            "type": "object",
+            "properties": {
+              "list_id": { "type": "string", "required": true, "description": "List ID" },
+              "segment_opts": {
+                "type": "object",
+                "description": "Segment options"
+              }
+            },
+            "required": true
+          },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "subject_line": { "type": "string", "required": true, "description": "Email subject" },
+              "from_name": { "type": "string", "required": true, "description": "Sender name" },
+              "reply_to": { "type": "string", "format": "email", "required": true, "description": "Reply-to email" },
+              "title": { "type": "string", "description": "Campaign title" }
+            },
+            "required": true
+          }
+        },
+        "required": ["type", "recipients", "settings"]
+      },
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/campaigns"
+    },
+    {
+      "id": "get-campaign",
+      "name": "Get Campaign",
+      "description": "Get campaign details by ID",
+      "method": "GET",
+      "path": "/campaigns/{campaignId}",
+      "queryParams": {
+        "fields": "id,type,status,settings,recipients"
+      },
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/campaigns/{campaignId}"
+    },
+    {
+      "id": "list-campaigns",
+      "name": "List Campaigns",
+      "description": "List all campaigns",
+      "method": "GET",
+      "path": "/campaigns",
+      "queryParams": {
+        "count": "1000",
+        "offset": "0",
+        "status": "sent",
+        "type": "regular",
+        "fields": "campaigns.id,campaigns.type,campaigns.status,campaigns.settings"
+      },
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/campaigns"
+    },
+    {
+      "id": "update-campaign",
+      "name": "Update Campaign",
+      "description": "Update a campaign",
+      "method": "PATCH",
+      "path": "/campaigns/{campaignId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "settings": {
+            "type": "object",
+            "properties": {
+              "subject_line": { "type": "string", "description": "Email subject" },
+              "from_name": { "type": "string", "description": "Sender name" },
+              "reply_to": { "type": "string", "format": "email", "description": "Reply-to email" },
+              "title": { "type": "string", "description": "Campaign title" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/campaigns/{campaignId}"
+    },
+    {
+      "id": "send-campaign",
+      "name": "Send Campaign",
+      "description": "Send a campaign",
+      "method": "POST",
+      "path": "/campaigns/{campaignId}/actions/send",
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/campaigns/{campaignId}/actions/send"
+    },
+    {
+      "id": "get-account",
+      "name": "Get Account",
+      "description": "Get account details",
+      "method": "GET",
+      "path": "/",
+      "queryParams": {
+        "fields": "account_id,account_name,email"
+      },
+      "urlTemplate": "https://{dc}.api.mailchimp.com/3.0/"
+    }
+  ]
+}
+

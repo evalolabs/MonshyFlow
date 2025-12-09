@@ -1,0 +1,713 @@
+{
+  "id": "activecampaign",
+  "name": "ActiveCampaign",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/activecampaign/0064FF",
+  "description": "Marketing automation and email marketing platform",
+  "baseUrl": "{apiUrl}",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Api-Token",
+    "headerFormat": "{apiKey}",
+    "secretKey": "ACTIVECAMPAIGN_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/contacts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "firstName": { "type": "string", "description": "First name" },
+          "lastName": { "type": "string", "description": "Last name" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "fieldValues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": { "type": "string", "required": true },
+                "value": { "type": "string", "required": true }
+              }
+            },
+            "description": "Custom field values"
+          }
+        },
+        "required": ["email"]
+      },
+      "urlTemplate": "{apiUrl}/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact details by ID",
+      "method": "GET",
+      "path": "/contacts/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/contacts/{id}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/contacts",
+      "headers": {},
+      "queryParams": {
+        "limit": "20",
+        "offset": "0"
+      },
+      "urlTemplate": "{apiUrl}/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update an existing contact",
+      "method": "PUT",
+      "path": "/contacts/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "required": true },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "firstName": { "type": "string", "description": "First name" },
+          "lastName": { "type": "string", "description": "Last name" },
+          "phone": { "type": "string", "description": "Phone number" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "{apiUrl}/contacts/{id}"
+    },
+    {
+      "id": "delete-contact",
+      "name": "Delete Contact",
+      "description": "Delete a contact",
+      "method": "DELETE",
+      "path": "/contacts/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/contacts/{id}"
+    },
+    {
+      "id": "create-account",
+      "name": "Create Account",
+      "description": "Create a new account",
+      "method": "POST",
+      "path": "/accounts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Account name" },
+          "accountUrl": { "type": "string", "format": "uri", "description": "Account URL" },
+          "accountCustomFields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "customFieldId": { "type": "number", "required": true },
+                "fieldValue": { "type": "string", "required": true }
+              }
+            }
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "{apiUrl}/accounts"
+    },
+    {
+      "id": "get-account",
+      "name": "Get Account",
+      "description": "Get account details by ID",
+      "method": "GET",
+      "path": "/accounts/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/accounts/{id}"
+    },
+    {
+      "id": "list-accounts",
+      "name": "List Accounts",
+      "description": "List all accounts",
+      "method": "GET",
+      "path": "/accounts",
+      "headers": {},
+      "queryParams": {
+        "limit": "20",
+        "offset": "0"
+      },
+      "urlTemplate": "{apiUrl}/accounts"
+    },
+    {
+      "id": "update-account",
+      "name": "Update Account",
+      "description": "Update an existing account",
+      "method": "PUT",
+      "path": "/accounts/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "required": true },
+          "name": { "type": "string", "description": "Account name" },
+          "accountUrl": { "type": "string", "format": "uri", "description": "Account URL" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "{apiUrl}/accounts/{id}"
+    },
+    {
+      "id": "create-account-contact",
+      "name": "Create Account Contact",
+      "description": "Associate a contact with an account",
+      "method": "POST",
+      "path": "/accountContacts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "contact": { "type": "string", "required": true, "description": "Contact ID" },
+          "account": { "type": "string", "required": true, "description": "Account ID" }
+        },
+        "required": ["contact", "account"]
+      },
+      "urlTemplate": "{apiUrl}/accountContacts"
+    },
+    {
+      "id": "get-account-contact",
+      "name": "Get Account Contact",
+      "description": "Get account contact details by ID",
+      "method": "GET",
+      "path": "/accountContacts/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/accountContacts/{id}"
+    },
+    {
+      "id": "list-account-contacts",
+      "name": "List Account Contacts",
+      "description": "List all account contacts",
+      "method": "GET",
+      "path": "/accountContacts",
+      "headers": {},
+      "queryParams": {
+        "limit": "20",
+        "offset": "0"
+      },
+      "urlTemplate": "{apiUrl}/accountContacts"
+    },
+    {
+      "id": "delete-account-contact",
+      "name": "Delete Account Contact",
+      "description": "Remove a contact from an account",
+      "method": "DELETE",
+      "path": "/accountContacts/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/accountContacts/{id}"
+    },
+    {
+      "id": "create-deal",
+      "name": "Create Deal",
+      "description": "Create a new deal",
+      "method": "POST",
+      "path": "/deals",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Deal title" },
+          "description": { "type": "string", "description": "Deal description" },
+          "account": { "type": "string", "description": "Account ID" },
+          "contact": { "type": "string", "description": "Contact ID" },
+          "value": { "type": "number", "description": "Deal value" },
+          "currency": { "type": "string", "default": "USD", "description": "Currency code" },
+          "group": { "type": "string", "description": "Pipeline group ID" },
+          "stage": { "type": "string", "description": "Pipeline stage ID" },
+          "owner": { "type": "string", "description": "Owner user ID" },
+          "percent": { "type": "number", "description": "Win probability (0-100)" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "{apiUrl}/deals"
+    },
+    {
+      "id": "get-deal",
+      "name": "Get Deal",
+      "description": "Get deal details by ID",
+      "method": "GET",
+      "path": "/deals/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/deals/{id}"
+    },
+    {
+      "id": "list-deals",
+      "name": "List Deals",
+      "description": "List all deals",
+      "method": "GET",
+      "path": "/deals",
+      "headers": {},
+      "queryParams": {
+        "limit": "20",
+        "offset": "0"
+      },
+      "urlTemplate": "{apiUrl}/deals"
+    },
+    {
+      "id": "update-deal",
+      "name": "Update Deal",
+      "description": "Update an existing deal",
+      "method": "PUT",
+      "path": "/deals/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "required": true },
+          "title": { "type": "string", "description": "Deal title" },
+          "value": { "type": "number", "description": "Deal value" },
+          "stage": { "type": "string", "description": "Pipeline stage ID" },
+          "percent": { "type": "number", "description": "Win probability" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "{apiUrl}/deals/{id}"
+    },
+    {
+      "id": "create-list",
+      "name": "Create List",
+      "description": "Create a new contact list",
+      "method": "POST",
+      "path": "/lists",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "List name" },
+          "stringid": { "type": "string", "description": "Unique string identifier" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "{apiUrl}/lists"
+    },
+    {
+      "id": "get-list",
+      "name": "Get List",
+      "description": "Get list details by ID",
+      "method": "GET",
+      "path": "/lists/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/lists/{id}"
+    },
+    {
+      "id": "list-lists",
+      "name": "List Lists",
+      "description": "List all contact lists",
+      "method": "GET",
+      "path": "/lists",
+      "headers": {},
+      "queryParams": {
+        "limit": "20",
+        "offset": "0"
+      },
+      "urlTemplate": "{apiUrl}/lists"
+    },
+    {
+      "id": "update-list",
+      "name": "Update List",
+      "description": "Update an existing list",
+      "method": "PUT",
+      "path": "/lists/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "required": true },
+          "name": { "type": "string", "description": "List name" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "{apiUrl}/lists/{id}"
+    },
+    {
+      "id": "add-contact-to-list",
+      "name": "Add Contact to List",
+      "description": "Add a contact to a list",
+      "method": "POST",
+      "path": "/contactLists",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "list": { "type": "string", "required": true, "description": "List ID" },
+          "contact": { "type": "string", "required": true, "description": "Contact ID" },
+          "status": { "type": "number", "default": 1, "description": "Subscription status (1=Active, 2=Unsubscribed)" }
+        },
+        "required": ["list", "contact"]
+      },
+      "urlTemplate": "{apiUrl}/contactLists"
+    },
+    {
+      "id": "remove-contact-from-list",
+      "name": "Remove Contact from List",
+      "description": "Remove a contact from a list",
+      "method": "DELETE",
+      "path": "/contactLists/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/contactLists/{id}"
+    },
+    {
+      "id": "create-tag",
+      "name": "Create Tag",
+      "description": "Create a new tag",
+      "method": "POST",
+      "path": "/tags",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "tag": { "type": "string", "required": true, "description": "Tag name" },
+          "tagType": { "type": "string", "enum": ["contact", "template", "segment"], "default": "contact", "description": "Tag type" },
+          "description": { "type": "string", "description": "Tag description" }
+        },
+        "required": ["tag"]
+      },
+      "urlTemplate": "{apiUrl}/tags"
+    },
+    {
+      "id": "get-tag",
+      "name": "Get Tag",
+      "description": "Get tag details by ID",
+      "method": "GET",
+      "path": "/tags/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/tags/{id}"
+    },
+    {
+      "id": "list-tags",
+      "name": "List Tags",
+      "description": "List all tags",
+      "method": "GET",
+      "path": "/tags",
+      "headers": {},
+      "queryParams": {
+        "limit": "20",
+        "offset": "0"
+      },
+      "urlTemplate": "{apiUrl}/tags"
+    },
+    {
+      "id": "update-tag",
+      "name": "Update Tag",
+      "description": "Update an existing tag",
+      "method": "PUT",
+      "path": "/tags/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "required": true },
+          "tag": { "type": "string", "description": "Tag name" },
+          "description": { "type": "string", "description": "Tag description" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "{apiUrl}/tags/{id}"
+    },
+    {
+      "id": "add-contact-tag",
+      "name": "Add Contact Tag",
+      "description": "Add a tag to a contact",
+      "method": "POST",
+      "path": "/contactTags",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "contact": { "type": "string", "required": true, "description": "Contact ID" },
+          "tag": { "type": "string", "required": true, "description": "Tag ID" }
+        },
+        "required": ["contact", "tag"]
+      },
+      "urlTemplate": "{apiUrl}/contactTags"
+    },
+    {
+      "id": "remove-contact-tag",
+      "name": "Remove Contact Tag",
+      "description": "Remove a tag from a contact",
+      "method": "DELETE",
+      "path": "/contactTags/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/contactTags/{id}"
+    },
+    {
+      "id": "create-connection",
+      "name": "Create Connection",
+      "description": "Create a new connection",
+      "method": "POST",
+      "path": "/connections",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "service": { "type": "string", "required": true, "description": "Service name" },
+          "externalid": { "type": "string", "required": true, "description": "External ID" },
+          "name": { "type": "string", "description": "Connection name" },
+          "logoUrl": { "type": "string", "format": "uri", "description": "Logo URL" }
+        },
+        "required": ["service", "externalid"]
+      },
+      "urlTemplate": "{apiUrl}/connections"
+    },
+    {
+      "id": "get-connection",
+      "name": "Get Connection",
+      "description": "Get connection details by ID",
+      "method": "GET",
+      "path": "/connections/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/connections/{id}"
+    },
+    {
+      "id": "list-connections",
+      "name": "List Connections",
+      "description": "List all connections",
+      "method": "GET",
+      "path": "/connections",
+      "headers": {},
+      "queryParams": {
+        "limit": "20",
+        "offset": "0"
+      },
+      "urlTemplate": "{apiUrl}/connections"
+    },
+    {
+      "id": "update-connection",
+      "name": "Update Connection",
+      "description": "Update an existing connection",
+      "method": "PUT",
+      "path": "/connections/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "required": true },
+          "name": { "type": "string", "description": "Connection name" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "{apiUrl}/connections/{id}"
+    },
+    {
+      "id": "create-ecom-customer",
+      "name": "Create E-Commerce Customer",
+      "description": "Create a new e-commerce customer",
+      "method": "POST",
+      "path": "/ecomCustomers",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "connectionid": { "type": "string", "required": true, "description": "Connection ID" },
+          "externalid": { "type": "string", "required": true, "description": "External customer ID" },
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "acceptsMarketing": { "type": "boolean", "default": false, "description": "Accepts marketing" }
+        },
+        "required": ["connectionid", "externalid", "email"]
+      },
+      "urlTemplate": "{apiUrl}/ecomCustomers"
+    },
+    {
+      "id": "get-ecom-customer",
+      "name": "Get E-Commerce Customer",
+      "description": "Get e-commerce customer details by ID",
+      "method": "GET",
+      "path": "/ecomCustomers/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/ecomCustomers/{id}"
+    },
+    {
+      "id": "list-ecom-customers",
+      "name": "List E-Commerce Customers",
+      "description": "List all e-commerce customers",
+      "method": "GET",
+      "path": "/ecomCustomers",
+      "headers": {},
+      "queryParams": {
+        "limit": "20",
+        "offset": "0"
+      },
+      "urlTemplate": "{apiUrl}/ecomCustomers"
+    },
+    {
+      "id": "update-ecom-customer",
+      "name": "Update E-Commerce Customer",
+      "description": "Update an existing e-commerce customer",
+      "method": "PUT",
+      "path": "/ecomCustomers/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "required": true },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "acceptsMarketing": { "type": "boolean", "description": "Accepts marketing" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "{apiUrl}/ecomCustomers/{id}"
+    },
+    {
+      "id": "create-ecom-order",
+      "name": "Create E-Commerce Order",
+      "description": "Create a new e-commerce order",
+      "method": "POST",
+      "path": "/ecomOrders",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "connectionid": { "type": "string", "required": true, "description": "Connection ID" },
+          "externalid": { "type": "string", "required": true, "description": "External order ID" },
+          "source": { "type": "string", "description": "Order source" },
+          "email": { "type": "string", "format": "email", "description": "Customer email" },
+          "orderProducts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "externalid": { "type": "string", "required": true },
+                "name": { "type": "string", "required": true },
+                "price": { "type": "number", "required": true },
+                "quantity": { "type": "number", "required": true }
+              }
+            }
+          },
+          "totalPrice": { "type": "number", "description": "Total order price" },
+          "currency": { "type": "string", "default": "USD", "description": "Currency code" },
+          "orderDate": { "type": "string", "format": "date-time", "description": "Order date" }
+        },
+        "required": ["connectionid", "externalid"]
+      },
+      "urlTemplate": "{apiUrl}/ecomOrders"
+    },
+    {
+      "id": "get-ecom-order",
+      "name": "Get E-Commerce Order",
+      "description": "Get e-commerce order details by ID",
+      "method": "GET",
+      "path": "/ecomOrders/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/ecomOrders/{id}"
+    },
+    {
+      "id": "list-ecom-orders",
+      "name": "List E-Commerce Orders",
+      "description": "List all e-commerce orders",
+      "method": "GET",
+      "path": "/ecomOrders",
+      "headers": {},
+      "queryParams": {
+        "limit": "20",
+        "offset": "0"
+      },
+      "urlTemplate": "{apiUrl}/ecomOrders"
+    },
+    {
+      "id": "update-ecom-order",
+      "name": "Update E-Commerce Order",
+      "description": "Update an existing e-commerce order",
+      "method": "PUT",
+      "path": "/ecomOrders/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "required": true },
+          "totalPrice": { "type": "number", "description": "Total order price" },
+          "currency": { "type": "string", "description": "Currency code" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "{apiUrl}/ecomOrders/{id}"
+    },
+    {
+      "id": "add-ecom-order-product",
+      "name": "Add E-Commerce Order Product",
+      "description": "Add a product to an e-commerce order",
+      "method": "POST",
+      "path": "/ecomOrderProducts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "order": { "type": "string", "required": true, "description": "Order ID" },
+          "externalid": { "type": "string", "required": true, "description": "External product ID" },
+          "name": { "type": "string", "required": true, "description": "Product name" },
+          "price": { "type": "number", "required": true, "description": "Product price" },
+          "quantity": { "type": "number", "required": true, "description": "Quantity" }
+        },
+        "required": ["order", "externalid", "name", "price", "quantity"]
+      },
+      "urlTemplate": "{apiUrl}/ecomOrderProducts"
+    },
+    {
+      "id": "remove-ecom-order-product",
+      "name": "Remove E-Commerce Order Product",
+      "description": "Remove a product from an e-commerce order",
+      "method": "DELETE",
+      "path": "/ecomOrderProducts/{id}",
+      "headers": {},
+      "urlTemplate": "{apiUrl}/ecomOrderProducts/{id}"
+    }
+  ]
+}
+

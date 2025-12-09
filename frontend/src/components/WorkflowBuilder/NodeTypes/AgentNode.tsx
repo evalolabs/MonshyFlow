@@ -1,0 +1,213 @@
+/**
+ * AgentNode Component
+ * 
+ * AI Agent node with specialized input handles for Chat Model, Memory, and Tools.
+ * AI Agent architecture where tools are connected as inputs.
+ * 
+ * Structure:
+ * - Input (left): Main workflow input (user prompt/data)
+ * - Inputs (bottom): Chat Model, Memory (optional), Tools (multiple)
+ * - Output (right): Final agent response
+ */
+
+import type { Node, NodeProps } from '@xyflow/react';
+import { Handle, Position } from '@xyflow/react';
+import { NodeInfoOverlay } from './NodeInfoOverlay';
+import { useState } from 'react';
+
+export function AgentNode({ data, id, type, ...props }: NodeProps) {
+  const safeData = (data || {}) as Record<string, any>;
+  const [isNodeHovered, setIsNodeHovered] = useState(false); // Track hover state of the node itself
+  
+  // Extract overlay props (added at runtime by nodeRegistry)
+  const onUpdateComment = safeData.onUpdateComment as ((nodeId: string, comment: string) => void) | undefined;
+  const showInfoOverlay = (safeData.showInfoOverlay as boolean | undefined) ?? true;
+  const secrets = (safeData.secrets as Array<{ key: string; isActive: boolean }>) || [];
+  
+  // Create node object for overlay - use xPos/yPos from props if available, otherwise default
+  const node: Node = {
+    id: id || '',
+    type: type || 'agent',
+    position: { x: (props as any).xPos || 0, y: (props as any).yPos || 0 },
+    data: safeData,
+  };
+  
+  const getSubtitle = () => {
+    if (safeData.model) return safeData.model;
+    return 'AI Agent';
+  };
+
+  // Bottom input handles configuration
+  const bottomInputs = [
+    {
+      id: 'chat-model',
+      label: 'Chat Model',
+      position: 30, // 30% from left
+      color: 'bg-indigo-500',
+      required: true,
+    },
+    {
+      id: 'memory',
+      label: 'Memory',
+      position: 50, // 50% from left
+      color: 'bg-purple-500',
+      required: false,
+    },
+    {
+      id: 'tool',
+      label: 'Tool',
+      position: 70, // 70% from left
+      color: 'bg-amber-500',
+      required: false,
+    },
+  ];
+
+  // Determine border and background based on execution status and animation
+  const getBorderColor = () => {
+    if (safeData.executionStatus === 'running' && safeData.isAnimating) {
+      return 'border-blue-500 animate-pulse';
+    }
+    if (safeData.executionStatus === 'completed') {
+      return 'border-green-500';
+    }
+    if (safeData.executionStatus === 'failed') {
+      return 'border-red-500';
+    }
+    return 'border-indigo-400';
+  };
+
+  const getBackgroundColor = () => {
+    if (safeData.executionStatus === 'running' && safeData.isAnimating) {
+      return 'bg-blue-50';
+    }
+    return 'from-indigo-50 to-purple-50';
+  };
+
+  return (
+    <div 
+      className={`relative w-[240px] h-[100px] px-4 py-3 rounded-lg shadow-md hover:shadow-lg bg-gradient-to-br ${getBackgroundColor()} border-2 ${getBorderColor()} transition-all duration-200 flex flex-col justify-center overflow-visible group ${safeData.isAnimating && safeData.executionStatus === 'running' ? 'ring-2 ring-blue-300 ring-opacity-50' : ''}`}
+      onMouseEnter={() => setIsNodeHovered(true)} // Set hovered state on node
+      onMouseLeave={() => setIsNodeHovered(false)} // Reset hovered state on node
+    >
+      
+      {/* Node Info Overlay */}
+      {showInfoOverlay && (
+        <NodeInfoOverlay
+          node={node}
+          onUpdateComment={onUpdateComment}
+          showOnHover={true}
+          secrets={secrets}
+          parentHovered={isNodeHovered} // Pass parent hover state
+        />
+      )}
+      
+      {/* Main Input Handle - Left */}
+      <Handle 
+        type="target" 
+        position={Position.Left} 
+        className="w-3 h-3 bg-indigo-500 border-2 border-white"
+        style={{ top: '50%', transform: 'translateY(-50%)' }}
+      />
+
+      {/* Content */}
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2.5">
+          <div className="text-lg text-indigo-600 flex-shrink-0 relative">
+            {/* Normal Icon */}
+            <span className={safeData.executionStatus === 'running' && safeData.isAnimating ? 'opacity-50' : ''}>
+              👤
+            </span>
+            
+            {/* Spinner for running nodes */}
+            {safeData.executionStatus === 'running' && safeData.isAnimating && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-blue-500 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+              </div>
+            )}
+            
+            {/* X mark for failed nodes */}
+            {safeData.executionStatus === 'failed' && (
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center animate-scale-in">
+                <svg
+                  className="w-3 h-3 text-white"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="3"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+            )}
+          </div>
+          <div className="font-semibold text-sm text-gray-800 truncate flex-1">
+            {safeData.agentName || safeData.label || 'Agent'}
+          </div>
+        </div>
+        <div className="text-[11px] text-gray-600 truncate">
+          {getSubtitle()}
+        </div>
+      </div>
+
+      {/* Bottom Input Handles - Chat Model, Memory, Tool */}
+      {bottomInputs.map((input) => (
+        <div key={input.id}>
+          {/* Handle */}
+          <Handle
+            type="target"
+            position={Position.Bottom}
+            id={input.id}
+            className={`w-3.5 h-3.5 ${input.color} border-2 border-white hover:scale-125 transition-transform cursor-pointer shadow-md`}
+            style={{
+              bottom: -7,
+              left: `${input.position}%`,
+              transform: 'translateX(-50%)',
+            }}
+          />
+          
+          {/* Label above handle */}
+          <div
+            className="absolute text-[9px] font-semibold text-gray-700 pointer-events-none whitespace-nowrap"
+            style={{
+              bottom: '4px',
+              left: `${input.position}%`,
+              transform: 'translateX(-50%)',
+            }}
+          >
+            {input.label}
+            {input.required && <span className="text-red-500 ml-0.5">*</span>}
+          </div>
+        </div>
+      ))}
+
+      {/* Main Output Handle - Right */}
+      <Handle 
+        type="source" 
+        position={Position.Right} 
+        className="w-3 h-3 bg-indigo-500 border-2 border-white"
+        style={{ top: '50%', transform: 'translateY(-50%)' }}
+      />
+    </div>
+  );
+}

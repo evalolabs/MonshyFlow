@@ -1,0 +1,740 @@
+{
+  "id": "odoo",
+  "name": "Odoo",
+  "icon": "📦",
+  "logoUrl": "https://cdn.simpleicons.org/odoo/714B67",
+  "description": "Business management software (ERP/CRM)",
+  "baseUrl": "https://{domain}/jsonrpc",
+  "color": {
+    "bg": "from-purple-100 to-fuchsia-100",
+    "border": "border-purple-500",
+    "icon": "text-purple-700",
+    "handle": "bg-purple-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(username:password)}",
+    "secretKey": "ODOO_PASSWORD",
+    "usernameSecretKey": "ODOO_USERNAME",
+    "note": "Odoo uses JSON-RPC instead of REST. Authentication is done via username/password in JSON-RPC params. Database name is also required in params."
+  },
+  "endpoints": [
+    {
+      "id": "authenticate",
+      "name": "Authenticate",
+      "description": "Authenticate and get user ID (required for other operations)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "common", "description": "Service name" },
+              "method": { "type": "string", "default": "authenticate", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Arguments: [database, username, password]",
+                "minItems": 3,
+                "maxItems": 3
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact (res.partner)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'res.partner', 'create', [values]]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact by ID (res.partner)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'res.partner', 'read', [ids], {fields: [...]}]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts (res.partner)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'res.partner', 'search_read', [domain], {fields: [...], limit: N, offset: N}]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update an existing contact (res.partner)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'res.partner', 'write', [ids], {values}]",
+                "minItems": 7
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "delete-contact",
+      "name": "Delete Contact",
+      "description": "Delete a contact (res.partner)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'res.partner', 'unlink', [ids]]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "create-opportunity",
+      "name": "Create Opportunity",
+      "description": "Create a new opportunity (crm.lead)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'crm.lead', 'create', [values]]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "get-opportunity",
+      "name": "Get Opportunity",
+      "description": "Get opportunity by ID (crm.lead)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'crm.lead', 'read', [ids], {fields: [...]}]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "list-opportunities",
+      "name": "List Opportunities",
+      "description": "List all opportunities (crm.lead)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'crm.lead', 'search_read', [domain], {fields: [...], limit: N, offset: N}]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "update-opportunity",
+      "name": "Update Opportunity",
+      "description": "Update an existing opportunity (crm.lead)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'crm.lead', 'write', [ids], {values}]",
+                "minItems": 7
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "delete-opportunity",
+      "name": "Delete Opportunity",
+      "description": "Delete an opportunity (crm.lead)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'crm.lead', 'unlink', [ids]]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "create-note",
+      "name": "Create Note",
+      "description": "Create a new note (note.note)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'note.note', 'create', [values]]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "get-note",
+      "name": "Get Note",
+      "description": "Get note by ID (note.note)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'note.note', 'read', [ids], {fields: [...]}]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "list-notes",
+      "name": "List Notes",
+      "description": "List all notes (note.note)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'note.note', 'search_read', [domain], {fields: [...], limit: N, offset: N}]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "update-note",
+      "name": "Update Note",
+      "description": "Update an existing note (note.note)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'note.note', 'write', [ids], {values}]",
+                "minItems": 7
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "delete-note",
+      "name": "Delete Note",
+      "description": "Delete a note (note.note)",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'note.note', 'unlink', [ids]]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "create-custom-resource",
+      "name": "Create Custom Resource",
+      "description": "Create a record in a custom model",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'model.name', 'create', [values]]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "get-custom-resource",
+      "name": "Get Custom Resource",
+      "description": "Get a record from a custom model",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'model.name', 'read', [ids], {fields: [...]}]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "list-custom-resources",
+      "name": "List Custom Resources",
+      "description": "List records from a custom model",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'model.name', 'search_read', [domain], {fields: [...], limit: N, offset: N}]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "update-custom-resource",
+      "name": "Update Custom Resource",
+      "description": "Update a record in a custom model",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'model.name', 'write', [ids], {values}]",
+                "minItems": 7
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    },
+    {
+      "id": "delete-custom-resource",
+      "name": "Delete Custom Resource",
+      "description": "Delete a record from a custom model",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0", "description": "JSON-RPC version" },
+          "method": { "type": "string", "default": "call", "description": "JSON-RPC method" },
+          "params": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "default": "object", "description": "Service name" },
+              "method": { "type": "string", "default": "execute_kw", "description": "Method name" },
+              "args": {
+                "type": "array",
+                "items": {},
+                "description": "Arguments: [database, uid, password, 'model.name', 'unlink', [ids]]",
+                "minItems": 6
+              }
+            },
+            "required": ["service", "method", "args"]
+          },
+          "id": { "type": "integer", "description": "Request ID" }
+        },
+        "required": ["jsonrpc", "method", "params"]
+      },
+      "urlTemplate": "https://{domain}/jsonrpc"
+    }
+  ]
+}
+

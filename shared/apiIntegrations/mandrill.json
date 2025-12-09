@@ -1,0 +1,348 @@
+{
+  "id": "mandrill",
+  "name": "Mandrill",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/mandrill/000000",
+  "description": "Transactional email service by Mailchimp",
+  "baseUrl": "https://mandrillapp.com/api/1.0",
+  "color": {
+    "bg": "from-gray-100 to-slate-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "",
+    "headerFormat": "",
+    "secretKey": "MANDRILL_API_KEY",
+    "note": "API key is sent as a parameter in the request body, not in headers."
+  },
+  "endpoints": [
+    {
+      "id": "send-message",
+      "name": "Send Message",
+      "description": "Send a transactional email",
+      "method": "POST",
+      "path": "/messages/send.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string", "required": true, "description": "API key" },
+          "message": {
+            "type": "object",
+            "properties": {
+              "html": { "type": "string", "description": "HTML content" },
+              "text": { "type": "string", "description": "Plain text content" },
+              "subject": { "type": "string", "required": true, "description": "Email subject" },
+              "from_email": { "type": "string", "format": "email", "required": true, "description": "From email address" },
+              "from_name": { "type": "string", "description": "From name" },
+              "to": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "email": { "type": "string", "format": "email", "required": true, "description": "Recipient email" },
+                    "name": { "type": "string", "description": "Recipient name" },
+                    "type": { "type": "string", "enum": ["to", "cc", "bcc"], "default": "to", "description": "Recipient type" }
+                  },
+                  "required": ["email"]
+                },
+                "required": true,
+                "description": "Recipients"
+              },
+              "headers": {
+                "type": "object",
+                "description": "Custom headers",
+                "additionalProperties": true
+              },
+              "important": { "type": "boolean", "default": false, "description": "Mark as important" },
+              "track_opens": { "type": "boolean", "default": true, "description": "Track opens" },
+              "track_clicks": { "type": "boolean", "default": true, "description": "Track clicks" },
+              "auto_text": { "type": "boolean", "default": false, "description": "Auto-generate text from HTML" },
+              "auto_html": { "type": "boolean", "default": false, "description": "Auto-generate HTML from text" },
+              "inline_css": { "type": "boolean", "default": false, "description": "Inline CSS" },
+              "url_strip_qs": { "type": "boolean", "default": false, "description": "Strip query strings from URLs" },
+              "preserve_recipients": { "type": "boolean", "default": false, "description": "Preserve recipients" },
+              "view_content_link": { "type": "boolean", "default": true, "description": "View content link" },
+              "tracking_domain": { "type": "string", "description": "Tracking domain" },
+              "signing_domain": { "type": "string", "description": "Signing domain" },
+              "return_path_domain": { "type": "string", "description": "Return path domain" },
+              "merge": { "type": "boolean", "default": true, "description": "Enable merge tags" },
+              "merge_language": { "type": "string", "enum": ["mailchimp", "handlebars"], "default": "mailchimp", "description": "Merge language" },
+              "global_merge_vars": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string", "description": "Variable name" },
+                    "content": { "type": "string", "description": "Variable content" }
+                  }
+                },
+                "description": "Global merge variables"
+              },
+              "merge_vars": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "rcpt": { "type": "string", "format": "email", "description": "Recipient email" },
+                    "vars": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "content": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                },
+                "description": "Per-recipient merge variables"
+              },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Tags"
+              },
+              "subaccount": { "type": "string", "description": "Subaccount identifier" },
+              "google_analytics_domains": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Google Analytics domains"
+              },
+              "google_analytics_campaign": { "type": "string", "description": "Google Analytics campaign" },
+              "metadata": {
+                "type": "object",
+                "description": "Metadata",
+                "additionalProperties": true
+              },
+              "recipient_metadata": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "rcpt": { "type": "string", "format": "email" },
+                    "values": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                },
+                "description": "Per-recipient metadata"
+              },
+              "attachments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string", "description": "MIME type" },
+                    "name": { "type": "string", "description": "File name" },
+                    "content": { "type": "string", "description": "Base64-encoded content" }
+                  }
+                },
+                "description": "Attachments"
+              },
+              "images": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string", "description": "MIME type" },
+                    "name": { "type": "string", "description": "Image name (CID)" },
+                    "content": { "type": "string", "description": "Base64-encoded content" }
+                  }
+                },
+                "description": "Inline images"
+              }
+            },
+            "required": ["subject", "from_email", "to"]
+          },
+          "async": { "type": "boolean", "default": false, "description": "Send asynchronously" },
+          "ip_pool": { "type": "string", "description": "IP pool name" },
+          "send_at": { "type": "string", "format": "date-time", "description": "Send at (ISO 8601)" }
+        },
+        "required": ["key", "message"]
+      },
+      "urlTemplate": "https://mandrillapp.com/api/1.0/messages/send.json"
+    },
+    {
+      "id": "send-template",
+      "name": "Send Template",
+      "description": "Send a transactional email using a template",
+      "method": "POST",
+      "path": "/messages/send-template.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string", "required": true, "description": "API key" },
+          "template_name": { "type": "string", "required": true, "description": "Template name" },
+          "template_content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "description": "Content block name" },
+                "content": { "type": "string", "description": "Content block content" }
+              }
+            },
+            "description": "Template content blocks"
+          },
+          "message": {
+            "type": "object",
+            "properties": {
+              "subject": { "type": "string", "description": "Email subject" },
+              "from_email": { "type": "string", "format": "email", "description": "From email address" },
+              "from_name": { "type": "string", "description": "From name" },
+              "to": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "email": { "type": "string", "format": "email", "description": "Recipient email" },
+                    "name": { "type": "string", "description": "Recipient name" },
+                    "type": { "type": "string", "enum": ["to", "cc", "bcc"], "description": "Recipient type" }
+                  }
+                }
+              },
+              "headers": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "important": { "type": "boolean", "description": "Mark as important" },
+              "track_opens": { "type": "boolean", "description": "Track opens" },
+              "track_clicks": { "type": "boolean", "description": "Track clicks" },
+              "auto_text": { "type": "boolean", "description": "Auto-generate text" },
+              "auto_html": { "type": "boolean", "description": "Auto-generate HTML" },
+              "inline_css": { "type": "boolean", "description": "Inline CSS" },
+              "url_strip_qs": { "type": "boolean", "description": "Strip query strings" },
+              "preserve_recipients": { "type": "boolean", "description": "Preserve recipients" },
+              "view_content_link": { "type": "boolean", "description": "View content link" },
+              "tracking_domain": { "type": "string", "description": "Tracking domain" },
+              "signing_domain": { "type": "string", "description": "Signing domain" },
+              "return_path_domain": { "type": "string", "description": "Return path domain" },
+              "merge": { "type": "boolean", "description": "Enable merge tags" },
+              "merge_language": { "type": "string", "enum": ["mailchimp", "handlebars"], "description": "Merge language" },
+              "global_merge_vars": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "content": { "type": "string" }
+                  }
+                }
+              },
+              "merge_vars": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "subaccount": { "type": "string", "description": "Subaccount identifier" },
+              "google_analytics_domains": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "google_analytics_campaign": { "type": "string" },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "recipient_metadata": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "attachments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string" },
+                    "name": { "type": "string" },
+                    "content": { "type": "string" }
+                  }
+                }
+              },
+              "images": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string" },
+                    "name": { "type": "string" },
+                    "content": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "async": { "type": "boolean", "description": "Send asynchronously" },
+          "ip_pool": { "type": "string", "description": "IP pool name" },
+          "send_at": { "type": "string", "format": "date-time", "description": "Send at (ISO 8601)" }
+        },
+        "required": ["key", "template_name", "message"]
+      },
+      "urlTemplate": "https://mandrillapp.com/api/1.0/messages/send-template.json"
+    },
+    {
+      "id": "get-template",
+      "name": "Get Template",
+      "description": "Get template information",
+      "method": "GET",
+      "path": "/templates/info.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "queryParams": {
+        "key": { "type": "string", "required": true, "description": "API key" },
+        "name": { "type": "string", "required": true, "description": "Template name" }
+      },
+      "urlTemplate": "https://mandrillapp.com/api/1.0/templates/info.json"
+    },
+    {
+      "id": "list-templates",
+      "name": "List Templates",
+      "description": "List all templates",
+      "method": "GET",
+      "path": "/templates/list.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "queryParams": {
+        "key": { "type": "string", "required": true, "description": "API key" }
+      },
+      "urlTemplate": "https://mandrillapp.com/api/1.0/templates/list.json"
+    },
+    {
+      "id": "list-webhooks",
+      "name": "List Webhooks",
+      "description": "List all webhooks",
+      "method": "GET",
+      "path": "/webhooks/list.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "queryParams": {
+        "key": { "type": "string", "required": true, "description": "API key" }
+      },
+      "urlTemplate": "https://mandrillapp.com/api/1.0/webhooks/list.json"
+    }
+  ]
+}
+

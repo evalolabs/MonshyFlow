@@ -1,0 +1,175 @@
+{
+  "id": "cockpit",
+  "name": "Cockpit",
+  "icon": "📝",
+  "logoUrl": "https://cdn.simpleicons.org/cockpit/000000",
+  "description": "Headless CMS",
+  "baseUrl": "https://{your-cockpit-instance}/api",
+  "color": {
+    "bg": "from-gray-100 to-stone-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "secretKey": "COCKPIT_ACCESS_TOKEN",
+    "queryParamName": "token",
+    "note": "Base URL should be provided in baseUrl placeholder {your-cockpit-instance} or as COCKPIT_BASE_URL secret key. Access token is sent as query parameter 'token'."
+  },
+  "endpoints": [
+    {
+      "id": "create-collection",
+      "name": "Create Collection",
+      "description": "Create a new entry in a collection",
+      "method": "POST",
+      "path": "/collections/save/{collectionName}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "Access token"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Collection entry data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-cockpit-instance}/api/collections/save/{collectionName}"
+    },
+    {
+      "id": "get-collection",
+      "name": "Get Collection",
+      "description": "Get a collection entry by ID",
+      "method": "GET",
+      "path": "/collections/get/{collectionName}/{entryId}",
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "Access token"
+        }
+      },
+      "urlTemplate": "https://{your-cockpit-instance}/api/collections/get/{collectionName}/{entryId}"
+    },
+    {
+      "id": "list-collections",
+      "name": "List Collections",
+      "description": "List all entries in a collection",
+      "method": "GET",
+      "path": "/collections/get/{collectionName}",
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "Access token"
+        }
+      },
+      "urlTemplate": "https://{your-cockpit-instance}/api/collections/get/{collectionName}"
+    },
+    {
+      "id": "update-collection",
+      "name": "Update Collection",
+      "description": "Update a collection entry",
+      "method": "POST",
+      "path": "/collections/save/{collectionName}/{entryId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "Access token"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Collection entry data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-cockpit-instance}/api/collections/save/{collectionName}/{entryId}"
+    },
+    {
+      "id": "delete-collection",
+      "name": "Delete Collection",
+      "description": "Delete a collection entry",
+      "method": "DELETE",
+      "path": "/collections/remove/{collectionName}/{entryId}",
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "Access token"
+        }
+      },
+      "urlTemplate": "https://{your-cockpit-instance}/api/collections/remove/{collectionName}/{entryId}"
+    },
+    {
+      "id": "get-singleton",
+      "name": "Get Singleton",
+      "description": "Get a singleton",
+      "method": "GET",
+      "path": "/singletons/get/{singletonName}",
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "Access token"
+        }
+      },
+      "urlTemplate": "https://{your-cockpit-instance}/api/singletons/get/{singletonName}"
+    },
+    {
+      "id": "update-singleton",
+      "name": "Update Singleton",
+      "description": "Update a singleton",
+      "method": "POST",
+      "path": "/singletons/save/{singletonName}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "Access token"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Singleton data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-cockpit-instance}/api/singletons/save/{singletonName}"
+    },
+    {
+      "id": "submit-form",
+      "name": "Submit Form",
+      "description": "Submit a form",
+      "method": "POST",
+      "path": "/forms/submit/{formName}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "queryParams": {
+        "token": {
+          "type": "string",
+          "required": true,
+          "description": "Access token"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Form data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-cockpit-instance}/api/forms/submit/{formName}"
+    }
+  ]
+}
+

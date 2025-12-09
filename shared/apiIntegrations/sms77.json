@@ -1,0 +1,166 @@
+{
+  "id": "sms77",
+  "name": "Sms77 (seven)",
+  "icon": "📱",
+  "logoUrl": "https://cdn.simpleicons.org/seven/000000",
+  "description": "SMS and voice messaging service",
+  "baseUrl": "https://gateway.seven.io/api",
+  "color": {
+    "bg": "from-neutral-100 to-gray-100",
+    "border": "border-neutral-500",
+    "icon": "text-neutral-700",
+    "handle": "bg-neutral-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "SentWith",
+    "secretKey": "SMS77_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "send-sms",
+      "name": "Send SMS",
+      "description": "Send an SMS message",
+      "method": "POST",
+      "path": "/sms",
+      "headers": {
+        "Content-Type": "application/json",
+        "SentWith": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "required": true,
+            "description": "Recipient phone number (E.164 format, e.g., +491234567890)"
+          },
+          "text": {
+            "type": "string",
+            "required": true,
+            "description": "Message text"
+          },
+          "from": {
+            "type": "string",
+            "description": "Sender ID or phone number (alphanumeric or E.164 format)"
+          },
+          "flash": {
+            "type": "boolean",
+            "default": false,
+            "description": "Send as flash SMS (displayed immediately, not stored)"
+          },
+          "ttl": {
+            "type": "integer",
+            "description": "Time to live in seconds (for delayed delivery)"
+          },
+          "performance_tracking": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable performance tracking"
+          },
+          "label": {
+            "type": "string",
+            "description": "Label for tracking"
+          },
+          "json": {
+            "type": "boolean",
+            "default": true,
+            "description": "Return JSON response"
+          },
+          "utf8": {
+            "type": "boolean",
+            "default": false,
+            "description": "Send as UTF-8"
+          },
+          "udh": {
+            "type": "string",
+            "description": "User Data Header (hex)"
+          },
+          "delay": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Schedule delivery time (ISO 8601)"
+          },
+          "no_reload": {
+            "type": "boolean",
+            "default": false,
+            "description": "Disable reload"
+          },
+          "details": {
+            "type": "boolean",
+            "default": false,
+            "description": "Return detailed response"
+          }
+        },
+        "required": ["to", "text"]
+      },
+      "urlTemplate": "https://gateway.seven.io/api/sms"
+    },
+    {
+      "id": "send-voice",
+      "name": "Send Voice Call",
+      "description": "Send a voice call",
+      "method": "POST",
+      "path": "/voice",
+      "headers": {
+        "Content-Type": "application/json",
+        "SentWith": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "required": true,
+            "description": "Recipient phone number (E.164 format)"
+          },
+          "text": {
+            "type": "string",
+            "required": true,
+            "description": "Text to convert to speech"
+          },
+          "from": {
+            "type": "string",
+            "description": "Caller ID or phone number"
+          },
+          "xml": {
+            "type": "boolean",
+            "default": false,
+            "description": "Text is XML format"
+          },
+          "language": {
+            "type": "string",
+            "default": "de",
+            "description": "Language code (e.g., 'de', 'en', 'fr')"
+          },
+          "voice": {
+            "type": "string",
+            "enum": ["female", "male"],
+            "default": "female",
+            "description": "Voice gender"
+          },
+          "repeat": {
+            "type": "integer",
+            "default": 1,
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Number of times to repeat"
+          },
+          "machine_detection": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable machine detection"
+          },
+          "delay": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Schedule call time (ISO 8601)"
+          }
+        },
+        "required": ["to", "text"]
+      },
+      "urlTemplate": "https://gateway.seven.io/api/voice"
+    }
+  ]
+}
+

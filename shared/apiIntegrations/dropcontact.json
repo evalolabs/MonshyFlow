@@ -1,0 +1,107 @@
+{
+  "id": "dropcontact",
+  "name": "Dropcontact",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/dropcontact/000000",
+  "description": "B2B email finder and contact enrichment platform",
+  "baseUrl": "https://api.dropcontact.io",
+  "color": {
+    "bg": "from-purple-100 to-fuchsia-100",
+    "border": "border-purple-500",
+    "icon": "text-purple-700",
+    "handle": "bg-purple-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "{apiKey}",
+    "secretKey": "DROPCONTACT_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "enrich-contacts",
+      "name": "Enrich Contacts",
+      "description": "Enrich contacts asynchronously (returns request ID)",
+      "method": "POST",
+      "path": "/batch",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "description": "Email address"
+                },
+                "first_name": {
+                  "type": "string",
+                  "description": "First name"
+                },
+                "last_name": {
+                  "type": "string",
+                  "description": "Last name"
+                },
+                "full_name": {
+                  "type": "string",
+                  "description": "Full name"
+                },
+                "company": {
+                  "type": "string",
+                  "description": "Company name"
+                },
+                "domain": {
+                  "type": "string",
+                  "description": "Company domain"
+                },
+                "phone": {
+                  "type": "string",
+                  "description": "Phone number"
+                },
+                "linkedin_url": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "LinkedIn URL"
+                }
+              },
+              "description": "Contact data to enrich"
+            },
+            "required": true,
+            "description": "Array of contacts to enrich"
+          },
+          "siren": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enrich with SIREN (French company registry)"
+          },
+          "siret": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enrich with SIRET (French company registry)"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://api.dropcontact.io/batch"
+    },
+    {
+      "id": "fetch-enrich-request",
+      "name": "Fetch Enrich Request",
+      "description": "Fetch results of an enrich request by request ID",
+      "method": "GET",
+      "path": "/batch/{requestId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://api.dropcontact.io/batch/{requestId}"
+    }
+  ]
+}
+

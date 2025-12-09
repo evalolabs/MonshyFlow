@@ -1,0 +1,384 @@
+{
+  "id": "mongodb",
+  "name": "MongoDB",
+  "icon": "🍃",
+  "logoUrl": "https://cdn.simpleicons.org/mongodb/47A248",
+  "description": "NoSQL document database",
+  "baseUrl": "https://data.mongodb-api.com/app/{appId}/endpoint/data/v1",
+  "color": {
+    "bg": "from-green-100 to-lime-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "api-key",
+    "headerFormat": "{apiKey}",
+    "secretKey": "MONGODB_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "find-one",
+      "name": "Find One",
+      "description": "Find a single document",
+      "method": "POST",
+      "path": "/action/findOne",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dataSource": { "type": "string", "required": true, "description": "Cluster name" },
+          "database": { "type": "string", "required": true, "description": "Database name" },
+          "collection": { "type": "string", "required": true, "description": "Collection name" },
+          "filter": {
+            "type": "object",
+            "description": "MongoDB query filter",
+            "additionalProperties": true
+          },
+          "projection": {
+            "type": "object",
+            "description": "Fields to return",
+            "additionalProperties": { "type": "number" }
+          },
+          "sort": {
+            "type": "object",
+            "description": "Sort order",
+            "additionalProperties": { "type": "number" }
+          }
+        },
+        "required": ["dataSource", "database", "collection"]
+      },
+      "urlTemplate": "https://data.mongodb-api.com/app/{appId}/endpoint/data/v1/action/findOne"
+    },
+    {
+      "id": "find-many",
+      "name": "Find Many",
+      "description": "Find multiple documents",
+      "method": "POST",
+      "path": "/action/find",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dataSource": { "type": "string", "required": true, "description": "Cluster name" },
+          "database": { "type": "string", "required": true, "description": "Database name" },
+          "collection": { "type": "string", "required": true, "description": "Collection name" },
+          "filter": {
+            "type": "object",
+            "description": "MongoDB query filter",
+            "additionalProperties": true
+          },
+          "projection": {
+            "type": "object",
+            "description": "Fields to return",
+            "additionalProperties": { "type": "number" }
+          },
+          "sort": {
+            "type": "object",
+            "description": "Sort order",
+            "additionalProperties": { "type": "number" }
+          },
+          "limit": { "type": "number", "description": "Maximum number of documents", "default": 1000 },
+          "skip": { "type": "number", "description": "Number of documents to skip", "default": 0 }
+        },
+        "required": ["dataSource", "database", "collection"]
+      },
+      "urlTemplate": "https://data.mongodb-api.com/app/{appId}/endpoint/data/v1/action/find"
+    },
+    {
+      "id": "insert-one",
+      "name": "Insert One",
+      "description": "Insert a single document",
+      "method": "POST",
+      "path": "/action/insertOne",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dataSource": { "type": "string", "required": true, "description": "Cluster name" },
+          "database": { "type": "string", "required": true, "description": "Database name" },
+          "collection": { "type": "string", "required": true, "description": "Collection name" },
+          "document": {
+            "type": "object",
+            "description": "Document to insert",
+            "additionalProperties": true,
+            "required": true
+          }
+        },
+        "required": ["dataSource", "database", "collection", "document"]
+      },
+      "urlTemplate": "https://data.mongodb-api.com/app/{appId}/endpoint/data/v1/action/insertOne"
+    },
+    {
+      "id": "insert-many",
+      "name": "Insert Many",
+      "description": "Insert multiple documents",
+      "method": "POST",
+      "path": "/action/insertMany",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dataSource": { "type": "string", "required": true, "description": "Cluster name" },
+          "database": { "type": "string", "required": true, "description": "Database name" },
+          "collection": { "type": "string", "required": true, "description": "Collection name" },
+          "documents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "required": true,
+            "description": "Documents to insert"
+          }
+        },
+        "required": ["dataSource", "database", "collection", "documents"]
+      },
+      "urlTemplate": "https://data.mongodb-api.com/app/{appId}/endpoint/data/v1/action/insertMany"
+    },
+    {
+      "id": "update-one",
+      "name": "Update One",
+      "description": "Update a single document",
+      "method": "POST",
+      "path": "/action/updateOne",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dataSource": { "type": "string", "required": true, "description": "Cluster name" },
+          "database": { "type": "string", "required": true, "description": "Database name" },
+          "collection": { "type": "string", "required": true, "description": "Collection name" },
+          "filter": {
+            "type": "object",
+            "description": "MongoDB query filter",
+            "additionalProperties": true,
+            "required": true
+          },
+          "update": {
+            "type": "object",
+            "description": "Update operations (e.g., { $set: { field: value } })",
+            "additionalProperties": true,
+            "required": true
+          },
+          "upsert": { "type": "boolean", "default": false, "description": "Create if not exists" }
+        },
+        "required": ["dataSource", "database", "collection", "filter", "update"]
+      },
+      "urlTemplate": "https://data.mongodb-api.com/app/{appId}/endpoint/data/v1/action/updateOne"
+    },
+    {
+      "id": "update-many",
+      "name": "Update Many",
+      "description": "Update multiple documents",
+      "method": "POST",
+      "path": "/action/updateMany",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dataSource": { "type": "string", "required": true, "description": "Cluster name" },
+          "database": { "type": "string", "required": true, "description": "Database name" },
+          "collection": { "type": "string", "required": true, "description": "Collection name" },
+          "filter": {
+            "type": "object",
+            "description": "MongoDB query filter",
+            "additionalProperties": true,
+            "required": true
+          },
+          "update": {
+            "type": "object",
+            "description": "Update operations",
+            "additionalProperties": true,
+            "required": true
+          },
+          "upsert": { "type": "boolean", "default": false, "description": "Create if not exists" }
+        },
+        "required": ["dataSource", "database", "collection", "filter", "update"]
+      },
+      "urlTemplate": "https://data.mongodb-api.com/app/{appId}/endpoint/data/v1/action/updateMany"
+    },
+    {
+      "id": "delete-one",
+      "name": "Delete One",
+      "description": "Delete a single document",
+      "method": "POST",
+      "path": "/action/deleteOne",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dataSource": { "type": "string", "required": true, "description": "Cluster name" },
+          "database": { "type": "string", "required": true, "description": "Database name" },
+          "collection": { "type": "string", "required": true, "description": "Collection name" },
+          "filter": {
+            "type": "object",
+            "description": "MongoDB query filter",
+            "additionalProperties": true,
+            "required": true
+          }
+        },
+        "required": ["dataSource", "database", "collection", "filter"]
+      },
+      "urlTemplate": "https://data.mongodb-api.com/app/{appId}/endpoint/data/v1/action/deleteOne"
+    },
+    {
+      "id": "delete-many",
+      "name": "Delete Many",
+      "description": "Delete multiple documents",
+      "method": "POST",
+      "path": "/action/deleteMany",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dataSource": { "type": "string", "required": true, "description": "Cluster name" },
+          "database": { "type": "string", "required": true, "description": "Database name" },
+          "collection": { "type": "string", "required": true, "description": "Collection name" },
+          "filter": {
+            "type": "object",
+            "description": "MongoDB query filter",
+            "additionalProperties": true,
+            "required": true
+          }
+        },
+        "required": ["dataSource", "database", "collection", "filter"]
+      },
+      "urlTemplate": "https://data.mongodb-api.com/app/{appId}/endpoint/data/v1/action/deleteMany"
+    },
+    {
+      "id": "aggregate",
+      "name": "Aggregate",
+      "description": "Run aggregation pipeline",
+      "method": "POST",
+      "path": "/action/aggregate",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dataSource": { "type": "string", "required": true, "description": "Cluster name" },
+          "database": { "type": "string", "required": true, "description": "Database name" },
+          "collection": { "type": "string", "required": true, "description": "Collection name" },
+          "pipeline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Aggregation pipeline stages",
+              "additionalProperties": true
+            },
+            "required": true,
+            "description": "Aggregation pipeline (e.g., [{ $match: {...} }, { $group: {...} }])"
+          }
+        },
+        "required": ["dataSource", "database", "collection", "pipeline"]
+      },
+      "urlTemplate": "https://data.mongodb-api.com/app/{appId}/endpoint/data/v1/action/aggregate"
+    },
+    {
+      "id": "find-one-and-update",
+      "name": "Find One and Update",
+      "description": "Find and update a single document",
+      "method": "POST",
+      "path": "/action/findOneAndUpdate",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dataSource": { "type": "string", "required": true, "description": "Cluster name" },
+          "database": { "type": "string", "required": true, "description": "Database name" },
+          "collection": { "type": "string", "required": true, "description": "Collection name" },
+          "filter": {
+            "type": "object",
+            "description": "MongoDB query filter",
+            "additionalProperties": true,
+            "required": true
+          },
+          "update": {
+            "type": "object",
+            "description": "Update operations",
+            "additionalProperties": true,
+            "required": true
+          },
+          "options": {
+            "type": "object",
+            "properties": {
+              "returnDocument": { "type": "string", "enum": ["before", "after"], "default": "before" },
+              "upsert": { "type": "boolean", "default": false },
+              "sort": {
+                "type": "object",
+                "additionalProperties": { "type": "number" }
+              }
+            }
+          }
+        },
+        "required": ["dataSource", "database", "collection", "filter", "update"]
+      },
+      "urlTemplate": "https://data.mongodb-api.com/app/{appId}/endpoint/data/v1/action/findOneAndUpdate"
+    },
+    {
+      "id": "find-one-and-replace",
+      "name": "Find One and Replace",
+      "description": "Find and replace a single document",
+      "method": "POST",
+      "path": "/action/findOneAndReplace",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dataSource": { "type": "string", "required": true, "description": "Cluster name" },
+          "database": { "type": "string", "required": true, "description": "Database name" },
+          "collection": { "type": "string", "required": true, "description": "Collection name" },
+          "filter": {
+            "type": "object",
+            "description": "MongoDB query filter",
+            "additionalProperties": true,
+            "required": true
+          },
+          "replacement": {
+            "type": "object",
+            "description": "Replacement document",
+            "additionalProperties": true,
+            "required": true
+          },
+          "options": {
+            "type": "object",
+            "properties": {
+              "returnDocument": { "type": "string", "enum": ["before", "after"], "default": "before" },
+              "upsert": { "type": "boolean", "default": false },
+              "sort": {
+                "type": "object",
+                "additionalProperties": { "type": "number" }
+              }
+            }
+          }
+        },
+        "required": ["dataSource", "database", "collection", "filter", "replacement"]
+      },
+      "urlTemplate": "https://data.mongodb-api.com/app/{appId}/endpoint/data/v1/action/findOneAndReplace"
+    }
+  ]
+}
+

@@ -1,0 +1,228 @@
+{
+  "id": "jotform",
+  "name": "JotForm",
+  "icon": "📋",
+  "logoUrl": "https://cdn.simpleicons.org/jotform/FF7100",
+  "description": "Online form builder and data collection platform",
+  "baseUrl": "https://{apiDomain || 'api.jotform.com'}",
+  "color": {
+    "bg": "from-orange-100 to-yellow-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "APIKEY",
+    "headerFormat": "{apiKey}",
+    "secretKey": "JOTFORM_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-form",
+      "name": "Create Form",
+      "description": "Create a new form",
+      "method": "POST",
+      "path": "/form",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "questions": {
+            "type": "object",
+            "description": "Form questions (key-value pairs where key is question ID)",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "required": true, "description": "Question type" },
+                "text": { "type": "string", "description": "Question text" },
+                "order": { "type": "number", "description": "Question order" },
+                "required": { "type": "boolean", "default": false, "description": "Required field" },
+                "options": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "Options for select/radio/checkbox questions"
+                },
+                "properties": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Question-specific properties"
+                }
+              },
+              "required": ["type"]
+            }
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string", "description": "Form title" },
+              "height": { "type": "number", "description": "Form height" },
+              "width": { "type": "number", "description": "Form width" },
+              "emails": {
+                "type": "array",
+                "items": { "type": "string", "format": "email" },
+                "description": "Notification email addresses"
+              },
+              "formType": { "type": "string", "description": "Form type" },
+              "language": { "type": "string", "description": "Form language" },
+              "thankyou": { "type": "string", "description": "Thank you message" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://{apiDomain || 'api.jotform.com'}/form"
+    },
+    {
+      "id": "get-form",
+      "name": "Get Form",
+      "description": "Get form details by ID",
+      "method": "GET",
+      "path": "/form/{formId}",
+      "headers": {},
+      "queryParams": {
+        "apiKey": "{apiKey}"
+      },
+      "urlTemplate": "https://{apiDomain || 'api.jotform.com'}/form/{formId}"
+    },
+    {
+      "id": "list-forms",
+      "name": "List Forms",
+      "description": "List all forms for user",
+      "method": "GET",
+      "path": "/user/forms",
+      "headers": {},
+      "queryParams": {
+        "limit": "20",
+        "offset": "0",
+        "filter": "{filter}",
+        "orderby": "{orderBy}"
+      },
+      "urlTemplate": "https://{apiDomain || 'api.jotform.com'}/user/forms"
+    },
+    {
+      "id": "update-form",
+      "name": "Update Form",
+      "description": "Update an existing form",
+      "method": "POST",
+      "path": "/form/{formId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "questions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string", "description": "Form title" },
+              "height": { "type": "number", "description": "Form height" },
+              "width": { "type": "number", "description": "Form width" },
+              "emails": {
+                "type": "array",
+                "items": { "type": "string", "format": "email" }
+              },
+              "thankyou": { "type": "string", "description": "Thank you message" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://{apiDomain || 'api.jotform.com'}/form/{formId}"
+    },
+    {
+      "id": "delete-form",
+      "name": "Delete Form",
+      "description": "Delete a form",
+      "method": "DELETE",
+      "path": "/form/{formId}",
+      "headers": {},
+      "urlTemplate": "https://{apiDomain || 'api.jotform.com'}/form/{formId}"
+    },
+    {
+      "id": "get-submission",
+      "name": "Get Submission",
+      "description": "Get form submission details by ID",
+      "method": "GET",
+      "path": "/form/{formId}/submissions/{submissionId}",
+      "headers": {},
+      "urlTemplate": "https://{apiDomain || 'api.jotform.com'}/form/{formId}/submissions/{submissionId}"
+    },
+    {
+      "id": "list-submissions",
+      "name": "List Submissions",
+      "description": "List all form submissions",
+      "method": "GET",
+      "path": "/form/{formId}/submissions",
+      "headers": {},
+      "queryParams": {
+        "limit": "20",
+        "offset": "0",
+        "filter": "{filter}",
+        "orderby": "{orderBy}"
+      },
+      "urlTemplate": "https://{apiDomain || 'api.jotform.com'}/form/{formId}/submissions"
+    },
+    {
+      "id": "create-webhook",
+      "name": "Create Webhook",
+      "description": "Create a new webhook for form",
+      "method": "POST",
+      "path": "/form/{formId}/webhooks",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "webhookURL": { "type": "string", "format": "uri", "required": true, "description": "Webhook URL" }
+        },
+        "required": ["webhookURL"]
+      },
+      "urlTemplate": "https://{apiDomain || 'api.jotform.com'}/form/{formId}/webhooks"
+    },
+    {
+      "id": "list-webhooks",
+      "name": "List Webhooks",
+      "description": "List all webhooks for form",
+      "method": "GET",
+      "path": "/form/{formId}/webhooks",
+      "headers": {},
+      "urlTemplate": "https://{apiDomain || 'api.jotform.com'}/form/{formId}/webhooks"
+    },
+    {
+      "id": "update-webhook",
+      "name": "Update Webhook",
+      "description": "Update an existing webhook",
+      "method": "POST",
+      "path": "/form/{formId}/webhooks/{webhookId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "webhookURL": { "type": "string", "format": "uri", "description": "Webhook URL" }
+        }
+      },
+      "urlTemplate": "https://{apiDomain || 'api.jotform.com'}/form/{formId}/webhooks/{webhookId}"
+    },
+    {
+      "id": "delete-webhook",
+      "name": "Delete Webhook",
+      "description": "Delete a webhook",
+      "method": "DELETE",
+      "path": "/form/{formId}/webhooks/{webhookId}",
+      "headers": {},
+      "urlTemplate": "https://{apiDomain || 'api.jotform.com'}/form/{formId}/webhooks/{webhookId}"
+    }
+  ]
+}
+

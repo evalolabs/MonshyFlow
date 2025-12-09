@@ -1,0 +1,241 @@
+{
+  "id": "ghost",
+  "name": "Ghost",
+  "icon": "👻",
+  "logoUrl": "https://cdn.simpleicons.org/ghost/15171A",
+  "description": "Publishing platform and headless CMS",
+  "baseUrl": "{url}/ghost/api/v3",
+  "color": {
+    "bg": "from-gray-100 to-zinc-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GHOST_ADMIN_API_KEY",
+    "queryParamName": "key",
+    "note": "Content API uses key query parameter (GHOST_CONTENT_API_KEY). Admin API uses Bearer token in Authorization header (GHOST_ADMIN_API_KEY)."
+  },
+  "endpoints": [
+    {
+      "id": "get-post-content",
+      "name": "Get Post (Content API)",
+      "description": "Get post by ID from Content API",
+      "method": "GET",
+      "path": "/content/posts/{id}",
+      "headers": {},
+      "queryParams": {
+        "key": "{key}",
+        "formats": "{formats}",
+        "include": "{include}",
+        "fields": "{fields}"
+      },
+      "urlTemplate": "{url}/ghost/api/v3/content/posts/{id}"
+    },
+    {
+      "id": "list-posts-content",
+      "name": "List Posts (Content API)",
+      "description": "List all posts from Content API",
+      "method": "GET",
+      "path": "/content/posts",
+      "headers": {},
+      "queryParams": {
+        "key": "{key}",
+        "filter": "{filter}",
+        "formats": "{formats}",
+        "include": "{include}",
+        "fields": "{fields}",
+        "limit": "15",
+        "page": "1",
+        "order": "{order}"
+      },
+      "urlTemplate": "{url}/ghost/api/v3/content/posts"
+    },
+    {
+      "id": "create-post-admin",
+      "name": "Create Post (Admin API)",
+      "description": "Create a new post",
+      "method": "POST",
+      "path": "/admin/posts",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "posts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string", "required": true, "description": "Post title" },
+                "slug": { "type": "string", "description": "Post slug" },
+                "mobiledoc": { "type": "string", "description": "MobileDoc content" },
+                "html": { "type": "string", "description": "HTML content" },
+                "plaintext": { "type": "string", "description": "Plain text content" },
+                "status": { "type": "string", "enum": ["draft", "published", "scheduled"], "default": "draft", "description": "Post status" },
+                "featured": { "type": "boolean", "default": false, "description": "Featured post" },
+                "feature_image": { "type": "string", "format": "uri", "description": "Feature image URL" },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string", "required": true },
+                      "slug": { "type": "string" }
+                    },
+                    "required": ["name"]
+                  },
+                  "description": "Post tags"
+                },
+                "authors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "email": { "type": "string", "format": "email" },
+                      "name": { "type": "string" }
+                    }
+                  },
+                  "description": "Post authors"
+                },
+                "published_at": { "type": "string", "format": "date-time", "description": "Published date" },
+                "excerpt": { "type": "string", "description": "Post excerpt" },
+                "meta_title": { "type": "string", "description": "Meta title" },
+                "meta_description": { "type": "string", "description": "Meta description" },
+                "custom_excerpt": { "type": "string", "description": "Custom excerpt" },
+                "codeinjection_head": { "type": "string", "description": "Code injection in head" },
+                "codeinjection_foot": { "type": "string", "description": "Code injection in foot" },
+                "og_image": { "type": "string", "format": "uri", "description": "OG image URL" },
+                "og_title": { "type": "string", "description": "OG title" },
+                "og_description": { "type": "string", "description": "OG description" },
+                "twitter_image": { "type": "string", "format": "uri", "description": "Twitter image URL" },
+                "twitter_title": { "type": "string", "description": "Twitter title" },
+                "twitter_description": { "type": "string", "description": "Twitter description" },
+                "custom_template": { "type": "string", "description": "Custom template" },
+                "canonical_url": { "type": "string", "format": "uri", "description": "Canonical URL" }
+              },
+              "required": ["title"]
+            },
+            "required": true
+          }
+        },
+        "required": ["posts"]
+      },
+      "urlTemplate": "{url}/ghost/api/v2/admin/posts"
+    },
+    {
+      "id": "get-post-admin",
+      "name": "Get Post (Admin API)",
+      "description": "Get post details by ID",
+      "method": "GET",
+      "path": "/admin/posts/{id}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "formats": "{formats}",
+        "include": "{include}",
+        "fields": "{fields}"
+      },
+      "urlTemplate": "{url}/ghost/api/v2/admin/posts/{id}"
+    },
+    {
+      "id": "list-posts-admin",
+      "name": "List Posts (Admin API)",
+      "description": "List all posts",
+      "method": "GET",
+      "path": "/admin/posts",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "filter": "{filter}",
+        "formats": "{formats}",
+        "include": "{include}",
+        "fields": "{fields}",
+        "limit": "15",
+        "page": "1",
+        "order": "{order}"
+      },
+      "urlTemplate": "{url}/ghost/api/v2/admin/posts"
+    },
+    {
+      "id": "update-post-admin",
+      "name": "Update Post (Admin API)",
+      "description": "Update an existing post",
+      "method": "PUT",
+      "path": "/admin/posts/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "posts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string", "description": "Post title" },
+                "slug": { "type": "string", "description": "Post slug" },
+                "mobiledoc": { "type": "string", "description": "MobileDoc content" },
+                "html": { "type": "string", "description": "HTML content" },
+                "plaintext": { "type": "string", "description": "Plain text content" },
+                "status": { "type": "string", "enum": ["draft", "published", "scheduled"], "description": "Post status" },
+                "featured": { "type": "boolean", "description": "Featured post" },
+                "feature_image": { "type": "string", "format": "uri", "description": "Feature image URL" },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "slug": { "type": "string" }
+                    }
+                  }
+                },
+                "authors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "email": { "type": "string", "format": "email" },
+                      "name": { "type": "string" }
+                    }
+                  }
+                },
+                "published_at": { "type": "string", "format": "date-time", "description": "Published date" },
+                "excerpt": { "type": "string", "description": "Post excerpt" },
+                "meta_title": { "type": "string", "description": "Meta title" },
+                "meta_description": { "type": "string", "description": "Meta description" }
+              }
+            },
+            "required": true
+          }
+        },
+        "required": ["posts"]
+      },
+      "urlTemplate": "{url}/ghost/api/v2/admin/posts/{id}"
+    },
+    {
+      "id": "delete-post-admin",
+      "name": "Delete Post (Admin API)",
+      "description": "Delete a post",
+      "method": "DELETE",
+      "path": "/admin/posts/{id}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "{url}/ghost/api/v2/admin/posts/{id}"
+    }
+  ]
+}
+

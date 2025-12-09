@@ -1,0 +1,172 @@
+{
+  "id": "azure-storage",
+  "name": "Azure Storage",
+  "icon": "☁️",
+  "logoUrl": "https://cdn.simpleicons.org/microsoftazure/0078D4",
+  "description": "Cloud storage service (Blob Storage)",
+  "baseUrl": "https://{storageAccount}.blob.core.windows.net",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "AZURE_STORAGE_ACCESS_TOKEN",
+    "note": "Azure Storage supports OAuth2 (Bearer token) or Shared Key authentication. For Shared Key, use AZURE_STORAGE_SHARED_KEY and generate Authorization header with Shared Key signature. Storage account should be provided in baseUrl placeholder {storageAccount} or as AZURE_STORAGE_ACCOUNT secret key."
+  },
+  "endpoints": [
+    {
+      "id": "create-container",
+      "name": "Create Container",
+      "description": "Create a new blob container",
+      "method": "PUT",
+      "path": "/{containerName}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}",
+        "x-ms-version": "2021-04-10"
+      },
+      "queryParams": {
+        "restype": "container"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "x-ms-blob-public-access": { "type": "string", "enum": ["container", "blob"], "description": "Public access level" },
+          "x-ms-meta-{name}": { "type": "string", "description": "Metadata (replace {name} with metadata key)" }
+        }
+      },
+      "urlTemplate": "https://{storageAccount}.blob.core.windows.net/{containerName}?restype=container"
+    },
+    {
+      "id": "get-container",
+      "name": "Get Container",
+      "description": "Get container properties",
+      "method": "GET",
+      "path": "/{containerName}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}",
+        "x-ms-version": "2021-04-10"
+      },
+      "queryParams": {
+        "restype": "container"
+      },
+      "urlTemplate": "https://{storageAccount}.blob.core.windows.net/{containerName}?restype=container"
+    },
+    {
+      "id": "list-containers",
+      "name": "List Containers",
+      "description": "List all containers",
+      "method": "GET",
+      "path": "/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}",
+        "x-ms-version": "2021-04-10"
+      },
+      "queryParams": {
+        "comp": "list",
+        "prefix": { "type": "string", "description": "Filter by prefix" },
+        "maxresults": { "type": "integer", "description": "Maximum number of results" },
+        "include": { "type": "string", "enum": ["metadata"], "description": "Include metadata" }
+      },
+      "urlTemplate": "https://{storageAccount}.blob.core.windows.net/?comp=list"
+    },
+    {
+      "id": "delete-container",
+      "name": "Delete Container",
+      "description": "Delete a container",
+      "method": "DELETE",
+      "path": "/{containerName}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}",
+        "x-ms-version": "2021-04-10"
+      },
+      "queryParams": {
+        "restype": "container"
+      },
+      "urlTemplate": "https://{storageAccount}.blob.core.windows.net/{containerName}?restype=container"
+    },
+    {
+      "id": "create-blob",
+      "name": "Create Blob",
+      "description": "Upload a blob",
+      "method": "PUT",
+      "path": "/{containerName}/{blobName}",
+      "headers": {
+        "Content-Type": "application/octet-stream",
+        "Authorization": "Bearer {apiKey}",
+        "x-ms-version": "2021-04-10",
+        "x-ms-blob-type": "BlockBlob",
+        "x-ms-blob-content-type": "{contentType}",
+        "x-ms-blob-content-encoding": "{contentEncoding}",
+        "x-ms-blob-content-language": "{contentLanguage}",
+        "x-ms-blob-content-md5": "{contentMD5}",
+        "x-ms-blob-cache-control": "{cacheControl}",
+        "x-ms-meta-{name}": { "type": "string", "description": "Metadata (replace {name} with metadata key)" }
+      },
+      "bodySchema": {
+        "type": "string",
+        "format": "binary",
+        "description": "Blob content (binary data)"
+      },
+      "urlTemplate": "https://{storageAccount}.blob.core.windows.net/{containerName}/{blobName}"
+    },
+    {
+      "id": "get-blob",
+      "name": "Get Blob",
+      "description": "Download a blob",
+      "method": "GET",
+      "path": "/{containerName}/{blobName}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}",
+        "x-ms-version": "2021-04-10"
+      },
+      "queryParams": {
+        "snapshot": { "type": "string", "description": "Snapshot timestamp" },
+        "versionid": { "type": "string", "description": "Version ID" }
+      },
+      "urlTemplate": "https://{storageAccount}.blob.core.windows.net/{containerName}/{blobName}"
+    },
+    {
+      "id": "list-blobs",
+      "name": "List Blobs",
+      "description": "List all blobs in a container",
+      "method": "GET",
+      "path": "/{containerName}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}",
+        "x-ms-version": "2021-04-10"
+      },
+      "queryParams": {
+        "restype": "container",
+        "comp": "list",
+        "prefix": { "type": "string", "description": "Filter by prefix" },
+        "delimiter": { "type": "string", "description": "Delimiter for virtual directory structure" },
+        "maxresults": { "type": "integer", "description": "Maximum number of results" },
+        "marker": { "type": "string", "description": "Continuation token" },
+        "include": { "type": "string", "description": "Include metadata, snapshots, uncommittedblobs, deleted, tags, versions, immutabilitypolicy, legalhold" }
+      },
+      "urlTemplate": "https://{storageAccount}.blob.core.windows.net/{containerName}?restype=container&comp=list"
+    },
+    {
+      "id": "delete-blob",
+      "name": "Delete Blob",
+      "description": "Delete a blob",
+      "method": "DELETE",
+      "path": "/{containerName}/{blobName}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}",
+        "x-ms-version": "2021-04-10"
+      },
+      "queryParams": {
+        "snapshot": { "type": "string", "description": "Snapshot timestamp" },
+        "versionid": { "type": "string", "description": "Version ID" }
+      },
+      "urlTemplate": "https://{storageAccount}.blob.core.windows.net/{containerName}/{blobName}"
+    }
+  ]
+}
+

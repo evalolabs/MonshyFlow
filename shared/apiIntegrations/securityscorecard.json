@@ -1,0 +1,214 @@
+{
+  "id": "securityscorecard",
+  "name": "SecurityScorecard",
+  "icon": "🔒",
+  "logoUrl": "https://cdn.simpleicons.org/securityscorecard/000000",
+  "description": "Security ratings and risk monitoring platform",
+  "baseUrl": "https://api.securityscorecard.io",
+  "color": {
+    "bg": "from-red-100 to-purple-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Token {apiKey}",
+    "secretKey": "SECURITYSCORECARD_API_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "get-company",
+      "name": "Get Company",
+      "description": "Get company details by domain",
+      "method": "GET",
+      "path": "/companies/{domain}",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "urlTemplate": "https://api.securityscorecard.io/companies/{domain}"
+    },
+    {
+      "id": "list-companies",
+      "name": "List Companies",
+      "description": "List all companies",
+      "method": "GET",
+      "path": "/companies",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" },
+        "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" },
+        "industry": { "type": "string", "description": "Filter by industry" },
+        "score": { "type": "integer", "description": "Filter by minimum score" }
+      },
+      "urlTemplate": "https://api.securityscorecard.io/companies"
+    },
+    {
+      "id": "get-industry",
+      "name": "Get Industry",
+      "description": "Get industry details",
+      "method": "GET",
+      "path": "/industries/{industry}",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "urlTemplate": "https://api.securityscorecard.io/industries/{industry}"
+    },
+    {
+      "id": "list-industries",
+      "name": "List Industries",
+      "description": "List all industries",
+      "method": "GET",
+      "path": "/industries",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "urlTemplate": "https://api.securityscorecard.io/industries"
+    },
+    {
+      "id": "create-invite",
+      "name": "Create Invite",
+      "description": "Create an invite",
+      "method": "POST",
+      "path": "/invites",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "role": { "type": "string", "enum": ["admin", "user", "viewer"], "description": "User role" }
+        },
+        "required": ["email"]
+      },
+      "urlTemplate": "https://api.securityscorecard.io/invites"
+    },
+    {
+      "id": "create-portfolio",
+      "name": "Create Portfolio",
+      "description": "Create a new portfolio",
+      "method": "POST",
+      "path": "/portfolios",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Portfolio name" },
+          "description": { "type": "string", "description": "Portfolio description" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.securityscorecard.io/portfolios"
+    },
+    {
+      "id": "get-portfolio",
+      "name": "Get Portfolio",
+      "description": "Get portfolio details",
+      "method": "GET",
+      "path": "/portfolios/{portfolioId}",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "urlTemplate": "https://api.securityscorecard.io/portfolios/{portfolioId}"
+    },
+    {
+      "id": "list-portfolios",
+      "name": "List Portfolios",
+      "description": "List all portfolios",
+      "method": "GET",
+      "path": "/portfolios",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" },
+        "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" }
+      },
+      "urlTemplate": "https://api.securityscorecard.io/portfolios"
+    },
+    {
+      "id": "update-portfolio",
+      "name": "Update Portfolio",
+      "description": "Update a portfolio",
+      "method": "PUT",
+      "path": "/portfolios/{portfolioId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Portfolio name" },
+          "description": { "type": "string", "description": "Portfolio description" }
+        }
+      },
+      "urlTemplate": "https://api.securityscorecard.io/portfolios/{portfolioId}"
+    },
+    {
+      "id": "delete-portfolio",
+      "name": "Delete Portfolio",
+      "description": "Delete a portfolio",
+      "method": "DELETE",
+      "path": "/portfolios/{portfolioId}",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "urlTemplate": "https://api.securityscorecard.io/portfolios/{portfolioId}"
+    },
+    {
+      "id": "add-portfolio-company",
+      "name": "Add Portfolio Company",
+      "description": "Add a company to a portfolio",
+      "method": "POST",
+      "path": "/portfolios/{portfolioId}/companies",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "domain": { "type": "string", "required": true, "description": "Company domain" }
+        },
+        "required": ["domain"]
+      },
+      "urlTemplate": "https://api.securityscorecard.io/portfolios/{portfolioId}/companies"
+    },
+    {
+      "id": "remove-portfolio-company",
+      "name": "Remove Portfolio Company",
+      "description": "Remove a company from a portfolio",
+      "method": "DELETE",
+      "path": "/portfolios/{portfolioId}/companies/{domain}",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "urlTemplate": "https://api.securityscorecard.io/portfolios/{portfolioId}/companies/{domain}"
+    },
+    {
+      "id": "get-company-factor-history",
+      "name": "Get Company Factor History",
+      "description": "Get company factor history report",
+      "method": "GET",
+      "path": "/companies/{domain}/history/factors/{factor}",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "queryParams": {
+        "from": { "type": "string", "format": "date", "description": "Start date (YYYY-MM-DD)" },
+        "to": { "type": "string", "format": "date", "description": "End date (YYYY-MM-DD)" }
+      },
+      "urlTemplate": "https://api.securityscorecard.io/companies/{domain}/history/factors/{factor}"
+    }
+  ]
+}
+

@@ -1,0 +1,215 @@
+{
+  "id": "getresponse",
+  "name": "GetResponse",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/getresponse/000000",
+  "description": "Email marketing and automation platform",
+  "baseUrl": "https://api.getresponse.com/v3",
+  "color": {
+    "bg": "from-gray-100 to-zinc-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "X-Auth-Token",
+    "headerFormat": "api-key {apiKey}",
+    "secretKey": "GETRESPONSE_API_KEY",
+    "note": "Use GETRESPONSE_API_KEY for API Key authentication (X-Auth-Token header) or GETRESPONSE_OAUTH2_ACCESS_TOKEN for OAuth2 (Authorization: Bearer header)."
+  },
+  "endpoints": [
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/contacts",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Auth-Token": "api-key {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Email address"
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name"
+          },
+          "dayOfCycle": {
+            "type": "string",
+            "description": "Day of cycle (for autoresponders)"
+          },
+          "campaign": {
+            "type": "object",
+            "properties": {
+              "campaignId": {
+                "type": "string",
+                "required": true,
+                "description": "Campaign ID"
+              }
+            },
+            "required": ["campaignId"],
+            "description": "Campaign information"
+          },
+          "customFieldValues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "customFieldId": { "type": "string" },
+                "value": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              },
+              "required": ["customFieldId", "value"]
+            },
+            "description": "Custom field values"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tagId": { "type": "string" }
+              },
+              "required": ["tagId"]
+            },
+            "description": "Tags"
+          },
+          "ipAddress": {
+            "type": "string",
+            "format": "ipv4",
+            "description": "IP address"
+          },
+          "geolocation": {
+            "type": "object",
+            "properties": {
+              "latitude": { "type": "number" },
+              "longitude": { "type": "number" }
+            },
+            "description": "Geolocation"
+          }
+        },
+        "required": ["email", "campaign"]
+      },
+      "urlTemplate": "https://api.getresponse.com/v3/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact by ID",
+      "method": "GET",
+      "path": "/contacts/{contactId}",
+      "headers": {
+        "X-Auth-Token": "api-key {apiKey}"
+      },
+      "urlTemplate": "https://api.getresponse.com/v3/contacts/{contactId}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/contacts",
+      "headers": {
+        "X-Auth-Token": "api-key {apiKey}"
+      },
+      "queryParams": {
+        "query": {
+          "type": "object",
+          "description": "Query object (JSON string)"
+        },
+        "fields": {
+          "type": "string",
+          "description": "Comma-separated list of fields to return"
+        },
+        "perPage": {
+          "type": "integer",
+          "default": 1000,
+          "description": "Number of results per page"
+        },
+        "page": {
+          "type": "integer",
+          "default": 1,
+          "description": "Page number"
+        }
+      },
+      "urlTemplate": "https://api.getresponse.com/v3/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update a contact",
+      "method": "POST",
+      "path": "/contacts/{contactId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Auth-Token": "api-key {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Full name"
+          },
+          "dayOfCycle": {
+            "type": "string",
+            "description": "Day of cycle"
+          },
+          "campaign": {
+            "type": "object",
+            "properties": {
+              "campaignId": { "type": "string" }
+            }
+          },
+          "customFieldValues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "customFieldId": { "type": "string" },
+                "value": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              },
+              "required": ["customFieldId", "value"]
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tagId": { "type": "string" }
+              },
+              "required": ["tagId"]
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.getresponse.com/v3/contacts/{contactId}"
+    },
+    {
+      "id": "delete-contact",
+      "name": "Delete Contact",
+      "description": "Delete a contact",
+      "method": "DELETE",
+      "path": "/contacts/{contactId}",
+      "headers": {
+        "X-Auth-Token": "api-key {apiKey}"
+      },
+      "urlTemplate": "https://api.getresponse.com/v3/contacts/{contactId}"
+    }
+  ]
+}
+

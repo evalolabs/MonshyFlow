@@ -1,0 +1,102 @@
+{
+  "id": "rocketchat",
+  "name": "RocketChat",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/rocketchat/FF6D5A",
+  "description": "Open-source team communication platform",
+  "baseUrl": "https://{host}/api/v1",
+  "color": {
+    "bg": "from-orange-100 to-red-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "X-Auth-Token",
+    "headerFormat": "{apiKey}",
+    "secretKey": "ROCKETCHAT_AUTH_TOKEN",
+    "usernameSecretKey": "ROCKETCHAT_USER_ID",
+    "note": "Host should be provided in baseUrl placeholder {host} or as ROCKETCHAT_BASE_URL secret key. User ID should be provided as X-User-Id header."
+  },
+  "endpoints": [
+    {
+      "id": "post-message",
+      "name": "Post Message",
+      "description": "Post a message to a channel or user",
+      "method": "POST",
+      "path": "/chat.postMessage",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Auth-Token": "{apiKey}",
+        "X-User-Id": "{username}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string", "description": "Channel name (e.g., #general) or user ID (e.g., @username)" },
+          "roomId": { "type": "string", "description": "Room ID (alternative to channel)" },
+          "text": { "type": "string", "description": "Message text" },
+          "alias": { "type": "string", "description": "Username alias" },
+          "emoji": { "type": "string", "description": "Emoji icon" },
+          "avatar": { "type": "string", "format": "uri", "description": "Avatar URL" },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "color": { "type": "string", "description": "Attachment color" },
+                "text": { "type": "string", "description": "Attachment text" },
+                "ts": { "type": "string", "format": "date-time", "description": "Timestamp" },
+                "thumb_url": { "type": "string", "format": "uri", "description": "Thumbnail URL" },
+                "message_link": { "type": "string", "format": "uri", "description": "Message link" },
+                "collapsed": { "type": "boolean", "description": "Collapsed attachment" },
+                "author_name": { "type": "string", "description": "Author name" },
+                "author_link": { "type": "string", "format": "uri", "description": "Author link" },
+                "author_icon": { "type": "string", "format": "uri", "description": "Author icon" },
+                "title": { "type": "string", "description": "Attachment title" },
+                "title_link": { "type": "string", "format": "uri", "description": "Title link" },
+                "title_link_download": { "type": "boolean", "description": "Download title link" },
+                "image_url": { "type": "string", "format": "uri", "description": "Image URL" },
+                "audio_url": { "type": "string", "format": "uri", "description": "Audio URL" },
+                "video_url": { "type": "string", "format": "uri", "description": "Video URL" },
+                "fields": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "short": { "type": "boolean", "description": "Short field" },
+                      "title": { "type": "string", "description": "Field title" },
+                      "value": { "type": "string", "description": "Field value" }
+                    }
+                  },
+                  "description": "Attachment fields"
+                },
+                "actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": { "type": "string", "enum": ["button"], "description": "Action type" },
+                      "text": { "type": "string", "description": "Button text" },
+                      "url": { "type": "string", "format": "uri", "description": "Button URL" },
+                      "image_url": { "type": "string", "format": "uri", "description": "Button image URL" },
+                      "is_webview": { "type": "boolean", "description": "Is webview" },
+                      "webview_height_ratio": { "type": "string", "enum": ["compact", "tall", "full"], "description": "Webview height ratio" },
+                      "msg": { "type": "string", "description": "Message" },
+                      "msg_in_chat_window": { "type": "boolean", "description": "Message in chat window" }
+                    }
+                  },
+                  "description": "Attachment actions"
+                }
+              }
+            },
+            "description": "Message attachments"
+          }
+        }
+      },
+      "urlTemplate": "https://{host}/api/v1/chat.postMessage"
+    }
+  ]
+}
+

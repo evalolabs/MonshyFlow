@@ -1,0 +1,389 @@
+{
+  "id": "agile-crm",
+  "name": "Agile CRM",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/agilecrm/000000",
+  "description": "CRM and marketing automation platform",
+  "baseUrl": "https://{subdomain}.agilecrm.com/dev",
+  "color": {
+    "bg": "from-green-100 to-emerald-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "AGILECRM_API_KEY",
+    "usernameSecretKey": "AGILECRM_EMAIL",
+    "note": "Subdomain should be provided in baseUrl placeholder {subdomain} or as AGILECRM_SUBDOMAIN secret key. Basic Auth uses email as username and API key as password. Format: Basic base64(email:apiKey)"
+  },
+  "endpoints": [
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/api/contacts",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string" },
+                "name": { "type": "string" },
+                "value": { "type": "string" }
+              },
+              "required": ["type", "name", "value"]
+            },
+            "description": "Contact properties"
+          }
+        }
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact by ID",
+      "method": "GET",
+      "path": "/api/contacts/{contactId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/contacts/{contactId}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/api/contacts",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "page_size": {
+          "type": "integer",
+          "default": 10,
+          "description": "Number of results per page"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "Cursor for pagination"
+        }
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update a contact",
+      "method": "PUT",
+      "path": "/api/contacts/{contactId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string" },
+                "name": { "type": "string" },
+                "value": { "type": "string" }
+              },
+              "required": ["type", "name", "value"]
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/contacts/{contactId}"
+    },
+    {
+      "id": "delete-contact",
+      "name": "Delete Contact",
+      "description": "Delete a contact",
+      "method": "DELETE",
+      "path": "/api/contacts/{contactId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/contacts/{contactId}"
+    },
+    {
+      "id": "create-company",
+      "name": "Create Company",
+      "description": "Create a new company (uses same endpoint as contact)",
+      "method": "POST",
+      "path": "/api/contacts",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["COMPANY"],
+            "default": "COMPANY",
+            "description": "Contact type (must be COMPANY)"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string" },
+                "name": { "type": "string" },
+                "value": { "type": "string" }
+              },
+              "required": ["type", "name", "value"]
+            },
+            "description": "Company properties"
+          }
+        },
+        "required": ["type"]
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/contacts"
+    },
+    {
+      "id": "get-company",
+      "name": "Get Company",
+      "description": "Get company by ID",
+      "method": "GET",
+      "path": "/api/contacts/{companyId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/contacts/{companyId}"
+    },
+    {
+      "id": "list-companies",
+      "name": "List Companies",
+      "description": "List all companies",
+      "method": "GET",
+      "path": "/api/contacts",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "page_size": {
+          "type": "integer",
+          "default": 10,
+          "description": "Number of results per page"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "Cursor for pagination"
+        }
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/contacts"
+    },
+    {
+      "id": "update-company",
+      "name": "Update Company",
+      "description": "Update a company",
+      "method": "PUT",
+      "path": "/api/contacts/{companyId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string" },
+                "name": { "type": "string" },
+                "value": { "type": "string" }
+              },
+              "required": ["type", "name", "value"]
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/contacts/{companyId}"
+    },
+    {
+      "id": "delete-company",
+      "name": "Delete Company",
+      "description": "Delete a company",
+      "method": "DELETE",
+      "path": "/api/contacts/{companyId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/contacts/{companyId}"
+    },
+    {
+      "id": "create-deal",
+      "name": "Create Deal",
+      "description": "Create a new deal",
+      "method": "POST",
+      "path": "/api/opportunity",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Deal name"
+          },
+          "expected_value": {
+            "type": "number",
+            "description": "Expected value"
+          },
+          "probability": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Probability percentage"
+          },
+          "milestone": {
+            "type": "string",
+            "description": "Milestone name"
+          },
+          "contact_ids": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Contact IDs"
+          },
+          "owner_id": {
+            "type": "integer",
+            "description": "Owner user ID"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/opportunity"
+    },
+    {
+      "id": "get-deal",
+      "name": "Get Deal",
+      "description": "Get deal by ID",
+      "method": "GET",
+      "path": "/api/opportunity/{dealId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/opportunity/{dealId}"
+    },
+    {
+      "id": "list-deals",
+      "name": "List Deals",
+      "description": "List all deals",
+      "method": "GET",
+      "path": "/api/opportunity",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "page_size": {
+          "type": "integer",
+          "default": 10,
+          "description": "Number of results per page"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "Cursor for pagination"
+        }
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/opportunity"
+    },
+    {
+      "id": "update-deal",
+      "name": "Update Deal",
+      "description": "Update a deal",
+      "method": "PUT",
+      "path": "/api/opportunity/{dealId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Deal name"
+          },
+          "expected_value": {
+            "type": "number",
+            "description": "Expected value"
+          },
+          "probability": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Probability percentage"
+          },
+          "milestone": {
+            "type": "string",
+            "description": "Milestone name"
+          },
+          "contact_ids": {
+            "type": "array",
+            "items": { "type": "integer" }
+          },
+          "owner_id": {
+            "type": "integer",
+            "description": "Owner user ID"
+          }
+        }
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/opportunity/{dealId}"
+    },
+    {
+      "id": "delete-deal",
+      "name": "Delete Deal",
+      "description": "Delete a deal",
+      "method": "DELETE",
+      "path": "/api/opportunity/{dealId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.agilecrm.com/dev/api/opportunity/{dealId}"
+    }
+  ]
+}
+

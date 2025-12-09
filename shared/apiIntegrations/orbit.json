@@ -1,0 +1,274 @@
+{
+  "id": "orbit",
+  "name": "Orbit",
+  "icon": "🌍",
+  "logoUrl": "https://cdn.simpleicons.org/orbit/000000",
+  "description": "Community relationship management platform",
+  "baseUrl": "https://app.orbit.love/api/v1",
+  "color": {
+    "bg": "from-purple-100 to-fuchsia-100",
+    "border": "border-purple-500",
+    "icon": "text-purple-700",
+    "handle": "bg-purple-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "ORBIT_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-activity",
+      "name": "Create Activity",
+      "description": "Create a new activity",
+      "method": "POST",
+      "path": "/workspaces/{workspaceSlug}/activities",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "activity": {
+            "type": "object",
+            "properties": {
+              "activity_type": { "type": "string", "required": true, "description": "Activity type (e.g., content:created, post:created, issue:opened)" },
+              "title": { "type": "string", "required": true, "description": "Activity title" },
+              "description": { "type": "string", "description": "Activity description" },
+              "key": { "type": "string", "description": "Unique key for deduplication" },
+              "occurred_at": { "type": "string", "format": "date-time", "description": "Occurrence time (ISO 8601)" },
+              "link": { "type": "string", "format": "uri", "description": "Activity link" },
+              "member": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email", "description": "Member email" },
+                  "name": { "type": "string", "description": "Member name" },
+                  "username": { "type": "string", "description": "Member username" }
+                },
+                "description": "Member information"
+              },
+              "properties": {
+                "type": "object",
+                "description": "Custom properties",
+                "additionalProperties": true
+              }
+            },
+            "required": ["activity_type", "title"]
+          }
+        },
+        "required": ["activity"]
+      },
+      "urlTemplate": "https://app.orbit.love/api/v1/workspaces/{workspaceSlug}/activities"
+    },
+    {
+      "id": "get-activity",
+      "name": "Get Activity",
+      "description": "Get activity by ID",
+      "method": "GET",
+      "path": "/workspaces/{workspaceSlug}/activities/{activityId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://app.orbit.love/api/v1/workspaces/{workspaceSlug}/activities/{activityId}"
+    },
+    {
+      "id": "list-activities",
+      "name": "List Activities",
+      "description": "List all activities",
+      "method": "GET",
+      "path": "/workspaces/{workspaceSlug}/activities",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "member_id": { "type": "string", "description": "Filter by member ID" },
+        "activity_type": { "type": "string", "description": "Filter by activity type" },
+        "start_date": { "type": "string", "format": "date", "description": "Start date (YYYY-MM-DD)" },
+        "end_date": { "type": "string", "format": "date", "description": "End date (YYYY-MM-DD)" },
+        "items": { "type": "integer", "default": 10, "description": "Number of results" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://app.orbit.love/api/v1/workspaces/{workspaceSlug}/activities"
+    },
+    {
+      "id": "create-member",
+      "name": "Create Member",
+      "description": "Create a new member",
+      "method": "POST",
+      "path": "/workspaces/{workspaceSlug}/members",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "member": {
+            "type": "object",
+            "properties": {
+              "email": { "type": "string", "format": "email", "description": "Email address" },
+              "name": { "type": "string", "description": "Member name" },
+              "username": { "type": "string", "description": "Username" },
+              "bio": { "type": "string", "description": "Bio" },
+              "location": { "type": "string", "description": "Location" },
+              "company": { "type": "string", "description": "Company" },
+              "avatar_url": { "type": "string", "format": "uri", "description": "Avatar URL" },
+              "twitter": { "type": "string", "description": "Twitter handle" },
+              "github": { "type": "string", "description": "GitHub username" },
+              "linkedin": { "type": "string", "description": "LinkedIn username" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Tags"
+              }
+            }
+          }
+        },
+        "required": ["member"]
+      },
+      "urlTemplate": "https://app.orbit.love/api/v1/workspaces/{workspaceSlug}/members"
+    },
+    {
+      "id": "get-member",
+      "name": "Get Member",
+      "description": "Get member by ID",
+      "method": "GET",
+      "path": "/workspaces/{workspaceSlug}/members/{memberId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://app.orbit.love/api/v1/workspaces/{workspaceSlug}/members/{memberId}"
+    },
+    {
+      "id": "list-members",
+      "name": "List Members",
+      "description": "List all members",
+      "method": "GET",
+      "path": "/workspaces/{workspaceSlug}/members",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "search": { "type": "string", "description": "Search query" },
+        "items": { "type": "integer", "default": 10, "description": "Number of results" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "sort": { "type": "string", "enum": ["created_at", "updated_at", "name"], "default": "created_at", "description": "Sort field" },
+        "direction": { "type": "string", "enum": ["ASC", "DESC"], "default": "DESC", "description": "Sort direction" }
+      },
+      "urlTemplate": "https://app.orbit.love/api/v1/workspaces/{workspaceSlug}/members"
+    },
+    {
+      "id": "update-member",
+      "name": "Update Member",
+      "description": "Update a member",
+      "method": "PUT",
+      "path": "/workspaces/{workspaceSlug}/members/{memberId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "member": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Member name" },
+              "bio": { "type": "string", "description": "Bio" },
+              "location": { "type": "string", "description": "Location" },
+              "company": { "type": "string", "description": "Company" },
+              "avatar_url": { "type": "string", "format": "uri", "description": "Avatar URL" },
+              "twitter": { "type": "string", "description": "Twitter handle" },
+              "github": { "type": "string", "description": "GitHub username" },
+              "linkedin": { "type": "string", "description": "LinkedIn username" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
+        "required": ["member"]
+      },
+      "urlTemplate": "https://app.orbit.love/api/v1/workspaces/{workspaceSlug}/members/{memberId}"
+    },
+    {
+      "id": "create-note",
+      "name": "Create Note",
+      "description": "Create a note for a member",
+      "method": "POST",
+      "path": "/workspaces/{workspaceSlug}/members/{memberId}/notes",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "object",
+            "properties": {
+              "body": { "type": "string", "required": true, "description": "Note body" }
+            },
+            "required": ["body"]
+          }
+        },
+        "required": ["note"]
+      },
+      "urlTemplate": "https://app.orbit.love/api/v1/workspaces/{workspaceSlug}/members/{memberId}/notes"
+    },
+    {
+      "id": "get-note",
+      "name": "Get Note",
+      "description": "Get note by ID",
+      "method": "GET",
+      "path": "/workspaces/{workspaceSlug}/members/{memberId}/notes/{noteId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://app.orbit.love/api/v1/workspaces/{workspaceSlug}/members/{memberId}/notes/{noteId}"
+    },
+    {
+      "id": "list-notes",
+      "name": "List Notes",
+      "description": "List all notes for a member",
+      "method": "GET",
+      "path": "/workspaces/{workspaceSlug}/members/{memberId}/notes",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "items": { "type": "integer", "default": 10, "description": "Number of results" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://app.orbit.love/api/v1/workspaces/{workspaceSlug}/members/{memberId}/notes"
+    },
+    {
+      "id": "update-note",
+      "name": "Update Note",
+      "description": "Update a note",
+      "method": "PUT",
+      "path": "/workspaces/{workspaceSlug}/members/{memberId}/notes/{noteId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "object",
+            "properties": {
+              "body": { "type": "string", "description": "Note body" }
+            }
+          }
+        },
+        "required": ["note"]
+      },
+      "urlTemplate": "https://app.orbit.love/api/v1/workspaces/{workspaceSlug}/members/{memberId}/notes/{noteId}"
+    }
+  ]
+}
+

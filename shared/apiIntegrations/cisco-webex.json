@@ -1,0 +1,352 @@
+{
+  "id": "cisco-webex",
+  "name": "Cisco Webex",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/webex/000000",
+  "description": "Video conferencing and team collaboration platform",
+  "baseUrl": "https://webexapis.com/v1",
+  "color": {
+    "bg": "from-red-100 to-yellow-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "CISCO_WEBEX_OAUTH2_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-message",
+      "name": "Create Message",
+      "description": "Send a message to a room or person",
+      "method": "POST",
+      "path": "/messages",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "roomId": {
+            "type": "string",
+            "description": "Room ID (for room messages)"
+          },
+          "toPersonId": {
+            "type": "string",
+            "description": "Person ID (for direct messages)"
+          },
+          "toPersonEmail": {
+            "type": "string",
+            "format": "email",
+            "description": "Person email (for direct messages)"
+          },
+          "text": {
+            "type": "string",
+            "description": "Message text"
+          },
+          "markdown": {
+            "type": "string",
+            "description": "Message in markdown format"
+          },
+          "html": {
+            "type": "string",
+            "description": "Message in HTML format"
+          },
+          "files": {
+            "type": "array",
+            "items": { "type": "string", "format": "uri" },
+            "description": "File URLs to attach"
+          },
+          "parentId": {
+            "type": "string",
+            "description": "Parent message ID (for replies)"
+          }
+        },
+        "oneOf": [
+          { "required": ["roomId"] },
+          { "required": ["toPersonId"] },
+          { "required": ["toPersonEmail"] }
+        ]
+      },
+      "urlTemplate": "https://webexapis.com/v1/messages"
+    },
+    {
+      "id": "get-message",
+      "name": "Get Message",
+      "description": "Get message by ID",
+      "method": "GET",
+      "path": "/messages/{messageId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://webexapis.com/v1/messages/{messageId}"
+    },
+    {
+      "id": "list-messages",
+      "name": "List Messages",
+      "description": "List all messages",
+      "method": "GET",
+      "path": "/messages",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "roomId": {
+          "type": "string",
+          "description": "Filter by room ID"
+        },
+        "mentionedPeople": {
+          "type": "string",
+          "description": "Filter by mentioned person ID"
+        },
+        "before": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Filter messages before this time (ISO 8601)"
+        },
+        "beforeMessage": {
+          "type": "string",
+          "description": "Filter messages before this message ID"
+        },
+        "max": {
+          "type": "integer",
+          "default": 50,
+          "description": "Maximum number of results"
+        }
+      },
+      "urlTemplate": "https://webexapis.com/v1/messages"
+    },
+    {
+      "id": "update-message",
+      "name": "Update Message",
+      "description": "Update a message",
+      "method": "PUT",
+      "path": "/messages/{messageId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Message text"
+          },
+          "markdown": {
+            "type": "string",
+            "description": "Message in markdown format"
+          },
+          "html": {
+            "type": "string",
+            "description": "Message in HTML format"
+          }
+        }
+      },
+      "urlTemplate": "https://webexapis.com/v1/messages/{messageId}"
+    },
+    {
+      "id": "delete-message",
+      "name": "Delete Message",
+      "description": "Delete a message",
+      "method": "DELETE",
+      "path": "/messages/{messageId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://webexapis.com/v1/messages/{messageId}"
+    },
+    {
+      "id": "create-meeting",
+      "name": "Create Meeting",
+      "description": "Create a new meeting",
+      "method": "POST",
+      "path": "/meetings",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "required": true,
+            "description": "Meeting title"
+          },
+          "agenda": {
+            "type": "string",
+            "description": "Meeting agenda"
+          },
+          "password": {
+            "type": "string",
+            "description": "Meeting password"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "required": true,
+            "description": "Start time (ISO 8601)"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End time (ISO 8601)"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Timezone (e.g., 'America/New_York')"
+          },
+          "recurrence": {
+            "type": "string",
+            "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
+            "description": "Recurrence pattern"
+          },
+          "enabledAutoRecordMeeting": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable automatic recording"
+          },
+          "allowAnyUserToBeCoHost": {
+            "type": "boolean",
+            "default": false,
+            "description": "Allow any user to be co-host"
+          },
+          "enableJoinBeforeHost": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable join before host"
+          },
+          "publicMeeting": {
+            "type": "boolean",
+            "default": false,
+            "description": "Public meeting"
+          },
+          "invitees": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email" },
+                "displayName": { "type": "string" },
+                "coHost": { "type": "boolean", "default": false }
+              },
+              "required": ["email"]
+            },
+            "description": "Invitees"
+          }
+        },
+        "required": ["title", "start"]
+      },
+      "urlTemplate": "https://webexapis.com/v1/meetings"
+    },
+    {
+      "id": "get-meeting",
+      "name": "Get Meeting",
+      "description": "Get meeting by ID",
+      "method": "GET",
+      "path": "/meetings/{meetingId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://webexapis.com/v1/meetings/{meetingId}"
+    },
+    {
+      "id": "list-meetings",
+      "name": "List Meetings",
+      "description": "List all meetings",
+      "method": "GET",
+      "path": "/meetings",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "from": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Filter meetings from this time (ISO 8601)"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Filter meetings to this time (ISO 8601)"
+        },
+        "max": {
+          "type": "integer",
+          "default": 50,
+          "description": "Maximum number of results"
+        },
+        "meetingType": {
+          "type": "string",
+          "enum": ["meetingSeries", "scheduledMeeting", "meeting"],
+          "description": "Filter by meeting type"
+        },
+        "state": {
+          "type": "string",
+          "enum": ["active", "scheduled", "ready", "lobby", "inProgress", "ended", "missed", "expired"],
+          "description": "Filter by meeting state"
+        }
+      },
+      "urlTemplate": "https://webexapis.com/v1/meetings"
+    },
+    {
+      "id": "update-meeting",
+      "name": "Update Meeting",
+      "description": "Update a meeting",
+      "method": "PUT",
+      "path": "/meetings/{meetingId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "agenda": { "type": "string" },
+          "password": { "type": "string" },
+          "start": { "type": "string", "format": "date-time" },
+          "end": { "type": "string", "format": "date-time" },
+          "timezone": { "type": "string" },
+          "recurrence": {
+            "type": "string",
+            "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
+          },
+          "enabledAutoRecordMeeting": { "type": "boolean" },
+          "allowAnyUserToBeCoHost": { "type": "boolean" },
+          "enableJoinBeforeHost": { "type": "boolean" },
+          "publicMeeting": { "type": "boolean" },
+          "invitees": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email" },
+                "displayName": { "type": "string" },
+                "coHost": { "type": "boolean" }
+              },
+              "required": ["email"]
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://webexapis.com/v1/meetings/{meetingId}"
+    },
+    {
+      "id": "delete-meeting",
+      "name": "Delete Meeting",
+      "description": "Delete a meeting",
+      "method": "DELETE",
+      "path": "/meetings/{meetingId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://webexapis.com/v1/meetings/{meetingId}"
+    }
+  ]
+}
+

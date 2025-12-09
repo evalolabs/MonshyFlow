@@ -1,0 +1,83 @@
+{
+  "id": "kobotoolbox",
+  "name": "KoBoToolbox",
+  "icon": "📦",
+  "logoUrl": "https://cdn.simpleicons.org/kobotoolbox/000000",
+  "description": "Data collection platform for humanitarian and development contexts",
+  "baseUrl": "https://{your-kobotoolbox-instance}",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Token {apiKey}",
+    "secretKey": "KOBOTOOLBOX_API_TOKEN",
+    "note": "Base URL should be provided in baseUrl placeholder {your-kobotoolbox-instance} or as KOBOTOOLBOX_BASE_URL secret key."
+  },
+  "endpoints": [
+    {
+      "id": "get-form",
+      "name": "Get Form",
+      "description": "Get form by ID",
+      "method": "GET",
+      "path": "/api/v1/forms/{formId}",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "urlTemplate": "https://{your-kobotoolbox-instance}/api/v1/forms/{formId}"
+    },
+    {
+      "id": "list-forms",
+      "name": "List Forms",
+      "description": "List all forms",
+      "method": "GET",
+      "path": "/api/v1/forms",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" },
+        "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" },
+        "ordering": { "type": "string", "description": "Ordering field (e.g., '-date_modified')" },
+        "search": { "type": "string", "description": "Search query" },
+        "tags": { "type": "string", "description": "Filter by tags (comma-separated)" }
+      },
+      "urlTemplate": "https://{your-kobotoolbox-instance}/api/v1/forms"
+    },
+    {
+      "id": "get-submission",
+      "name": "Get Submission",
+      "description": "Get submission by ID",
+      "method": "GET",
+      "path": "/api/v1/data/{formId}/{submissionId}",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "urlTemplate": "https://{your-kobotoolbox-instance}/api/v1/data/{formId}/{submissionId}"
+    },
+    {
+      "id": "list-submissions",
+      "name": "List Submissions",
+      "description": "List all submissions for a form",
+      "method": "GET",
+      "path": "/api/v1/data/{formId}",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" },
+        "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" },
+        "ordering": { "type": "string", "description": "Ordering field (e.g., '-_submission_time')" },
+        "query": { "type": "string", "description": "JSON query for filtering" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to return" },
+        "format": { "type": "string", "enum": ["json", "csv", "xls"], "default": "json", "description": "Response format" }
+      },
+      "urlTemplate": "https://{your-kobotoolbox-instance}/api/v1/data/{formId}"
+    }
+  ]
+}
+

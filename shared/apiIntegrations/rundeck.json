@@ -1,0 +1,68 @@
+{
+  "id": "rundeck",
+  "name": "Rundeck",
+  "icon": "⚙️",
+  "logoUrl": "https://cdn.simpleicons.org/rundeck/000000",
+  "description": "Operations automation and runbook platform",
+  "baseUrl": "https://{your-rundeck-instance}/api/{apiVersion}",
+  "color": {
+    "bg": "from-gray-100 to-slate-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "X-Rundeck-Auth-Token",
+    "secretKey": "RUNDECK_API_TOKEN",
+    "note": "Base URL should be provided with host placeholder {your-rundeck-instance} and API version placeholder {apiVersion}, or as RUNDECK_BASE_URL and RUNDECK_API_VERSION secret keys."
+  },
+  "endpoints": [
+    {
+      "id": "execute-job",
+      "name": "Execute Job",
+      "description": "Execute a job",
+      "method": "POST",
+      "path": "/job/{jobId}/run",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Rundeck-Auth-Token": "{apiKey}",
+        "Accept": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "argString": { "type": "string", "description": "Job arguments as string" },
+          "loglevel": {
+            "type": "string",
+            "enum": ["DEBUG", "VERBOSE", "INFO", "WARN", "ERROR"],
+            "default": "INFO",
+            "description": "Log level"
+          },
+          "asUser": { "type": "string", "description": "Run as user" },
+          "filter": { "type": "string", "description": "Node filter" },
+          "runAtTime": { "type": "string", "format": "date-time", "description": "Schedule execution time (ISO 8601)" },
+          "options": {
+            "type": "object",
+            "description": "Job options (key-value pairs)",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://{your-rundeck-instance}/api/{apiVersion}/job/{jobId}/run"
+    },
+    {
+      "id": "get-job",
+      "name": "Get Job",
+      "description": "Get job metadata by ID",
+      "method": "GET",
+      "path": "/job/{jobId}",
+      "headers": {
+        "X-Rundeck-Auth-Token": "{apiKey}",
+        "Accept": "application/json"
+      },
+      "urlTemplate": "https://{your-rundeck-instance}/api/{apiVersion}/job/{jobId}"
+    }
+  ]
+}
+

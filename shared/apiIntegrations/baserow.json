@@ -1,0 +1,114 @@
+{
+  "id": "baserow",
+  "name": "Baserow",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/baserow/000000",
+  "description": "Open-source Airtable alternative",
+  "baseUrl": "https://api.baserow.io",
+  "color": {
+    "bg": "from-cyan-100 to-teal-100",
+    "border": "border-cyan-500",
+    "icon": "text-cyan-700",
+    "handle": "bg-cyan-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "JWT {token}",
+    "secretKey": "BASEROW_JWT_TOKEN",
+    "note": "Base URL should be provided in baseUrl placeholder or as BASEROW_HOST secret key. Can be own Baserow instance or cloud URL (https://api.baserow.io)."
+  },
+  "endpoints": [
+    {
+      "id": "create-row",
+      "name": "Create Row",
+      "description": "Create a new row",
+      "method": "POST",
+      "path": "/api/database/rows/table/{tableId}/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "JWT {token}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Row data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://api.baserow.io/api/database/rows/table/{tableId}/"
+    },
+    {
+      "id": "get-row",
+      "name": "Get Row",
+      "description": "Get row by ID",
+      "method": "GET",
+      "path": "/api/database/rows/table/{tableId}/{rowId}/",
+      "headers": {
+        "Authorization": "JWT {token}"
+      },
+      "urlTemplate": "https://api.baserow.io/api/database/rows/table/{tableId}/{rowId}/"
+    },
+    {
+      "id": "list-rows",
+      "name": "List Rows",
+      "description": "List all rows",
+      "method": "GET",
+      "path": "/api/database/rows/table/{tableId}/",
+      "headers": {
+        "Authorization": "JWT {token}"
+      },
+      "queryParams": {
+        "search": {
+          "type": "string",
+          "description": "Search query"
+        },
+        "order_by": {
+          "type": "string",
+          "description": "Sort order"
+        },
+        "filter": {
+          "type": "string",
+          "description": "Filter conditions"
+        },
+        "size": {
+          "type": "integer",
+          "default": 100,
+          "description": "Page size"
+        },
+        "page": {
+          "type": "integer",
+          "default": 1,
+          "description": "Page number"
+        }
+      },
+      "urlTemplate": "https://api.baserow.io/api/database/rows/table/{tableId}/"
+    },
+    {
+      "id": "update-row",
+      "name": "Update Row",
+      "description": "Update a row",
+      "method": "PATCH",
+      "path": "/api/database/rows/table/{tableId}/{rowId}/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "JWT {token}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Row data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://api.baserow.io/api/database/rows/table/{tableId}/{rowId}/"
+    },
+    {
+      "id": "delete-row",
+      "name": "Delete Row",
+      "description": "Delete a row",
+      "method": "DELETE",
+      "path": "/api/database/rows/table/{tableId}/{rowId}/",
+      "headers": {
+        "Authorization": "JWT {token}"
+      },
+      "urlTemplate": "https://api.baserow.io/api/database/rows/table/{tableId}/{rowId}/"
+    }
+  ]
+}

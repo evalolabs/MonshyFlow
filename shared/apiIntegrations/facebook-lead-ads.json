@@ -1,0 +1,58 @@
+{
+  "id": "facebook-lead-ads",
+  "name": "Facebook Lead Ads",
+  "icon": "📋",
+  "logoUrl": "https://cdn.simpleicons.org/facebook/1877F2",
+  "description": "Facebook Lead Ads API for retrieving lead data",
+  "baseUrl": "https://graph.facebook.com/v23.0",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "FACEBOOK_LEAD_ADS_ACCESS_TOKEN",
+    "note": "Facebook Lead Ads uses webhooks for new leads. The API is primarily used to retrieve lead data."
+  },
+  "endpoints": [
+    {
+      "id": "list-leadgen-forms",
+      "name": "List Lead Gen Forms",
+      "description": "List all lead gen forms for a page",
+      "method": "GET",
+      "path": "/{pageId}/leadgen_forms",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "fields": { "type": "string", "description": "Comma-separated list of fields to return" },
+        "limit": { "type": "integer", "description": "Number of results" },
+        "after": { "type": "string", "description": "Cursor for pagination" },
+        "before": { "type": "string", "description": "Cursor for pagination" }
+      },
+      "urlTemplate": "https://graph.facebook.com/v23.0/{pageId}/leadgen_forms"
+    },
+    {
+      "id": "list-leads",
+      "name": "List Leads",
+      "description": "List all leads for a lead gen form",
+      "method": "GET",
+      "path": "/{pageId}/leadgen_forms/{formId}/leads",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "fields": { "type": "string", "description": "Comma-separated list of fields to return (e.g., id,created_time,field_data)" },
+        "limit": { "type": "integer", "description": "Number of results" },
+        "after": { "type": "string", "description": "Cursor for pagination" },
+        "before": { "type": "string", "description": "Cursor for pagination" }
+      },
+      "urlTemplate": "https://graph.facebook.com/v23.0/{pageId}/leadgen_forms/{formId}/leads"
+    }
+  ]
+}
+

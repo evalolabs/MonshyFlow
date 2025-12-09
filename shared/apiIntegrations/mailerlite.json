@@ -1,0 +1,261 @@
+{
+  "id": "mailerlite",
+  "name": "MailerLite",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/mailerlite/000000",
+  "description": "Email marketing and automation platform",
+  "baseUrl": "https://api.mailerlite.com/api/v2",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "MAILERLITE_API_KEY",
+    "note": "MailerLite supports two API versions. Version 2 uses a different base URL (https://connect.mailerlite.com/api). This integration uses v2 API."
+  },
+  "endpoints": [
+    {
+      "id": "create-subscriber",
+      "name": "Create Subscriber",
+      "description": "Create a new subscriber",
+      "method": "POST",
+      "path": "/subscribers",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Email address"
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name"
+          },
+          "fields": {
+            "type": "object",
+            "description": "Custom fields",
+            "additionalProperties": true
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "unsubscribed", "bounced", "junk"],
+            "default": "active",
+            "description": "Subscriber status"
+          },
+          "groups": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Group IDs"
+          },
+          "resubscribe": {
+            "type": "boolean",
+            "default": false,
+            "description": "Resubscribe if unsubscribed"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["active", "unsubscribed", "bounced", "junk"],
+            "description": "Subscriber type"
+          }
+        },
+        "required": ["email"]
+      },
+      "urlTemplate": "https://api.mailerlite.com/api/v2/subscribers"
+    },
+    {
+      "id": "get-subscriber",
+      "name": "Get Subscriber",
+      "description": "Get subscriber by ID",
+      "method": "GET",
+      "path": "/subscribers/{subscriberId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.mailerlite.com/api/v2/subscribers/{subscriberId}"
+    },
+    {
+      "id": "list-subscribers",
+      "name": "List Subscribers",
+      "description": "List all subscribers",
+      "method": "GET",
+      "path": "/subscribers",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 1000,
+          "description": "Number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0,
+          "description": "Offset for pagination"
+        },
+        "filter": {
+          "type": "object",
+          "description": "Filter object (JSON string)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "unsubscribed", "bounced", "junk"],
+          "description": "Filter by status"
+        }
+      },
+      "urlTemplate": "https://api.mailerlite.com/api/v2/subscribers"
+    },
+    {
+      "id": "update-subscriber",
+      "name": "Update Subscriber",
+      "description": "Update a subscriber",
+      "method": "PUT",
+      "path": "/subscribers/{subscriberId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Full name"
+          },
+          "fields": {
+            "type": "object",
+            "description": "Custom fields",
+            "additionalProperties": true
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "unsubscribed", "bounced", "junk"],
+            "description": "Subscriber status"
+          },
+          "groups": {
+            "type": "array",
+            "items": { "type": "integer" }
+          },
+          "type": {
+            "type": "string",
+            "enum": ["active", "unsubscribed", "bounced", "junk"],
+            "description": "Subscriber type"
+          }
+        }
+      },
+      "urlTemplate": "https://api.mailerlite.com/api/v2/subscribers/{subscriberId}"
+    },
+    {
+      "id": "delete-subscriber",
+      "name": "Delete Subscriber",
+      "description": "Delete a subscriber",
+      "method": "DELETE",
+      "path": "/subscribers/{subscriberId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.mailerlite.com/api/v2/subscribers/{subscriberId}"
+    },
+    {
+      "id": "create-group",
+      "name": "Create Group",
+      "description": "Create a new group",
+      "method": "POST",
+      "path": "/groups",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Group name"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.mailerlite.com/api/v2/groups"
+    },
+    {
+      "id": "get-group",
+      "name": "Get Group",
+      "description": "Get group by ID",
+      "method": "GET",
+      "path": "/groups/{groupId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.mailerlite.com/api/v2/groups/{groupId}"
+    },
+    {
+      "id": "list-groups",
+      "name": "List Groups",
+      "description": "List all groups",
+      "method": "GET",
+      "path": "/groups",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 1000,
+          "description": "Number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0,
+          "description": "Offset for pagination"
+        }
+      },
+      "urlTemplate": "https://api.mailerlite.com/api/v2/groups"
+    },
+    {
+      "id": "update-group",
+      "name": "Update Group",
+      "description": "Update a group",
+      "method": "PUT",
+      "path": "/groups/{groupId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Group name"
+          }
+        }
+      },
+      "urlTemplate": "https://api.mailerlite.com/api/v2/groups/{groupId}"
+    },
+    {
+      "id": "delete-group",
+      "name": "Delete Group",
+      "description": "Delete a group",
+      "method": "DELETE",
+      "path": "/groups/{groupId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.mailerlite.com/api/v2/groups/{groupId}"
+    }
+  ]
+}
+

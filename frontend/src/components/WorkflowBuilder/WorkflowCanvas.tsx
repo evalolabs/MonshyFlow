@@ -1,0 +1,1024 @@
+/**
+ * WorkflowCanvas Component (Refactored)
+ * 
+ * Main canvas component for the workflow builder.
+ * This refactored version uses custom hooks for better code organization and maintainability.
+ * 
+ * Key Features:
+ * - Visual workflow editor with drag & drop
+ * - Auto-save and auto-layout
+ * - Node and edge operations
+ * - Execution monitoring
+ * - Context menus and modals
+ */
+
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import {
+  useNodesState,
+  useEdgesState,
+  useReactFlow,
+  type Node,
+  type Edge,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+
+// Node Registry
+import { createNodeTypesMap } from './nodeRegistry';
+
+// Edge Types
+import { ButtonEdge } from './EdgeTypes/ButtonEdge';
+
+// Components
+import { ResizableWorkflowLayout } from './ResizableWorkflowLayout';
+
+// Custom Hooks
+import {
+  useAutoSave,
+  useAutoLayout,
+  useNodeOperations,
+  useEdgeHandling,
+  useNodeSelector,
+  useWorkflowExecution,
+  useAgentToolPositioning,
+} from './hooks';
+import { useSequentialNodeAnimation } from './hooks/useSequentialNodeAnimation';
+import { useSecrets } from './hooks/useSecrets';
+
+// Services & Utils
+import { workflowService } from '../../services/workflowService';
+import { createSSEConnection, type SSEConnection } from '../../services/sseService';
+import type { WorkflowNode, WorkflowEdge } from '../../types/workflow';
+
+// Constants
+import {
+  DEFAULT_EDGE_STYLE,
+  DEFAULT_EDGE_MARKER,
+  FIT_VIEW_PADDING,
+  FIT_VIEW_DURATION,
+} from './constants';
+
+// ============================================================================
+// NODE AND EDGE TYPE DEFINITIONS
+// ============================================================================
+
+// Node types are now automatically loaded from the registry
+// No manual registration needed - just add to nodeRegistry/nodeMetadata.ts
+
+const edgeTypes = {
+  buttonEdge: ButtonEdge,
+};
+
+const compareNodesByPosition = (a: Node, b: Node) => {
+  const ax = a.position?.x ?? 0;
+  const bx = b.position?.x ?? 0;
+  if (ax !== bx) {
+    return ax - bx;
+  }
+  const ay = a.position?.y ?? 0;
+  const by = b.position?.y ?? 0;
+  if (ay !== by) {
+    return ay - by;
+  }
+  return a.id.localeCompare(b.id);
+};
+
+export const buildNodeOrderForDebugPanel = (nodes: Node[], edges: Edge[]): Node[] => {
+  if (!nodes.length) {
+    return [];
+  }
+
+  const nodeMap = new Map(nodes.map(node => [node.id, node]));
+  const adjacency = new Map<string, string[]>();
+  const inDegree = new Map<string, number>();
+
+  nodes.forEach(node => {
+    adjacency.set(node.id, []);
+    inDegree.set(node.id, 0);
+  });
+
+  edges.forEach(edge => {
+    if (!nodeMap.has(edge.source) || !nodeMap.has(edge.target)) {
+      return;
+    }
+    adjacency.get(edge.source)!.push(edge.target);
+    inDegree.set(edge.target, (inDegree.get(edge.target) || 0) + 1);
+  });
+
+  const queue: Node[] = nodes
+    .filter(node => (inDegree.get(node.id) || 0) === 0)
+    .sort(compareNodesByPosition);
+  const ordered: Node[] = [];
+  const inDegreeCopy = new Map(inDegree);
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    ordered.push(current);
+
+    const neighbours = adjacency.get(current.id) || [];
+    neighbours.forEach(neighbourId => {
+      const neighbourNode = nodeMap.get(neighbourId);
+      if (!neighbourNode) return;
+      const updated = (inDegreeCopy.get(neighbourId) || 0) - 1;
+      inDegreeCopy.set(neighbourId, updated);
+      if (updated === 0) {
+        queue.push(neighbourNode);
+        queue.sort(compareNodesByPosition);
+      }
+    });
+  }
+
+  if (ordered.length < nodes.length) {
+    const remaining = nodes.filter(node => !ordered.includes(node));
+    remaining.sort(compareNodesByPosition);
+    ordered.push(...remaining);
+  }
+
+  return ordered;
+};
+
+// ============================================================================
+// COMPONENT PROPS
+// ============================================================================
+
+interface WorkflowCanvasProps {
+  initialNodes?: WorkflowNode[];
+  initialEdges?: WorkflowEdge[];
+  onSave?: (nodes: Node[], edges: Edge[]) => void;
+  onExecute?: () => void;
+  workflowId?: string;
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+export function WorkflowCanvas({
+  initialNodes = [],
+  initialEdges = [],
+  onSave,
+  workflowId,
+}: WorkflowCanvasProps) {
+  const { fitView } = useReactFlow();
+
+  // ============================================================================
+  // STATE MANAGEMENT
+  // ============================================================================
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes as Node[]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges as Edge[]);
+
+  // Update nodes when initialNodes changes (e.g., workflow loaded from backend)
+  React.useEffect(() => {
+    console.log('[WorkflowCanvas] initialNodes changed:', {
+      count: initialNodes?.length || 0,
+      nodes: initialNodes?.map(n => ({
+        id: n.id,
+        type: n.type,
+        dataKeys: Object.keys(n.data || {}),
+        data: n.data,
+        data_url: n.data?.url
+      }))
+    });
+    if (initialNodes && initialNodes.length > 0) {
+      // CRITICAL: Ensure node.data is always an object, not a stringified JSON.
+      // This is a safeguard against data corruption from various sources.
+      const sanitizedNodes = initialNodes.map(node => {
+        if (typeof node.data === 'string') {
+          try {
+            return { ...node, data: JSON.parse(node.data) };
+          } catch (e) {
+            console.error(`Failed to parse node.data for node ${node.id}`, e);
+            return { ...node, data: {} }; // Fallback to empty object on parse error
+          }
+        }
+        return node;
+      });
+      setNodes(sanitizedNodes as Node[]);
+      console.log('[WorkflowCanvas] Updated nodes state with sanitized data');
+    }
+  }, [initialNodes, setNodes]);
+
+  // Update edges when initialEdges changes
+  React.useEffect(() => {
+    if (initialEdges && initialEdges.length >= 0) {
+      setEdges(initialEdges as Edge[]);
+    }
+  }, [initialEdges, setEdges]);
+
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  
+  // SSE connection for real-time events (used for node tests)
+  const [sseConnection, setSseConnection] = useState<SSEConnection | null>(null);
+  const [showConfigPanel, setShowConfigPanel] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; node: Node } | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{ node: Node } | null>(null);
+  
+  // Debug panel state
+  const [showDebugPanel, setShowDebugPanel] = useState(true); // Set to true for testing
+  const [debugSteps, setDebugSteps] = useState<any[]>([]);
+  
+  // State for single node testing animation
+  const [testingNodeId, setTestingNodeId] = useState<string | null>(null);
+  const autoDebugEnabled = false; // Disabled by default - user can test nodes manually with play buttons
+  
+  // State for showing/hiding node overlays
+  const [showOverlays, setShowOverlays] = useState(true);
+
+  // Build debug steps - either initial empty steps (if autoDebugEnabled is false) or full steps (if true)
+  React.useEffect(() => {
+    if (!autoDebugEnabled) {
+      // Create initial empty steps for all nodes so they appear in debug panel
+      // But preserve existing tested steps (status !== 'pending')
+      if (nodes.length) {
+        const orderedNodes = buildNodeOrderForDebugPanel(nodes, edges);
+        setDebugSteps(prevSteps => {
+          // Create a map of existing tested steps (status !== 'pending')
+          const testedStepsMap = new Map<string, any>();
+          prevSteps.forEach(step => {
+            if (step.status !== 'pending') {
+              testedStepsMap.set(step.nodeId, step);
+            }
+          });
+
+          // Create initial steps for all nodes, but keep tested steps
+          const initialSteps = orderedNodes.map((node: Node) => {
+            // If this node was already tested, keep the tested step
+            const existingTestedStep = testedStepsMap.get(node.id);
+            if (existingTestedStep) {
+              return existingTestedStep;
+            }
+
+            // Otherwise create a new pending step
+            return {
+              nodeId: node.id,
+              nodeType: node.type,
+              nodeLabel: node.data?.label || undefined,
+              status: 'pending' as const,
+              input: undefined,
+              output: undefined,
+              debugInfo: {
+                outputPreview: 'Click play button to test this node',
+                size: 0,
+              },
+              startedAt: undefined,
+              completedAt: undefined,
+              duration: 0,
+            };
+          });
+
+          console.log('[WorkflowCanvas] Updating debug steps:', initialSteps.length, 'nodes, preserving', testedStepsMap.size, 'tested steps');
+          return initialSteps;
+        });
+      } else {
+        setDebugSteps([]);
+      }
+      return;
+    }
+
+    // If autoDebugEnabled is true, build full debug steps from nodes
+    const buildDebugStepsFromNodes = async () => {
+      const steps: any[] = [];
+      const outputsByNodeId: Record<string, any> = {};
+
+      // Helper to resolve expression fields in a node
+      const resolveExpressionFields = async (n: any, context: any) => {
+        try {
+          // Dynamic import to avoid circular dependency
+          const { NODE_FIELD_CONFIG } = await import('./nodeFieldConfig');
+          const { transformData } = await import('../../utils/templateEngine');
+          
+          const fieldConfig = NODE_FIELD_CONFIG[n.type];
+          if (!fieldConfig) return n.data || {};
+
+          const resolved: any = {};
+          for (const [fieldName, fieldDef] of Object.entries(fieldConfig)) {
+            const fieldValue = n.data?.[fieldName];
+            if (!fieldValue) continue;
+
+            // Only resolve expression fields
+            if (fieldDef.type === 'expression' && typeof fieldValue === 'string' && fieldValue.includes('{{')) {
+              try {
+                resolved[fieldName] = transformData(context, fieldValue);
+              } catch (e: any) {
+                resolved[fieldName] = `[Error: ${e.message}]`;
+              }
+            } else {
+              resolved[fieldName] = fieldValue;
+            }
+          }
+
+          // Merge with non-expression fields
+          return { ...n.data, ...resolved };
+        } catch (e) {
+          console.warn('Failed to resolve expression fields:', e);
+          return n.data || {};
+        }
+      };
+
+      // Helper to estimate realistic duration based on node type
+      const estimateDuration = (nodeType: string): number => {
+        // Realistic duration estimates in milliseconds for different node types
+        const durationMap: Record<string, number> = {
+          'start': 5,
+          'api': 200, // API calls typically take longer
+          'llm': 1500, // LLM calls are usually slowest
+          'agent': 1200, // Agent calls also slow
+          'web-search': 800,
+          'file-search': 300,
+          'email': 150,
+          'transform': 50,
+        };
+        return durationMap[nodeType] || 50; // Default duration
+      };
+
+      // Helper to create generic step with previews from node.data
+      const createGenericStep = (n: any, resolvedData?: any) => {
+        const data = resolvedData || n.data || {};
+        const dataKeys = Object.keys(data);
+        const preview = JSON.stringify(data, null, 2);
+        const duration = estimateDuration(n.type);
+        const startedAt = new Date().toISOString();
+        const completedAt = new Date(Date.now() + duration).toISOString();
+        
+        return {
+          nodeId: n.id,
+          nodeType: n.type,
+          nodeLabel: n.data?.label || undefined,
+          status: 'completed',
+          input: undefined,
+          output: data,
+          debugInfo: {
+            inputSchema: undefined,
+            outputSchema: { type: 'object', keys: dataKeys, keyCount: dataKeys.length },
+            inputPreview: undefined,
+            outputPreview: preview,
+            dataType: 'object',
+            size: preview.length,
+          },
+          startedAt,
+          completedAt,
+          duration,
+        };
+      };
+
+      // Topological order so that upstream outputs are available for downstream nodes
+      const indeg: Record<string, number> = {};
+      nodes.forEach(n => indeg[n.id] = 0);
+      edges.forEach(e => { if (indeg[e.target] !== undefined) indeg[e.target] += 1; });
+      const queue: any[] = nodes.filter(n => indeg[n.id] === 0);
+      const topo: any[] = [];
+      const outAdj: Record<string, string[]> = {};
+      nodes.forEach(n => outAdj[n.id] = []);
+      edges.forEach(e => outAdj[e.source]?.push(e.target));
+      while (queue.length) {
+        const n = queue.shift();
+        topo.push(n);
+        for (const t of outAdj[n.id] || []) {
+          indeg[t] -= 1;
+          if (indeg[t] === 0) {
+            const nodeObj = nodes.find(nn => nn.id === t);
+            if (nodeObj) queue.push(nodeObj);
+          }
+        }
+        }
+      const ordered = topo.length === nodes.length ? topo : nodes;
+
+      for (const n of ordered) {
+        // Skip tool nodes (they are part of Agent node execution, not workflow flow)
+        if (n.type === 'tool' || (typeof n.type === 'string' && n.type.startsWith('tool-'))) {
+          continue;
+        }
+        // Start node: simple static output
+        if (n.type === 'start') {
+          const duration = estimateDuration('start');
+          const startedAt = new Date().toISOString();
+          const completedAt = new Date(Date.now() + duration).toISOString();
+          
+          steps.push({
+            nodeId: n.id,
+            nodeType: n.type,
+            nodeLabel: n.data?.label || n.label || undefined,
+            status: 'completed',
+            input: { message: 'Workflow started' },
+            output: { message: 'Workflow started' },
+            debugInfo: {
+              inputSchema: { type: 'object', keys: ['message'], keyCount: 1 },
+              outputSchema: { type: 'object', keys: ['message'], keyCount: 1 },
+              inputPreview: '{"message": "Workflow started"}',
+              outputPreview: '{"message": "Workflow started"}',
+              dataType: 'object',
+              size: 32,
+            },
+            startedAt,
+            completedAt,
+            duration,
+          });
+          continue;
+        }
+
+        // Default: show configuration as preview for any node type
+        // But resolve expression fields first if they exist
+        const context: any = { input: {}, steps: {} };
+        const incoming = edges.find(e => e.target === n.id);
+        if (incoming?.source) {
+          const upstreamId = incoming.source;
+          context.input = outputsByNodeId[upstreamId] || {};
+      }
+        // Add all upstream outputs to steps
+        for (const [nodeId, output] of Object.entries(outputsByNodeId)) {
+          context.steps[nodeId] = output;
+        }
+
+        const resolvedData = await resolveExpressionFields(n, context);
+        const defStep = createGenericStep(n, resolvedData);
+        steps.push(defStep);
+        outputsByNodeId[n.id] = resolvedData;
+      }
+
+      setDebugSteps(steps);
+    };
+
+    buildDebugStepsFromNodes();
+  }, [nodes.length, edges.length, autoDebugEnabled]); // Only depend on counts, not the full arrays to avoid unnecessary re-runs
+
+  // Handler to update debug steps when a node is tested via play button
+  const handleDebugStepUpdate = useCallback((nodeId: string, updatedStep: any) => {
+    setDebugSteps(prevSteps => {
+      const existingIndex = prevSteps.findIndex(step => step.nodeId === nodeId);
+      if (existingIndex >= 0) {
+        // Update existing step
+        const newSteps = [...prevSteps];
+        newSteps[existingIndex] = updatedStep;
+        return newSteps;
+      } else {
+        // Add new step if it doesn't exist
+        return [...prevSteps, updatedStep];
+      }
+    });
+  }, []);
+
+  // Handler to start animation immediately when Play button is clicked
+  const handleDebugTestStart = useCallback((nodeId: string, _step: any) => {
+    // Start animation IMMEDIATELY when Play button is clicked (before backend call)
+    console.log('[WorkflowCanvas] Node test started - triggering animation immediately:', nodeId);
+    
+    // Set testing state to trigger animation
+    // This will trigger animation for all nodes from Start to this node
+    setTestingNodeId(nodeId);
+    
+    // Create SSE connection for real-time events (if not already connected)
+    if (!sseConnection) {
+      const EXECUTION_API_URL = import.meta.env.VITE_EXECUTION_API_URL || 'http://localhost:5002';
+      const eventsStreamUrl = `${EXECUTION_API_URL}/api/events/stream`;
+      console.log('[WorkflowCanvas] Creating SSE connection for node test:', eventsStreamUrl);
+      const sse = createSSEConnection(eventsStreamUrl);
+      sse.connect();
+      setSseConnection(sse);
+    }
+    
+    // Calculate animation duration based on number of nodes in the path
+    // Calculate the path: Start → ... → tested node
+    const fullOrder = edges.length > 0 
+      ? buildNodeOrderForDebugPanel(nodes, edges)
+      : nodes;
+    const testNodeIndex = fullOrder.findIndex(n => n.id === nodeId);
+    const nodesInPath = testNodeIndex >= 0 ? testNodeIndex + 1 : 1;
+    
+    // Calculate duration: fast nodes (200ms) + slow nodes (will use real duration from SSE)
+    // For node tests with SSE, slow nodes will wait for real events
+    // Estimate: 200ms for fast nodes, 1500ms for slow nodes (fallback), plus 1s buffer
+    // Count fast vs slow nodes in path
+    const fastNodeTypes = ['start', 'end', 'transform'];
+    const slowNodeTypes = ['agent', 'llm', 'http-request', 'api', 'email', 'tool'];
+    let fastCount = 0;
+    let slowCount = 0;
+    const pathNodes = fullOrder.slice(0, testNodeIndex + 1);
+    pathNodes.forEach(node => {
+      if (node.type && fastNodeTypes.includes(node.type)) {
+        fastCount++;
+      } else if (node.type && slowNodeTypes.includes(node.type)) {
+        slowCount++;
+      } else {
+        slowCount++; // Default to slow
+      }
+    });
+    // Use fallback duration (will be overridden by real SSE events for slow nodes)
+    const estimatedDuration = (fastCount * 200) + (slowCount * 1500) + 2000; // Fast nodes + slow nodes (fallback) + buffer
+    
+    console.log('[WorkflowCanvas] Animation duration for node test path (fallback):', estimatedDuration, 'ms', 'nodes in path:', nodesInPath);
+    
+    // Note: SSE connection cleanup is handled in useEffect below
+    // We don't disconnect here because the connection might be reused for multiple tests
+  }, [nodes, edges, sseConnection]);
+
+  // Cleanup SSE connection when testing completes or component unmounts
+  useEffect(() => {
+    if (!testingNodeId && sseConnection) {
+      // Testing completed - disconnect SSE connection
+      console.log('[WorkflowCanvas] Testing completed, disconnecting SSE connection');
+      sseConnection.disconnect();
+      setSseConnection(null);
+    }
+  }, [testingNodeId, sseConnection]);
+
+  // Cleanup SSE connection on unmount
+  useEffect(() => {
+    return () => {
+      if (sseConnection) {
+        console.log('[WorkflowCanvas] Component unmounting, cleaning up SSE connection');
+        sseConnection.disconnect();
+        setSseConnection(null);
+      }
+    };
+  }, [sseConnection]);
+
+  const handleDebugTestResult = useCallback((result: any, originalStep: any) => {
+    // This is called AFTER the backend test completes
+    // Animation should already be running from handleDebugTestStart
+    console.log('[WorkflowCanvas] Node test result:', result, 'nodeId:', originalStep.nodeId);
+    
+    // Reset testingNodeId after a short delay to allow animation to complete
+    // This ensures the animation finishes before we reset the state
+    setTimeout(() => {
+      setTestingNodeId(prevTestingNodeId => {
+        if (prevTestingNodeId === originalStep.nodeId) {
+          console.log('[WorkflowCanvas] Resetting testingNodeId after test completion');
+          return null;
+        }
+        return prevTestingNodeId; // Keep current value if it changed (new test started)
+      });
+    }, 500); // Small delay to allow final animation states
+    
+    // Update debug steps with test result
+    setDebugSteps(prevSteps => {
+      return prevSteps.map(step => {
+        if (step.nodeId === originalStep.nodeId) {
+          return {
+            ...step,
+            status: result.success ? 'completed' : 'failed',
+            input: result.input || step.input,
+            output: result.output || result,
+            error: result.error || step.error,
+            duration: result.duration || step.duration,
+            startedAt: result.timestamp || new Date().toISOString(),
+            completedAt: result.timestamp || new Date().toISOString(),
+            debugInfo: {
+              ...step.debugInfo,
+              outputPreview: JSON.stringify(result.output || result, null, 2),
+              size: JSON.stringify(result.output || result).length,
+            },
+          };
+        }
+        return step;
+      });
+    });
+    
+    // Process the trace from the backend and update all relevant steps
+    if (result?.execution?.trace && Array.isArray(result.execution.trace)) {
+      setDebugSteps(prevSteps => {
+        const newStepsMap = new Map<string, any>();
+        
+        // Create a map of existing steps
+        const existingStepsMap = new Map(prevSteps.map(step => [step.nodeId, step]));
+        
+        // Process each trace entry
+        result.execution.trace.forEach((traceEntry: any) => {
+          const existingStep = existingStepsMap.get(traceEntry.nodeId);
+          const outputPayload = traceEntry.output;
+          const outputPreview = outputPayload !== undefined 
+            ? JSON.stringify(outputPayload, null, 2) 
+            : existingStep?.debugInfo?.outputPreview || '';
+
+          const derivedStep = {
+            nodeId: traceEntry.nodeId || existingStep?.nodeId || originalStep.nodeId,
+            nodeType: existingStep?.nodeType || traceEntry.type || originalStep.nodeType,
+            nodeLabel: existingStep?.nodeLabel || originalStep.nodeLabel,
+            status: traceEntry.error ? 'failed' : 'completed',
+            input: traceEntry.input ?? existingStep?.input,
+            output: traceEntry.output ?? existingStep?.output,
+            error: traceEntry.error ?? existingStep?.error,
+            duration: traceEntry.duration ?? existingStep?.duration,
+            startedAt: traceEntry.timestamp || existingStep?.startedAt,
+            completedAt: traceEntry.timestamp || existingStep?.completedAt,
+            debugInfo: {
+              ...existingStep?.debugInfo,
+              outputPreview,
+              size: outputPreview.length,
+            },
+          };
+          
+          newStepsMap.set(derivedStep.nodeId, derivedStep);
+        });
+
+        // Update existing steps and add new ones
+        const updatedSteps = prevSteps.map(step => newStepsMap.get(step.nodeId) || step);
+        newStepsMap.forEach(newStep => {
+          if (!updatedSteps.some(s => s.nodeId === newStep.nodeId)) {
+            updatedSteps.push(newStep);
+          }
+        });
+
+        return updatedSteps;
+      });
+    } else {
+      // Fallback: update single step
+      handleDebugStepUpdate(originalStep.nodeId, {
+        ...originalStep,
+        status: result.success ? 'completed' : 'failed',
+        input: result.input || originalStep.input,
+        output: result.output || result,
+        error: result.error || originalStep.error,
+        duration: result.duration || originalStep.duration,
+        startedAt: result.timestamp || new Date().toISOString(),
+        completedAt: result.timestamp || new Date().toISOString(),
+        debugInfo: {
+          ...originalStep.debugInfo,
+          outputPreview: JSON.stringify(result.output || result, null, 2),
+          size: JSON.stringify(result.output || result, null, 2).length,
+        },
+      });
+    }
+  }, [handleDebugStepUpdate, testingNodeId]);
+
+  // ============================================================================
+  // CUSTOM HOOKS
+  // ============================================================================
+
+  // Auto-save hook
+  const { autoSaving, manualSave, triggerImmediateSave } = useAutoSave({
+    workflowId,
+    nodes,
+    edges,
+    onSave: onSave ? async (nodes, edges) => { await onSave(nodes, edges); } : undefined,
+  });
+
+  // Auto-layout hook
+  const { enabled: autoLayoutEnabled, toggleEnabled: toggleAutoLayout, applyLayout } = useAutoLayout({
+    nodes,
+    edges,
+    onNodesChange: setNodes,
+    onEdgesChange: setEdges,
+  });
+
+  // Node selector hook
+  const {
+    popup: nodeSelectorPopup,
+    combinedPopup,
+    openPopupBetweenNodes,
+    openPopupFromOutput,
+    selectNodeType,
+    selectApiEndpoint,
+    closePopup: closeNodeSelector,
+    closeCombinedPopup,
+  } = useNodeSelector({
+    nodes,
+    edges,
+    onNodesChange: setNodes,
+    onEdgesChange: setEdges,
+    autoLayoutEnabled,
+  });
+  
+  // Create a ref for default edge options (used when connecting nodes manually)
+  const addNodeCallbackRef = useCallback((edgeId: string, source: string, target: string) => {
+    openPopupBetweenNodes(edgeId, source, target);
+  }, [openPopupBetweenNodes]);
+
+  // Node operations hook
+  const { addNode, deleteNode, duplicateNode, updateNode } = useNodeOperations({
+    nodes,
+    edges,
+    workflowId,
+    onNodesChange: setNodes,
+    onEdgesChange: setEdges,
+    onAddNodeCallback: openPopupBetweenNodes,
+    deleteNodeFromBackend: workflowService.deleteNode,
+  });
+
+  // Handle comment updates from node overlay
+  const handleUpdateComment = useCallback((nodeId: string, comment: string) => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (node) {
+      updateNode(nodeId, {
+        ...node.data,
+        comment,
+      });
+    }
+  }, [nodes, updateNode]);
+
+  // Edge handling hook
+  const { handleConnect } = useEdgeHandling({
+    nodes,
+    edges,
+    onEdgesChange: setEdges,
+    onAddNodeCallback: openPopupBetweenNodes,
+  });
+
+  // Agent tool positioning hook - maintains relative positions when agent moves
+  useAgentToolPositioning({
+    nodes,
+    edges,
+    onNodesChange: setNodes,
+  });
+
+  // Workflow execution hook
+  const {
+    executing,
+    publishing,
+    currentExecutionId,
+    showExecutionMonitor,
+    execute,
+    publish,
+    closeExecutionMonitor,
+  } = useWorkflowExecution({ workflowId });
+
+  // Load secrets for validation
+  const { secrets: allSecrets } = useSecrets();
+  // Convert to simplified format for node components
+  const secrets = allSecrets.map(s => ({ key: s.name, isActive: s.isActive }));
+
+  // Use executing for animation, and convert debugSteps to executionSteps format
+  // Also support single node testing animation
+  const isExecuting = executing || testingNodeId !== null;
+  
+  // Debug: Log when executing changes
+  useEffect(() => {
+    console.log('[WorkflowCanvas] executing state changed:', executing, 'testingNodeId:', testingNodeId, 'isExecuting:', isExecuting);
+  }, [executing, testingNodeId, isExecuting]);
+  
+  const executionSteps = useMemo(() => {
+    // Convert debugSteps to executionSteps format for animation
+    return debugSteps.map(step => ({
+      nodeId: step.nodeId,
+      status: step.status || 'pending',
+      nodeType: step.nodeType,
+      nodeLabel: step.nodeLabel,
+      input: step.input,
+      output: step.output,
+      startedAt: step.startedAt,
+      completedAt: step.completedAt,
+      duration: step.duration,
+    }));
+  }, [debugSteps]);
+
+
+
+  // Update debug steps when executing
+  React.useEffect(() => {
+    if (executing) {
+      // Show live execution steps
+      setDebugSteps([
+        {
+          nodeId: 'start',
+          nodeType: 'start',
+          status: 'running',
+          input: { message: 'Workflow started' },
+          output: null,
+          debugInfo: {
+            inputSchema: { type: 'object', keys: ['message'], keyCount: 1 },
+            outputSchema: null,
+            inputPreview: '{"message": "Workflow started"}',
+            outputPreview: 'Executing...',
+            dataType: 'object',
+            size: 32
+          },
+          startedAt: new Date().toISOString(),
+          completedAt: null,
+          duration: 0
+        }
+      ]);
+    }
+  }, [executing]);
+
+
+  // Sequential node animation for live execution visualization
+  const { currentAnimatedNodeId } = useSequentialNodeAnimation({
+    nodes,
+    edges,
+    executionSteps,
+    sseConnection: sseConnection, // Use SSE connection for real-time events (node tests and full executions)
+    isExecuting,
+    testingNodeId, // Pass testingNodeId for single node tests
+  });
+
+  // Debug log for animation state
+  useEffect(() => {
+    console.log('[WorkflowCanvas] Animation state:', {
+      isExecuting,
+      executing, // Also log the original executing state
+      currentAnimatedNodeId,
+      executionStepsCount: executionSteps.length,
+      nodesCount: nodes.length,
+      debugStepsCount: debugSteps.length,
+    });
+  }, [isExecuting, executing, currentAnimatedNodeId, executionSteps.length, nodes.length, debugSteps.length]);
+
+  // Get node types from registry (automatically includes all registered nodes)
+  // Memoize with stable reference to avoid React Flow warnings
+  const nodeTypes = useMemo(() => {
+    const types = createNodeTypesMap(isExecuting, executionSteps, currentAnimatedNodeId, handleUpdateComment, secrets, showOverlays);
+    // Return a stable reference
+    return types;
+  }, [isExecuting, executionSteps.length, currentAnimatedNodeId, handleUpdateComment, secrets, showOverlays]);
+
+  // Calculate which nodes need add-node buttons
+  const nodesWithAddButtons = useMemo(() => {
+    const result: Array<{ nodeId: string; sourceHandle?: string }> = [];
+    
+    // Helper: Check if a specific handle has an outgoing edge
+    const hasEdgeFromHandle = (nodeId: string, handleId?: string) => {
+      return edges.some(
+        e => e.source === nodeId && (handleId ? e.sourceHandle === handleId : !e.sourceHandle)
+      );
+    };
+    
+    nodes.forEach(node => {
+      // Skip End nodes (no outputs)
+      if (node.type === 'end') return;
+
+      // Skip tool nodes, they shouldn't have an add button
+      if (node.type?.startsWith('tool')) return;
+      
+      
+      // Handle all other nodes - check default output
+      if (!hasEdgeFromHandle(node.id)) {
+        result.push({ nodeId: node.id });
+      }
+    });
+    
+    return result;
+  }, [nodes, edges]);
+
+  // ============================================================================
+  // EVENT HANDLERS
+  // ============================================================================
+
+  // Add node with auto-save
+  const handleAddNode = useCallback((type: string) => {
+    const node = addNode(type);
+    if (node) {
+      triggerImmediateSave();
+    }
+  }, [addNode, triggerImmediateSave]);
+
+  // Delete node with auto-save
+  const handleDeleteNode = useCallback(async (nodeId: string) => {
+    await deleteNode(nodeId);
+    triggerImmediateSave();
+  }, [deleteNode, triggerImmediateSave]);
+
+  // Duplicate node with auto-save
+  const handleDuplicateNode = useCallback((node: Node) => {
+    duplicateNode(node);
+    triggerImmediateSave();
+  }, [duplicateNode, triggerImmediateSave]);
+
+  // Node click handler
+  const handleNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
+    // Always get the latest node from the nodes state to ensure we have the latest data
+    const latestNode = nodes.find(n => n.id === node.id) || node;
+    console.log('[WorkflowCanvas] Node clicked:', {
+      clickedNodeId: node.id,
+      clickedNodeData: node.data,
+      clickedNodeData_url: node.data?.url,
+      foundInState: !!nodes.find(n => n.id === node.id),
+      latestNodeData: latestNode.data,
+      latestNodeData_url: latestNode.data?.url,
+      allNodesInState: nodes.map(n => ({ id: n.id, type: n.type, dataKeys: Object.keys(n.data || {}), url: n.data?.url }))
+    });
+    console.log('[WorkflowCanvas] Full clicked node:', JSON.stringify(node, null, 2));
+    console.log('[WorkflowCanvas] Full latest node:', JSON.stringify(latestNode, null, 2));
+    setSelectedNode(latestNode);
+    setShowConfigPanel(true);
+    setContextMenu(null);
+    // Don't close debug panel when opening config panel
+  }, [nodes]);
+
+  // Node context menu handler
+  const handleNodeContextMenu = useCallback((event: React.MouseEvent, node: Node) => {
+    event.preventDefault();
+    setContextMenu({ x: event.clientX, y: event.clientY, node });
+  }, []);
+
+  // Pane click handler (close panels)
+  const handlePaneClick = useCallback(() => {
+    setContextMenu(null);
+    setShowConfigPanel(false);
+    setSelectedNode(null);
+  }, []);
+
+  // Close config panel
+  const handleCloseConfigPanel = useCallback(() => {
+    setShowConfigPanel(false);
+    setSelectedNode(null);
+  }, []);
+
+  // Fit view to canvas
+  const handleFitView = useCallback(() => {
+    fitView({ padding: FIT_VIEW_PADDING, duration: FIT_VIEW_DURATION });
+  }, [fitView]);
+
+  // Suppress phantom edge warnings (these are intentional UI elements, not real edges)
+  const handleReactFlowError = useCallback((errorCode: string, errorMessage: string) => {
+    // Suppress error 008: "Couldn't create edge for target handle id"
+    // This happens for phantom edges (+ buttons) which don't have real handles
+    if (errorCode === '008' && errorMessage.includes('phantom-')) {
+      return; // Silently ignore phantom edge handle warnings
+    }
+    // Suppress error 002: "It looks like you've created a new nodeTypes or edgeTypes object"
+    // This is a false positive - nodeTypes is properly memoized with useMemo
+    if (errorCode === '002' && errorMessage.includes('nodeTypes')) {
+      return; // Silently ignore - nodeTypes is memoized and stable
+    }
+    // Log other errors normally
+    console.error(`[React Flow Error ${errorCode}]:`, errorMessage);
+  }, []);
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
+  return (
+    <ResizableWorkflowLayout
+      // Canvas props
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={handleConnect}
+      onNodeClick={handleNodeClick}
+      onNodeContextMenu={handleNodeContextMenu}
+      onPaneClick={handlePaneClick}
+      onError={handleReactFlowError}
+      nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
+      defaultEdgeOptions={{
+        animated: false,
+        // Don't set a default type - let useEdgeHandling determine it based on connection
+        style: DEFAULT_EDGE_STYLE,
+        markerEnd: { ...DEFAULT_EDGE_MARKER },
+        data: { onAddNode: addNodeCallbackRef },
+      }}
+      nodesWithAddButtons={nodesWithAddButtons}
+      
+      // Panel states
+      showDebugPanel={showDebugPanel}
+      showConfigPanel={showConfigPanel}
+      selectedNode={selectedNode}
+      contextMenu={contextMenu}
+      deleteModal={deleteModal}
+      showExecutionMonitor={showExecutionMonitor}
+      currentExecutionId={currentExecutionId}
+      nodeSelectorPopup={nodeSelectorPopup}
+      combinedPopup={combinedPopup}
+      onSelectNode={selectNodeType}
+      onSelectApiEndpoint={selectApiEndpoint}
+      onCloseCombinedPopup={closeCombinedPopup}
+      
+      // Debug panel props
+      debugSteps={debugSteps}
+      onDebugStepUpdate={handleDebugStepUpdate}
+      onDebugTestResult={handleDebugTestResult}
+      onDebugTestStart={handleDebugTestStart}
+      
+      // Toolbar props
+      onAddNode={handleAddNode}
+      onSave={manualSave}
+      onExecute={execute}
+      onPublish={publish}
+      onAutoLayout={applyLayout}
+      autoLayoutEnabled={autoLayoutEnabled}
+      onToggleAutoLayout={toggleAutoLayout}
+      onFitView={handleFitView}
+      onToggleDebug={() => {
+        setShowDebugPanel(!showDebugPanel);
+        // Allow both panels to be open simultaneously
+      }}
+      showOverlays={showOverlays}
+      onToggleOverlays={() => setShowOverlays(!showOverlays)}
+      saving={false}
+      executing={executing}
+      autoSaving={autoSaving}
+      publishing={publishing}
+      
+      // Node operations
+      onUpdateNode={updateNode}
+      onDeleteNode={handleDeleteNode}
+      onDuplicateNode={handleDuplicateNode}
+      onSelectNodeType={selectNodeType}
+      onOpenPopupFromOutput={openPopupFromOutput}
+      onCloseNodeSelector={closeNodeSelector}
+      onCloseConfigPanel={handleCloseConfigPanel}
+      onCloseExecutionMonitor={closeExecutionMonitor}
+      
+      // Modal handlers
+      onSetContextMenu={setContextMenu}
+      onSetDeleteModal={setDeleteModal}
+      onSetSelectedNode={setSelectedNode}
+      onSetShowConfigPanel={setShowConfigPanel}
+      
+      // Workflow props
+      workflowId={workflowId}
+    />
+  );
+}
+

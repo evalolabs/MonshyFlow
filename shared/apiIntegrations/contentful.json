@@ -1,0 +1,155 @@
+{
+  "id": "contentful",
+  "name": "Contentful",
+  "icon": "📝",
+  "logoUrl": "https://cdn.simpleicons.org/contentful/2478CC",
+  "description": "Content management system and headless CMS",
+  "baseUrl": "https://cdn.contentful.com",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "{apiKey}",
+    "secretKey": "CONTENTFUL_CONTENT_DELIVERY_ACCESS_TOKEN",
+    "queryParamName": "access_token",
+    "note": "Access token can be sent as query parameter (access_token) or in Authorization header. Preview API uses https://preview.contentful.com with CONTENTFUL_CONTENT_PREVIEW_ACCESS_TOKEN."
+  },
+  "endpoints": [
+    {
+      "id": "get-asset",
+      "name": "Get Asset",
+      "description": "Get asset details by ID",
+      "method": "GET",
+      "path": "/spaces/{spaceId}/assets/{assetId}",
+      "headers": {},
+      "queryParams": {
+        "access_token": "{accessToken}"
+      },
+      "urlTemplate": "https://cdn.contentful.com/spaces/{spaceId}/assets/{assetId}"
+    },
+    {
+      "id": "list-assets",
+      "name": "List Assets",
+      "description": "List all assets",
+      "method": "GET",
+      "path": "/spaces/{spaceId}/assets",
+      "headers": {},
+      "queryParams": {
+        "access_token": "{accessToken}",
+        "skip": "0",
+        "limit": "100",
+        "order": "sys.createdAt",
+        "select": "{select}",
+        "mimetype_group": "{mimetypeGroup}",
+        "sys.id": "{sysId}",
+        "sys.updatedAt": "{sysUpdatedAt}"
+      },
+      "urlTemplate": "https://cdn.contentful.com/spaces/{spaceId}/assets"
+    },
+    {
+      "id": "get-content-type",
+      "name": "Get Content Type",
+      "description": "Get content type details by ID",
+      "method": "GET",
+      "path": "/spaces/{spaceId}/content_types/{contentTypeId}",
+      "headers": {},
+      "queryParams": {
+        "access_token": "{accessToken}"
+      },
+      "urlTemplate": "https://cdn.contentful.com/spaces/{spaceId}/content_types/{contentTypeId}"
+    },
+    {
+      "id": "list-content-types",
+      "name": "List Content Types",
+      "description": "List all content types",
+      "method": "GET",
+      "path": "/spaces/{spaceId}/content_types",
+      "headers": {},
+      "queryParams": {
+        "access_token": "{accessToken}",
+        "skip": "0",
+        "limit": "100",
+        "order": "sys.id"
+      },
+      "urlTemplate": "https://cdn.contentful.com/spaces/{spaceId}/content_types"
+    },
+    {
+      "id": "get-entry",
+      "name": "Get Entry",
+      "description": "Get entry details by ID",
+      "method": "GET",
+      "path": "/spaces/{spaceId}/entries/{entryId}",
+      "headers": {},
+      "queryParams": {
+        "access_token": "{accessToken}",
+        "locale": "{locale}",
+        "include": "{include}"
+      },
+      "urlTemplate": "https://cdn.contentful.com/spaces/{spaceId}/entries/{entryId}"
+    },
+    {
+      "id": "list-entries",
+      "name": "List Entries",
+      "description": "List all entries",
+      "method": "GET",
+      "path": "/spaces/{spaceId}/entries",
+      "headers": {},
+      "queryParams": {
+        "access_token": "{accessToken}",
+        "skip": "0",
+        "limit": "100",
+        "order": "sys.createdAt",
+        "content_type": "{contentType}",
+        "select": "{select}",
+        "locale": "{locale}",
+        "include": "{include}",
+        "sys.id": "{sysId}",
+        "sys.updatedAt": "{sysUpdatedAt}",
+        "query": "{query}"
+      },
+      "urlTemplate": "https://cdn.contentful.com/spaces/{spaceId}/entries"
+    },
+    {
+      "id": "get-locale",
+      "name": "Get Locale",
+      "description": "Get locale details by ID",
+      "method": "GET",
+      "path": "/spaces/{spaceId}/locales/{localeId}",
+      "headers": {},
+      "queryParams": {
+        "access_token": "{accessToken}"
+      },
+      "urlTemplate": "https://cdn.contentful.com/spaces/{spaceId}/locales/{localeId}"
+    },
+    {
+      "id": "list-locales",
+      "name": "List Locales",
+      "description": "List all locales",
+      "method": "GET",
+      "path": "/spaces/{spaceId}/locales",
+      "headers": {},
+      "queryParams": {
+        "access_token": "{accessToken}"
+      },
+      "urlTemplate": "https://cdn.contentful.com/spaces/{spaceId}/locales"
+    },
+    {
+      "id": "get-space",
+      "name": "Get Space",
+      "description": "Get space details by ID",
+      "method": "GET",
+      "path": "/spaces/{spaceId}",
+      "headers": {},
+      "queryParams": {
+        "access_token": "{accessToken}"
+      },
+      "urlTemplate": "https://cdn.contentful.com/spaces/{spaceId}"
+    }
+  ]
+}
+

@@ -1,0 +1,100 @@
+{
+  "id": "hacker-news",
+  "name": "Hacker News",
+  "icon": "📰",
+  "logoUrl": "https://cdn.simpleicons.org/ycombinator/FF6600",
+  "description": "Social news website focused on computer science and entrepreneurship",
+  "baseUrl": "http://hn.algolia.com/api/v1",
+  "color": {
+    "bg": "from-orange-100 to-yellow-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "",
+    "headerFormat": "",
+    "secretKey": "",
+    "note": "Public API - no authentication required"
+  },
+  "endpoints": [
+    {
+      "id": "get-article",
+      "name": "Get Article",
+      "description": "Get article/item by ID",
+      "method": "GET",
+      "path": "/items/{itemId}",
+      "headers": {},
+      "urlTemplate": "http://hn.algolia.com/api/v1/items/{itemId}"
+    },
+    {
+      "id": "search-articles",
+      "name": "Search Articles",
+      "description": "Search articles by query",
+      "method": "GET",
+      "path": "/search",
+      "headers": {},
+      "queryParams": {
+        "query": { "type": "string", "required": true, "description": "Search query" },
+        "tags": { "type": "string", "description": "Filter by tags (e.g., story, comment, author_username, story_123)" },
+        "numericFilters": { "type": "string", "description": "Numeric filters (e.g., points>100, created_at_i>1234567890)" },
+        "page": { "type": "integer", "default": 0, "description": "Page number" },
+        "hitsPerPage": { "type": "integer", "default": 20, "description": "Number of results per page" },
+        "restrictSearchableAttributes": { "type": "string", "description": "Restrict searchable attributes (comma-separated)" },
+        "attributesToRetrieve": { "type": "string", "description": "Attributes to retrieve (comma-separated)" },
+        "attributesToHighlight": { "type": "string", "description": "Attributes to highlight (comma-separated)" },
+        "minWordSizefor1Typo": { "type": "integer", "default": 4, "description": "Minimum word size for 1 typo" },
+        "minWordSizefor2Typos": { "type": "integer", "default": 8, "description": "Minimum word size for 2 typos" },
+        "typoTolerance": { "type": "boolean", "default": true, "description": "Enable typo tolerance" },
+        "allowTyposOnNumericTokens": { "type": "boolean", "default": true, "description": "Allow typos on numeric tokens" },
+        "ignorePlurals": { "type": "boolean", "default": false, "description": "Ignore plurals" },
+        "removeStopWords": { "type": "boolean", "default": false, "description": "Remove stop words" },
+        "getRankingInfo": { "type": "boolean", "default": false, "description": "Get ranking info" },
+        "aroundLatLng": { "type": "string", "description": "Geolocation (lat,lng)" },
+        "aroundRadius": { "type": "integer", "description": "Radius in meters" },
+        "filters": { "type": "string", "description": "Filters" }
+      },
+      "urlTemplate": "http://hn.algolia.com/api/v1/search"
+    },
+    {
+      "id": "search-articles-by-date",
+      "name": "Search Articles by Date",
+      "description": "Search articles by query and date",
+      "method": "GET",
+      "path": "/search_by_date",
+      "headers": {},
+      "queryParams": {
+        "query": { "type": "string", "required": true, "description": "Search query" },
+        "tags": { "type": "string", "description": "Filter by tags" },
+        "numericFilters": { "type": "string", "description": "Numeric filters" },
+        "page": { "type": "integer", "default": 0, "description": "Page number" },
+        "hitsPerPage": { "type": "integer", "default": 20, "description": "Number of results per page" },
+        "restrictSearchableAttributes": { "type": "string", "description": "Restrict searchable attributes" },
+        "attributesToRetrieve": { "type": "string", "description": "Attributes to retrieve" },
+        "attributesToHighlight": { "type": "string", "description": "Attributes to highlight" },
+        "minWordSizefor1Typo": { "type": "integer", "default": 4, "description": "Minimum word size for 1 typo" },
+        "minWordSizefor2Typos": { "type": "integer", "default": 8, "description": "Minimum word size for 2 typos" },
+        "typoTolerance": { "type": "boolean", "default": true, "description": "Enable typo tolerance" },
+        "allowTyposOnNumericTokens": { "type": "boolean", "default": true, "description": "Allow typos on numeric tokens" },
+        "ignorePlurals": { "type": "boolean", "default": false, "description": "Ignore plurals" },
+        "removeStopWords": { "type": "boolean", "default": false, "description": "Remove stop words" },
+        "getRankingInfo": { "type": "boolean", "default": false, "description": "Get ranking info" },
+        "aroundLatLng": { "type": "string", "description": "Geolocation" },
+        "aroundRadius": { "type": "integer", "description": "Radius in meters" },
+        "filters": { "type": "string", "description": "Filters" }
+      },
+      "urlTemplate": "http://hn.algolia.com/api/v1/search_by_date"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user information",
+      "method": "GET",
+      "path": "/users/{username}",
+      "headers": {},
+      "urlTemplate": "http://hn.algolia.com/api/v1/users/{username}"
+    }
+  ]
+}
+

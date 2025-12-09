@@ -1,0 +1,135 @@
+{
+  "id": "webflow",
+  "name": "Webflow",
+  "icon": "🌐",
+  "logoUrl": "https://cdn.simpleicons.org/webflow/4353FF",
+  "description": "No-code website builder and CMS",
+  "baseUrl": "https://api.webflow.com/v2",
+  "color": {
+    "bg": "from-indigo-100 to-blue-100",
+    "border": "border-indigo-500",
+    "icon": "text-indigo-700",
+    "handle": "bg-indigo-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "WEBFLOW_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "list-sites",
+      "name": "List Sites",
+      "description": "List all sites",
+      "method": "GET",
+      "path": "/sites",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 10, "description": "Number of sites to return" },
+        "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" }
+      },
+      "urlTemplate": "https://api.webflow.com/v2/sites"
+    },
+    {
+      "id": "get-site",
+      "name": "Get Site",
+      "description": "Get site details by ID",
+      "method": "GET",
+      "path": "/sites/{siteId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.webflow.com/v2/sites/{siteId}"
+    },
+    {
+      "id": "list-collection-items",
+      "name": "List Collection Items",
+      "description": "List items in a collection",
+      "method": "GET",
+      "path": "/collections/{collectionId}/items",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 100, "description": "Number of items to return" },
+        "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" }
+      },
+      "urlTemplate": "https://api.webflow.com/v2/collections/{collectionId}/items"
+    },
+    {
+      "id": "get-collection-item",
+      "name": "Get Collection Item",
+      "description": "Get a collection item by ID",
+      "method": "GET",
+      "path": "/collections/{collectionId}/items/{itemId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.webflow.com/v2/collections/{collectionId}/items/{itemId}"
+    },
+    {
+      "id": "create-collection-item",
+      "name": "Create Collection Item",
+      "description": "Create a new item in a collection",
+      "method": "POST",
+      "path": "/collections/{collectionId}/items",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "fieldData": {
+            "type": "object",
+            "description": "Field data (structure depends on collection schema)",
+            "additionalProperties": true
+          },
+          "isArchived": { "type": "boolean", "default": false, "description": "Archive status" },
+          "isDraft": { "type": "boolean", "default": false, "description": "Draft status" }
+        },
+        "required": ["fieldData"]
+      },
+      "urlTemplate": "https://api.webflow.com/v2/collections/{collectionId}/items"
+    },
+    {
+      "id": "update-collection-item",
+      "name": "Update Collection Item",
+      "description": "Update an existing collection item",
+      "method": "PATCH",
+      "path": "/collections/{collectionId}/items/{itemId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "fieldData": {
+            "type": "object",
+            "description": "Field data (structure depends on collection schema)",
+            "additionalProperties": true
+          },
+          "isArchived": { "type": "boolean", "description": "Archive status" },
+          "isDraft": { "type": "boolean", "description": "Draft status" }
+        }
+      },
+      "urlTemplate": "https://api.webflow.com/v2/collections/{collectionId}/items/{itemId}"
+    },
+    {
+      "id": "delete-collection-item",
+      "name": "Delete Collection Item",
+      "description": "Delete a collection item",
+      "method": "DELETE",
+      "path": "/collections/{collectionId}/items/{itemId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.webflow.com/v2/collections/{collectionId}/items/{itemId}"
+    }
+  ]
+}
+

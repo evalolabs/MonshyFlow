@@ -1,0 +1,758 @@
+{
+  "id": "quickbooks-online",
+  "name": "QuickBooks Online",
+  "icon": "💰",
+  "logoUrl": "https://cdn.simpleicons.org/quickbooks/0077C5",
+  "description": "Cloud-based accounting software",
+  "baseUrl": "https://quickbooks.api.intuit.com",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "tokenUrl": "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {accessToken}",
+    "secretKey": "QUICKBOOKS_CLIENT_SECRET",
+    "clientIdSecretKey": "QUICKBOOKS_CLIENT_ID",
+    "realmIdSecretKey": "QUICKBOOKS_REALM_ID"
+  },
+  "endpoints": [
+    {
+      "id": "create-bill",
+      "name": "Create Bill",
+      "description": "Create a new bill",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/bill",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "VendorRef": {
+            "type": "object",
+            "properties": {
+              "value": { "type": "string", "required": true }
+            },
+            "required": true
+          },
+          "Line": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Amount": { "type": "number", "required": true },
+                "DetailType": { "type": "string", "enum": ["ItemBasedExpenseLineDetail", "AccountBasedExpenseLineDetail"], "required": true },
+                "ItemRef": {
+                  "type": "object",
+                  "properties": {
+                    "value": { "type": "string", "required": true }
+                  }
+                },
+                "AccountRef": {
+                  "type": "object",
+                  "properties": {
+                    "value": { "type": "string", "required": true }
+                  }
+                }
+              },
+              "required": ["Amount", "DetailType"]
+            },
+            "required": true
+          },
+          "DueDate": { "type": "string", "format": "date", "description": "Due date" }
+        },
+        "required": ["VendorRef", "Line"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/bill"
+    },
+    {
+      "id": "get-bill",
+      "name": "Get Bill",
+      "description": "Get bill details by ID",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/bill/{billId}",
+      "headers": {},
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/bill/{billId}"
+    },
+    {
+      "id": "list-bills",
+      "name": "List Bills",
+      "description": "List all bills using query",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/query",
+      "headers": {},
+      "queryParams": {
+        "query": "SELECT * FROM Bill",
+        "minorversion": "65"
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/query?query=SELECT * FROM Bill"
+    },
+    {
+      "id": "update-bill",
+      "name": "Update Bill",
+      "description": "Update an existing bill",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/bill",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Id": { "type": "string", "required": true },
+          "SyncToken": { "type": "string", "required": true },
+          "Line": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Amount": { "type": "number", "required": true },
+                "DetailType": { "type": "string", "enum": ["ItemBasedExpenseLineDetail", "AccountBasedExpenseLineDetail"], "required": true }
+              }
+            }
+          }
+        },
+        "required": ["Id", "SyncToken"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/bill"
+    },
+    {
+      "id": "create-customer",
+      "name": "Create Customer",
+      "description": "Create a new customer",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/customer",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "DisplayName": { "type": "string", "required": true, "description": "Customer display name" },
+          "GivenName": { "type": "string", "description": "First name" },
+          "FamilyName": { "type": "string", "description": "Last name" },
+          "PrimaryEmailAddr": {
+            "type": "object",
+            "properties": {
+              "Address": { "type": "string", "format": "email", "required": true }
+            },
+            "required": true
+          },
+          "PrimaryPhone": {
+            "type": "object",
+            "properties": {
+              "FreeFormNumber": { "type": "string", "required": true }
+            }
+          },
+          "BillAddr": {
+            "type": "object",
+            "properties": {
+              "Line1": { "type": "string" },
+              "City": { "type": "string" },
+              "CountrySubDivisionCode": { "type": "string" },
+              "PostalCode": { "type": "string" },
+              "Country": { "type": "string" }
+            }
+          }
+        },
+        "required": ["DisplayName"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/customer"
+    },
+    {
+      "id": "get-customer",
+      "name": "Get Customer",
+      "description": "Get customer details by ID",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/customer/{customerId}",
+      "headers": {},
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/customer/{customerId}"
+    },
+    {
+      "id": "list-customers",
+      "name": "List Customers",
+      "description": "List all customers using query",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/query",
+      "headers": {},
+      "queryParams": {
+        "query": "SELECT * FROM Customer",
+        "minorversion": "65"
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/query?query=SELECT * FROM Customer"
+    },
+    {
+      "id": "update-customer",
+      "name": "Update Customer",
+      "description": "Update an existing customer",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/customer",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Id": { "type": "string", "required": true },
+          "SyncToken": { "type": "string", "required": true },
+          "DisplayName": { "type": "string", "description": "Customer display name" },
+          "PrimaryEmailAddr": {
+            "type": "object",
+            "properties": {
+              "Address": { "type": "string", "format": "email" }
+            }
+          }
+        },
+        "required": ["Id", "SyncToken"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/customer"
+    },
+    {
+      "id": "get-employee",
+      "name": "Get Employee",
+      "description": "Get employee details by ID",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/employee/{employeeId}",
+      "headers": {},
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/employee/{employeeId}"
+    },
+    {
+      "id": "list-employees",
+      "name": "List Employees",
+      "description": "List all employees using query",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/query",
+      "headers": {},
+      "queryParams": {
+        "query": "SELECT * FROM Employee",
+        "minorversion": "65"
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/query?query=SELECT * FROM Employee"
+    },
+    {
+      "id": "create-estimate",
+      "name": "Create Estimate",
+      "description": "Create a new estimate",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/estimate",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "CustomerRef": {
+            "type": "object",
+            "properties": {
+              "value": { "type": "string", "required": true }
+            },
+            "required": true
+          },
+          "Line": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Amount": { "type": "number", "required": true },
+                "DetailType": { "type": "string", "enum": ["SalesItemLineDetail"], "required": true },
+                "ItemRef": {
+                  "type": "object",
+                  "properties": {
+                    "value": { "type": "string", "required": true }
+                  },
+                  "required": true
+                }
+              },
+              "required": ["Amount", "DetailType", "ItemRef"]
+            },
+            "required": true
+          },
+          "TxnDate": { "type": "string", "format": "date", "description": "Transaction date" },
+          "ExpirationDate": { "type": "string", "format": "date", "description": "Expiration date" }
+        },
+        "required": ["CustomerRef", "Line"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/estimate"
+    },
+    {
+      "id": "get-estimate",
+      "name": "Get Estimate",
+      "description": "Get estimate details by ID",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/estimate/{estimateId}",
+      "headers": {},
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/estimate/{estimateId}"
+    },
+    {
+      "id": "list-estimates",
+      "name": "List Estimates",
+      "description": "List all estimates using query",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/query",
+      "headers": {},
+      "queryParams": {
+        "query": "SELECT * FROM Estimate",
+        "minorversion": "65"
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/query?query=SELECT * FROM Estimate"
+    },
+    {
+      "id": "update-estimate",
+      "name": "Update Estimate",
+      "description": "Update an existing estimate",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/estimate",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Id": { "type": "string", "required": true },
+          "SyncToken": { "type": "string", "required": true },
+          "Line": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Amount": { "type": "number", "required": true },
+                "DetailType": { "type": "string", "enum": ["SalesItemLineDetail"], "required": true }
+              }
+            }
+          }
+        },
+        "required": ["Id", "SyncToken"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/estimate"
+    },
+    {
+      "id": "create-invoice",
+      "name": "Create Invoice",
+      "description": "Create a new invoice",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/invoice",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "CustomerRef": {
+            "type": "object",
+            "properties": {
+              "value": { "type": "string", "required": true }
+            },
+            "required": true
+          },
+          "Line": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Amount": { "type": "number", "required": true },
+                "DetailType": { "type": "string", "enum": ["SalesItemLineDetail"], "required": true },
+                "ItemRef": {
+                  "type": "object",
+                  "properties": {
+                    "value": { "type": "string", "required": true }
+                  },
+                  "required": true
+                }
+              },
+              "required": ["Amount", "DetailType", "ItemRef"]
+            },
+            "required": true
+          },
+          "TxnDate": { "type": "string", "format": "date", "description": "Transaction date" },
+          "DueDate": { "type": "string", "format": "date", "description": "Due date" }
+        },
+        "required": ["CustomerRef", "Line"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/invoice"
+    },
+    {
+      "id": "get-invoice",
+      "name": "Get Invoice",
+      "description": "Get invoice details by ID",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/invoice/{invoiceId}",
+      "headers": {},
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/invoice/{invoiceId}"
+    },
+    {
+      "id": "list-invoices",
+      "name": "List Invoices",
+      "description": "List all invoices using query",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/query",
+      "headers": {},
+      "queryParams": {
+        "query": "SELECT * FROM Invoice",
+        "minorversion": "65"
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/query?query=SELECT * FROM Invoice"
+    },
+    {
+      "id": "update-invoice",
+      "name": "Update Invoice",
+      "description": "Update an existing invoice",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/invoice",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Id": { "type": "string", "required": true },
+          "SyncToken": { "type": "string", "required": true },
+          "Line": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Amount": { "type": "number", "required": true },
+                "DetailType": { "type": "string", "enum": ["SalesItemLineDetail"], "required": true }
+              }
+            }
+          }
+        },
+        "required": ["Id", "SyncToken"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/invoice"
+    },
+    {
+      "id": "create-item",
+      "name": "Create Item",
+      "description": "Create a new item",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/item",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Name": { "type": "string", "required": true, "description": "Item name" },
+          "Type": { "type": "string", "enum": ["Service", "Inventory", "NonInventory"], "default": "Service", "description": "Item type" },
+          "IncomeAccountRef": {
+            "type": "object",
+            "properties": {
+              "value": { "type": "string", "required": true }
+            },
+            "required": true
+          },
+          "UnitPrice": { "type": "number", "description": "Unit price" },
+          "QtyOnHand": { "type": "number", "description": "Quantity on hand (for Inventory items)" }
+        },
+        "required": ["Name", "IncomeAccountRef"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/item"
+    },
+    {
+      "id": "get-item",
+      "name": "Get Item",
+      "description": "Get item details by ID",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/item/{itemId}",
+      "headers": {},
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/item/{itemId}"
+    },
+    {
+      "id": "list-items",
+      "name": "List Items",
+      "description": "List all items using query",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/query",
+      "headers": {},
+      "queryParams": {
+        "query": "SELECT * FROM Item",
+        "minorversion": "65"
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/query?query=SELECT * FROM Item"
+    },
+    {
+      "id": "update-item",
+      "name": "Update Item",
+      "description": "Update an existing item",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/item",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Id": { "type": "string", "required": true },
+          "SyncToken": { "type": "string", "required": true },
+          "Name": { "type": "string", "description": "Item name" },
+          "UnitPrice": { "type": "number", "description": "Unit price" }
+        },
+        "required": ["Id", "SyncToken"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/item"
+    },
+    {
+      "id": "create-payment",
+      "name": "Create Payment",
+      "description": "Create a new payment",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/payment",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "CustomerRef": {
+            "type": "object",
+            "properties": {
+              "value": { "type": "string", "required": true }
+            },
+            "required": true
+          },
+          "TotalAmt": { "type": "number", "required": true, "description": "Total payment amount" },
+          "PaymentMethodRef": {
+            "type": "object",
+            "properties": {
+              "value": { "type": "string", "required": true }
+            }
+          },
+          "TxnDate": { "type": "string", "format": "date", "description": "Transaction date" }
+        },
+        "required": ["CustomerRef", "TotalAmt"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/payment"
+    },
+    {
+      "id": "get-payment",
+      "name": "Get Payment",
+      "description": "Get payment details by ID",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/payment/{paymentId}",
+      "headers": {},
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/payment/{paymentId}"
+    },
+    {
+      "id": "list-payments",
+      "name": "List Payments",
+      "description": "List all payments using query",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/query",
+      "headers": {},
+      "queryParams": {
+        "query": "SELECT * FROM Payment",
+        "minorversion": "65"
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/query?query=SELECT * FROM Payment"
+    },
+    {
+      "id": "update-payment",
+      "name": "Update Payment",
+      "description": "Update an existing payment",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/payment",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Id": { "type": "string", "required": true },
+          "SyncToken": { "type": "string", "required": true },
+          "TotalAmt": { "type": "number", "description": "Total payment amount" }
+        },
+        "required": ["Id", "SyncToken"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/payment"
+    },
+    {
+      "id": "create-purchase",
+      "name": "Create Purchase",
+      "description": "Create a new purchase",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/purchase",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "AccountRef": {
+            "type": "object",
+            "properties": {
+              "value": { "type": "string", "required": true }
+            },
+            "required": true
+          },
+          "Line": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Amount": { "type": "number", "required": true },
+                "DetailType": { "type": "string", "enum": ["AccountBasedExpenseLineDetail"], "required": true }
+              },
+              "required": ["Amount", "DetailType"]
+            },
+            "required": true
+          },
+          "TxnDate": { "type": "string", "format": "date", "description": "Transaction date" }
+        },
+        "required": ["AccountRef", "Line"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/purchase"
+    },
+    {
+      "id": "get-purchase",
+      "name": "Get Purchase",
+      "description": "Get purchase details by ID",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/purchase/{purchaseId}",
+      "headers": {},
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/purchase/{purchaseId}"
+    },
+    {
+      "id": "list-purchases",
+      "name": "List Purchases",
+      "description": "List all purchases using query",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/query",
+      "headers": {},
+      "queryParams": {
+        "query": "SELECT * FROM Purchase",
+        "minorversion": "65"
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/query?query=SELECT * FROM Purchase"
+    },
+    {
+      "id": "update-purchase",
+      "name": "Update Purchase",
+      "description": "Update an existing purchase",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/purchase",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Id": { "type": "string", "required": true },
+          "SyncToken": { "type": "string", "required": true },
+          "Line": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Amount": { "type": "number", "required": true },
+                "DetailType": { "type": "string", "enum": ["AccountBasedExpenseLineDetail"], "required": true }
+              }
+            }
+          }
+        },
+        "required": ["Id", "SyncToken"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/purchase"
+    },
+    {
+      "id": "get-transaction-list",
+      "name": "Get Transaction List",
+      "description": "Get transaction list report",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/reports/TransactionList",
+      "headers": {},
+      "queryParams": {
+        "start_date": "{startDate}",
+        "end_date": "{endDate}",
+        "minorversion": "65"
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/reports/TransactionList"
+    },
+    {
+      "id": "create-vendor",
+      "name": "Create Vendor",
+      "description": "Create a new vendor",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/vendor",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "DisplayName": { "type": "string", "required": true, "description": "Vendor display name" },
+          "GivenName": { "type": "string", "description": "First name" },
+          "FamilyName": { "type": "string", "description": "Last name" },
+          "PrimaryEmailAddr": {
+            "type": "object",
+            "properties": {
+              "Address": { "type": "string", "format": "email", "required": true }
+            }
+          },
+          "PrimaryPhone": {
+            "type": "object",
+            "properties": {
+              "FreeFormNumber": { "type": "string", "required": true }
+            }
+          }
+        },
+        "required": ["DisplayName"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/vendor"
+    },
+    {
+      "id": "get-vendor",
+      "name": "Get Vendor",
+      "description": "Get vendor details by ID",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/vendor/{vendorId}",
+      "headers": {},
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/vendor/{vendorId}"
+    },
+    {
+      "id": "list-vendors",
+      "name": "List Vendors",
+      "description": "List all vendors using query",
+      "method": "GET",
+      "path": "/v3/company/{companyId}/query",
+      "headers": {},
+      "queryParams": {
+        "query": "SELECT * FROM Vendor",
+        "minorversion": "65"
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/query?query=SELECT * FROM Vendor"
+    },
+    {
+      "id": "update-vendor",
+      "name": "Update Vendor",
+      "description": "Update an existing vendor",
+      "method": "POST",
+      "path": "/v3/company/{companyId}/vendor",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Id": { "type": "string", "required": true },
+          "SyncToken": { "type": "string", "required": true },
+          "DisplayName": { "type": "string", "description": "Vendor display name" },
+          "PrimaryEmailAddr": {
+            "type": "object",
+            "properties": {
+              "Address": { "type": "string", "format": "email" }
+            }
+          }
+        },
+        "required": ["Id", "SyncToken"]
+      },
+      "urlTemplate": "https://quickbooks.api.intuit.com/v3/company/{companyId}/vendor"
+    }
+  ]
+}
+

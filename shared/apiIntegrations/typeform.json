@@ -1,0 +1,250 @@
+{
+  "id": "typeform",
+  "name": "Typeform",
+  "icon": "📝",
+  "logoUrl": "https://cdn.simpleicons.org/typeform/262627",
+  "description": "Interactive form and survey builder",
+  "baseUrl": "https://api.typeform.com",
+  "color": {
+    "bg": "from-gray-100 to-slate-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "TYPEFORM_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-form",
+      "name": "Create Form",
+      "description": "Create a new form",
+      "method": "POST",
+      "path": "/forms",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Form title" },
+          "type": { "type": "string", "enum": ["form", "quiz"], "default": "form", "description": "Form type" },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "is_public": { "type": "boolean", "default": false, "description": "Public form" },
+              "show_progress_bar": { "type": "boolean", "default": true, "description": "Show progress bar" },
+              "show_typeform_branding": { "type": "boolean", "default": true, "description": "Show Typeform branding" },
+              "show_cookie_consent": { "type": "boolean", "default": false, "description": "Show cookie consent" },
+              "language": { "type": "string", "description": "Form language" }
+            }
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "required": true, "description": "Field type" },
+                "title": { "type": "string", "description": "Field title" },
+                "ref": { "type": "string", "description": "Field reference" },
+                "properties": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "validations": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "required": ["type"]
+            },
+            "description": "Form fields"
+          },
+          "theme": {
+            "type": "object",
+            "properties": {
+              "href": { "type": "string", "format": "uri", "description": "Theme URL" }
+            }
+          },
+          "workspace": {
+            "type": "object",
+            "properties": {
+              "href": { "type": "string", "format": "uri", "description": "Workspace URL" }
+            }
+          }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://api.typeform.com/forms"
+    },
+    {
+      "id": "get-form",
+      "name": "Get Form",
+      "description": "Get form details by ID",
+      "method": "GET",
+      "path": "/forms/{formId}",
+      "headers": {},
+      "urlTemplate": "https://api.typeform.com/forms/{formId}"
+    },
+    {
+      "id": "list-forms",
+      "name": "List Forms",
+      "description": "List all forms",
+      "method": "GET",
+      "path": "/forms",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "page_size": "10",
+        "search": "{search}",
+        "workspace_id": "{workspaceId}"
+      },
+      "urlTemplate": "https://api.typeform.com/forms"
+    },
+    {
+      "id": "update-form",
+      "name": "Update Form",
+      "description": "Update an existing form",
+      "method": "PATCH",
+      "path": "/forms/{formId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Form title" },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "is_public": { "type": "boolean", "description": "Public form" },
+              "show_progress_bar": { "type": "boolean", "description": "Show progress bar" },
+              "show_typeform_branding": { "type": "boolean", "description": "Show Typeform branding" },
+              "show_cookie_consent": { "type": "boolean", "description": "Show cookie consent" },
+              "language": { "type": "string", "description": "Form language" }
+            }
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.typeform.com/forms/{formId}"
+    },
+    {
+      "id": "delete-form",
+      "name": "Delete Form",
+      "description": "Delete a form",
+      "method": "DELETE",
+      "path": "/forms/{formId}",
+      "headers": {},
+      "urlTemplate": "https://api.typeform.com/forms/{formId}"
+    },
+    {
+      "id": "get-response",
+      "name": "Get Response",
+      "description": "Get form response details by ID",
+      "method": "GET",
+      "path": "/forms/{formId}/responses/{responseId}",
+      "headers": {},
+      "urlTemplate": "https://api.typeform.com/forms/{formId}/responses/{responseId}"
+    },
+    {
+      "id": "list-responses",
+      "name": "List Responses",
+      "description": "List all form responses",
+      "method": "GET",
+      "path": "/forms/{formId}/responses",
+      "headers": {},
+      "queryParams": {
+        "page_size": "25",
+        "since": "{since}",
+        "until": "{until}",
+        "after": "{after}",
+        "before": "{before}",
+        "included_response_ids": "{includedResponseIds}",
+        "completed": "{completed}",
+        "sort": "{sort}",
+        "query": "{query}"
+      },
+      "urlTemplate": "https://api.typeform.com/forms/{formId}/responses"
+    },
+    {
+      "id": "create-webhook",
+      "name": "Create Webhook",
+      "description": "Create a new webhook for form",
+      "method": "POST",
+      "path": "/forms/{formId}/webhooks",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "format": "uri", "required": true, "description": "Webhook URL" },
+          "enabled": { "type": "boolean", "default": true, "description": "Webhook enabled" },
+          "verify_ssl": { "type": "boolean", "default": true, "description": "Verify SSL certificate" },
+          "secret": { "type": "string", "description": "Webhook secret for signature verification" },
+          "tag": { "type": "string", "description": "Webhook tag/identifier" }
+        },
+        "required": ["url"]
+      },
+      "urlTemplate": "https://api.typeform.com/forms/{formId}/webhooks"
+    },
+    {
+      "id": "get-webhook",
+      "name": "Get Webhook",
+      "description": "Get webhook details by tag",
+      "method": "GET",
+      "path": "/forms/{formId}/webhooks/{tag}",
+      "headers": {},
+      "urlTemplate": "https://api.typeform.com/forms/{formId}/webhooks/{tag}"
+    },
+    {
+      "id": "list-webhooks",
+      "name": "List Webhooks",
+      "description": "List all webhooks for form",
+      "method": "GET",
+      "path": "/forms/{formId}/webhooks",
+      "headers": {},
+      "urlTemplate": "https://api.typeform.com/forms/{formId}/webhooks"
+    },
+    {
+      "id": "update-webhook",
+      "name": "Update Webhook",
+      "description": "Update an existing webhook",
+      "method": "PUT",
+      "path": "/forms/{formId}/webhooks/{tag}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "format": "uri", "description": "Webhook URL" },
+          "enabled": { "type": "boolean", "description": "Webhook enabled" },
+          "verify_ssl": { "type": "boolean", "description": "Verify SSL certificate" },
+          "secret": { "type": "string", "description": "Webhook secret" }
+        }
+      },
+      "urlTemplate": "https://api.typeform.com/forms/{formId}/webhooks/{tag}"
+    },
+    {
+      "id": "delete-webhook",
+      "name": "Delete Webhook",
+      "description": "Delete a webhook",
+      "method": "DELETE",
+      "path": "/forms/{formId}/webhooks/{tag}",
+      "headers": {},
+      "urlTemplate": "https://api.typeform.com/forms/{formId}/webhooks/{tag}"
+    }
+  ]
+}
+

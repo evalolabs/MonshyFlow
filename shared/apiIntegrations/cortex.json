@@ -1,0 +1,178 @@
+{
+  "id": "cortex",
+  "name": "Cortex",
+  "icon": "🔍",
+  "logoUrl": "https://cdn.simpleicons.org/cortex/000000",
+  "description": "Threat intelligence platform for security analysis",
+  "baseUrl": "https://{your-cortex-instance}/api",
+  "color": {
+    "bg": "from-purple-100 to-indigo-100",
+    "border": "border-purple-500",
+    "icon": "text-purple-700",
+    "handle": "bg-purple-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "CORTEX_API_KEY",
+    "note": "Base URL should be provided in baseUrl placeholder {your-cortex-instance} or as CORTEX_BASE_URL secret key."
+  },
+  "endpoints": [
+    {
+      "id": "get-analyzer",
+      "name": "Get Analyzer",
+      "description": "Get analyzer by ID",
+      "method": "GET",
+      "path": "/analyzer/{analyzerId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-cortex-instance}/api/analyzer/{analyzerId}"
+    },
+    {
+      "id": "list-analyzers",
+      "name": "List Analyzers",
+      "description": "List all analyzers",
+      "method": "GET",
+      "path": "/analyzer",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-cortex-instance}/api/analyzer"
+    },
+    {
+      "id": "run-analyzer",
+      "name": "Run Analyzer",
+      "description": "Run an analyzer on data",
+      "method": "POST",
+      "path": "/analyzer/{analyzerId}/run",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "required": true,
+            "description": "Data to analyze"
+          },
+          "dataType": {
+            "type": "string",
+            "required": true,
+            "description": "Data type (e.g., 'ip', 'domain', 'url', 'file', 'hash')"
+          },
+          "tlp": {
+            "type": "integer",
+            "enum": [0, 1, 2, "white", "green", "amber", "red"],
+            "description": "Traffic Light Protocol (0/white, 1/green, 2/amber, 3/red)"
+          },
+          "pap": {
+            "type": "integer",
+            "enum": [0, 1, 2, 3],
+            "description": "Permissible Actions Protocol (0=white, 1=green, 2=amber, 3=red)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Analyzer-specific parameters",
+            "additionalProperties": true
+          }
+        },
+        "required": ["data", "dataType"]
+      },
+      "urlTemplate": "https://{your-cortex-instance}/api/analyzer/{analyzerId}/run"
+    },
+    {
+      "id": "get-responder",
+      "name": "Get Responder",
+      "description": "Get responder by ID",
+      "method": "GET",
+      "path": "/responder/{responderId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-cortex-instance}/api/responder/{responderId}"
+    },
+    {
+      "id": "list-responders",
+      "name": "List Responders",
+      "description": "List all responders",
+      "method": "GET",
+      "path": "/responder",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-cortex-instance}/api/responder"
+    },
+    {
+      "id": "run-responder",
+      "name": "Run Responder",
+      "description": "Run a responder",
+      "method": "POST",
+      "path": "/responder/{responderId}/run",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "required": true,
+            "description": "Label"
+          },
+          "dataType": {
+            "type": "string",
+            "required": true,
+            "description": "Data type"
+          },
+          "data": {
+            "type": "string",
+            "required": true,
+            "description": "Data"
+          },
+          "tlp": {
+            "type": "integer",
+            "enum": [0, 1, 2, 3],
+            "description": "Traffic Light Protocol"
+          },
+          "pap": {
+            "type": "integer",
+            "enum": [0, 1, 2, 3],
+            "description": "Permissible Actions Protocol"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Responder-specific parameters",
+            "additionalProperties": true
+          }
+        },
+        "required": ["label", "dataType", "data"]
+      },
+      "urlTemplate": "https://{your-cortex-instance}/api/responder/{responderId}/run"
+    },
+    {
+      "id": "get-job",
+      "name": "Get Job",
+      "description": "Get job by ID",
+      "method": "GET",
+      "path": "/job/{jobId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-cortex-instance}/api/job/{jobId}"
+    }
+  ]
+}
+

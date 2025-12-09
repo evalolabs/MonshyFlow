@@ -1,0 +1,155 @@
+{
+  "id": "disqus",
+  "name": "Disqus",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/disqus/2E9FFF",
+  "description": "Commenting platform for websites",
+  "baseUrl": "https://disqus.com/api/3.0",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "secretKey": "DISQUS_API_KEY",
+    "queryParamName": "api_key",
+    "note": "API Key is sent as query parameter 'api_key'."
+  },
+  "endpoints": [
+    {
+      "id": "get-forum-details",
+      "name": "Get Forum Details",
+      "description": "Get forum details",
+      "method": "GET",
+      "path": "/forums/details.json",
+      "queryParams": {
+        "api_key": {
+          "type": "string",
+          "required": true,
+          "description": "API key"
+        },
+        "forum": {
+          "type": "string",
+          "required": true,
+          "description": "Forum shortname"
+        }
+      },
+      "urlTemplate": "https://disqus.com/api/3.0/forums/details.json"
+    },
+    {
+      "id": "list-forum-categories",
+      "name": "List Forum Categories",
+      "description": "List all categories for a forum",
+      "method": "GET",
+      "path": "/forums/listCategories.json",
+      "queryParams": {
+        "api_key": {
+          "type": "string",
+          "required": true,
+          "description": "API key"
+        },
+        "forum": {
+          "type": "string",
+          "required": true,
+          "description": "Forum shortname"
+        }
+      },
+      "urlTemplate": "https://disqus.com/api/3.0/forums/listCategories.json"
+    },
+    {
+      "id": "list-forum-threads",
+      "name": "List Forum Threads",
+      "description": "List all threads for a forum",
+      "method": "GET",
+      "path": "/forums/listThreads.json",
+      "queryParams": {
+        "api_key": {
+          "type": "string",
+          "required": true,
+          "description": "API key"
+        },
+        "forum": {
+          "type": "string",
+          "required": true,
+          "description": "Forum shortname"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 25,
+          "description": "Maximum number of results"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "Cursor for pagination"
+        },
+        "order": {
+          "type": "string",
+          "enum": ["asc", "desc"],
+          "default": "desc",
+          "description": "Sort order"
+        },
+        "since": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Filter threads since this date (ISO 8601)"
+        },
+        "related": {
+          "type": "string",
+          "description": "Related data to include (comma-separated)"
+        }
+      },
+      "urlTemplate": "https://disqus.com/api/3.0/forums/listThreads.json"
+    },
+    {
+      "id": "list-forum-posts",
+      "name": "List Forum Posts",
+      "description": "List all posts for a forum",
+      "method": "GET",
+      "path": "/forums/listPosts.json",
+      "queryParams": {
+        "api_key": {
+          "type": "string",
+          "required": true,
+          "description": "API key"
+        },
+        "forum": {
+          "type": "string",
+          "required": true,
+          "description": "Forum shortname"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 25,
+          "description": "Maximum number of results"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "Cursor for pagination"
+        },
+        "order": {
+          "type": "string",
+          "enum": ["asc", "desc"],
+          "default": "desc",
+          "description": "Sort order"
+        },
+        "since": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Filter posts since this date (ISO 8601)"
+        },
+        "related": {
+          "type": "string",
+          "description": "Related data to include (comma-separated)"
+        },
+        "thread": {
+          "type": "string",
+          "description": "Filter by thread ID"
+        }
+      },
+      "urlTemplate": "https://disqus.com/api/3.0/forums/listPosts.json"
+    }
+  ]
+}
+

@@ -1,0 +1,163 @@
+{
+  "id": "zoom",
+  "name": "Zoom",
+  "icon": "📹",
+  "logoUrl": "https://cdn.simpleicons.org/zoom/2D8CFF",
+  "description": "Video conferencing and webinars",
+  "baseUrl": "https://api.zoom.us/v2",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "ZOOM_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-meeting",
+      "name": "Create Meeting",
+      "description": "Create a new meeting",
+      "method": "POST",
+      "path": "/users/{userId}/meetings",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "topic": { "type": "string", "required": true, "description": "Meeting topic" },
+          "type": { "type": "number", "enum": [1, 2, 3, 8], "description": "Meeting type: 1=Instant, 2=Scheduled, 3=Recurring no fixed time, 8=Recurring fixed time", "default": 2 },
+          "start_time": { "type": "string", "format": "date-time", "description": "Meeting start time (ISO 8601)" },
+          "duration": { "type": "number", "description": "Meeting duration in minutes", "default": 30 },
+          "timezone": { "type": "string", "description": "Timezone (e.g., America/New_York)", "default": "UTC" },
+          "password": { "type": "string", "description": "Meeting password" },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "host_video": { "type": "boolean", "description": "Start with host video on", "default": false },
+              "participant_video": { "type": "boolean", "description": "Start with participant video on", "default": false },
+              "join_before_host": { "type": "boolean", "description": "Allow participants to join before host", "default": false },
+              "mute_upon_entry": { "type": "boolean", "description": "Mute participants upon entry", "default": false },
+              "waiting_room": { "type": "boolean", "description": "Enable waiting room", "default": false },
+              "approval_type": { "type": "number", "enum": [0, 1, 2], "description": "0=Automatically approve, 1=Manually approve, 2=No registration required" }
+            }
+          }
+        },
+        "required": ["topic"]
+      },
+      "urlTemplate": "https://api.zoom.us/v2/users/{userId}/meetings"
+    },
+    {
+      "id": "get-meeting",
+      "name": "Get Meeting",
+      "description": "Get meeting details by ID",
+      "method": "GET",
+      "path": "/meetings/{meetingId}",
+      "queryParams": {
+        "occurrence_id": "{occurrenceId}"
+      },
+      "urlTemplate": "https://api.zoom.us/v2/meetings/{meetingId}"
+    },
+    {
+      "id": "list-meetings",
+      "name": "List Meetings",
+      "description": "List meetings for a user",
+      "method": "GET",
+      "path": "/users/{userId}/meetings",
+      "queryParams": {
+        "type": "scheduled",
+        "page_size": "30",
+        "next_page_token": "{nextPageToken}"
+      },
+      "urlTemplate": "https://api.zoom.us/v2/users/{userId}/meetings"
+    },
+    {
+      "id": "update-meeting",
+      "name": "Update Meeting",
+      "description": "Update a meeting",
+      "method": "PATCH",
+      "path": "/meetings/{meetingId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "topic": { "type": "string", "description": "Meeting topic" },
+          "type": { "type": "number", "enum": [1, 2, 3, 8] },
+          "start_time": { "type": "string", "format": "date-time", "description": "Meeting start time" },
+          "duration": { "type": "number", "description": "Meeting duration in minutes" },
+          "timezone": { "type": "string", "description": "Timezone" },
+          "password": { "type": "string", "description": "Meeting password" },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "host_video": { "type": "boolean" },
+              "participant_video": { "type": "boolean" },
+              "join_before_host": { "type": "boolean" },
+              "mute_upon_entry": { "type": "boolean" },
+              "waiting_room": { "type": "boolean" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.zoom.us/v2/meetings/{meetingId}"
+    },
+    {
+      "id": "delete-meeting",
+      "name": "Delete Meeting",
+      "description": "Delete a meeting",
+      "method": "DELETE",
+      "path": "/meetings/{meetingId}",
+      "queryParams": {
+        "occurrence_id": "{occurrenceId}",
+        "schedule_for_reminder": "false",
+        "cancel_meeting_reminder": "false"
+      },
+      "urlTemplate": "https://api.zoom.us/v2/meetings/{meetingId}"
+    },
+    {
+      "id": "get-meeting-participants",
+      "name": "Get Meeting Participants",
+      "description": "Get participants from a past meeting",
+      "method": "GET",
+      "path": "/meetings/{meetingId}/participants",
+      "queryParams": {
+        "page_size": "30",
+        "next_page_token": "{nextPageToken}"
+      },
+      "urlTemplate": "https://api.zoom.us/v2/meetings/{meetingId}/participants"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user details by ID",
+      "method": "GET",
+      "path": "/users/{userId}",
+      "queryParams": {
+        "login_type": "0"
+      },
+      "urlTemplate": "https://api.zoom.us/v2/users/{userId}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/users",
+      "queryParams": {
+        "status": "active",
+        "page_size": "30",
+        "next_page_token": "{nextPageToken}",
+        "role_id": "{roleId}"
+      },
+      "urlTemplate": "https://api.zoom.us/v2/users"
+    }
+  ]
+}
+

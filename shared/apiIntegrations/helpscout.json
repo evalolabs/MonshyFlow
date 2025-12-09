@@ -1,0 +1,298 @@
+{
+  "id": "helpscout",
+  "name": "HelpScout",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/helpscout/1292EE",
+  "description": "Customer support and help desk platform",
+  "baseUrl": "https://api.helpscout.net",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "tokenUrl": "https://api.helpscout.net/v2/oauth2/token",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {accessToken}",
+    "secretKey": "HELPSCOUT_CLIENT_SECRET",
+    "clientIdSecretKey": "HELPSCOUT_CLIENT_ID"
+  },
+  "endpoints": [
+    {
+      "id": "create-conversation",
+      "name": "Create Conversation",
+      "description": "Create a new conversation",
+      "method": "POST",
+      "path": "/v2/conversations",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "required": true, "description": "Conversation subject" },
+          "type": { "type": "string", "enum": ["email", "chat", "phone", "twitter"], "default": "email", "description": "Conversation type" },
+          "mailboxId": { "type": "number", "required": true, "description": "Mailbox ID" },
+          "status": { "type": "string", "enum": ["active", "pending", "closed", "spam"], "default": "active", "description": "Conversation status" },
+          "assignTo": { "type": "number", "description": "User ID to assign to" },
+          "customer": {
+            "type": "object",
+            "properties": {
+              "email": { "type": "string", "format": "email", "required": true },
+              "firstName": { "type": "string" },
+              "lastName": { "type": "string" }
+            },
+            "required": ["email"]
+          },
+          "threads": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "enum": ["lineitem", "note", "message", "customer", "chat", "phone"], "required": true },
+                "body": { "type": "string", "required": true, "description": "Thread body" },
+                "status": { "type": "string", "enum": ["active", "pending", "closed", "spam"] }
+              },
+              "required": ["type", "body"]
+            },
+            "description": "Initial thread(s) for the conversation"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          }
+        },
+        "required": ["subject", "mailboxId", "customer"]
+      },
+      "urlTemplate": "https://api.helpscout.net/v2/conversations"
+    },
+    {
+      "id": "get-conversation",
+      "name": "Get Conversation",
+      "description": "Get conversation details by ID",
+      "method": "GET",
+      "path": "/v2/conversations/{conversationId}",
+      "headers": {},
+      "urlTemplate": "https://api.helpscout.net/v2/conversations/{conversationId}"
+    },
+    {
+      "id": "list-conversations",
+      "name": "List Conversations",
+      "description": "List all conversations",
+      "method": "GET",
+      "path": "/v2/conversations",
+      "headers": {},
+      "queryParams": {
+        "mailbox": "{mailboxId}",
+        "status": "{status}",
+        "assignee": "{assigneeId}",
+        "page": "1"
+      },
+      "urlTemplate": "https://api.helpscout.net/v2/conversations"
+    },
+    {
+      "id": "update-conversation",
+      "name": "Update Conversation",
+      "description": "Update an existing conversation",
+      "method": "PATCH",
+      "path": "/v2/conversations/{conversationId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "op": { "type": "string", "enum": ["replace", "add", "remove"], "default": "replace", "description": "Operation type" },
+          "path": { "type": "string", "required": true, "description": "JSON path (e.g., '/status', '/assignTo')" },
+          "value": {
+            "type": ["string", "number", "boolean", "array"],
+            "required": true,
+            "description": "New value"
+          }
+        },
+        "required": ["op", "path", "value"]
+      },
+      "urlTemplate": "https://api.helpscout.net/v2/conversations/{conversationId}"
+    },
+    {
+      "id": "delete-conversation",
+      "name": "Delete Conversation",
+      "description": "Delete a conversation",
+      "method": "DELETE",
+      "path": "/v2/conversations/{conversationId}",
+      "headers": {},
+      "urlTemplate": "https://api.helpscout.net/v2/conversations/{conversationId}"
+    },
+    {
+      "id": "create-customer",
+      "name": "Create Customer",
+      "description": "Create a new customer",
+      "method": "POST",
+      "path": "/v2/customers",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string", "description": "First name" },
+          "lastName": { "type": "string", "description": "Last name" },
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": { "type": "string", "format": "email", "required": true },
+                "type": { "type": "string", "enum": ["work", "home", "other"], "default": "work" }
+              },
+              "required": ["value"]
+            },
+            "required": true
+          },
+          "phones": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": { "type": "string", "required": true },
+                "type": { "type": "string", "enum": ["work", "home", "mobile", "fax", "pager", "other"], "default": "work" }
+              },
+              "required": ["value"]
+            }
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "city": { "type": "string" },
+              "state": { "type": "string" },
+              "postalCode": { "type": "string" },
+              "country": { "type": "string" },
+              "lines": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
+        "required": ["emails"]
+      },
+      "urlTemplate": "https://api.helpscout.net/v2/customers"
+    },
+    {
+      "id": "get-customer",
+      "name": "Get Customer",
+      "description": "Get customer details by ID",
+      "method": "GET",
+      "path": "/v2/customers/{customerId}",
+      "headers": {},
+      "urlTemplate": "https://api.helpscout.net/v2/customers/{customerId}"
+    },
+    {
+      "id": "list-customers",
+      "name": "List Customers",
+      "description": "List all customers",
+      "method": "GET",
+      "path": "/v2/customers",
+      "headers": {},
+      "queryParams": {
+        "email": "{email}",
+        "page": "1"
+      },
+      "urlTemplate": "https://api.helpscout.net/v2/customers"
+    },
+    {
+      "id": "update-customer",
+      "name": "Update Customer",
+      "description": "Update an existing customer",
+      "method": "PUT",
+      "path": "/v2/customers/{customerId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string", "description": "First name" },
+          "lastName": { "type": "string", "description": "Last name" },
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": { "type": "string", "format": "email", "required": true },
+                "type": { "type": "string", "enum": ["work", "home", "other"] }
+              }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.helpscout.net/v2/customers/{customerId}"
+    },
+    {
+      "id": "get-mailbox",
+      "name": "Get Mailbox",
+      "description": "Get mailbox details by ID",
+      "method": "GET",
+      "path": "/v2/mailboxes/{mailboxId}",
+      "headers": {},
+      "urlTemplate": "https://api.helpscout.net/v2/mailboxes/{mailboxId}"
+    },
+    {
+      "id": "list-mailboxes",
+      "name": "List Mailboxes",
+      "description": "List all mailboxes",
+      "method": "GET",
+      "path": "/v2/mailboxes",
+      "headers": {},
+      "urlTemplate": "https://api.helpscout.net/v2/mailboxes"
+    },
+    {
+      "id": "create-thread",
+      "name": "Create Thread",
+      "description": "Create a new thread in a conversation",
+      "method": "POST",
+      "path": "/v2/conversations/{conversationId}/threads",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["lineitem", "note", "message", "customer", "chat", "phone"], "required": true, "description": "Thread type" },
+          "body": { "type": "string", "required": true, "description": "Thread body" },
+          "status": { "type": "string", "enum": ["active", "pending", "closed", "spam"], "description": "Thread status" },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fileName": { "type": "string", "required": true },
+                "mimeType": { "type": "string", "required": true },
+                "data": { "type": "string", "required": true, "description": "Base64 encoded file data" }
+              },
+              "required": ["fileName", "mimeType", "data"]
+            }
+          }
+        },
+        "required": ["type", "body"]
+      },
+      "urlTemplate": "https://api.helpscout.net/v2/conversations/{conversationId}/threads"
+    },
+    {
+      "id": "list-threads",
+      "name": "List Threads",
+      "description": "List all threads in a conversation",
+      "method": "GET",
+      "path": "/v2/conversations/{conversationId}/threads",
+      "headers": {},
+      "queryParams": {
+        "page": "1"
+      },
+      "urlTemplate": "https://api.helpscout.net/v2/conversations/{conversationId}/threads"
+    }
+  ]
+}
+

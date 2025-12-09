@@ -1,0 +1,142 @@
+{
+  "id": "snowflake",
+  "name": "Snowflake",
+  "icon": "❄️",
+  "logoUrl": "https://cdn.simpleicons.org/snowflake/29B5E8",
+  "description": "Cloud data warehouse",
+  "baseUrl": "https://{account}.snowflakecomputing.com",
+  "color": {
+    "bg": "from-cyan-100 to-sky-100",
+    "border": "border-cyan-500",
+    "icon": "text-cyan-700",
+    "handle": "bg-cyan-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(username:password)}",
+    "secretKey": "SNOWFLAKE_PASSWORD",
+    "usernameSecretKey": "SNOWFLAKE_USERNAME",
+    "note": "Base URL should be provided as {account}.snowflakecomputing.com or as SNOWFLAKE_ACCOUNT secret key. Also requires SNOWFLAKE_DATABASE, SNOWFLAKE_SCHEMA, SNOWFLAKE_WAREHOUSE secret keys. Uses SQL queries over JDBC/ODBC connection. OAuth2 is also supported (SNOWFLAKE_OAUTH2_ACCESS_TOKEN)."
+  },
+  "endpoints": [
+    {
+      "id": "execute-query",
+      "name": "Execute Query",
+      "description": "Execute a SQL query",
+      "method": "POST",
+      "path": "/api/v2/statements",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "statement": {
+            "type": "string",
+            "required": true,
+            "description": "SQL query statement"
+          },
+          "warehouse": {
+            "type": "string",
+            "description": "Warehouse name"
+          },
+          "database": {
+            "type": "string",
+            "description": "Database name"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Schema name"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role name"
+          }
+        },
+        "required": ["statement"]
+      },
+      "urlTemplate": "https://{account}.snowflakecomputing.com/api/v2/statements"
+    },
+    {
+      "id": "insert-into-table",
+      "name": "Insert Into Table",
+      "description": "Insert data into a table",
+      "method": "POST",
+      "path": "/api/v2/statements",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "statement": {
+            "type": "string",
+            "required": true,
+            "description": "INSERT INTO {table} ... SQL statement"
+          },
+          "warehouse": {
+            "type": "string",
+            "description": "Warehouse name"
+          },
+          "database": {
+            "type": "string",
+            "description": "Database name"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Schema name"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role name"
+          }
+        },
+        "required": ["statement"]
+      },
+      "urlTemplate": "https://{account}.snowflakecomputing.com/api/v2/statements"
+    },
+    {
+      "id": "update-table",
+      "name": "Update Table",
+      "description": "Update data in a table",
+      "method": "POST",
+      "path": "/api/v2/statements",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "statement": {
+            "type": "string",
+            "required": true,
+            "description": "UPDATE {table} ... SQL statement"
+          },
+          "warehouse": {
+            "type": "string",
+            "description": "Warehouse name"
+          },
+          "database": {
+            "type": "string",
+            "description": "Database name"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Schema name"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role name"
+          }
+        },
+        "required": ["statement"]
+      },
+      "urlTemplate": "https://{account}.snowflakecomputing.com/api/v2/statements"
+    }
+  ]
+}
+

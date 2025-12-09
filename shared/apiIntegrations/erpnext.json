@@ -1,0 +1,99 @@
+{
+  "id": "erpnext",
+  "name": "ERPNext",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/erpnext/000000",
+  "description": "Open-source ERP system",
+  "baseUrl": "https://{your-erpnext-instance}",
+  "color": {
+    "bg": "from-gray-100 to-slate-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "ERPNEXT_API_SECRET",
+    "usernameSecretKey": "ERPNEXT_API_KEY",
+    "note": "Base URL should be provided in baseUrl placeholder {your-erpnext-instance} or as ERPNEXT_BASE_URL secret key. Basic Auth uses API Key as username and API Secret as password. Format: Basic base64(apiKey:apiSecret)"
+  },
+  "endpoints": [
+    {
+      "id": "create-document",
+      "name": "Create Document",
+      "description": "Create a new document of a specific DocType",
+      "method": "POST",
+      "path": "/api/resource/{docType}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Document data (fields depend on DocType, e.g., 'Customer', 'Sales Order', 'Invoice', etc.)",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-erpnext-instance}/api/resource/{docType}"
+    },
+    {
+      "id": "get-document",
+      "name": "Get Document",
+      "description": "Get document by DocType and name",
+      "method": "GET",
+      "path": "/api/resource/{docType}/{name}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-erpnext-instance}/api/resource/{docType}/{name}"
+    },
+    {
+      "id": "list-documents",
+      "name": "List Documents",
+      "description": "List all documents of a specific DocType",
+      "method": "GET",
+      "path": "/api/resource/{docType}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "fields": { "type": "string", "description": "Comma-separated list of fields to return" },
+        "filters": { "type": "string", "description": "JSON string of filters (e.g., '[{\"Customer\":\"ABC Ltd\"}]')" },
+        "limit_start": { "type": "integer", "default": 0, "description": "Start index for pagination" },
+        "limit_page_length": { "type": "integer", "default": 20, "description": "Number of results per page" },
+        "order_by": { "type": "string", "description": "Order by field (e.g., 'creation desc')" }
+      },
+      "urlTemplate": "https://{your-erpnext-instance}/api/resource/{docType}"
+    },
+    {
+      "id": "update-document",
+      "name": "Update Document",
+      "description": "Update a document",
+      "method": "PUT",
+      "path": "/api/resource/{docType}/{name}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Document data to update (fields depend on DocType)",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-erpnext-instance}/api/resource/{docType}/{name}"
+    },
+    {
+      "id": "delete-document",
+      "name": "Delete Document",
+      "description": "Delete a document",
+      "method": "DELETE",
+      "path": "/api/resource/{docType}/{name}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-erpnext-instance}/api/resource/{docType}/{name}"
+    }
+  ]
+}
+

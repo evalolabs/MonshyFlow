@@ -1,0 +1,164 @@
+{
+  "id": "pushbullet",
+  "name": "Pushbullet",
+  "icon": "📱",
+  "logoUrl": "https://cdn.simpleicons.org/pushbullet/000000",
+  "description": "Push notifications and file sharing service",
+  "baseUrl": "https://api.pushbullet.com/v2",
+  "color": {
+    "bg": "from-zinc-100 to-gray-100",
+    "border": "border-zinc-500",
+    "icon": "text-zinc-700",
+    "handle": "bg-zinc-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "PUSHBULLET_OAUTH2_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-push",
+      "name": "Create Push",
+      "description": "Send a push notification",
+      "method": "POST",
+      "path": "/pushes",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["note", "link", "file"],
+            "required": true,
+            "description": "Push type"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title (for note and link types)"
+          },
+          "body": {
+            "type": "string",
+            "description": "Body text (for note and link types)"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL (for link type)"
+          },
+          "file_name": {
+            "type": "string",
+            "description": "File name (for file type)"
+          },
+          "file_type": {
+            "type": "string",
+            "description": "File MIME type (for file type)"
+          },
+          "file_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "File URL (for file type)"
+          },
+          "device_iden": {
+            "type": "string",
+            "description": "Device identifier (optional, sends to all devices if omitted)"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address (optional, sends to specific user if omitted)"
+          },
+          "channel_tag": {
+            "type": "string",
+            "description": "Channel tag (optional, sends to channel if specified)"
+          },
+          "client_iden": {
+            "type": "string",
+            "description": "Client identifier"
+          }
+        },
+        "required": ["type"]
+      },
+      "urlTemplate": "https://api.pushbullet.com/v2/pushes"
+    },
+    {
+      "id": "get-push",
+      "name": "Get Push",
+      "description": "Get push by ID",
+      "method": "GET",
+      "path": "/pushes/{pushId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.pushbullet.com/v2/pushes/{pushId}"
+    },
+    {
+      "id": "list-pushes",
+      "name": "List Pushes",
+      "description": "List all pushes",
+      "method": "GET",
+      "path": "/pushes",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "modified_after": {
+          "type": "number",
+          "description": "Unix timestamp (filter pushes modified after this time)"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "Cursor for pagination"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 100,
+          "description": "Number of results"
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Filter by active status"
+        }
+      },
+      "urlTemplate": "https://api.pushbullet.com/v2/pushes"
+    },
+    {
+      "id": "update-push",
+      "name": "Update Push",
+      "description": "Update a push (mark as dismissed)",
+      "method": "POST",
+      "path": "/pushes/{pushId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dismissed": {
+            "type": "boolean",
+            "default": true,
+            "description": "Mark push as dismissed"
+          }
+        }
+      },
+      "urlTemplate": "https://api.pushbullet.com/v2/pushes/{pushId}"
+    },
+    {
+      "id": "delete-push",
+      "name": "Delete Push",
+      "description": "Delete a push",
+      "method": "DELETE",
+      "path": "/pushes/{pushId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.pushbullet.com/v2/pushes/{pushId}"
+    }
+  ]
+}
+

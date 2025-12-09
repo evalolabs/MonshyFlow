@@ -1,0 +1,533 @@
+{
+  "id": "freshworks-crm",
+  "name": "Freshworks CRM",
+  "icon": "💼",
+  "logoUrl": "https://cdn.simpleicons.org/freshworks/7A7A7A",
+  "description": "CRM and sales management platform",
+  "baseUrl": "https://{domain}.myfreshworks.com/crm/sales/api",
+  "color": {
+    "bg": "from-gray-100 to-zinc-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Token token={apiKey}",
+    "secretKey": "FRESHWORKS_CRM_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-account",
+      "name": "Create Account",
+      "description": "Create a new sales account",
+      "method": "POST",
+      "path": "/sales_accounts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Account name" },
+          "address": { "type": "string", "description": "Address" },
+          "city": { "type": "string", "description": "City" },
+          "state": { "type": "string", "description": "State" },
+          "zipcode": { "type": "string", "description": "Zip code" },
+          "country": { "type": "string", "description": "Country" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "website": { "type": "string", "format": "uri", "description": "Website URL" },
+          "owner_id": { "type": "number", "description": "Owner user ID" },
+          "custom_field": {
+            "type": "object",
+            "description": "Custom field values",
+            "additionalProperties": true
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/sales_accounts"
+    },
+    {
+      "id": "get-account",
+      "name": "Get Account",
+      "description": "Get account details by ID",
+      "method": "GET",
+      "path": "/sales_accounts/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/sales_accounts/{id}"
+    },
+    {
+      "id": "list-accounts",
+      "name": "List Accounts",
+      "description": "List all sales accounts",
+      "method": "GET",
+      "path": "/sales_accounts",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "25"
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/sales_accounts"
+    },
+    {
+      "id": "update-account",
+      "name": "Update Account",
+      "description": "Update an existing account",
+      "method": "PUT",
+      "path": "/sales_accounts/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "name": { "type": "string", "description": "Account name" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "website": { "type": "string", "format": "uri", "description": "Website URL" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/sales_accounts/{id}"
+    },
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/contacts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "first_name": { "type": "string", "required": true, "description": "First name" },
+          "last_name": { "type": "string", "required": true, "description": "Last name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "mobile": { "type": "string", "description": "Mobile number" },
+          "address": { "type": "string", "description": "Address" },
+          "city": { "type": "string", "description": "City" },
+          "state": { "type": "string", "description": "State" },
+          "zipcode": { "type": "string", "description": "Zip code" },
+          "country": { "type": "string", "description": "Country" },
+          "sales_account_id": { "type": "number", "description": "Associated sales account ID" },
+          "owner_id": { "type": "number", "description": "Owner user ID" },
+          "custom_field": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["first_name", "last_name"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact details by ID",
+      "method": "GET",
+      "path": "/contacts/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/contacts/{id}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/contacts",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "25"
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update an existing contact",
+      "method": "PUT",
+      "path": "/contacts/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "first_name": { "type": "string", "description": "First name" },
+          "last_name": { "type": "string", "description": "Last name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/contacts/{id}"
+    },
+    {
+      "id": "create-deal",
+      "name": "Create Deal",
+      "description": "Create a new deal",
+      "method": "POST",
+      "path": "/deals",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Deal name" },
+          "amount": { "type": "number", "description": "Deal amount" },
+          "currency": { "type": "string", "default": "USD", "description": "Currency code" },
+          "sales_account_id": { "type": "number", "description": "Associated sales account ID" },
+          "contact_id": { "type": "number", "description": "Associated contact ID" },
+          "owner_id": { "type": "number", "description": "Owner user ID" },
+          "stage_id": { "type": "number", "description": "Deal stage ID" },
+          "expected_close_date": { "type": "string", "format": "date", "description": "Expected close date" },
+          "custom_field": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/deals"
+    },
+    {
+      "id": "get-deal",
+      "name": "Get Deal",
+      "description": "Get deal details by ID",
+      "method": "GET",
+      "path": "/deals/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/deals/{id}"
+    },
+    {
+      "id": "list-deals",
+      "name": "List Deals",
+      "description": "List all deals",
+      "method": "GET",
+      "path": "/deals",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "25"
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/deals"
+    },
+    {
+      "id": "update-deal",
+      "name": "Update Deal",
+      "description": "Update an existing deal",
+      "method": "PUT",
+      "path": "/deals/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "name": { "type": "string", "description": "Deal name" },
+          "amount": { "type": "number", "description": "Deal amount" },
+          "stage_id": { "type": "number", "description": "Deal stage ID" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/deals/{id}"
+    },
+    {
+      "id": "create-appointment",
+      "name": "Create Appointment",
+      "description": "Create a new appointment",
+      "method": "POST",
+      "path": "/appointments",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Appointment title" },
+          "start_time": { "type": "string", "format": "date-time", "required": true, "description": "Start time" },
+          "end_time": { "type": "string", "format": "date-time", "description": "End time" },
+          "owner_id": { "type": "number", "description": "Owner user ID" },
+          "contact_id": { "type": "number", "description": "Associated contact ID" },
+          "sales_account_id": { "type": "number", "description": "Associated sales account ID" },
+          "location": { "type": "string", "description": "Location" },
+          "notes": { "type": "string", "description": "Notes" }
+        },
+        "required": ["title", "start_time"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/appointments"
+    },
+    {
+      "id": "get-appointment",
+      "name": "Get Appointment",
+      "description": "Get appointment details by ID",
+      "method": "GET",
+      "path": "/appointments/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/appointments/{id}"
+    },
+    {
+      "id": "list-appointments",
+      "name": "List Appointments",
+      "description": "List all appointments",
+      "method": "GET",
+      "path": "/appointments",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "25"
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/appointments"
+    },
+    {
+      "id": "update-appointment",
+      "name": "Update Appointment",
+      "description": "Update an existing appointment",
+      "method": "PUT",
+      "path": "/appointments/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "title": { "type": "string", "description": "Appointment title" },
+          "start_time": { "type": "string", "format": "date-time", "description": "Start time" },
+          "end_time": { "type": "string", "format": "date-time", "description": "End time" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/appointments/{id}"
+    },
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new task",
+      "method": "POST",
+      "path": "/tasks",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Task title" },
+          "due_date": { "type": "string", "format": "date-time", "description": "Due date" },
+          "owner_id": { "type": "number", "description": "Owner user ID" },
+          "contact_id": { "type": "number", "description": "Associated contact ID" },
+          "sales_account_id": { "type": "number", "description": "Associated sales account ID" },
+          "deal_id": { "type": "number", "description": "Associated deal ID" },
+          "status": { "type": "string", "enum": ["open", "completed"], "default": "open", "description": "Task status" },
+          "notes": { "type": "string", "description": "Task notes" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/tasks"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get task details by ID",
+      "method": "GET",
+      "path": "/tasks/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/tasks/{id}"
+    },
+    {
+      "id": "list-tasks",
+      "name": "List Tasks",
+      "description": "List all tasks",
+      "method": "GET",
+      "path": "/tasks",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "25"
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/tasks"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update an existing task",
+      "method": "PUT",
+      "path": "/tasks/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "title": { "type": "string", "description": "Task title" },
+          "status": { "type": "string", "enum": ["open", "completed"], "description": "Task status" },
+          "due_date": { "type": "string", "format": "date-time", "description": "Due date" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/tasks/{id}"
+    },
+    {
+      "id": "create-note",
+      "name": "Create Note",
+      "description": "Create a new note",
+      "method": "POST",
+      "path": "/notes",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "content": { "type": "string", "required": true, "description": "Note content" },
+          "targetable_type": { "type": "string", "enum": ["SalesAccount", "Contact", "Deal"], "required": true, "description": "Target type" },
+          "targetable_id": { "type": "number", "required": true, "description": "Target ID" },
+          "owner_id": { "type": "number", "description": "Owner user ID" }
+        },
+        "required": ["content", "targetable_type", "targetable_id"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/notes"
+    },
+    {
+      "id": "get-note",
+      "name": "Get Note",
+      "description": "Get note details by ID",
+      "method": "GET",
+      "path": "/notes/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/notes/{id}"
+    },
+    {
+      "id": "list-notes",
+      "name": "List Notes",
+      "description": "List all notes",
+      "method": "GET",
+      "path": "/notes",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "25"
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/notes"
+    },
+    {
+      "id": "update-note",
+      "name": "Update Note",
+      "description": "Update an existing note",
+      "method": "PUT",
+      "path": "/notes/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "content": { "type": "string", "description": "Note content" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/notes/{id}"
+    },
+    {
+      "id": "create-sales-activity",
+      "name": "Create Sales Activity",
+      "description": "Create a new sales activity",
+      "method": "POST",
+      "path": "/sales_activities",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["call", "meeting", "email", "task"], "required": true, "description": "Activity type" },
+          "title": { "type": "string", "required": true, "description": "Activity title" },
+          "owner_id": { "type": "number", "description": "Owner user ID" },
+          "contact_id": { "type": "number", "description": "Associated contact ID" },
+          "sales_account_id": { "type": "number", "description": "Associated sales account ID" },
+          "deal_id": { "type": "number", "description": "Associated deal ID" },
+          "notes": { "type": "string", "description": "Activity notes" }
+        },
+        "required": ["type", "title"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/sales_activities"
+    },
+    {
+      "id": "get-sales-activity",
+      "name": "Get Sales Activity",
+      "description": "Get sales activity details by ID",
+      "method": "GET",
+      "path": "/sales_activities/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/sales_activities/{id}"
+    },
+    {
+      "id": "list-sales-activities",
+      "name": "List Sales Activities",
+      "description": "List all sales activities",
+      "method": "GET",
+      "path": "/sales_activities",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "25"
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/sales_activities"
+    },
+    {
+      "id": "update-sales-activity",
+      "name": "Update Sales Activity",
+      "description": "Update an existing sales activity",
+      "method": "PUT",
+      "path": "/sales_activities/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "title": { "type": "string", "description": "Activity title" },
+          "notes": { "type": "string", "description": "Activity notes" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/sales_activities/{id}"
+    },
+    {
+      "id": "search",
+      "name": "Search",
+      "description": "Search across multiple resources",
+      "method": "POST",
+      "path": "/search",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "required": true, "description": "Search query" },
+          "entity_types": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["SalesAccount", "Contact", "Deal", "Task", "Appointment"] },
+            "description": "Entity types to search"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://{domain}.myfreshworks.com/crm/sales/api/search"
+    }
+  ]
+}
+

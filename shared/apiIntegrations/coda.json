@@ -1,0 +1,380 @@
+{
+  "id": "coda",
+  "name": "Coda",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/coda/EE4C4C",
+  "description": "Document collaboration platform",
+  "baseUrl": "https://coda.io/apis/v1",
+  "color": {
+    "bg": "from-red-100 to-pink-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "CODA_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-row",
+      "name": "Create Row",
+      "description": "Create a new row in a table",
+      "method": "POST",
+      "path": "/docs/{docId}/tables/{tableId}/rows",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "type": "object",
+            "properties": {
+              "cells": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "column": { "type": "string", "description": "Column ID or name" },
+                    "value": { "type": ["string", "number", "boolean", "object"], "description": "Cell value" }
+                  },
+                  "required": ["column", "value"]
+                },
+                "description": "Array of cell objects"
+              }
+            },
+            "required": ["cells"]
+          },
+          "disableParsing": { "type": "boolean", "default": false, "description": "Disable automatic parsing" }
+        },
+        "required": ["row"]
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/rows"
+    },
+    {
+      "id": "upsert-rows",
+      "name": "Upsert Rows",
+      "description": "Create or update rows in a table",
+      "method": "POST",
+      "path": "/docs/{docId}/tables/{tableId}/rows",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "disableParsing": { "type": "boolean", "default": false, "description": "Disable automatic parsing" },
+        "keyColumns": { "type": "string", "description": "Comma-separated list of column IDs to use as keys" }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cells": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "column": { "type": "string", "description": "Column ID or name" },
+                      "value": { "type": ["string", "number", "boolean", "object"], "description": "Cell value" }
+                    },
+                    "required": ["column", "value"]
+                  }
+                }
+              },
+              "required": ["cells"]
+            },
+            "required": true
+          }
+        },
+        "required": ["rows"]
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/rows"
+    },
+    {
+      "id": "get-row",
+      "name": "Get Row",
+      "description": "Get a row by ID",
+      "method": "GET",
+      "path": "/docs/{docId}/tables/{tableId}/rows/{rowId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "useColumnNames": { "type": "boolean", "default": false, "description": "Use column names instead of IDs" },
+        "valueFormat": { "type": "string", "enum": ["simple", "rich"], "default": "simple", "description": "Value format" }
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/rows/{rowId}"
+    },
+    {
+      "id": "list-rows",
+      "name": "List Rows",
+      "description": "List all rows in a table",
+      "method": "GET",
+      "path": "/docs/{docId}/tables/{tableId}/rows",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "useColumnNames": { "type": "boolean", "default": false, "description": "Use column names instead of IDs" },
+        "valueFormat": { "type": "string", "enum": ["simple", "rich"], "default": "simple", "description": "Value format" },
+        "sortBy": { "type": "string", "description": "Column ID or name to sort by" },
+        "visibleOnly": { "type": "boolean", "default": false, "description": "Only return visible rows" },
+        "query": { "type": "string", "description": "Query string to filter rows" },
+        "limit": { "type": "integer", "default": 100, "description": "Maximum number of rows to return" },
+        "pageToken": { "type": "string", "description": "Token for pagination" }
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/rows"
+    },
+    {
+      "id": "delete-row",
+      "name": "Delete Row",
+      "description": "Delete a row",
+      "method": "DELETE",
+      "path": "/docs/{docId}/tables/{tableId}/rows/{rowId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/rows/{rowId}"
+    },
+    {
+      "id": "push-button",
+      "name": "Push Button",
+      "description": "Trigger a button in a row",
+      "method": "POST",
+      "path": "/docs/{docId}/tables/{tableId}/rows/{rowId}/buttons/{buttonId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "parameters": {
+            "type": "object",
+            "description": "Button parameters",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/rows/{rowId}/buttons/{buttonId}"
+    },
+    {
+      "id": "get-column",
+      "name": "Get Column",
+      "description": "Get a column by ID",
+      "method": "GET",
+      "path": "/docs/{docId}/tables/{tableId}/columns/{columnId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/columns/{columnId}"
+    },
+    {
+      "id": "list-columns",
+      "name": "List Columns",
+      "description": "List all columns in a table",
+      "method": "GET",
+      "path": "/docs/{docId}/tables/{tableId}/columns",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "visibleOnly": { "type": "boolean", "default": false, "description": "Only return visible columns" }
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/columns"
+    },
+    {
+      "id": "get-view",
+      "name": "Get View",
+      "description": "Get a view by ID",
+      "method": "GET",
+      "path": "/docs/{docId}/tables/{tableId}/views/{viewId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/views/{viewId}"
+    },
+    {
+      "id": "list-views",
+      "name": "List Views",
+      "description": "List all views in a table",
+      "method": "GET",
+      "path": "/docs/{docId}/tables/{tableId}/views",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/views"
+    },
+    {
+      "id": "get-view-row",
+      "name": "Get View Row",
+      "description": "Get a row from a view",
+      "method": "GET",
+      "path": "/docs/{docId}/tables/{tableId}/views/{viewId}/rows/{rowId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "useColumnNames": { "type": "boolean", "default": false, "description": "Use column names instead of IDs" },
+        "valueFormat": { "type": "string", "enum": ["simple", "rich"], "default": "simple", "description": "Value format" }
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/views/{viewId}/rows/{rowId}"
+    },
+    {
+      "id": "list-view-rows",
+      "name": "List View Rows",
+      "description": "List all rows in a view",
+      "method": "GET",
+      "path": "/docs/{docId}/tables/{tableId}/views/{viewId}/rows",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "useColumnNames": { "type": "boolean", "default": false, "description": "Use column names instead of IDs" },
+        "valueFormat": { "type": "string", "enum": ["simple", "rich"], "default": "simple", "description": "Value format" },
+        "sortBy": { "type": "string", "description": "Column ID or name to sort by" },
+        "visibleOnly": { "type": "boolean", "default": false, "description": "Only return visible rows" },
+        "query": { "type": "string", "description": "Query string to filter rows" },
+        "limit": { "type": "integer", "default": 100, "description": "Maximum number of rows to return" },
+        "pageToken": { "type": "string", "description": "Token for pagination" }
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/views/{viewId}/rows"
+    },
+    {
+      "id": "update-view-row",
+      "name": "Update View Row",
+      "description": "Update a row in a view",
+      "method": "PUT",
+      "path": "/docs/{docId}/tables/{tableId}/views/{viewId}/rows/{rowId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "type": "object",
+            "properties": {
+              "cells": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "column": { "type": "string", "description": "Column ID or name" },
+                    "value": { "type": ["string", "number", "boolean", "object"], "description": "Cell value" }
+                  },
+                  "required": ["column", "value"]
+                }
+              }
+            },
+            "required": ["cells"]
+          },
+          "disableParsing": { "type": "boolean", "default": false, "description": "Disable automatic parsing" }
+        },
+        "required": ["row"]
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/views/{viewId}/rows/{rowId}"
+    },
+    {
+      "id": "delete-view-row",
+      "name": "Delete View Row",
+      "description": "Delete a row from a view",
+      "method": "DELETE",
+      "path": "/docs/{docId}/tables/{tableId}/views/{viewId}/rows/{rowId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/views/{viewId}/rows/{rowId}"
+    },
+    {
+      "id": "push-view-button",
+      "name": "Push View Button",
+      "description": "Trigger a button in a view row",
+      "method": "POST",
+      "path": "/docs/{docId}/tables/{tableId}/views/{viewId}/rows/{rowId}/buttons/{buttonId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "parameters": {
+            "type": "object",
+            "description": "Button parameters",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/views/{viewId}/rows/{rowId}/buttons/{buttonId}"
+    },
+    {
+      "id": "get-view-columns",
+      "name": "Get View Columns",
+      "description": "List all columns in a view",
+      "method": "GET",
+      "path": "/docs/{docId}/tables/{tableId}/views/{viewId}/columns",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "visibleOnly": { "type": "boolean", "default": false, "description": "Only return visible columns" }
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/tables/{tableId}/views/{viewId}/columns"
+    },
+    {
+      "id": "get-formula",
+      "name": "Get Formula",
+      "description": "Get a formula by ID",
+      "method": "GET",
+      "path": "/docs/{docId}/formulas/{formulaId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/formulas/{formulaId}"
+    },
+    {
+      "id": "list-formulas",
+      "name": "List Formulas",
+      "description": "List all formulas in a document",
+      "method": "GET",
+      "path": "/docs/{docId}/formulas",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/formulas"
+    },
+    {
+      "id": "get-control",
+      "name": "Get Control",
+      "description": "Get a control by ID",
+      "method": "GET",
+      "path": "/docs/{docId}/controls/{controlId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/controls/{controlId}"
+    },
+    {
+      "id": "list-controls",
+      "name": "List Controls",
+      "description": "List all controls in a document",
+      "method": "GET",
+      "path": "/docs/{docId}/controls",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://coda.io/apis/v1/docs/{docId}/controls"
+    }
+  ]
+}
+

@@ -1,0 +1,462 @@
+{
+  "id": "grafana",
+  "name": "Grafana",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/grafana/F46800",
+  "description": "Analytics and monitoring platform",
+  "baseUrl": "https://{host}",
+  "color": {
+    "bg": "from-orange-100 to-red-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GRAFANA_API_KEY",
+    "note": "Host should be provided in baseUrl placeholder {host} or as GRAFANA_BASE_URL secret key."
+  },
+  "endpoints": [
+    {
+      "id": "create-dashboard",
+      "name": "Create Dashboard",
+      "description": "Create a new dashboard",
+      "method": "POST",
+      "path": "/api/dashboards/db",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dashboard": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string", "required": true, "description": "Dashboard title" },
+              "uid": { "type": "string", "description": "Dashboard UID" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Dashboard tags"
+              },
+              "timezone": { "type": "string", "default": "browser", "description": "Timezone" },
+              "schemaVersion": { "type": "integer", "default": 16, "description": "Schema version" },
+              "version": { "type": "integer", "default": 0, "description": "Dashboard version" },
+              "refresh": { "type": "string", "description": "Refresh interval" },
+              "panels": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "Panel configuration",
+                  "additionalProperties": true
+                },
+                "description": "Dashboard panels"
+              },
+              "templating": {
+                "type": "object",
+                "properties": {
+                  "list": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "description": "Template variable",
+                      "additionalProperties": true
+                    }
+                  }
+                },
+                "description": "Template variables"
+              },
+              "annotations": {
+                "type": "object",
+                "properties": {
+                  "list": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "description": "Annotation",
+                      "additionalProperties": true
+                    }
+                  }
+                },
+                "description": "Annotations"
+              },
+              "time": {
+                "type": "object",
+                "properties": {
+                  "from": { "type": "string", "description": "From time" },
+                  "to": { "type": "string", "description": "To time" }
+                },
+                "description": "Time range"
+              },
+              "timepicker": {
+                "type": "object",
+                "description": "Time picker settings",
+                "additionalProperties": true
+              },
+              "editable": { "type": "boolean", "default": true, "description": "Editable" },
+              "graphTooltip": { "type": "integer", "default": 0, "description": "Graph tooltip" },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "Dashboard link",
+                  "additionalProperties": true
+                }
+              },
+              "description": { "type": "string", "description": "Dashboard description" }
+            },
+            "required": ["title"]
+          },
+          "overwrite": { "type": "boolean", "default": false, "description": "Overwrite existing dashboard" },
+          "folderId": { "type": "integer", "description": "Folder ID" },
+          "folderUid": { "type": "string", "description": "Folder UID" },
+          "message": { "type": "string", "description": "Commit message" }
+        },
+        "required": ["dashboard"]
+      },
+      "urlTemplate": "https://{host}/api/dashboards/db"
+    },
+    {
+      "id": "get-dashboard",
+      "name": "Get Dashboard",
+      "description": "Get dashboard by UID",
+      "method": "GET",
+      "path": "/api/dashboards/uid/{uid}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/dashboards/uid/{uid}"
+    },
+    {
+      "id": "list-dashboards",
+      "name": "List Dashboards",
+      "description": "List all dashboards",
+      "method": "GET",
+      "path": "/api/search",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "type": "dash-db",
+        "query": { "type": "string", "description": "Search query" },
+        "tag": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Filter by tags"
+        },
+        "starred": { "type": "boolean", "description": "Show only starred" },
+        "limit": { "type": "integer", "default": 1000, "description": "Maximum number of results" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://{host}/api/search?type=dash-db"
+    },
+    {
+      "id": "update-dashboard",
+      "name": "Update Dashboard",
+      "description": "Update an existing dashboard",
+      "method": "PUT",
+      "path": "/api/dashboards/db",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dashboard": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "description": "Dashboard ID" },
+              "uid": { "type": "string", "description": "Dashboard UID" },
+              "title": { "type": "string", "description": "Dashboard title" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "timezone": { "type": "string", "description": "Timezone" },
+              "schemaVersion": { "type": "integer", "description": "Schema version" },
+              "version": { "type": "integer", "description": "Dashboard version" },
+              "refresh": { "type": "string", "description": "Refresh interval" },
+              "panels": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "templating": {
+                "type": "object",
+                "properties": {
+                  "list": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              },
+              "annotations": {
+                "type": "object",
+                "properties": {
+                  "list": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              },
+              "time": {
+                "type": "object",
+                "properties": {
+                  "from": { "type": "string" },
+                  "to": { "type": "string" }
+                }
+              },
+              "timepicker": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "editable": { "type": "boolean" },
+              "graphTooltip": { "type": "integer" },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "description": { "type": "string" }
+            }
+          },
+          "overwrite": { "type": "boolean", "description": "Overwrite existing dashboard" },
+          "folderId": { "type": "integer", "description": "Folder ID" },
+          "folderUid": { "type": "string", "description": "Folder UID" },
+          "message": { "type": "string", "description": "Commit message" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/dashboards/db"
+    },
+    {
+      "id": "delete-dashboard",
+      "name": "Delete Dashboard",
+      "description": "Delete a dashboard",
+      "method": "DELETE",
+      "path": "/api/dashboards/uid/{uid}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/dashboards/uid/{uid}"
+    },
+    {
+      "id": "create-team",
+      "name": "Create Team",
+      "description": "Create a new team",
+      "method": "POST",
+      "path": "/api/teams",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Team name" },
+          "email": { "type": "string", "format": "email", "description": "Team email" },
+          "orgId": { "type": "integer", "description": "Organization ID" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{host}/api/teams"
+    },
+    {
+      "id": "get-team",
+      "name": "Get Team",
+      "description": "Get team by ID",
+      "method": "GET",
+      "path": "/api/teams/{teamId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/teams/{teamId}"
+    },
+    {
+      "id": "list-teams",
+      "name": "List Teams",
+      "description": "List all teams",
+      "method": "GET",
+      "path": "/api/teams/search",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "query": { "type": "string", "description": "Search query" },
+        "perpage": { "type": "integer", "default": 1000, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://{host}/api/teams/search"
+    },
+    {
+      "id": "update-team",
+      "name": "Update Team",
+      "description": "Update an existing team",
+      "method": "PUT",
+      "path": "/api/teams/{teamId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Team name" },
+          "email": { "type": "string", "format": "email", "description": "Team email" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/teams/{teamId}"
+    },
+    {
+      "id": "delete-team",
+      "name": "Delete Team",
+      "description": "Delete a team",
+      "method": "DELETE",
+      "path": "/api/teams/{teamId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/teams/{teamId}"
+    },
+    {
+      "id": "add-team-member",
+      "name": "Add Team Member",
+      "description": "Add a member to a team",
+      "method": "POST",
+      "path": "/api/teams/{teamId}/members",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "userId": { "type": "integer", "required": true, "description": "User ID" }
+        },
+        "required": ["userId"]
+      },
+      "urlTemplate": "https://{host}/api/teams/{teamId}/members"
+    },
+    {
+      "id": "list-team-members",
+      "name": "List Team Members",
+      "description": "List all members of a team",
+      "method": "GET",
+      "path": "/api/teams/{teamId}/members",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/teams/{teamId}/members"
+    },
+    {
+      "id": "remove-team-member",
+      "name": "Remove Team Member",
+      "description": "Remove a member from a team",
+      "method": "DELETE",
+      "path": "/api/teams/{teamId}/members/{userId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/teams/{teamId}/members/{userId}"
+    },
+    {
+      "id": "create-user",
+      "name": "Create User",
+      "description": "Create a new user (admin only)",
+      "method": "POST",
+      "path": "/api/admin/users",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "User name" },
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "login": { "type": "string", "description": "Login username" },
+          "password": { "type": "string", "required": true, "description": "Password" },
+          "orgId": { "type": "integer", "description": "Organization ID" },
+          "isAdmin": { "type": "boolean", "default": false, "description": "Is admin" },
+          "isDisabled": { "type": "boolean", "default": false, "description": "Is disabled" }
+        },
+        "required": ["name", "email", "password"]
+      },
+      "urlTemplate": "https://{host}/api/admin/users"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user by ID",
+      "method": "GET",
+      "path": "/api/users/{userId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/users/{userId}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/api/users/search",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "query": { "type": "string", "description": "Search query" },
+        "perpage": { "type": "integer", "default": 1000, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://{host}/api/users/search"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update an existing user",
+      "method": "PUT",
+      "path": "/api/users/{userId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "User name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "login": { "type": "string", "description": "Login username" },
+          "isAdmin": { "type": "boolean", "description": "Is admin" },
+          "isDisabled": { "type": "boolean", "description": "Is disabled" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/users/{userId}"
+    },
+    {
+      "id": "delete-user",
+      "name": "Delete User",
+      "description": "Delete a user (admin only)",
+      "method": "DELETE",
+      "path": "/api/admin/users/{userId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/admin/users/{userId}"
+    }
+  ]
+}
+

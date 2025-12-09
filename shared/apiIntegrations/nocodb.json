@@ -1,0 +1,108 @@
+{
+  "id": "nocodb",
+  "name": "NocoDB",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/nocodb/000000",
+  "description": "Open-source Airtable alternative",
+  "baseUrl": "https://{host}",
+  "color": {
+    "bg": "from-cyan-100 to-indigo-100",
+    "border": "border-cyan-500",
+    "icon": "text-cyan-700",
+    "handle": "bg-cyan-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "xc-token",
+    "headerFormat": "{apiKey}",
+    "secretKey": "NOCODB_API_TOKEN",
+    "note": "Base URL should be provided in baseUrl placeholder {host} or as NOCODB_HOST secret key. Supports API Token (xc-token header) or User Token (xc-auth header). Supports v1 (Before v0.90.0), v2 (v0.90.0 Onwards), v3 (v0.200.0 Onwards)."
+  },
+  "endpoints": [
+    {
+      "id": "create-record",
+      "name": "Create Record",
+      "description": "Create a new record (row)",
+      "method": "POST",
+      "path": "/api/v1/db/{projectId}/tables/{tableId}/records",
+      "headers": {
+        "Content-Type": "application/json",
+        "xc-token": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Record data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{host}/api/v1/db/{projectId}/tables/{tableId}/records"
+    },
+    {
+      "id": "get-record",
+      "name": "Get Record",
+      "description": "Get record by ID",
+      "method": "GET",
+      "path": "/api/v1/db/{projectId}/tables/{tableId}/records/{recordId}",
+      "headers": {
+        "xc-token": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v1/db/{projectId}/tables/{tableId}/records/{recordId}"
+    },
+    {
+      "id": "list-records",
+      "name": "List Records",
+      "description": "List all records",
+      "method": "GET",
+      "path": "/api/v1/db/{projectId}/tables/{tableId}/records",
+      "headers": {
+        "xc-token": "{apiKey}"
+      },
+      "queryParams": {
+        "where": {
+          "type": "string",
+          "description": "Filter conditions"
+        },
+        "sort": {
+          "type": "string",
+          "description": "Sort order"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "description": "Offset for pagination"
+        }
+      },
+      "urlTemplate": "https://{host}/api/v1/db/{projectId}/tables/{tableId}/records"
+    },
+    {
+      "id": "update-record",
+      "name": "Update Record",
+      "description": "Update a record",
+      "method": "PATCH",
+      "path": "/api/v1/db/{projectId}/tables/{tableId}/records/{recordId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "xc-token": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Record data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{host}/api/v1/db/{projectId}/tables/{tableId}/records/{recordId}"
+    },
+    {
+      "id": "delete-record",
+      "name": "Delete Record",
+      "description": "Delete a record",
+      "method": "DELETE",
+      "path": "/api/v1/db/{projectId}/tables/{tableId}/records/{recordId}",
+      "headers": {
+        "xc-token": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v1/db/{projectId}/tables/{tableId}/records/{recordId}"
+    }
+  ]
+}

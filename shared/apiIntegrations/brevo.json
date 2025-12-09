@@ -1,0 +1,371 @@
+{
+  "id": "brevo",
+  "name": "Brevo (Sendinblue)",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/brevo/0695C2",
+  "description": "Email marketing and transactional email platform",
+  "baseUrl": "https://api.brevo.com/v3",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "api-key",
+    "headerFormat": "{apiKey}",
+    "secretKey": "BREVO_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/contacts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "attributes": {
+            "type": "object",
+            "properties": {
+              "FIRSTNAME": { "type": "string", "description": "First name" },
+              "LASTNAME": { "type": "string", "description": "Last name" },
+              "SMS": { "type": "string", "description": "Phone number" },
+              "COMPANY": { "type": "string", "description": "Company name" }
+            },
+            "description": "Contact attributes"
+          },
+          "listIds": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "List IDs to add contact to"
+          },
+          "updateEnabled": { "type": "boolean", "default": true, "description": "Update existing contact if email exists" },
+          "emailBlacklisted": { "type": "boolean", "default": false, "description": "Blacklist email" },
+          "smsBlacklisted": { "type": "boolean", "default": false, "description": "Blacklist SMS" }
+        },
+        "required": ["email"]
+      },
+      "urlTemplate": "https://api.brevo.com/v3/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact details by identifier (email or ID)",
+      "method": "GET",
+      "path": "/contacts/{identifier}",
+      "headers": {},
+      "urlTemplate": "https://api.brevo.com/v3/contacts/{identifier}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/contacts",
+      "headers": {},
+      "queryParams": {
+        "limit": "50",
+        "offset": "0",
+        "modifiedSince": "{modifiedSince}",
+        "sort": "desc"
+      },
+      "urlTemplate": "https://api.brevo.com/v3/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update an existing contact",
+      "method": "PUT",
+      "path": "/contacts/{identifier}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "attributes": {
+            "type": "object",
+            "properties": {
+              "FIRSTNAME": { "type": "string", "description": "First name" },
+              "LASTNAME": { "type": "string", "description": "Last name" },
+              "SMS": { "type": "string", "description": "Phone number" },
+              "COMPANY": { "type": "string", "description": "Company name" }
+            }
+          },
+          "emailBlacklisted": { "type": "boolean", "description": "Blacklist email" },
+          "smsBlacklisted": { "type": "boolean", "description": "Blacklist SMS" },
+          "listIds": {
+            "type": "array",
+            "items": { "type": "number" }
+          },
+          "unlinkListIds": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "List IDs to remove contact from"
+          }
+        }
+      },
+      "urlTemplate": "https://api.brevo.com/v3/contacts/{identifier}"
+    },
+    {
+      "id": "delete-contact",
+      "name": "Delete Contact",
+      "description": "Delete a contact",
+      "method": "DELETE",
+      "path": "/contacts/{identifier}",
+      "headers": {},
+      "urlTemplate": "https://api.brevo.com/v3/contacts/{identifier}"
+    },
+    {
+      "id": "create-contact-attribute",
+      "name": "Create Contact Attribute",
+      "description": "Create a new contact attribute",
+      "method": "POST",
+      "path": "/contacts/attributes/{attributeCategory}/{attributeName}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["text", "date", "float", "boolean"], "required": true, "description": "Attribute type" },
+          "value": {
+            "type": ["string", "number", "boolean"],
+            "description": "Default value"
+          }
+        },
+        "required": ["type"]
+      },
+      "urlTemplate": "https://api.brevo.com/v3/contacts/attributes/{attributeCategory}/{attributeName}"
+    },
+    {
+      "id": "get-contact-attribute",
+      "name": "Get Contact Attribute",
+      "description": "Get contact attribute details",
+      "method": "GET",
+      "path": "/contacts/attributes/{attributeCategory}/{attributeName}",
+      "headers": {},
+      "urlTemplate": "https://api.brevo.com/v3/contacts/attributes/{attributeCategory}/{attributeName}"
+    },
+    {
+      "id": "list-contact-attributes",
+      "name": "List Contact Attributes",
+      "description": "List all contact attributes",
+      "method": "GET",
+      "path": "/contacts/attributes",
+      "headers": {},
+      "queryParams": {
+        "type": "{type}"
+      },
+      "urlTemplate": "https://api.brevo.com/v3/contacts/attributes"
+    },
+    {
+      "id": "send-email",
+      "name": "Send Email",
+      "description": "Send a transactional email",
+      "method": "POST",
+      "path": "/smtp/email",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "sender": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Sender name" },
+              "email": { "type": "string", "format": "email", "required": true }
+            },
+            "required": ["email"]
+          },
+          "to": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email", "required": true },
+                "name": { "type": "string" }
+              },
+              "required": ["email"]
+            },
+            "required": true
+          },
+          "cc": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email", "required": true },
+                "name": { "type": "string" }
+              }
+            }
+          },
+          "bcc": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email", "required": true },
+                "name": { "type": "string" }
+              }
+            }
+          },
+          "subject": { "type": "string", "required": true, "description": "Email subject" },
+          "htmlContent": { "type": "string", "description": "HTML email body" },
+          "textContent": { "type": "string", "description": "Plain text email body" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags for tracking"
+          },
+          "params": {
+            "type": "object",
+            "description": "Parameters for template variables",
+            "additionalProperties": true
+          },
+          "attachment": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "required": true },
+                "content": { "type": "string", "required": true, "description": "Base64 encoded file content" }
+              },
+              "required": ["name", "content"]
+            }
+          }
+        },
+        "required": ["sender", "to", "subject"]
+      },
+      "urlTemplate": "https://api.brevo.com/v3/smtp/email"
+    },
+    {
+      "id": "send-template-email",
+      "name": "Send Template Email",
+      "description": "Send an email using a template",
+      "method": "POST",
+      "path": "/smtp/templates/{templateId}/send",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email", "required": true },
+                "name": { "type": "string" }
+              },
+              "required": ["email"]
+            },
+            "required": true
+          },
+          "cc": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email", "required": true }
+              }
+            }
+          },
+          "bcc": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email", "required": true }
+              }
+            }
+          },
+          "params": {
+            "type": "object",
+            "description": "Template parameters",
+            "additionalProperties": true
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["to"]
+      },
+      "urlTemplate": "https://api.brevo.com/v3/smtp/templates/{templateId}/send"
+    },
+    {
+      "id": "create-sender",
+      "name": "Create Sender",
+      "description": "Create a new sender identity",
+      "method": "POST",
+      "path": "/senders",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Sender name" },
+          "email": { "type": "string", "format": "email", "required": true, "description": "Sender email" },
+          "ips": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "IP addresses"
+          }
+        },
+        "required": ["email"]
+      },
+      "urlTemplate": "https://api.brevo.com/v3/senders"
+    },
+    {
+      "id": "get-sender",
+      "name": "Get Sender",
+      "description": "Get sender details by ID",
+      "method": "GET",
+      "path": "/senders/{senderId}",
+      "headers": {},
+      "urlTemplate": "https://api.brevo.com/v3/senders/{senderId}"
+    },
+    {
+      "id": "list-senders",
+      "name": "List Senders",
+      "description": "List all sender identities",
+      "method": "GET",
+      "path": "/senders",
+      "headers": {},
+      "urlTemplate": "https://api.brevo.com/v3/senders"
+    },
+    {
+      "id": "update-sender",
+      "name": "Update Sender",
+      "description": "Update an existing sender",
+      "method": "PUT",
+      "path": "/senders/{senderId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Sender name" },
+          "ips": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "urlTemplate": "https://api.brevo.com/v3/senders/{senderId}"
+    }
+  ]
+}
+

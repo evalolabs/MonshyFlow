@@ -1,0 +1,127 @@
+{
+  "id": "mocean",
+  "name": "Mocean",
+  "icon": "📞",
+  "logoUrl": "https://cdn.simpleicons.org/mocean/000000",
+  "description": "SMS and voice messaging service",
+  "baseUrl": "https://rest.moceanapi.com/rest/2",
+  "color": {
+    "bg": "from-slate-100 to-zinc-100",
+    "border": "border-slate-500",
+    "icon": "text-slate-700",
+    "handle": "bg-slate-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "MOCEAN_API_SECRET",
+    "usernameSecretKey": "MOCEAN_API_KEY",
+    "note": "Basic Auth uses API Key as username and API Secret as password. Format: Basic base64(apiKey:apiSecret)"
+  },
+  "endpoints": [
+    {
+      "id": "send-sms",
+      "name": "Send SMS",
+      "description": "Send an SMS message",
+      "method": "POST",
+      "path": "/sms",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "mocean-to": {
+            "type": "string",
+            "required": true,
+            "description": "Recipient phone number (E.164 format, e.g., +60123456789)"
+          },
+          "mocean-text": {
+            "type": "string",
+            "required": true,
+            "description": "Message text"
+          },
+          "mocean-from": {
+            "type": "string",
+            "description": "Sender ID or phone number (alphanumeric or E.164 format)"
+          },
+          "mocean-dlr-mask": {
+            "type": "integer",
+            "description": "Delivery report mask (bitmask)"
+          },
+          "mocean-dlr-url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Delivery report callback URL"
+          },
+          "mocean-udh": {
+            "type": "string",
+            "description": "User Data Header (hex)"
+          },
+          "mocean-coding": {
+            "type": "integer",
+            "enum": [0, 1, 2],
+            "default": 0,
+            "description": "Message encoding (0=GSM 7-bit, 1=8-bit, 2=UCS-2)"
+          },
+          "mocean-validity": {
+            "type": "integer",
+            "description": "Validity period in minutes"
+          },
+          "mocean-schedule": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Schedule delivery time (ISO 8601)"
+          }
+        },
+        "required": ["mocean-to", "mocean-text"]
+      },
+      "urlTemplate": "https://rest.moceanapi.com/rest/2/sms"
+    },
+    {
+      "id": "send-voice",
+      "name": "Send Voice Call",
+      "description": "Send a voice call",
+      "method": "POST",
+      "path": "/voice/dial",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "mocean-to": {
+            "type": "string",
+            "required": true,
+            "description": "Recipient phone number (E.164 format)"
+          },
+          "mocean-command": {
+            "type": "string",
+            "required": true,
+            "description": "Voice command (e.g., 'say', 'play', 'dial')"
+          },
+          "mocean-from": {
+            "type": "string",
+            "description": "Caller ID or phone number"
+          },
+          "mocean-event-url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Event callback URL"
+          },
+          "mocean-voice-params": {
+            "type": "object",
+            "description": "Voice parameters (language, voice, speed, etc.)",
+            "additionalProperties": true
+          }
+        },
+        "required": ["mocean-to", "mocean-command"]
+      },
+      "urlTemplate": "https://rest.moceanapi.com/rest/2/voice/dial"
+    }
+  ]
+}
+

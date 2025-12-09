@@ -1,0 +1,275 @@
+{
+  "id": "vonage",
+  "name": "Vonage (Nexmo)",
+  "icon": "📞",
+  "logoUrl": "https://cdn.simpleicons.org/vonage/FF0000",
+  "description": "Cloud communications platform for SMS, voice, and video",
+  "baseUrl": "https://rest.nexmo.com",
+  "color": {
+    "bg": "from-red-100 to-pink-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "VONAGE_API_SECRET",
+    "emailSecretKey": "VONAGE_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "send-sms",
+      "name": "Send SMS",
+      "description": "Send an SMS message",
+      "method": "POST",
+      "path": "/sms/json",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API Key" },
+          "api_secret": { "type": "string", "required": true, "description": "API Secret" },
+          "to": { "type": "string", "required": true, "description": "Recipient phone number (E.164 format)" },
+          "from": { "type": "string", "required": true, "description": "Sender ID or phone number" },
+          "text": { "type": "string", "required": true, "description": "Message text" },
+          "type": { "type": "string", "enum": ["text", "unicode", "binary"], "default": "text", "description": "Message type" },
+          "ttl": { "type": "number", "description": "Time to live in milliseconds" },
+          "status-report-req": { "type": "number", "enum": [0, 1], "default": 0, "description": "Request delivery receipt (0=no, 1=yes)" },
+          "callback": { "type": "string", "format": "uri", "description": "Callback URL for delivery receipt" },
+          "client-ref": { "type": "string", "description": "Client reference ID" },
+          "vcard": { "type": "string", "description": "vCard data" },
+          "vcal": { "type": "string", "description": "vCal data" }
+        },
+        "required": ["api_key", "api_secret", "to", "from", "text"]
+      },
+      "urlTemplate": "https://rest.nexmo.com/sms/json"
+    },
+    {
+      "id": "send-unicode-sms",
+      "name": "Send Unicode SMS",
+      "description": "Send an SMS with Unicode characters",
+      "method": "POST",
+      "path": "/sms/json",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true },
+          "api_secret": { "type": "string", "required": true },
+          "to": { "type": "string", "required": true },
+          "from": { "type": "string", "required": true },
+          "text": { "type": "string", "required": true },
+          "type": { "type": "string", "enum": ["unicode"], "default": "unicode", "required": true },
+          "status-report-req": { "type": "number", "enum": [0, 1], "default": 0 },
+          "callback": { "type": "string", "format": "uri" }
+        },
+        "required": ["api_key", "api_secret", "to", "from", "text", "type"]
+      },
+      "urlTemplate": "https://rest.nexmo.com/sms/json"
+    },
+    {
+      "id": "make-voice-call",
+      "name": "Make Voice Call",
+      "description": "Make a voice call",
+      "method": "POST",
+      "path": "/v1/calls",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {jwt}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "enum": ["phone"], "default": "phone" },
+                "number": { "type": "string", "required": true, "description": "Phone number" }
+              },
+              "required": true
+            },
+            "required": true
+          },
+          "from": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["phone"], "default": "phone" },
+              "number": { "type": "string", "required": true, "description": "Caller ID" }
+            },
+            "required": true
+          },
+          "answer_url": {
+            "type": "array",
+            "items": { "type": "string", "format": "uri" },
+            "required": true,
+            "description": "Answer webhook URLs"
+          },
+          "event_url": {
+            "type": "array",
+            "items": { "type": "string", "format": "uri" }
+          },
+          "answer_method": { "type": "string", "enum": ["GET", "POST"], "default": "POST" },
+          "event_method": { "type": "string", "enum": ["GET", "POST"], "default": "POST" },
+          "machine_detection": { "type": "string", "enum": ["continue", "hangup"], "description": "Machine detection behavior" },
+          "length_timer": { "type": "number", "description": "Maximum call length in seconds" },
+          "ringing_timer": { "type": "number", "description": "Ringing timeout in seconds" }
+        },
+        "required": ["to", "from", "answer_url"]
+      },
+      "urlTemplate": "https://api.nexmo.com/v1/calls"
+    },
+    {
+      "id": "get-call",
+      "name": "Get Call",
+      "description": "Get call details by ID",
+      "method": "GET",
+      "path": "/v1/calls/{uuid}",
+      "headers": {
+        "Authorization": "Bearer {jwt}"
+      },
+      "urlTemplate": "https://api.nexmo.com/v1/calls/{uuid}"
+    },
+    {
+      "id": "list-calls",
+      "name": "List Calls",
+      "description": "List calls",
+      "method": "GET",
+      "path": "/v1/calls",
+      "headers": {
+        "Authorization": "Bearer {jwt}"
+      },
+      "queryParams": {
+        "page_size": "10",
+        "record_index": "0",
+        "status": "{status}",
+        "date_start": "{dateStart}",
+        "date_end": "{dateEnd}"
+      },
+      "urlTemplate": "https://api.nexmo.com/v1/calls"
+    },
+    {
+      "id": "hangup-call",
+      "name": "Hangup Call",
+      "description": "Hangup an active call",
+      "method": "PUT",
+      "path": "/v1/calls/{uuid}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {jwt}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "action": { "type": "string", "enum": ["hangup"], "default": "hangup", "required": true }
+        },
+        "required": ["action"]
+      },
+      "urlTemplate": "https://api.nexmo.com/v1/calls/{uuid}"
+    },
+    {
+      "id": "send-verification-code",
+      "name": "Send Verification Code",
+      "description": "Send a verification code via SMS",
+      "method": "POST",
+      "path": "/verify/json",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true },
+          "api_secret": { "type": "string", "required": true },
+          "number": { "type": "string", "required": true, "description": "Phone number to verify" },
+          "brand": { "type": "string", "required": true, "description": "Brand name" },
+          "code_length": { "type": "number", "enum": [4, 6], "default": 4, "description": "Verification code length" },
+          "lg": { "type": "string", "default": "en-us", "description": "Language code" },
+          "pin_expiry": { "type": "number", "default": 300, "description": "PIN expiry in seconds" },
+          "next_event_wait": { "type": "number", "default": 120, "description": "Wait time between events in seconds" }
+        },
+        "required": ["api_key", "api_secret", "number", "brand"]
+      },
+      "urlTemplate": "https://api.nexmo.com/verify/json"
+    },
+    {
+      "id": "verify-code",
+      "name": "Verify Code",
+      "description": "Verify a verification code",
+      "method": "POST",
+      "path": "/verify/check/json",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true },
+          "api_secret": { "type": "string", "required": true },
+          "request_id": { "type": "string", "required": true, "description": "Request ID from verification" },
+          "code": { "type": "string", "required": true, "description": "Verification code" }
+        },
+        "required": ["api_key", "api_secret", "request_id", "code"]
+      },
+      "urlTemplate": "https://api.nexmo.com/verify/check/json"
+    },
+    {
+      "id": "cancel-verification",
+      "name": "Cancel Verification",
+      "description": "Cancel a verification request",
+      "method": "POST",
+      "path": "/verify/control/json",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true },
+          "api_secret": { "type": "string", "required": true },
+          "request_id": { "type": "string", "required": true },
+          "cmd": { "type": "string", "enum": ["cancel"], "default": "cancel", "required": true }
+        },
+        "required": ["api_key", "api_secret", "request_id", "cmd"]
+      },
+      "urlTemplate": "https://api.nexmo.com/verify/control/json"
+    },
+    {
+      "id": "get-balance",
+      "name": "Get Balance",
+      "description": "Get account balance",
+      "method": "GET",
+      "path": "/account/get-balance",
+      "headers": {},
+      "queryParams": {
+        "api_key": "{apiKey}",
+        "api_secret": "{apiSecret}"
+      },
+      "urlTemplate": "https://rest.nexmo.com/account/get-balance"
+    },
+    {
+      "id": "get-account-numbers",
+      "name": "Get Account Numbers",
+      "description": "List phone numbers on account",
+      "method": "GET",
+      "path": "/account/numbers",
+      "headers": {},
+      "queryParams": {
+        "api_key": "{apiKey}",
+        "api_secret": "{apiSecret}",
+        "size": "10",
+        "pattern": "{pattern}",
+        "search_pattern": "{searchPattern}"
+      },
+      "urlTemplate": "https://rest.nexmo.com/account/numbers"
+    }
+  ]
+}
+

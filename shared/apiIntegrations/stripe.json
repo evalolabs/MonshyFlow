@@ -1,0 +1,213 @@
+{
+  "id": "stripe",
+  "name": "Stripe",
+  "icon": "💳",
+  "logoUrl": "https://cdn.simpleicons.org/stripe/635BFF",
+  "description": "Payment processing platform",
+  "baseUrl": "https://api.stripe.com/v1",
+  "color": {
+    "bg": "from-indigo-100 to-violet-100",
+    "border": "border-indigo-500",
+    "icon": "text-indigo-700",
+    "handle": "bg-indigo-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "STRIPE_SECRET_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "get-balance",
+      "name": "Get Balance",
+      "description": "Get account balance",
+      "method": "GET",
+      "path": "/balance",
+      "urlTemplate": "https://api.stripe.com/v1/balance"
+    },
+    {
+      "id": "get-charge",
+      "name": "Get Charge",
+      "description": "Get charge details by ID",
+      "method": "GET",
+      "path": "/charges/{id}",
+      "urlTemplate": "https://api.stripe.com/v1/charges/{id}"
+    },
+    {
+      "id": "list-charges",
+      "name": "List Charges",
+      "description": "List all charges",
+      "method": "GET",
+      "path": "/charges",
+      "queryParams": {
+        "limit": "100",
+        "starting_after": "{chargeId}",
+        "ending_before": "{chargeId}"
+      },
+      "urlTemplate": "https://api.stripe.com/v1/charges"
+    },
+    {
+      "id": "create-customer",
+      "name": "Create Customer",
+      "description": "Create a new customer in Stripe",
+      "method": "POST",
+      "path": "/customers",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "description": "Customer email" },
+          "name": { "type": "string", "description": "Customer name" },
+          "description": { "type": "string", "description": "Customer description" },
+          "phone": { "type": "string", "description": "Customer phone number" },
+          "address": {
+            "type": "object",
+            "properties": {
+              "line1": { "type": "string", "description": "Address line 1" },
+              "line2": { "type": "string", "description": "Address line 2" },
+              "city": { "type": "string", "description": "City" },
+              "state": { "type": "string", "description": "State" },
+              "postal_code": { "type": "string", "description": "Postal code" },
+              "country": { "type": "string", "description": "Country code" }
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Metadata key-value pairs"
+          }
+        }
+      },
+      "urlTemplate": "https://api.stripe.com/v1/customers"
+    },
+    {
+      "id": "get-customer",
+      "name": "Get Customer",
+      "description": "Get customer details by ID",
+      "method": "GET",
+      "path": "/customers/{id}",
+      "urlTemplate": "https://api.stripe.com/v1/customers/{id}"
+    },
+    {
+      "id": "list-customers",
+      "name": "List Customers",
+      "description": "List all customers",
+      "method": "GET",
+      "path": "/customers",
+      "queryParams": {
+        "limit": "100",
+        "starting_after": "{customerId}",
+        "ending_before": "{customerId}",
+        "email": "{email}"
+      },
+      "urlTemplate": "https://api.stripe.com/v1/customers"
+    },
+    {
+      "id": "update-customer",
+      "name": "Update Customer",
+      "description": "Update an existing customer",
+      "method": "POST",
+      "path": "/customers/{id}",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "description": "Customer email" },
+          "name": { "type": "string", "description": "Customer name" },
+          "description": { "type": "string", "description": "Customer description" },
+          "phone": { "type": "string", "description": "Customer phone number" },
+          "address": {
+            "type": "object",
+            "properties": {
+              "line1": { "type": "string", "description": "Address line 1" },
+              "line2": { "type": "string", "description": "Address line 2" },
+              "city": { "type": "string", "description": "City" },
+              "state": { "type": "string", "description": "State" },
+              "postal_code": { "type": "string", "description": "Postal code" },
+              "country": { "type": "string", "description": "Country code" }
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Metadata key-value pairs"
+          }
+        }
+      },
+      "urlTemplate": "https://api.stripe.com/v1/customers/{id}"
+    },
+    {
+      "id": "add-customer-card",
+      "name": "Add Customer Card",
+      "description": "Add a payment source (card) to a customer",
+      "method": "POST",
+      "path": "/customers/{customerId}/sources",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "source": { "type": "string", "description": "Token ID or card details" },
+          "card": {
+            "type": "object",
+            "properties": {
+              "number": { "type": "string", "description": "Card number" },
+              "exp_month": { "type": "number", "description": "Expiration month (1-12)" },
+              "exp_year": { "type": "number", "description": "Expiration year (YYYY)" },
+              "cvc": { "type": "string", "description": "CVC code" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.stripe.com/v1/customers/{customerId}/sources"
+    },
+    {
+      "id": "get-customer-source",
+      "name": "Get Customer Source",
+      "description": "Get a payment source (card) for a customer",
+      "method": "GET",
+      "path": "/customers/{customerId}/sources/{sourceId}",
+      "urlTemplate": "https://api.stripe.com/v1/customers/{customerId}/sources/{sourceId}"
+    },
+    {
+      "id": "remove-customer-card",
+      "name": "Remove Customer Card",
+      "description": "Remove a payment source (card) from a customer",
+      "method": "DELETE",
+      "path": "/customers/{customerId}/sources/{cardId}",
+      "urlTemplate": "https://api.stripe.com/v1/customers/{customerId}/sources/{cardId}"
+    },
+    {
+      "id": "create-payment-intent",
+      "name": "Create Payment Intent",
+      "description": "Create a payment intent for processing a payment",
+      "method": "POST",
+      "path": "/payment_intents",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "amount": { "type": "number", "required": true, "description": "Amount in cents" },
+          "currency": { "type": "string", "required": true, "default": "usd", "description": "Currency code (e.g., usd, eur, gbp)" },
+          "customer": { "type": "string", "description": "Customer ID" },
+          "payment_method": { "type": "string", "description": "Payment method ID" },
+          "description": { "type": "string", "description": "Payment description" },
+          "metadata": {
+            "type": "object",
+            "description": "Metadata key-value pairs"
+          },
+          "confirmation_method": { "type": "string", "enum": ["automatic", "manual"], "description": "Confirmation method" },
+          "capture_method": { "type": "string", "enum": ["automatic", "manual"], "description": "Capture method" }
+        },
+        "required": ["amount", "currency"]
+      },
+      "urlTemplate": "https://api.stripe.com/v1/payment_intents"
+    }
+  ]
+}

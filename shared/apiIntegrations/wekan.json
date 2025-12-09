@@ -1,0 +1,438 @@
+{
+  "id": "wekan",
+  "name": "Wekan",
+  "icon": "📋",
+  "logoUrl": "https://cdn.simpleicons.org/wekan/0080FF",
+  "description": "Open-source kanban board",
+  "baseUrl": "https://{host}/api",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "WEKAN_SESSION_TOKEN",
+    "usernameSecretKey": "WEKAN_USERNAME",
+    "note": "Host should be provided in baseUrl placeholder {host} or as WEKAN_BASE_URL secret key. Session token is obtained by authenticating with username and password via /users/login endpoint."
+  },
+  "endpoints": [
+    {
+      "id": "create-board",
+      "name": "Create Board",
+      "description": "Create a new board",
+      "method": "POST",
+      "path": "/boards",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Board title" },
+          "description": { "type": "string", "description": "Board description" },
+          "permission": { "type": "string", "enum": ["private", "public"], "default": "private", "description": "Board permission" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://{host}/api/boards"
+    },
+    {
+      "id": "get-board",
+      "name": "Get Board",
+      "description": "Get board by ID",
+      "method": "GET",
+      "path": "/boards/{boardId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}"
+    },
+    {
+      "id": "list-boards",
+      "name": "List Boards",
+      "description": "List all boards",
+      "method": "GET",
+      "path": "/boards",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards"
+    },
+    {
+      "id": "update-board",
+      "name": "Update Board",
+      "description": "Update a board",
+      "method": "PUT",
+      "path": "/boards/{boardId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Board title" },
+          "description": { "type": "string", "description": "Board description" },
+          "permission": { "type": "string", "enum": ["private", "public"], "description": "Board permission" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}"
+    },
+    {
+      "id": "delete-board",
+      "name": "Delete Board",
+      "description": "Delete a board",
+      "method": "DELETE",
+      "path": "/boards/{boardId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}"
+    },
+    {
+      "id": "create-list",
+      "name": "Create List",
+      "description": "Create a new list",
+      "method": "POST",
+      "path": "/boards/{boardId}/lists",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "List title" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists"
+    },
+    {
+      "id": "get-list",
+      "name": "Get List",
+      "description": "Get list by ID",
+      "method": "GET",
+      "path": "/boards/{boardId}/lists/{listId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}"
+    },
+    {
+      "id": "list-lists",
+      "name": "List Lists",
+      "description": "List all lists in a board",
+      "method": "GET",
+      "path": "/boards/{boardId}/lists",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists"
+    },
+    {
+      "id": "update-list",
+      "name": "Update List",
+      "description": "Update a list",
+      "method": "PUT",
+      "path": "/boards/{boardId}/lists/{listId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "List title" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}"
+    },
+    {
+      "id": "delete-list",
+      "name": "Delete List",
+      "description": "Delete a list",
+      "method": "DELETE",
+      "path": "/boards/{boardId}/lists/{listId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}"
+    },
+    {
+      "id": "create-card",
+      "name": "Create Card",
+      "description": "Create a new card",
+      "method": "POST",
+      "path": "/boards/{boardId}/lists/{listId}/cards",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Card title" },
+          "description": { "type": "string", "description": "Card description" },
+          "members": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Member user IDs"
+          },
+          "labels": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Label IDs"
+          }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards"
+    },
+    {
+      "id": "get-card",
+      "name": "Get Card",
+      "description": "Get card by ID",
+      "method": "GET",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}"
+    },
+    {
+      "id": "list-cards",
+      "name": "List Cards",
+      "description": "List all cards in a list",
+      "method": "GET",
+      "path": "/boards/{boardId}/lists/{listId}/cards",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards"
+    },
+    {
+      "id": "update-card",
+      "name": "Update Card",
+      "description": "Update a card",
+      "method": "PUT",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Card title" },
+          "description": { "type": "string", "description": "Card description" },
+          "members": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "labels": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}"
+    },
+    {
+      "id": "delete-card",
+      "name": "Delete Card",
+      "description": "Delete a card",
+      "method": "DELETE",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}"
+    },
+    {
+      "id": "create-card-comment",
+      "name": "Create Card Comment",
+      "description": "Create a comment on a card",
+      "method": "POST",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}/comments",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string", "required": true, "description": "Comment text" }
+        },
+        "required": ["text"]
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}/comments"
+    },
+    {
+      "id": "list-card-comments",
+      "name": "List Card Comments",
+      "description": "List all comments on a card",
+      "method": "GET",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}/comments",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}/comments"
+    },
+    {
+      "id": "update-card-comment",
+      "name": "Update Card Comment",
+      "description": "Update a card comment",
+      "method": "PUT",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}/comments/{commentId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string", "description": "Comment text" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}/comments/{commentId}"
+    },
+    {
+      "id": "delete-card-comment",
+      "name": "Delete Card Comment",
+      "description": "Delete a card comment",
+      "method": "DELETE",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}/comments/{commentId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}/comments/{commentId}"
+    },
+    {
+      "id": "create-checklist",
+      "name": "Create Checklist",
+      "description": "Create a checklist on a card",
+      "method": "POST",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Checklist title" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists"
+    },
+    {
+      "id": "list-checklists",
+      "name": "List Checklists",
+      "description": "List all checklists on a card",
+      "method": "GET",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists"
+    },
+    {
+      "id": "update-checklist",
+      "name": "Update Checklist",
+      "description": "Update a checklist",
+      "method": "PUT",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists/{checklistId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Checklist title" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists/{checklistId}"
+    },
+    {
+      "id": "delete-checklist",
+      "name": "Delete Checklist",
+      "description": "Delete a checklist",
+      "method": "DELETE",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists/{checklistId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists/{checklistId}"
+    },
+    {
+      "id": "create-checklist-item",
+      "name": "Create Checklist Item",
+      "description": "Create an item in a checklist",
+      "method": "POST",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists/{checklistId}/items",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Item title" },
+          "isFinished": { "type": "boolean", "default": false, "description": "Is finished" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists/{checklistId}/items"
+    },
+    {
+      "id": "list-checklist-items",
+      "name": "List Checklist Items",
+      "description": "List all items in a checklist",
+      "method": "GET",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists/{checklistId}/items",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists/{checklistId}/items"
+    },
+    {
+      "id": "update-checklist-item",
+      "name": "Update Checklist Item",
+      "description": "Update a checklist item",
+      "method": "PUT",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists/{checklistId}/items/{itemId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Item title" },
+          "isFinished": { "type": "boolean", "description": "Is finished" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists/{checklistId}/items/{itemId}"
+    },
+    {
+      "id": "delete-checklist-item",
+      "name": "Delete Checklist Item",
+      "description": "Delete a checklist item",
+      "method": "DELETE",
+      "path": "/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists/{checklistId}/items/{itemId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/boards/{boardId}/lists/{listId}/cards/{cardId}/checklists/{checklistId}/items/{itemId}"
+    }
+  ]
+}
+

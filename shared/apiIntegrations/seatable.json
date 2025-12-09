@@ -1,0 +1,174 @@
+{
+  "id": "seatable",
+  "name": "SeaTable",
+  "icon": "🌊",
+  "logoUrl": "https://cdn.simpleicons.org/seatable/000000",
+  "description": "Collaborative database platform",
+  "baseUrl": "https://cloud.seatable.io",
+  "color": {
+    "bg": "from-cyan-100 to-blue-100",
+    "border": "border-cyan-500",
+    "icon": "text-cyan-700",
+    "handle": "bg-cyan-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Token {token}",
+    "secretKey": "SEATABLE_TOKEN",
+    "note": "Base URL should be 'https://cloud.seatable.io' for Cloud or provided as SEATABLE_DOMAIN secret key for Self-hosted."
+  },
+  "endpoints": [
+    {
+      "id": "create-row",
+      "name": "Create Row",
+      "description": "Create a new row",
+      "method": "POST",
+      "path": "/dtable-server/api/v1/dtables/{dtable_uuid}/rows/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token {token}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Row data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://cloud.seatable.io/dtable-server/api/v1/dtables/{dtable_uuid}/rows/"
+    },
+    {
+      "id": "list-rows",
+      "name": "List Rows",
+      "description": "List all rows",
+      "method": "GET",
+      "path": "/dtable-server/api/v1/dtables/{dtable_uuid}/rows/",
+      "headers": {
+        "Authorization": "Token {token}"
+      },
+      "queryParams": {
+        "table_name": {
+          "type": "string",
+          "required": true,
+          "description": "Table name"
+        },
+        "start": {
+          "type": "integer",
+          "default": 0,
+          "description": "Start index"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum number of results"
+        }
+      },
+      "urlTemplate": "https://cloud.seatable.io/dtable-server/api/v1/dtables/{dtable_uuid}/rows/"
+    },
+    {
+      "id": "update-row",
+      "name": "Update Row",
+      "description": "Update rows",
+      "method": "PUT",
+      "path": "/dtable-server/api/v1/dtables/{dtable_uuid}/rows/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token {token}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Row data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://cloud.seatable.io/dtable-server/api/v1/dtables/{dtable_uuid}/rows/"
+    },
+    {
+      "id": "delete-row",
+      "name": "Delete Row",
+      "description": "Delete rows",
+      "method": "DELETE",
+      "path": "/dtable-server/api/v1/dtables/{dtable_uuid}/rows/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token {token}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Row IDs to delete",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://cloud.seatable.io/dtable-server/api/v1/dtables/{dtable_uuid}/rows/"
+    },
+    {
+      "id": "get-base",
+      "name": "Get Base",
+      "description": "Get base (dtable) by UUID",
+      "method": "GET",
+      "path": "/api/v2.1/dtable/{dtable_uuid}/",
+      "headers": {
+        "Authorization": "Token {token}"
+      },
+      "urlTemplate": "https://cloud.seatable.io/api/v2.1/dtable/{dtable_uuid}/"
+    },
+    {
+      "id": "list-bases",
+      "name": "List Bases",
+      "description": "List all bases (dtables)",
+      "method": "GET",
+      "path": "/api/v2.1/dtables/",
+      "headers": {
+        "Authorization": "Token {token}"
+      },
+      "urlTemplate": "https://cloud.seatable.io/api/v2.1/dtables/"
+    },
+    {
+      "id": "create-link",
+      "name": "Create Link",
+      "description": "Create a link between tables",
+      "method": "POST",
+      "path": "/dtable-server/api/v1/dtables/{dtable_uuid}/links/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token {token}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Link data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://cloud.seatable.io/dtable-server/api/v1/dtables/{dtable_uuid}/links/"
+    },
+    {
+      "id": "delete-link",
+      "name": "Delete Link",
+      "description": "Delete a link between tables",
+      "method": "DELETE",
+      "path": "/dtable-server/api/v1/dtables/{dtable_uuid}/links/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token {token}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Link data to delete",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://cloud.seatable.io/dtable-server/api/v1/dtables/{dtable_uuid}/links/"
+    },
+    {
+      "id": "upload-asset",
+      "name": "Upload Asset",
+      "description": "Upload an asset to workspace",
+      "method": "POST",
+      "path": "/api/v2.1/workspace/{workspace_id}/asset/",
+      "headers": {
+        "Authorization": "Token {token}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Asset data (multipart/form-data)",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://cloud.seatable.io/api/v2.1/workspace/{workspace_id}/asset/"
+    }
+  ]
+}

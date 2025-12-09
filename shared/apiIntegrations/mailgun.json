@@ -1,0 +1,87 @@
+{
+  "id": "mailgun",
+  "name": "Mailgun",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/mailgun/FF6B6B",
+  "description": "Email delivery service",
+  "baseUrl": "https://{apiDomain}/v3/{emailDomain}",
+  "color": {
+    "bg": "from-red-100 to-amber-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(api:apiKey)}",
+    "secretKey": "MAILGUN_API_KEY",
+    "emailSecretKey": "MAILGUN_API_USERNAME"
+  },
+  "endpoints": [
+    {
+      "id": "send-message",
+      "name": "Send Message",
+      "description": "Send an email message",
+      "method": "POST",
+      "path": "/messages",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string", "required": true, "description": "Sender email address (e.g., 'Sender Name <sender@example.com>')" },
+          "to": { "type": "string", "required": true, "description": "Recipient email address(es), comma-separated for multiple" },
+          "cc": { "type": "string", "description": "CC email address(es), comma-separated" },
+          "bcc": { "type": "string", "description": "BCC email address(es), comma-separated" },
+          "subject": { "type": "string", "required": true, "description": "Email subject" },
+          "text": { "type": "string", "description": "Plain text email body" },
+          "html": { "type": "string", "description": "HTML email body" },
+          "template": { "type": "string", "description": "Template name" },
+          "template_variables": {
+            "type": "object",
+            "description": "Template variables (JSON object as string)",
+            "additionalProperties": true
+          },
+          "attachment": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "filename": { "type": "string", "required": true },
+                "data": { "type": "string", "required": true, "description": "Base64 encoded file data" }
+              }
+            },
+            "description": "File attachments"
+          },
+          "inline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "filename": { "type": "string", "required": true },
+                "data": { "type": "string", "required": true, "description": "Base64 encoded file data" }
+              }
+            },
+            "description": "Inline attachments (embedded images)"
+          },
+          "o:tag": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags for tracking"
+          },
+          "o:campaign": { "type": "string", "description": "Campaign ID" },
+          "o:deliverytime": { "type": "string", "format": "date-time", "description": "Scheduled delivery time" },
+          "o:testmode": { "type": "boolean", "default": false, "description": "Enable test mode" },
+          "o:tracking": { "type": "boolean", "default": true, "description": "Enable click/open tracking" },
+          "o:tracking-clicks": { "type": "boolean", "default": true, "description": "Enable click tracking" },
+          "o:tracking-opens": { "type": "boolean", "default": true, "description": "Enable open tracking" }
+        },
+        "required": ["from", "to", "subject"]
+      },
+      "urlTemplate": "https://{apiDomain}/v3/{emailDomain}/messages"
+    }
+  ]
+}
+

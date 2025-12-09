@@ -1,0 +1,252 @@
+{
+  "id": "bitbucket",
+  "name": "Bitbucket",
+  "icon": "🔷",
+  "logoUrl": "https://cdn.simpleicons.org/bitbucket/0052CC",
+  "description": "Git repository hosting and collaboration platform",
+  "baseUrl": "https://api.bitbucket.org/2.0",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(username:password)}",
+    "secretKey": "BITBUCKET_APP_PASSWORD",
+    "usernameSecretKey": "BITBUCKET_USERNAME"
+  },
+  "endpoints": [
+    {
+      "id": "create-repository",
+      "name": "Create Repository",
+      "description": "Create a new repository",
+      "method": "POST",
+      "path": "/repositories/{workspace}/{repo_slug}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "scm": { "type": "string", "enum": ["git", "hg"], "default": "git", "description": "Source control management" },
+          "is_private": { "type": "boolean", "default": false, "description": "Private repository" },
+          "description": { "type": "string", "description": "Repository description" },
+          "fork_policy": { "type": "string", "enum": ["allow_forks", "no_public_forks", "no_forks"], "default": "allow_forks", "description": "Fork policy" },
+          "has_issues": { "type": "boolean", "default": false, "description": "Enable issues" },
+          "has_wiki": { "type": "boolean", "default": false, "description": "Enable wiki" },
+          "project": {
+            "type": "object",
+            "properties": {
+              "key": { "type": "string", "description": "Project key" }
+            }
+          },
+          "language": { "type": "string", "description": "Primary language" }
+        }
+      },
+      "urlTemplate": "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo_slug}"
+    },
+    {
+      "id": "get-repository",
+      "name": "Get Repository",
+      "description": "Get repository details",
+      "method": "GET",
+      "path": "/repositories/{workspace}/{repo_slug}",
+      "headers": {},
+      "urlTemplate": "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo_slug}"
+    },
+    {
+      "id": "list-repositories",
+      "name": "List Repositories",
+      "description": "List all repositories in workspace",
+      "method": "GET",
+      "path": "/repositories/{workspace}",
+      "headers": {},
+      "queryParams": {
+        "role": "{role}",
+        "q": "{query}",
+        "sort": "name",
+        "page": "1",
+        "pagelen": "30"
+      },
+      "urlTemplate": "https://api.bitbucket.org/2.0/repositories/{workspace}"
+    },
+    {
+      "id": "update-repository",
+      "name": "Update Repository",
+      "description": "Update an existing repository",
+      "method": "PUT",
+      "path": "/repositories/{workspace}/{repo_slug}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Repository name" },
+          "description": { "type": "string", "description": "Repository description" },
+          "is_private": { "type": "boolean", "description": "Private repository" },
+          "fork_policy": { "type": "string", "enum": ["allow_forks", "no_public_forks", "no_forks"], "description": "Fork policy" },
+          "has_issues": { "type": "boolean", "description": "Enable issues" },
+          "has_wiki": { "type": "boolean", "description": "Enable wiki" },
+          "language": { "type": "string", "description": "Primary language" }
+        }
+      },
+      "urlTemplate": "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo_slug}"
+    },
+    {
+      "id": "create-pull-request",
+      "name": "Create Pull Request",
+      "description": "Create a new pull request",
+      "method": "POST",
+      "path": "/repositories/{workspace}/{repo_slug}/pullrequests",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Pull request title" },
+          "description": { "type": "string", "description": "Pull request description" },
+          "source": {
+            "type": "object",
+            "properties": {
+              "branch": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "required": true, "description": "Branch name" }
+                },
+                "required": ["name"]
+              },
+              "repository": {
+                "type": "object",
+                "properties": {
+                  "full_name": { "type": "string", "description": "Repository full name" }
+                }
+              }
+            },
+            "required": ["branch"]
+          },
+          "destination": {
+            "type": "object",
+            "properties": {
+              "branch": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "required": true, "description": "Branch name" }
+                },
+                "required": ["name"]
+              }
+            },
+            "required": ["branch"]
+          },
+          "close_source_branch": { "type": "boolean", "default": false, "description": "Close source branch after merge" },
+          "reviewers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "uuid": { "type": "string", "description": "Reviewer UUID" },
+                "username": { "type": "string", "description": "Reviewer username" }
+              }
+            }
+          }
+        },
+        "required": ["title", "source", "destination"]
+      },
+      "urlTemplate": "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo_slug}/pullrequests"
+    },
+    {
+      "id": "get-pull-request",
+      "name": "Get Pull Request",
+      "description": "Get pull request details by ID",
+      "method": "GET",
+      "path": "/repositories/{workspace}/{repo_slug}/pullrequests/{pullRequestId}",
+      "headers": {},
+      "urlTemplate": "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo_slug}/pullrequests/{pullRequestId}"
+    },
+    {
+      "id": "list-pull-requests",
+      "name": "List Pull Requests",
+      "description": "List all pull requests",
+      "method": "GET",
+      "path": "/repositories/{workspace}/{repo_slug}/pullrequests",
+      "headers": {},
+      "queryParams": {
+        "state": "{state}",
+        "q": "{query}",
+        "sort": "created_on",
+        "page": "1",
+        "pagelen": "30"
+      },
+      "urlTemplate": "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo_slug}/pullrequests"
+    },
+    {
+      "id": "update-pull-request",
+      "name": "Update Pull Request",
+      "description": "Update an existing pull request",
+      "method": "PUT",
+      "path": "/repositories/{workspace}/{repo_slug}/pullrequests/{pullRequestId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Pull request title" },
+          "description": { "type": "string", "description": "Pull request description" },
+          "destination": {
+            "type": "object",
+            "properties": {
+              "branch": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "description": "Branch name" }
+                }
+              }
+            }
+          },
+          "close_source_branch": { "type": "boolean", "description": "Close source branch after merge" },
+          "reviewers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "uuid": { "type": "string" },
+                "username": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo_slug}/pullrequests/{pullRequestId}"
+    },
+    {
+      "id": "get-commit",
+      "name": "Get Commit",
+      "description": "Get commit details",
+      "method": "GET",
+      "path": "/repositories/{workspace}/{repo_slug}/commit/{commit}",
+      "headers": {},
+      "urlTemplate": "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo_slug}/commit/{commit}"
+    },
+    {
+      "id": "list-commits",
+      "name": "List Commits",
+      "description": "List all commits",
+      "method": "GET",
+      "path": "/repositories/{workspace}/{repo_slug}/commits",
+      "headers": {},
+      "queryParams": {
+        "include": "{include}",
+        "exclude": "{exclude}",
+        "page": "1",
+        "pagelen": "30"
+      },
+      "urlTemplate": "https://api.bitbucket.org/2.0/repositories/{workspace}/{repo_slug}/commits"
+    }
+  ]
+}
+

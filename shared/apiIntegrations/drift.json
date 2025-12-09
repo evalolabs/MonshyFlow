@@ -1,0 +1,174 @@
+{
+  "id": "drift",
+  "name": "Drift",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/drift/4F46E5",
+  "description": "Conversational marketing platform for sales and marketing",
+  "baseUrl": "https://driftapi.com",
+  "color": {
+    "bg": "from-indigo-100 to-purple-100",
+    "border": "border-indigo-500",
+    "icon": "text-indigo-700",
+    "handle": "bg-indigo-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "DRIFT_ACCESS_TOKEN",
+    "note": "Access Token is sent as 'Bearer {apiKey}'. OAuth2 is also supported (DRIFT_OAUTH2_ACCESS_TOKEN)."
+  },
+  "endpoints": [
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/contacts",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Contact email"
+          },
+          "attributes": {
+            "type": "object",
+            "properties": {
+              "firstName": { "type": "string" },
+              "lastName": { "type": "string" },
+              "phone": { "type": "string" },
+              "company": { "type": "string" },
+              "title": { "type": "string" },
+              "website": { "type": "string", "format": "uri" },
+              "city": { "type": "string" },
+              "state": { "type": "string" },
+              "country": { "type": "string" },
+              "timezone": { "type": "string" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "customAttributes": {
+                "type": "object",
+                "description": "Custom attributes",
+                "additionalProperties": true
+              }
+            },
+            "description": "Contact attributes"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User ID (for existing users)"
+          }
+        },
+        "required": ["email"]
+      },
+      "urlTemplate": "https://driftapi.com/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact by ID",
+      "method": "GET",
+      "path": "/contacts/{contactId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://driftapi.com/contacts/{contactId}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/contacts",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Filter by email"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Filter by user ID"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "Cursor for pagination"
+        },
+        "pageSize": {
+          "type": "integer",
+          "default": 50,
+          "description": "Number of results per page"
+        }
+      },
+      "urlTemplate": "https://driftapi.com/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update a contact",
+      "method": "PATCH",
+      "path": "/contacts/{contactId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "attributes": {
+            "type": "object",
+            "properties": {
+              "firstName": { "type": "string" },
+              "lastName": { "type": "string" },
+              "phone": { "type": "string" },
+              "company": { "type": "string" },
+              "title": { "type": "string" },
+              "website": { "type": "string", "format": "uri" },
+              "city": { "type": "string" },
+              "state": { "type": "string" },
+              "country": { "type": "string" },
+              "timezone": { "type": "string" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "customAttributes": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://driftapi.com/contacts/{contactId}"
+    },
+    {
+      "id": "delete-contact",
+      "name": "Delete Contact",
+      "description": "Delete a contact",
+      "method": "DELETE",
+      "path": "/contacts/{contactId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://driftapi.com/contacts/{contactId}"
+    }
+  ]
+}
+

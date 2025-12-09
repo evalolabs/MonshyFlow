@@ -1,0 +1,670 @@
+{
+  "id": "harvest",
+  "name": "Harvest",
+  "icon": "⏱️",
+  "logoUrl": "https://cdn.simpleicons.org/harvest/FF6B35",
+  "description": "Time tracking and invoicing software",
+  "baseUrl": "https://api.harvestapp.com/v2",
+  "color": {
+    "bg": "from-orange-100 to-yellow-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "HARVEST_ACCESS_TOKEN",
+    "emailSecretKey": "HARVEST_ACCOUNT_ID",
+    "emailHeaderName": "Harvest-Account-Id"
+  },
+  "endpoints": [
+    {
+      "id": "create-client",
+      "name": "Create Client",
+      "description": "Create a new client",
+      "method": "POST",
+      "path": "/clients",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Client name" },
+          "is_active": { "type": "boolean", "default": true, "description": "Is active" },
+          "address": { "type": "string", "description": "Address" },
+          "currency": { "type": "string", "default": "USD", "description": "Currency code" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/clients"
+    },
+    {
+      "id": "get-client",
+      "name": "Get Client",
+      "description": "Get client details by ID",
+      "method": "GET",
+      "path": "/clients/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.harvestapp.com/v2/clients/{id}"
+    },
+    {
+      "id": "list-clients",
+      "name": "List Clients",
+      "description": "List all clients",
+      "method": "GET",
+      "path": "/clients",
+      "headers": {},
+      "queryParams": {
+        "is_active": "true",
+        "page": "1",
+        "per_page": "100"
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/clients"
+    },
+    {
+      "id": "update-client",
+      "name": "Update Client",
+      "description": "Update an existing client",
+      "method": "PATCH",
+      "path": "/clients/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Client name" },
+          "is_active": { "type": "boolean", "description": "Is active" },
+          "address": { "type": "string", "description": "Address" }
+        }
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/clients/{id}"
+    },
+    {
+      "id": "get-company",
+      "name": "Get Company",
+      "description": "Get company information",
+      "method": "GET",
+      "path": "/company",
+      "headers": {},
+      "urlTemplate": "https://api.harvestapp.com/v2/company"
+    },
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/contacts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "number", "required": true, "description": "Client ID" },
+          "first_name": { "type": "string", "description": "First name" },
+          "last_name": { "type": "string", "description": "Last name" },
+          "title": { "type": "string", "description": "Job title" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone_office": { "type": "string", "description": "Office phone" },
+          "phone_mobile": { "type": "string", "description": "Mobile phone" }
+        },
+        "required": ["client_id"]
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact details by ID",
+      "method": "GET",
+      "path": "/contacts/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.harvestapp.com/v2/contacts/{id}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/contacts",
+      "headers": {},
+      "queryParams": {
+        "client_id": "{clientId}",
+        "page": "1",
+        "per_page": "100"
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update an existing contact",
+      "method": "PATCH",
+      "path": "/contacts/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "first_name": { "type": "string", "description": "First name" },
+          "last_name": { "type": "string", "description": "Last name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone_office": { "type": "string", "description": "Office phone" }
+        }
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/contacts/{id}"
+    },
+    {
+      "id": "create-project",
+      "name": "Create Project",
+      "description": "Create a new project",
+      "method": "POST",
+      "path": "/projects",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "number", "required": true, "description": "Client ID" },
+          "name": { "type": "string", "required": true, "description": "Project name" },
+          "code": { "type": "string", "description": "Project code" },
+          "is_active": { "type": "boolean", "default": true, "description": "Is active" },
+          "is_billable": { "type": "boolean", "default": true, "description": "Is billable" },
+          "bill_by": { "type": "string", "enum": ["none", "People", "Project", "Tasks"], "default": "none", "description": "Bill by method" },
+          "budget": { "type": "number", "description": "Budget amount" },
+          "budget_by": { "type": "string", "enum": ["project", "project_cost", "task", "task_fees", "person", "none"], "description": "Budget by method" },
+          "hourly_rate": { "type": "number", "description": "Hourly rate" },
+          "notes": { "type": "string", "description": "Project notes" }
+        },
+        "required": ["client_id", "name"]
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/projects"
+    },
+    {
+      "id": "get-project",
+      "name": "Get Project",
+      "description": "Get project details by ID",
+      "method": "GET",
+      "path": "/projects/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.harvestapp.com/v2/projects/{id}"
+    },
+    {
+      "id": "list-projects",
+      "name": "List Projects",
+      "description": "List all projects",
+      "method": "GET",
+      "path": "/projects",
+      "headers": {},
+      "queryParams": {
+        "client_id": "{clientId}",
+        "is_active": "true",
+        "page": "1",
+        "per_page": "100"
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/projects"
+    },
+    {
+      "id": "update-project",
+      "name": "Update Project",
+      "description": "Update an existing project",
+      "method": "PATCH",
+      "path": "/projects/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Project name" },
+          "is_active": { "type": "boolean", "description": "Is active" },
+          "is_billable": { "type": "boolean", "description": "Is billable" },
+          "hourly_rate": { "type": "number", "description": "Hourly rate" },
+          "notes": { "type": "string", "description": "Project notes" }
+        }
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/projects/{id}"
+    },
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new task",
+      "method": "POST",
+      "path": "/tasks",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Task name" },
+          "is_active": { "type": "boolean", "default": true, "description": "Is active" },
+          "billable_by_default": { "type": "boolean", "default": false, "description": "Billable by default" },
+          "default_hourly_rate": { "type": "number", "description": "Default hourly rate" },
+          "is_default": { "type": "boolean", "default": false, "description": "Is default task" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/tasks"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get task details by ID",
+      "method": "GET",
+      "path": "/tasks/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.harvestapp.com/v2/tasks/{id}"
+    },
+    {
+      "id": "list-tasks",
+      "name": "List Tasks",
+      "description": "List all tasks",
+      "method": "GET",
+      "path": "/tasks",
+      "headers": {},
+      "queryParams": {
+        "is_active": "true",
+        "page": "1",
+        "per_page": "100"
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/tasks"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update an existing task",
+      "method": "PATCH",
+      "path": "/tasks/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Task name" },
+          "is_active": { "type": "boolean", "description": "Is active" },
+          "billable_by_default": { "type": "boolean", "description": "Billable by default" },
+          "default_hourly_rate": { "type": "number", "description": "Default hourly rate" }
+        }
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/tasks/{id}"
+    },
+    {
+      "id": "create-time-entry",
+      "name": "Create Time Entry",
+      "description": "Create a new time entry",
+      "method": "POST",
+      "path": "/time_entries",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "number", "description": "User ID (defaults to authenticated user)" },
+          "project_id": { "type": "number", "required": true, "description": "Project ID" },
+          "task_id": { "type": "number", "required": true, "description": "Task ID" },
+          "spent_date": { "type": "string", "format": "date", "required": true, "description": "Date (YYYY-MM-DD)" },
+          "hours": { "type": "number", "description": "Hours worked" },
+          "notes": { "type": "string", "description": "Notes" },
+          "external_reference": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "group_id": { "type": "string" },
+              "permalink": { "type": "string", "format": "uri" }
+            }
+          }
+        },
+        "required": ["project_id", "task_id", "spent_date"]
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/time_entries"
+    },
+    {
+      "id": "get-time-entry",
+      "name": "Get Time Entry",
+      "description": "Get time entry details by ID",
+      "method": "GET",
+      "path": "/time_entries/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.harvestapp.com/v2/time_entries/{id}"
+    },
+    {
+      "id": "list-time-entries",
+      "name": "List Time Entries",
+      "description": "List all time entries",
+      "method": "GET",
+      "path": "/time_entries",
+      "headers": {},
+      "queryParams": {
+        "user_id": "{userId}",
+        "client_id": "{clientId}",
+        "project_id": "{projectId}",
+        "is_billed": "{isBilled}",
+        "is_running": "{isRunning}",
+        "from": "{fromDate}",
+        "to": "{toDate}",
+        "page": "1",
+        "per_page": "100"
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/time_entries"
+    },
+    {
+      "id": "update-time-entry",
+      "name": "Update Time Entry",
+      "description": "Update an existing time entry",
+      "method": "PATCH",
+      "path": "/time_entries/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "project_id": { "type": "number", "description": "Project ID" },
+          "task_id": { "type": "number", "description": "Task ID" },
+          "spent_date": { "type": "string", "format": "date", "description": "Date" },
+          "hours": { "type": "number", "description": "Hours worked" },
+          "notes": { "type": "string", "description": "Notes" }
+        }
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/time_entries/{id}"
+    },
+    {
+      "id": "delete-time-entry",
+      "name": "Delete Time Entry",
+      "description": "Delete a time entry",
+      "method": "DELETE",
+      "path": "/time_entries/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.harvestapp.com/v2/time_entries/{id}"
+    },
+    {
+      "id": "create-expense",
+      "name": "Create Expense",
+      "description": "Create a new expense",
+      "method": "POST",
+      "path": "/expenses",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "number", "description": "User ID (defaults to authenticated user)" },
+          "project_id": { "type": "number", "description": "Project ID" },
+          "expense_category_id": { "type": "number", "required": true, "description": "Expense category ID" },
+          "spent_date": { "type": "string", "format": "date", "required": true, "description": "Date (YYYY-MM-DD)" },
+          "units": { "type": "number", "description": "Quantity/units" },
+          "total_cost": { "type": "number", "description": "Total cost" },
+          "notes": { "type": "string", "description": "Notes" },
+          "billable": { "type": "boolean", "default": false, "description": "Is billable" },
+          "receipt": {
+            "type": "object",
+            "properties": {
+              "url": { "type": "string", "format": "uri" }
+            }
+          }
+        },
+        "required": ["expense_category_id", "spent_date"]
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/expenses"
+    },
+    {
+      "id": "get-expense",
+      "name": "Get Expense",
+      "description": "Get expense details by ID",
+      "method": "GET",
+      "path": "/expenses/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.harvestapp.com/v2/expenses/{id}"
+    },
+    {
+      "id": "list-expenses",
+      "name": "List Expenses",
+      "description": "List all expenses",
+      "method": "GET",
+      "path": "/expenses",
+      "headers": {},
+      "queryParams": {
+        "user_id": "{userId}",
+        "project_id": "{projectId}",
+        "is_billed": "{isBilled}",
+        "from": "{fromDate}",
+        "to": "{toDate}",
+        "page": "1",
+        "per_page": "100"
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/expenses"
+    },
+    {
+      "id": "update-expense",
+      "name": "Update Expense",
+      "description": "Update an existing expense",
+      "method": "PATCH",
+      "path": "/expenses/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "project_id": { "type": "number", "description": "Project ID" },
+          "expense_category_id": { "type": "number", "description": "Expense category ID" },
+          "spent_date": { "type": "string", "format": "date", "description": "Date" },
+          "units": { "type": "number", "description": "Quantity/units" },
+          "total_cost": { "type": "number", "description": "Total cost" },
+          "notes": { "type": "string", "description": "Notes" },
+          "billable": { "type": "boolean", "description": "Is billable" }
+        }
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/expenses/{id}"
+    },
+    {
+      "id": "create-invoice",
+      "name": "Create Invoice",
+      "description": "Create a new invoice",
+      "method": "POST",
+      "path": "/invoices",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "number", "required": true, "description": "Client ID" },
+          "retainer_id": { "type": "number", "description": "Retainer ID" },
+          "estimate_id": { "type": "number", "description": "Estimate ID" },
+          "number": { "type": "string", "description": "Invoice number" },
+          "purchase_order": { "type": "string", "description": "Purchase order" },
+          "tax": { "type": "string", "description": "Tax amount" },
+          "tax2": { "type": "string", "description": "Second tax amount" },
+          "discount": { "type": "string", "description": "Discount amount" },
+          "subject": { "type": "string", "description": "Invoice subject" },
+          "notes": { "type": "string", "description": "Invoice notes" },
+          "currency": { "type": "string", "default": "USD", "description": "Currency code" },
+          "issue_date": { "type": "string", "format": "date", "description": "Issue date" },
+          "due_date": { "type": "string", "format": "date", "description": "Due date" },
+          "payment_term": { "type": "string", "description": "Payment term" },
+          "line_items_import": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "project_id": { "type": "number", "required": true },
+                "kind": { "type": "string", "enum": ["Service", "Product"], "default": "Service" },
+                "description": { "type": "string" },
+                "quantity": { "type": "number" },
+                "unit_price": { "type": "number" }
+              },
+              "required": ["project_id"]
+            }
+          }
+        },
+        "required": ["client_id"]
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/invoices"
+    },
+    {
+      "id": "get-invoice",
+      "name": "Get Invoice",
+      "description": "Get invoice details by ID",
+      "method": "GET",
+      "path": "/invoices/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.harvestapp.com/v2/invoices/{id}"
+    },
+    {
+      "id": "list-invoices",
+      "name": "List Invoices",
+      "description": "List all invoices",
+      "method": "GET",
+      "path": "/invoices",
+      "headers": {},
+      "queryParams": {
+        "client_id": "{clientId}",
+        "state": "{state}",
+        "from": "{fromDate}",
+        "to": "{toDate}",
+        "page": "1",
+        "per_page": "100"
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/invoices"
+    },
+    {
+      "id": "update-invoice",
+      "name": "Update Invoice",
+      "description": "Update an existing invoice",
+      "method": "PATCH",
+      "path": "/invoices/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "description": "Invoice subject" },
+          "notes": { "type": "string", "description": "Invoice notes" },
+          "currency": { "type": "string", "description": "Currency code" },
+          "issue_date": { "type": "string", "format": "date", "description": "Issue date" },
+          "due_date": { "type": "string", "format": "date", "description": "Due date" }
+        }
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/invoices/{id}"
+    },
+    {
+      "id": "create-estimate",
+      "name": "Create Estimate",
+      "description": "Create a new estimate",
+      "method": "POST",
+      "path": "/estimates",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "number", "required": true, "description": "Client ID" },
+          "number": { "type": "string", "description": "Estimate number" },
+          "subject": { "type": "string", "description": "Estimate subject" },
+          "notes": { "type": "string", "description": "Estimate notes" },
+          "currency": { "type": "string", "default": "USD", "description": "Currency code" },
+          "issue_date": { "type": "string", "format": "date", "description": "Issue date" },
+          "line_items_import": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "project_id": { "type": "number", "required": true },
+                "kind": { "type": "string", "enum": ["Service", "Product"], "default": "Service" },
+                "description": { "type": "string" },
+                "quantity": { "type": "number" },
+                "unit_price": { "type": "number" }
+              },
+              "required": ["project_id"]
+            }
+          }
+        },
+        "required": ["client_id"]
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/estimates"
+    },
+    {
+      "id": "get-estimate",
+      "name": "Get Estimate",
+      "description": "Get estimate details by ID",
+      "method": "GET",
+      "path": "/estimates/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.harvestapp.com/v2/estimates/{id}"
+    },
+    {
+      "id": "list-estimates",
+      "name": "List Estimates",
+      "description": "List all estimates",
+      "method": "GET",
+      "path": "/estimates",
+      "headers": {},
+      "queryParams": {
+        "client_id": "{clientId}",
+        "state": "{state}",
+        "from": "{fromDate}",
+        "to": "{toDate}",
+        "page": "1",
+        "per_page": "100"
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/estimates"
+    },
+    {
+      "id": "update-estimate",
+      "name": "Update Estimate",
+      "description": "Update an existing estimate",
+      "method": "PATCH",
+      "path": "/estimates/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "description": "Estimate subject" },
+          "notes": { "type": "string", "description": "Estimate notes" },
+          "currency": { "type": "string", "description": "Currency code" },
+          "issue_date": { "type": "string", "format": "date", "description": "Issue date" }
+        }
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/estimates/{id}"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user details by ID",
+      "method": "GET",
+      "path": "/users/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.harvestapp.com/v2/users/{id}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/users",
+      "headers": {},
+      "queryParams": {
+        "is_active": "true",
+        "page": "1",
+        "per_page": "100"
+      },
+      "urlTemplate": "https://api.harvestapp.com/v2/users"
+    }
+  ]
+}
+

@@ -1,0 +1,160 @@
+{
+  "id": "facebook-graph",
+  "name": "Facebook Graph API",
+  "icon": "📘",
+  "logoUrl": "https://cdn.simpleicons.org/facebook/1877F2",
+  "description": "Facebook's Graph API for accessing social data",
+  "baseUrl": "https://graph.facebook.com/{version}",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "FACEBOOK_ACCESS_TOKEN",
+    "note": "Access token can also be passed as query parameter 'access_token'. Version placeholder {version} should be replaced with API version (e.g., v23.0). For video uploads, use baseUrl: https://graph-video.facebook.com/{version}."
+  },
+  "endpoints": [
+    {
+      "id": "generic-get",
+      "name": "Generic GET Request",
+      "description": "Make a GET request to any Graph API node",
+      "method": "GET",
+      "path": "/{version}/{node}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "access_token": { "type": "string", "description": "Access token (alternative to Bearer header)" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to return" },
+        "limit": { "type": "integer", "description": "Number of results" },
+        "offset": { "type": "integer", "description": "Offset for pagination" },
+        "since": { "type": "string", "format": "date-time", "description": "Filter results since this date" },
+        "until": { "type": "string", "format": "date-time", "description": "Filter results until this date" }
+      },
+      "urlTemplate": "https://graph.facebook.com/{version}/{node}"
+    },
+    {
+      "id": "generic-post",
+      "name": "Generic POST Request",
+      "description": "Make a POST request to any Graph API node",
+      "method": "POST",
+      "path": "/{version}/{node}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "access_token": { "type": "string", "description": "Access token (alternative to Bearer header)" }
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Request body - structure depends on the node being accessed",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://graph.facebook.com/{version}/{node}"
+    },
+    {
+      "id": "generic-delete",
+      "name": "Generic DELETE Request",
+      "description": "Make a DELETE request to any Graph API node",
+      "method": "DELETE",
+      "path": "/{version}/{node}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "access_token": { "type": "string", "description": "Access token (alternative to Bearer header)" }
+      },
+      "urlTemplate": "https://graph.facebook.com/{version}/{node}"
+    },
+    {
+      "id": "get-me",
+      "name": "Get Current User",
+      "description": "Get information about the current user (example: GET /v23.0/me)",
+      "method": "GET",
+      "path": "/{version}/me",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "access_token": { "type": "string", "description": "Access token (alternative to Bearer header)" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to return" }
+      },
+      "urlTemplate": "https://graph.facebook.com/{version}/me"
+    },
+    {
+      "id": "get-page-posts",
+      "name": "Get Page Posts",
+      "description": "Get posts from a page (example: GET /v23.0/{page-id}/posts)",
+      "method": "GET",
+      "path": "/{version}/{pageId}/posts",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "access_token": { "type": "string", "description": "Access token (alternative to Bearer header)" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to return" },
+        "limit": { "type": "integer", "description": "Number of results" },
+        "since": { "type": "string", "format": "date-time", "description": "Filter results since this date" },
+        "until": { "type": "string", "format": "date-time", "description": "Filter results until this date" }
+      },
+      "urlTemplate": "https://graph.facebook.com/{version}/{pageId}/posts"
+    },
+    {
+      "id": "post-to-page-feed",
+      "name": "Post to Page Feed",
+      "description": "Post to a page feed (example: POST /v23.0/{page-id}/feed)",
+      "method": "POST",
+      "path": "/{version}/{pageId}/feed",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "access_token": { "type": "string", "description": "Access token (alternative to Bearer header)" }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "description": "Post message" },
+          "link": { "type": "string", "format": "uri", "description": "Link URL" },
+          "place": { "type": "string", "description": "Place ID" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "User IDs to tag"
+          },
+          "privacy": {
+            "type": "object",
+            "properties": {
+              "value": { "type": "string", "enum": ["EVERYONE", "ALL_FRIENDS", "FRIENDS_OF_FRIENDS", "CUSTOM", "SELF"], "description": "Privacy value" },
+              "friends": { "type": "string", "enum": ["EVERYONE", "ALL_FRIENDS", "FRIENDS_OF_FRIENDS", "CUSTOM"], "description": "Friends privacy" },
+              "networks": { "type": "string", "description": "Network ID" },
+              "allow": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Allowed user IDs"
+              },
+              "deny": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Denied user IDs"
+              }
+            },
+            "description": "Privacy settings"
+          },
+          "object_attachment": { "type": "string", "description": "Object attachment ID" },
+          "scheduled_publish_time": { "type": "integer", "description": "Unix timestamp for scheduled publish" },
+          "published": { "type": "boolean", "default": true, "description": "Whether to publish immediately" }
+        }
+      },
+      "urlTemplate": "https://graph.facebook.com/{version}/{pageId}/feed"
+    }
+  ]
+}
+

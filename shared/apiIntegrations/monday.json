@@ -1,0 +1,350 @@
+{
+  "id": "monday",
+  "name": "Monday.com",
+  "icon": "📅",
+  "logoUrl": "https://cdn.simpleicons.org/monday/FF0080",
+  "description": "Work management and collaboration platform",
+  "baseUrl": "https://api.monday.com/v2",
+  "color": {
+    "bg": "from-fuchsia-100 to-pink-100",
+    "border": "border-fuchsia-500",
+    "icon": "text-fuchsia-700",
+    "handle": "bg-fuchsia-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "{apiKey}",
+    "secretKey": "MONDAY_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "graphql-query",
+      "name": "GraphQL Query",
+      "description": "Execute a GraphQL query",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json",
+        "API-Version": "2023-10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "required": true, "description": "GraphQL query string" },
+          "variables": {
+            "type": "object",
+            "description": "GraphQL variables",
+            "additionalProperties": true
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.monday.com/v2"
+    },
+    {
+      "id": "create-item",
+      "name": "Create Item",
+      "description": "Create a new item in a board",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json",
+        "API-Version": "2023-10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL mutation: mutation { create_item (board_id: $boardId, item_name: $itemName, column_values: $columnValues) { id } }",
+            "default": "mutation ($boardId: ID!, $itemName: String!, $columnValues: JSON) { create_item (board_id: $boardId, item_name: $itemName, column_values: $columnValues) { id } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "boardId": { "type": "string", "required": true, "description": "Board ID" },
+              "itemName": { "type": "string", "required": true, "description": "Item name" },
+              "columnValues": { "type": "string", "description": "Column values as JSON string" }
+            },
+            "required": ["boardId", "itemName"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.monday.com/v2"
+    },
+    {
+      "id": "get-item",
+      "name": "Get Item",
+      "description": "Get item details by ID",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json",
+        "API-Version": "2023-10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query: query { items (ids: [$itemId]) { id name column_values { id text } } }",
+            "default": "query ($itemId: [ID!]) { items (ids: $itemId) { id name column_values { id text } } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "itemId": { "type": "array", "items": { "type": "string" }, "required": true, "description": "Item ID(s)" }
+            },
+            "required": ["itemId"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.monday.com/v2"
+    },
+    {
+      "id": "list-items",
+      "name": "List Items",
+      "description": "List items in a board",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json",
+        "API-Version": "2023-10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query: query { boards (ids: [$boardId]) { items { id name } } }",
+            "default": "query ($boardId: [ID!]) { boards (ids: $boardId) { items { id name column_values { id text } } } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "boardId": { "type": "array", "items": { "type": "string" }, "required": true, "description": "Board ID(s)" }
+            },
+            "required": ["boardId"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.monday.com/v2"
+    },
+    {
+      "id": "update-item",
+      "name": "Update Item",
+      "description": "Update an item",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json",
+        "API-Version": "2023-10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL mutation: mutation { change_column_value (board_id: $boardId, item_id: $itemId, column_id: $columnId, value: $value) { id } }",
+            "default": "mutation ($boardId: ID!, $itemId: ID!, $columnId: String!, $value: JSON!) { change_column_value (board_id: $boardId, item_id: $itemId, column_id: $columnId, value: $value) { id } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "boardId": { "type": "string", "required": true, "description": "Board ID" },
+              "itemId": { "type": "string", "required": true, "description": "Item ID" },
+              "columnId": { "type": "string", "required": true, "description": "Column ID" },
+              "value": { "type": "string", "required": true, "description": "Column value as JSON string" }
+            },
+            "required": ["boardId", "itemId", "columnId", "value"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.monday.com/v2"
+    },
+    {
+      "id": "create-board",
+      "name": "Create Board",
+      "description": "Create a new board",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json",
+        "API-Version": "2023-10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL mutation: mutation { create_board (board_name: $boardName, board_kind: $boardKind) { id } }",
+            "default": "mutation ($boardName: String!, $boardKind: BoardKind) { create_board (board_name: $boardName, board_kind: $boardKind) { id } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "boardName": { "type": "string", "required": true, "description": "Board name" },
+              "boardKind": { "type": "string", "enum": ["public", "private", "share"], "description": "Board kind" }
+            },
+            "required": ["boardName"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.monday.com/v2"
+    },
+    {
+      "id": "get-board",
+      "name": "Get Board",
+      "description": "Get board details by ID",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json",
+        "API-Version": "2023-10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query: query { boards (ids: [$boardId]) { id name description } }",
+            "default": "query ($boardId: [ID!]) { boards (ids: $boardId) { id name description } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "boardId": { "type": "array", "items": { "type": "string" }, "required": true, "description": "Board ID(s)" }
+            },
+            "required": ["boardId"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.monday.com/v2"
+    },
+    {
+      "id": "list-boards",
+      "name": "List Boards",
+      "description": "List all boards",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json",
+        "API-Version": "2023-10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query: query { boards { id name } }",
+            "default": "query { boards { id name } }"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.monday.com/v2"
+    },
+    {
+      "id": "create-update",
+      "name": "Create Update",
+      "description": "Create an update (comment) on an item",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json",
+        "API-Version": "2023-10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL mutation: mutation { create_update (item_id: $itemId, body: $body) { id } }",
+            "default": "mutation ($itemId: ID!, $body: String!) { create_update (item_id: $itemId, body: $body) { id } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "itemId": { "type": "string", "required": true, "description": "Item ID" },
+              "body": { "type": "string", "required": true, "description": "Update body (Markdown)" }
+            },
+            "required": ["itemId", "body"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.monday.com/v2"
+    },
+    {
+      "id": "get-updates",
+      "name": "Get Updates",
+      "description": "Get updates for an item",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json",
+        "API-Version": "2023-10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query: query { items (ids: [$itemId]) { updates { id body created_at } } }",
+            "default": "query ($itemId: [ID!]) { items (ids: $itemId) { updates { id body created_at } } }"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "itemId": { "type": "array", "items": { "type": "string" }, "required": true, "description": "Item ID(s)" }
+            },
+            "required": ["itemId"]
+          }
+        },
+        "required": ["query", "variables"]
+      },
+      "urlTemplate": "https://api.monday.com/v2"
+    },
+    {
+      "id": "get-me",
+      "name": "Get Me",
+      "description": "Get authenticated user details",
+      "method": "POST",
+      "path": "",
+      "headers": {
+        "Content-Type": "application/json",
+        "API-Version": "2023-10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query: query { me { id name email } }",
+            "default": "query { me { id name email } }"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.monday.com/v2"
+    }
+  ]
+}
+

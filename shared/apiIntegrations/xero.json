@@ -1,0 +1,268 @@
+{
+  "id": "xero",
+  "name": "Xero",
+  "icon": "💰",
+  "logoUrl": "https://cdn.simpleicons.org/xero/13B5EA",
+  "description": "Cloud-based accounting software",
+  "baseUrl": "https://api.xero.com/api.xro/2.0",
+  "color": {
+    "bg": "from-cyan-100 to-blue-100",
+    "border": "border-cyan-500",
+    "icon": "text-cyan-700",
+    "handle": "bg-cyan-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "tokenUrl": "https://identity.xero.com/connect/token",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {accessToken}",
+    "secretKey": "XERO_CLIENT_SECRET",
+    "clientIdSecretKey": "XERO_CLIENT_ID"
+  },
+  "endpoints": [
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/Contacts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Contacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Name": { "type": "string", "required": true, "description": "Contact name" },
+                "FirstName": { "type": "string", "description": "First name" },
+                "LastName": { "type": "string", "description": "Last name" },
+                "EmailAddress": { "type": "string", "format": "email", "description": "Email address" },
+                "Phones": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "PhoneType": { "type": "string", "enum": ["DEFAULT", "DDI", "MOBILE", "FAX"], "default": "DEFAULT" },
+                      "PhoneNumber": { "type": "string", "required": true },
+                      "PhoneAreaCode": { "type": "string" },
+                      "PhoneCountryCode": { "type": "string" }
+                    },
+                    "required": ["PhoneNumber"]
+                  }
+                },
+                "Addresses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "AddressType": { "type": "string", "enum": ["STREET", "POBOX"], "default": "STREET" },
+                      "AddressLine1": { "type": "string" },
+                      "AddressLine2": { "type": "string" },
+                      "City": { "type": "string" },
+                      "Region": { "type": "string" },
+                      "PostalCode": { "type": "string" },
+                      "Country": { "type": "string" }
+                    }
+                  }
+                },
+                "IsSupplier": { "type": "boolean", "default": false, "description": "Is a supplier" },
+                "IsCustomer": { "type": "boolean", "default": true, "description": "Is a customer" }
+              },
+              "required": ["Name"]
+            },
+            "required": true
+          }
+        },
+        "required": ["Contacts"]
+      },
+      "urlTemplate": "https://api.xero.com/api.xro/2.0/Contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact details by ID",
+      "method": "GET",
+      "path": "/Contacts/{contactId}",
+      "headers": {},
+      "urlTemplate": "https://api.xero.com/api.xro/2.0/Contacts/{contactId}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/Contacts",
+      "headers": {},
+      "queryParams": {
+        "where": "{where}",
+        "order": "{order}",
+        "page": "1"
+      },
+      "urlTemplate": "https://api.xero.com/api.xro/2.0/Contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update an existing contact",
+      "method": "POST",
+      "path": "/Contacts/{contactId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Contacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ContactID": { "type": "string", "required": true },
+                "Name": { "type": "string", "description": "Contact name" },
+                "EmailAddress": { "type": "string", "format": "email", "description": "Email address" },
+                "Phones": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "PhoneType": { "type": "string", "enum": ["DEFAULT", "DDI", "MOBILE", "FAX"] },
+                      "PhoneNumber": { "type": "string", "required": true }
+                    }
+                  }
+                }
+              },
+              "required": ["ContactID"]
+            },
+            "required": true
+          }
+        },
+        "required": ["Contacts"]
+      },
+      "urlTemplate": "https://api.xero.com/api.xro/2.0/Contacts/{contactId}"
+    },
+    {
+      "id": "create-invoice",
+      "name": "Create Invoice",
+      "description": "Create a new invoice",
+      "method": "POST",
+      "path": "/Invoices",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Invoices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Type": { "type": "string", "enum": ["ACCREC", "ACCPAY"], "default": "ACCREC", "description": "Invoice type (ACCREC=Accounts Receivable, ACCPAY=Accounts Payable)" },
+                "Contact": {
+                  "type": "object",
+                  "properties": {
+                    "ContactID": { "type": "string", "required": true }
+                  },
+                  "required": true
+                },
+                "Date": { "type": "string", "format": "date", "required": true, "description": "Invoice date" },
+                "DueDate": { "type": "string", "format": "date", "description": "Due date" },
+                "InvoiceNumber": { "type": "string", "description": "Invoice number" },
+                "Reference": { "type": "string", "description": "Reference" },
+                "LineItems": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Description": { "type": "string", "required": true, "description": "Line item description" },
+                      "Quantity": { "type": "number", "required": true, "description": "Quantity" },
+                      "UnitAmount": { "type": "number", "required": true, "description": "Unit amount" },
+                      "AccountCode": { "type": "string", "description": "Account code" },
+                      "ItemCode": { "type": "string", "description": "Item code" },
+                      "TaxType": { "type": "string", "description": "Tax type" }
+                    },
+                    "required": ["Description", "Quantity", "UnitAmount"]
+                  },
+                  "required": true
+                },
+                "Status": { "type": "string", "enum": ["DRAFT", "SUBMITTED", "AUTHORISED", "PAID", "VOIDED"], "default": "DRAFT", "description": "Invoice status" }
+              },
+              "required": ["Type", "Contact", "Date", "LineItems"]
+            },
+            "required": true
+          }
+        },
+        "required": ["Invoices"]
+      },
+      "urlTemplate": "https://api.xero.com/api.xro/2.0/Invoices"
+    },
+    {
+      "id": "get-invoice",
+      "name": "Get Invoice",
+      "description": "Get invoice details by ID",
+      "method": "GET",
+      "path": "/Invoices/{invoiceId}",
+      "headers": {},
+      "urlTemplate": "https://api.xero.com/api.xro/2.0/Invoices/{invoiceId}"
+    },
+    {
+      "id": "list-invoices",
+      "name": "List Invoices",
+      "description": "List all invoices",
+      "method": "GET",
+      "path": "/Invoices",
+      "headers": {},
+      "queryParams": {
+        "where": "{where}",
+        "order": "{order}",
+        "page": "1"
+      },
+      "urlTemplate": "https://api.xero.com/api.xro/2.0/Invoices"
+    },
+    {
+      "id": "update-invoice",
+      "name": "Update Invoice",
+      "description": "Update an existing invoice",
+      "method": "POST",
+      "path": "/Invoices/{invoiceId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Invoices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "InvoiceID": { "type": "string", "required": true },
+                "Status": { "type": "string", "enum": ["DRAFT", "SUBMITTED", "AUTHORISED", "PAID", "VOIDED"], "description": "Invoice status" },
+                "LineItems": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Description": { "type": "string", "required": true },
+                      "Quantity": { "type": "number", "required": true },
+                      "UnitAmount": { "type": "number", "required": true }
+                    }
+                  }
+                }
+              },
+              "required": ["InvoiceID"]
+            },
+            "required": true
+          }
+        },
+        "required": ["Invoices"]
+      },
+      "urlTemplate": "https://api.xero.com/api.xro/2.0/Invoices/{invoiceId}"
+    }
+  ]
+}
+

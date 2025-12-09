@@ -1,0 +1,296 @@
+{
+  "id": "microsoft-todo",
+  "name": "Microsoft ToDo",
+  "icon": "✅",
+  "logoUrl": "https://cdn.simpleicons.org/microsofttodo/0078D4",
+  "description": "Task management via Microsoft Graph API",
+  "baseUrl": "https://graph.microsoft.com/v1.0/me",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "MICROSOFT_TODO_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-list",
+      "name": "Create List",
+      "description": "Create a new todo list",
+      "method": "POST",
+      "path": "/todo/lists",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "displayName": { "type": "string", "required": true, "description": "List name" }
+        },
+        "required": ["displayName"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists"
+    },
+    {
+      "id": "get-list",
+      "name": "Get List",
+      "description": "Get a todo list by ID",
+      "method": "GET",
+      "path": "/todo/lists/{listId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists/{listId}"
+    },
+    {
+      "id": "list-lists",
+      "name": "List Lists",
+      "description": "List all todo lists",
+      "method": "GET",
+      "path": "/todo/lists",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "$filter": { "type": "string", "description": "OData filter expression" },
+        "$orderby": { "type": "string", "description": "OData order by expression" },
+        "$top": { "type": "integer", "description": "Number of results" },
+        "$skip": { "type": "integer", "description": "Skip results" }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists"
+    },
+    {
+      "id": "update-list",
+      "name": "Update List",
+      "description": "Update a todo list",
+      "method": "PATCH",
+      "path": "/todo/lists/{listId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "displayName": { "type": "string", "description": "List name" }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists/{listId}"
+    },
+    {
+      "id": "delete-list",
+      "name": "Delete List",
+      "description": "Delete a todo list",
+      "method": "DELETE",
+      "path": "/todo/lists/{listId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists/{listId}"
+    },
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new task in a list",
+      "method": "POST",
+      "path": "/todo/lists/{listId}/tasks",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Task title" },
+          "body": {
+            "type": "object",
+            "properties": {
+              "content": { "type": "string", "description": "Task body content" },
+              "contentType": { "type": "string", "enum": ["text", "html"], "default": "text", "description": "Content type" }
+            }
+          },
+          "dueDateTime": {
+            "type": "object",
+            "properties": {
+              "dateTime": { "type": "string", "format": "date-time", "description": "Due date and time" },
+              "timeZone": { "type": "string", "description": "Time zone" }
+            }
+          },
+          "importance": { "type": "string", "enum": ["low", "normal", "high"], "default": "normal", "description": "Importance level" },
+          "isReminderOn": { "type": "boolean", "default": false, "description": "Enable reminder" },
+          "reminderDateTime": {
+            "type": "object",
+            "properties": {
+              "dateTime": { "type": "string", "format": "date-time", "description": "Reminder date and time" },
+              "timeZone": { "type": "string", "description": "Time zone" }
+            }
+          },
+          "status": { "type": "string", "enum": ["notStarted", "inProgress", "completed", "waitingOnOthers", "deferred"], "default": "notStarted", "description": "Task status" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists/{listId}/tasks"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get a task by ID",
+      "method": "GET",
+      "path": "/todo/lists/{listId}/tasks/{taskId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists/{listId}/tasks/{taskId}"
+    },
+    {
+      "id": "list-tasks",
+      "name": "List Tasks",
+      "description": "List all tasks in a list",
+      "method": "GET",
+      "path": "/todo/lists/{listId}/tasks",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "$filter": { "type": "string", "description": "OData filter expression" },
+        "$orderby": { "type": "string", "description": "OData order by expression" },
+        "$top": { "type": "integer", "description": "Number of results" },
+        "$skip": { "type": "integer", "description": "Skip results" }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists/{listId}/tasks"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update a task",
+      "method": "PATCH",
+      "path": "/todo/lists/{listId}/tasks/{taskId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Task title" },
+          "body": {
+            "type": "object",
+            "properties": {
+              "content": { "type": "string", "description": "Task body content" },
+              "contentType": { "type": "string", "enum": ["text", "html"], "description": "Content type" }
+            }
+          },
+          "dueDateTime": {
+            "type": "object",
+            "properties": {
+              "dateTime": { "type": "string", "format": "date-time", "description": "Due date and time" },
+              "timeZone": { "type": "string", "description": "Time zone" }
+            }
+          },
+          "importance": { "type": "string", "enum": ["low", "normal", "high"], "description": "Importance level" },
+          "isReminderOn": { "type": "boolean", "description": "Enable reminder" },
+          "reminderDateTime": {
+            "type": "object",
+            "properties": {
+              "dateTime": { "type": "string", "format": "date-time", "description": "Reminder date and time" },
+              "timeZone": { "type": "string", "description": "Time zone" }
+            }
+          },
+          "status": { "type": "string", "enum": ["notStarted", "inProgress", "completed", "waitingOnOthers", "deferred"], "description": "Task status" }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists/{listId}/tasks/{taskId}"
+    },
+    {
+      "id": "delete-task",
+      "name": "Delete Task",
+      "description": "Delete a task",
+      "method": "DELETE",
+      "path": "/todo/lists/{listId}/tasks/{taskId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists/{listId}/tasks/{taskId}"
+    },
+    {
+      "id": "create-linked-resource",
+      "name": "Create Linked Resource",
+      "description": "Create a linked resource for a task",
+      "method": "POST",
+      "path": "/todo/lists/{listId}/tasks/{taskId}/linkedResources",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "webUrl": { "type": "string", "format": "uri", "description": "Linked resource URL" },
+          "applicationName": { "type": "string", "description": "Application name" },
+          "displayName": { "type": "string", "description": "Display name" }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists/{listId}/tasks/{taskId}/linkedResources"
+    },
+    {
+      "id": "get-linked-resource",
+      "name": "Get Linked Resource",
+      "description": "Get a linked resource by ID",
+      "method": "GET",
+      "path": "/todo/lists/{listId}/tasks/{taskId}/linkedResources/{linkedResourceId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists/{listId}/tasks/{taskId}/linkedResources/{linkedResourceId}"
+    },
+    {
+      "id": "list-linked-resources",
+      "name": "List Linked Resources",
+      "description": "List all linked resources for a task",
+      "method": "GET",
+      "path": "/todo/lists/{listId}/tasks/{taskId}/linkedResources",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists/{listId}/tasks/{taskId}/linkedResources"
+    },
+    {
+      "id": "update-linked-resource",
+      "name": "Update Linked Resource",
+      "description": "Update a linked resource",
+      "method": "PATCH",
+      "path": "/todo/lists/{listId}/tasks/{taskId}/linkedResources/{linkedResourceId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "webUrl": { "type": "string", "format": "uri", "description": "Linked resource URL" },
+          "applicationName": { "type": "string", "description": "Application name" },
+          "displayName": { "type": "string", "description": "Display name" }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists/{listId}/tasks/{taskId}/linkedResources/{linkedResourceId}"
+    },
+    {
+      "id": "delete-linked-resource",
+      "name": "Delete Linked Resource",
+      "description": "Delete a linked resource",
+      "method": "DELETE",
+      "path": "/todo/lists/{listId}/tasks/{taskId}/linkedResources/{linkedResourceId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me/todo/lists/{listId}/tasks/{taskId}/linkedResources/{linkedResourceId}"
+    }
+  ]
+}
+

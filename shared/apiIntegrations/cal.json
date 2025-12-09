@@ -1,0 +1,71 @@
+{
+  "id": "cal",
+  "name": "Cal",
+  "icon": "📅",
+  "logoUrl": "https://cdn.simpleicons.org/cal/000000",
+  "description": "Open-source scheduling tool",
+  "baseUrl": "https://{your-cal-instance}",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "CAL_API_KEY",
+    "note": "Base URL should be provided in baseUrl placeholder {your-cal-instance} or as CAL_BASE_URL secret key."
+  },
+  "endpoints": [
+    {
+      "id": "get-booking",
+      "name": "Get Booking",
+      "description": "Get booking by ID",
+      "method": "GET",
+      "path": "/api/bookings/{bookingId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-cal-instance}/api/bookings/{bookingId}"
+    },
+    {
+      "id": "list-bookings",
+      "name": "List Bookings",
+      "description": "List all bookings",
+      "method": "GET",
+      "path": "/api/bookings",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "eventTypeId": {
+          "type": "integer",
+          "description": "Filter by event type ID"
+        },
+        "userId": {
+          "type": "integer",
+          "description": "Filter by user ID"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["upcoming", "recurring", "past", "cancelled", "unconfirmed"],
+          "description": "Filter by status"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 100,
+          "description": "Number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0,
+          "description": "Offset for pagination"
+        }
+      },
+      "urlTemplate": "https://{your-cal-instance}/api/bookings"
+    }
+  ]
+}
+

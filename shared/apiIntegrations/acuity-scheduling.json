@@ -1,0 +1,243 @@
+{
+  "id": "acuity-scheduling",
+  "name": "Acuity Scheduling",
+  "icon": "📅",
+  "logoUrl": "https://cdn.simpleicons.org/acuityscheduling/000000",
+  "description": "Online appointment scheduling software",
+  "baseUrl": "https://acuityscheduling.com/api/v1",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "ACUITY_API_KEY",
+    "usernameSecretKey": "ACUITY_USER_ID",
+    "note": "Basic Auth uses User ID as username and API Key as password. Format: Basic base64(userId:apiKey)"
+  },
+  "endpoints": [
+    {
+      "id": "create-appointment",
+      "name": "Create Appointment",
+      "description": "Create a new appointment",
+      "method": "POST",
+      "path": "/appointments",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "appointmentTypeID": { "type": "integer", "required": true, "description": "Appointment type ID" },
+          "calendarID": { "type": "integer", "required": true, "description": "Calendar ID" },
+          "datetime": { "type": "string", "format": "date-time", "required": true, "description": "Appointment date and time (ISO 8601)" },
+          "firstName": { "type": "string", "description": "Client first name" },
+          "lastName": { "type": "string", "description": "Client last name" },
+          "email": { "type": "string", "format": "email", "description": "Client email" },
+          "phone": { "type": "string", "description": "Client phone number" },
+          "notes": { "type": "string", "description": "Appointment notes" },
+          "timezone": { "type": "string", "description": "Timezone (e.g., 'America/New_York')" },
+          "addonIDs": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Add-on IDs"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "integer" },
+                "value": { "type": "string" }
+              },
+              "required": ["id", "value"]
+            },
+            "description": "Custom field values"
+          }
+        },
+        "required": ["appointmentTypeID", "calendarID", "datetime"]
+      },
+      "urlTemplate": "https://acuityscheduling.com/api/v1/appointments"
+    },
+    {
+      "id": "get-appointment",
+      "name": "Get Appointment",
+      "description": "Get appointment by ID",
+      "method": "GET",
+      "path": "/appointments/{appointmentId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://acuityscheduling.com/api/v1/appointments/{appointmentId}"
+    },
+    {
+      "id": "list-appointments",
+      "name": "List Appointments",
+      "description": "List all appointments",
+      "method": "GET",
+      "path": "/appointments",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "minDate": { "type": "string", "format": "date", "description": "Minimum date (YYYY-MM-DD)" },
+        "maxDate": { "type": "string", "format": "date", "description": "Maximum date (YYYY-MM-DD)" },
+        "calendarID": { "type": "integer", "description": "Filter by calendar ID" },
+        "appointmentTypeID": { "type": "integer", "description": "Filter by appointment type ID" },
+        "email": { "type": "string", "format": "email", "description": "Filter by client email" },
+        "showall": { "type": "boolean", "default": false, "description": "Show cancelled appointments" }
+      },
+      "urlTemplate": "https://acuityscheduling.com/api/v1/appointments"
+    },
+    {
+      "id": "update-appointment",
+      "name": "Update Appointment",
+      "description": "Update an appointment",
+      "method": "PUT",
+      "path": "/appointments/{appointmentId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "appointmentTypeID": { "type": "integer", "description": "Appointment type ID" },
+          "calendarID": { "type": "integer", "description": "Calendar ID" },
+          "datetime": { "type": "string", "format": "date-time", "description": "Appointment date and time" },
+          "firstName": { "type": "string", "description": "Client first name" },
+          "lastName": { "type": "string", "description": "Client last name" },
+          "email": { "type": "string", "format": "email", "description": "Client email" },
+          "phone": { "type": "string", "description": "Client phone number" },
+          "notes": { "type": "string", "description": "Appointment notes" },
+          "timezone": { "type": "string", "description": "Timezone" },
+          "addonIDs": {
+            "type": "array",
+            "items": { "type": "integer" }
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "integer" },
+                "value": { "type": "string" }
+              },
+              "required": ["id", "value"]
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://acuityscheduling.com/api/v1/appointments/{appointmentId}"
+    },
+    {
+      "id": "delete-appointment",
+      "name": "Delete Appointment",
+      "description": "Cancel/delete an appointment",
+      "method": "DELETE",
+      "path": "/appointments/{appointmentId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://acuityscheduling.com/api/v1/appointments/{appointmentId}"
+    },
+    {
+      "id": "get-calendar",
+      "name": "Get Calendar",
+      "description": "Get calendar by ID",
+      "method": "GET",
+      "path": "/calendars/{calendarId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://acuityscheduling.com/api/v1/calendars/{calendarId}"
+    },
+    {
+      "id": "list-calendars",
+      "name": "List Calendars",
+      "description": "List all calendars",
+      "method": "GET",
+      "path": "/calendars",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://acuityscheduling.com/api/v1/calendars"
+    },
+    {
+      "id": "create-client",
+      "name": "Create Client",
+      "description": "Create a new client",
+      "method": "POST",
+      "path": "/clients",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string", "description": "First name" },
+          "lastName": { "type": "string", "description": "Last name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "notes": { "type": "string", "description": "Client notes" }
+        }
+      },
+      "urlTemplate": "https://acuityscheduling.com/api/v1/clients"
+    },
+    {
+      "id": "get-client",
+      "name": "Get Client",
+      "description": "Get client by ID",
+      "method": "GET",
+      "path": "/clients/{clientId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://acuityscheduling.com/api/v1/clients/{clientId}"
+    },
+    {
+      "id": "list-clients",
+      "name": "List Clients",
+      "description": "List all clients",
+      "method": "GET",
+      "path": "/clients",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "search": { "type": "string", "description": "Search query" },
+        "email": { "type": "string", "format": "email", "description": "Filter by email" }
+      },
+      "urlTemplate": "https://acuityscheduling.com/api/v1/clients"
+    },
+    {
+      "id": "update-client",
+      "name": "Update Client",
+      "description": "Update a client",
+      "method": "PUT",
+      "path": "/clients/{clientId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string", "description": "First name" },
+          "lastName": { "type": "string", "description": "Last name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "notes": { "type": "string", "description": "Client notes" }
+        }
+      },
+      "urlTemplate": "https://acuityscheduling.com/api/v1/clients/{clientId}"
+    }
+  ]
+}
+

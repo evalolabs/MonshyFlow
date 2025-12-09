@@ -1,0 +1,443 @@
+{
+  "id": "affinity",
+  "name": "Affinity",
+  "icon": "🤝",
+  "logoUrl": "https://cdn.simpleicons.org/affinity/000000",
+  "description": "Relationship intelligence and CRM platform",
+  "baseUrl": "https://api.affinity.co",
+  "color": {
+    "bg": "from-indigo-100 to-blue-100",
+    "border": "border-indigo-500",
+    "icon": "text-indigo-700",
+    "handle": "bg-indigo-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "AFFINITY_API_KEY",
+    "note": "Basic Auth uses API Key as both username and password. Format: Basic base64(apiKey:apiKey)"
+  },
+  "endpoints": [
+    {
+      "id": "create-organization",
+      "name": "Create Organization",
+      "description": "Create a new organization",
+      "method": "POST",
+      "path": "/organizations",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Organization name"
+          },
+          "domain": {
+            "type": "string",
+            "description": "Domain"
+          },
+          "global": {
+            "type": "boolean",
+            "default": false,
+            "description": "Is global organization"
+          },
+          "person_ids": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Person IDs associated with organization"
+          },
+          "list_ids": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "List IDs"
+          },
+          "field_values": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": { "type": "integer" },
+                "value": { "type": "string" }
+              },
+              "required": ["field_id", "value"]
+            },
+            "description": "Custom field values"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.affinity.co/organizations"
+    },
+    {
+      "id": "get-organization",
+      "name": "Get Organization",
+      "description": "Get organization by ID",
+      "method": "GET",
+      "path": "/organizations/{organizationId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.affinity.co/organizations/{organizationId}"
+    },
+    {
+      "id": "list-organizations",
+      "name": "List Organizations",
+      "description": "List all organizations",
+      "method": "GET",
+      "path": "/organizations",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "term": {
+          "type": "string",
+          "description": "Search term"
+        },
+        "page_size": {
+          "type": "integer",
+          "default": 500,
+          "description": "Number of results per page"
+        },
+        "page_token": {
+          "type": "string",
+          "description": "Token for pagination"
+        }
+      },
+      "urlTemplate": "https://api.affinity.co/organizations"
+    },
+    {
+      "id": "update-organization",
+      "name": "Update Organization",
+      "description": "Update an organization",
+      "method": "PUT",
+      "path": "/organizations/{organizationId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Organization name"
+          },
+          "domain": {
+            "type": "string",
+            "description": "Domain"
+          },
+          "global": {
+            "type": "boolean",
+            "description": "Is global organization"
+          },
+          "person_ids": {
+            "type": "array",
+            "items": { "type": "integer" }
+          },
+          "list_ids": {
+            "type": "array",
+            "items": { "type": "integer" }
+          },
+          "field_values": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": { "type": "integer" },
+                "value": { "type": "string" }
+              },
+              "required": ["field_id", "value"]
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.affinity.co/organizations/{organizationId}"
+    },
+    {
+      "id": "create-person",
+      "name": "Create Person",
+      "description": "Create a new person",
+      "method": "POST",
+      "path": "/persons",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "description": "First name"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "emails": {
+            "type": "array",
+            "items": { "type": "string", "format": "email" },
+            "description": "Email addresses"
+          },
+          "organization_ids": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Organization IDs"
+          },
+          "list_ids": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "List IDs"
+          },
+          "field_values": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": { "type": "integer" },
+                "value": { "type": "string" }
+              },
+              "required": ["field_id", "value"]
+            },
+            "description": "Custom field values"
+          }
+        }
+      },
+      "urlTemplate": "https://api.affinity.co/persons"
+    },
+    {
+      "id": "get-person",
+      "name": "Get Person",
+      "description": "Get person by ID",
+      "method": "GET",
+      "path": "/persons/{personId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.affinity.co/persons/{personId}"
+    },
+    {
+      "id": "list-persons",
+      "name": "List Persons",
+      "description": "List all persons",
+      "method": "GET",
+      "path": "/persons",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "term": {
+          "type": "string",
+          "description": "Search term"
+        },
+        "page_size": {
+          "type": "integer",
+          "default": 500,
+          "description": "Number of results per page"
+        },
+        "page_token": {
+          "type": "string",
+          "description": "Token for pagination"
+        }
+      },
+      "urlTemplate": "https://api.affinity.co/persons"
+    },
+    {
+      "id": "update-person",
+      "name": "Update Person",
+      "description": "Update a person",
+      "method": "PUT",
+      "path": "/persons/{personId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "description": "First name"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "emails": {
+            "type": "array",
+            "items": { "type": "string", "format": "email" }
+          },
+          "organization_ids": {
+            "type": "array",
+            "items": { "type": "integer" }
+          },
+          "list_ids": {
+            "type": "array",
+            "items": { "type": "integer" }
+          },
+          "field_values": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": { "type": "integer" },
+                "value": { "type": "string" }
+              },
+              "required": ["field_id", "value"]
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.affinity.co/persons/{personId}"
+    },
+    {
+      "id": "get-list",
+      "name": "Get List",
+      "description": "Get list by ID",
+      "method": "GET",
+      "path": "/lists/{listId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.affinity.co/lists/{listId}"
+    },
+    {
+      "id": "list-lists",
+      "name": "List Lists",
+      "description": "List all lists",
+      "method": "GET",
+      "path": "/lists",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "page_size": {
+          "type": "integer",
+          "default": 500,
+          "description": "Number of results per page"
+        },
+        "page_token": {
+          "type": "string",
+          "description": "Token for pagination"
+        }
+      },
+      "urlTemplate": "https://api.affinity.co/lists"
+    },
+    {
+      "id": "create-list-entry",
+      "name": "Create List Entry",
+      "description": "Create a new list entry",
+      "method": "POST",
+      "path": "/list-entries",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "list_id": {
+            "type": "integer",
+            "required": true,
+            "description": "List ID"
+          },
+          "entity_id": {
+            "type": "integer",
+            "required": true,
+            "description": "Entity ID (organization or person)"
+          },
+          "entity_type": {
+            "type": "string",
+            "enum": ["organization", "person"],
+            "required": true,
+            "description": "Entity type"
+          }
+        },
+        "required": ["list_id", "entity_id", "entity_type"]
+      },
+      "urlTemplate": "https://api.affinity.co/list-entries"
+    },
+    {
+      "id": "get-list-entry",
+      "name": "Get List Entry",
+      "description": "Get list entry by ID",
+      "method": "GET",
+      "path": "/list-entries/{listEntryId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.affinity.co/list-entries/{listEntryId}"
+    },
+    {
+      "id": "list-list-entries",
+      "name": "List List Entries",
+      "description": "List all list entries",
+      "method": "GET",
+      "path": "/list-entries",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "list_id": {
+          "type": "integer",
+          "description": "Filter by list ID"
+        },
+        "entity_id": {
+          "type": "integer",
+          "description": "Filter by entity ID"
+        },
+        "entity_type": {
+          "type": "string",
+          "enum": ["organization", "person"],
+          "description": "Filter by entity type"
+        },
+        "page_size": {
+          "type": "integer",
+          "default": 500,
+          "description": "Number of results per page"
+        },
+        "page_token": {
+          "type": "string",
+          "description": "Token for pagination"
+        }
+      },
+      "urlTemplate": "https://api.affinity.co/list-entries"
+    },
+    {
+      "id": "update-list-entry",
+      "name": "Update List Entry",
+      "description": "Update a list entry",
+      "method": "PUT",
+      "path": "/list-entries/{listEntryId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "list_id": {
+            "type": "integer",
+            "description": "List ID"
+          },
+          "entity_id": {
+            "type": "integer",
+            "description": "Entity ID"
+          },
+          "entity_type": {
+            "type": "string",
+            "enum": ["organization", "person"],
+            "description": "Entity type"
+          }
+        }
+      },
+      "urlTemplate": "https://api.affinity.co/list-entries/{listEntryId}"
+    }
+  ]
+}
+

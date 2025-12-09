@@ -1,0 +1,285 @@
+{
+  "id": "elastic-security",
+  "name": "Elastic Security",
+  "icon": "🔒",
+  "logoUrl": "https://cdn.simpleicons.org/elastic/005571",
+  "description": "Security Information and Event Management (SIEM) platform",
+  "baseUrl": "https://{your-elastic-instance}:{port}/api",
+  "color": {
+    "bg": "from-teal-100 to-cyan-100",
+    "border": "border-teal-500",
+    "icon": "text-teal-700",
+    "handle": "bg-teal-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "ELASTIC_SECURITY_PASSWORD",
+    "usernameSecretKey": "ELASTIC_SECURITY_USERNAME",
+    "note": "Base URL should be provided with host placeholder {your-elastic-instance} and port placeholder {port}, or as ELASTIC_SECURITY_BASE_URL secret key. Supports Basic Auth (username/password) or API Key authentication. Use ELASTIC_SECURITY_API_KEY for API Key authentication (Authorization: ApiKey {apiKey})."
+  },
+  "endpoints": [
+    {
+      "id": "create-case",
+      "name": "Create Case",
+      "description": "Create a new case",
+      "method": "POST",
+      "path": "/cases",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "required": true,
+            "description": "Case title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Case description"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "connector": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "type": { "type": "string" },
+              "fields": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "description": "Connector information"
+          },
+          "settings": {
+            "type": "object",
+            "description": "Case settings",
+            "additionalProperties": true
+          },
+          "owner": {
+            "type": "string",
+            "description": "Owner username"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["open", "in-progress", "closed"],
+            "default": "open",
+            "description": "Case status"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"],
+            "default": "low",
+            "description": "Case severity"
+          }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://{your-elastic-instance}:{port}/api/cases"
+    },
+    {
+      "id": "get-case",
+      "name": "Get Case",
+      "description": "Get case by ID",
+      "method": "GET",
+      "path": "/cases/{caseId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-elastic-instance}:{port}/api/cases/{caseId}"
+    },
+    {
+      "id": "list-cases",
+      "name": "List Cases",
+      "description": "List all cases",
+      "method": "GET",
+      "path": "/cases/_find",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "perPage": {
+          "type": "integer",
+          "default": 20,
+          "description": "Number of results per page"
+        },
+        "page": {
+          "type": "integer",
+          "default": 1,
+          "description": "Page number"
+        },
+        "sortField": {
+          "type": "string",
+          "description": "Sort field"
+        },
+        "sortOrder": {
+          "type": "string",
+          "enum": ["asc", "desc"],
+          "default": "asc",
+          "description": "Sort order"
+        }
+      },
+      "urlTemplate": "https://{your-elastic-instance}:{port}/api/cases/_find"
+    },
+    {
+      "id": "update-case",
+      "name": "Update Case",
+      "description": "Update a case",
+      "method": "PATCH",
+      "path": "/cases/{caseId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Case data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-elastic-instance}:{port}/api/cases/{caseId}"
+    },
+    {
+      "id": "delete-case",
+      "name": "Delete Case",
+      "description": "Delete a case",
+      "method": "DELETE",
+      "path": "/cases/{caseId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-elastic-instance}:{port}/api/cases/{caseId}"
+    },
+    {
+      "id": "create-comment",
+      "name": "Create Comment",
+      "description": "Create a new comment on a case",
+      "method": "POST",
+      "path": "/cases/{caseId}/comments",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string",
+            "required": true,
+            "description": "Comment text"
+          }
+        },
+        "required": ["comment"]
+      },
+      "urlTemplate": "https://{your-elastic-instance}:{port}/api/cases/{caseId}/comments"
+    },
+    {
+      "id": "get-comment",
+      "name": "Get Comment",
+      "description": "Get comment by ID",
+      "method": "GET",
+      "path": "/cases/{caseId}/comments/{commentId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-elastic-instance}:{port}/api/cases/{caseId}/comments/{commentId}"
+    },
+    {
+      "id": "list-comments",
+      "name": "List Comments",
+      "description": "List all comments for a case",
+      "method": "GET",
+      "path": "/cases/{caseId}/comments",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-elastic-instance}:{port}/api/cases/{caseId}/comments"
+    },
+    {
+      "id": "update-comment",
+      "name": "Update Comment",
+      "description": "Update a comment",
+      "method": "PUT",
+      "path": "/cases/{caseId}/comments/{commentId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string",
+            "description": "Comment text"
+          }
+        }
+      },
+      "urlTemplate": "https://{your-elastic-instance}:{port}/api/cases/{caseId}/comments/{commentId}"
+    },
+    {
+      "id": "add-tag",
+      "name": "Add Tag",
+      "description": "Add a tag to a case",
+      "method": "POST",
+      "path": "/cases/{caseId}/tags",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "tag": {
+            "type": "string",
+            "required": true,
+            "description": "Tag name"
+          }
+        },
+        "required": ["tag"]
+      },
+      "urlTemplate": "https://{your-elastic-instance}:{port}/api/cases/{caseId}/tags"
+    },
+    {
+      "id": "delete-tag",
+      "name": "Delete Tag",
+      "description": "Delete a tag from a case",
+      "method": "DELETE",
+      "path": "/cases/{caseId}/tags/{tagId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-elastic-instance}:{port}/api/cases/{caseId}/tags/{tagId}"
+    },
+    {
+      "id": "list-connectors",
+      "name": "List Connectors",
+      "description": "List all connectors",
+      "method": "GET",
+      "path": "/cases/configure/connectors",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-elastic-instance}:{port}/api/cases/configure/connectors"
+    },
+    {
+      "id": "find-connectors",
+      "name": "Find Connectors",
+      "description": "Find connectors",
+      "method": "GET",
+      "path": "/cases/configure/connectors/_find",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-elastic-instance}:{port}/api/cases/configure/connectors/_find"
+    }
+  ]
+}
+

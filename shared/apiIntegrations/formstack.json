@@ -1,0 +1,84 @@
+{
+  "id": "formstack",
+  "name": "Formstack",
+  "icon": "📝",
+  "logoUrl": "https://cdn.simpleicons.org/formstack/000000",
+  "description": "Online form builder and data collection platform",
+  "baseUrl": "https://www.formstack.com/api/v2",
+  "color": {
+    "bg": "from-gray-100 to-slate-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "FORMSTACK_ACCESS_TOKEN",
+    "note": "Formstack supports webhooks for new submissions."
+  },
+  "endpoints": [
+    {
+      "id": "get-form",
+      "name": "Get Form",
+      "description": "Get form by ID",
+      "method": "GET",
+      "path": "/form/{formId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "data": { "type": "boolean", "default": false, "description": "Include form data" }
+      },
+      "urlTemplate": "https://www.formstack.com/api/v2/form/{formId}"
+    },
+    {
+      "id": "list-forms",
+      "name": "List Forms",
+      "description": "List all forms",
+      "method": "GET",
+      "path": "/form",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "folder": { "type": "integer", "description": "Filter by folder ID" },
+        "per_page": { "type": "integer", "default": 25, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://www.formstack.com/api/v2/form"
+    },
+    {
+      "id": "get-submission",
+      "name": "Get Submission",
+      "description": "Get submission by ID",
+      "method": "GET",
+      "path": "/form/{formId}/submission/{submissionId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://www.formstack.com/api/v2/form/{formId}/submission/{submissionId}"
+    },
+    {
+      "id": "list-submissions",
+      "name": "List Submissions",
+      "description": "List all submissions for a form",
+      "method": "GET",
+      "path": "/form/{formId}/submission",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "per_page": { "type": "integer", "default": 25, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "min_time": { "type": "string", "format": "date-time", "description": "Minimum submission time (ISO 8601)" },
+        "max_time": { "type": "string", "format": "date-time", "description": "Maximum submission time (ISO 8601)" },
+        "search_field": { "type": "string", "description": "Field ID to search" },
+        "search_value": { "type": "string", "description": "Search value" }
+      },
+      "urlTemplate": "https://www.formstack.com/api/v2/form/{formId}/submission"
+    }
+  ]
+}
+

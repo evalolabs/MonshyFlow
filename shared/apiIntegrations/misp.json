@@ -1,0 +1,446 @@
+{
+  "id": "misp",
+  "name": "MISP",
+  "icon": "🔒",
+  "logoUrl": "https://cdn.simpleicons.org/misp/000000",
+  "description": "Open-source threat intelligence platform",
+  "baseUrl": "https://{your-misp-instance}",
+  "color": {
+    "bg": "from-red-100 to-fuchsia-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "{apiKey}",
+    "secretKey": "MISP_API_KEY",
+    "note": "Base URL should be provided in baseUrl placeholder {your-misp-instance} or as MISP_BASE_URL secret key."
+  },
+  "endpoints": [
+    {
+      "id": "create-event",
+      "name": "Create Event",
+      "description": "Create a new event",
+      "method": "POST",
+      "path": "/events/add",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Event data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-misp-instance}/events/add"
+    },
+    {
+      "id": "get-event",
+      "name": "Get Event",
+      "description": "Get event by ID",
+      "method": "GET",
+      "path": "/events/view/{eventId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/events/view/{eventId}"
+    },
+    {
+      "id": "list-events",
+      "name": "List Events",
+      "description": "List all events",
+      "method": "GET",
+      "path": "/events/index",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "description": "Maximum number of results"
+        },
+        "page": {
+          "type": "integer",
+          "description": "Page number"
+        }
+      },
+      "urlTemplate": "https://{your-misp-instance}/events/index"
+    },
+    {
+      "id": "search-events",
+      "name": "Search Events",
+      "description": "Search events",
+      "method": "POST",
+      "path": "/events/restSearch",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Search criteria",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-misp-instance}/events/restSearch"
+    },
+    {
+      "id": "update-event",
+      "name": "Update Event",
+      "description": "Update an event",
+      "method": "POST",
+      "path": "/events/edit/{eventId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Event data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-misp-instance}/events/edit/{eventId}"
+    },
+    {
+      "id": "delete-event",
+      "name": "Delete Event",
+      "description": "Delete an event",
+      "method": "POST",
+      "path": "/events/delete/{eventId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/events/delete/{eventId}"
+    },
+    {
+      "id": "create-attribute",
+      "name": "Create Attribute",
+      "description": "Create a new attribute for an event",
+      "method": "POST",
+      "path": "/attributes/add/{eventId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Attribute data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-misp-instance}/attributes/add/{eventId}"
+    },
+    {
+      "id": "get-attribute",
+      "name": "Get Attribute",
+      "description": "Get attribute by ID",
+      "method": "GET",
+      "path": "/attributes/view/{attributeId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/attributes/view/{attributeId}"
+    },
+    {
+      "id": "list-attributes",
+      "name": "List Attributes",
+      "description": "List all attributes",
+      "method": "GET",
+      "path": "/attributes/index",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/attributes/index"
+    },
+    {
+      "id": "search-attributes",
+      "name": "Search Attributes",
+      "description": "Search attributes",
+      "method": "POST",
+      "path": "/attributes/restSearch",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Search criteria",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-misp-instance}/attributes/restSearch"
+    },
+    {
+      "id": "update-attribute",
+      "name": "Update Attribute",
+      "description": "Update an attribute",
+      "method": "POST",
+      "path": "/attributes/edit/{attributeId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Attribute data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-misp-instance}/attributes/edit/{attributeId}"
+    },
+    {
+      "id": "delete-attribute",
+      "name": "Delete Attribute",
+      "description": "Delete an attribute",
+      "method": "POST",
+      "path": "/attributes/delete/{attributeId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/attributes/delete/{attributeId}"
+    },
+    {
+      "id": "create-object",
+      "name": "Create Object",
+      "description": "Create a new object for an event",
+      "method": "POST",
+      "path": "/objects/add/{eventId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Object data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-misp-instance}/objects/add/{eventId}"
+    },
+    {
+      "id": "get-object",
+      "name": "Get Object",
+      "description": "Get object by ID",
+      "method": "GET",
+      "path": "/objects/view/{objectId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/objects/view/{objectId}"
+    },
+    {
+      "id": "list-objects",
+      "name": "List Objects",
+      "description": "List all objects",
+      "method": "GET",
+      "path": "/objects/index",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/objects/index"
+    },
+    {
+      "id": "search-objects",
+      "name": "Search Objects",
+      "description": "Search objects",
+      "method": "POST",
+      "path": "/objects/restSearch",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Search criteria",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-misp-instance}/objects/restSearch"
+    },
+    {
+      "id": "attach-tag",
+      "name": "Attach Tag",
+      "description": "Attach a tag to an object",
+      "method": "POST",
+      "path": "/tags/attachTagToObject",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Tag attachment data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-misp-instance}/tags/attachTagToObject"
+    },
+    {
+      "id": "remove-tag",
+      "name": "Remove Tag",
+      "description": "Remove a tag from an object",
+      "method": "POST",
+      "path": "/tags/removeTagFromObject",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Tag removal data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-misp-instance}/tags/removeTagFromObject"
+    },
+    {
+      "id": "get-tag",
+      "name": "Get Tag",
+      "description": "Get tag by ID",
+      "method": "GET",
+      "path": "/tags/view/{tagId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/tags/view/{tagId}"
+    },
+    {
+      "id": "list-tags",
+      "name": "List Tags",
+      "description": "List all tags",
+      "method": "GET",
+      "path": "/tags/index",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/tags/index"
+    },
+    {
+      "id": "get-organisation",
+      "name": "Get Organisation",
+      "description": "Get organisation by ID",
+      "method": "GET",
+      "path": "/organisations/view/{organisationId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/organisations/view/{organisationId}"
+    },
+    {
+      "id": "list-organisations",
+      "name": "List Organisations",
+      "description": "List all organisations",
+      "method": "GET",
+      "path": "/organisations/index",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/organisations/index"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user by ID",
+      "method": "GET",
+      "path": "/users/view/{userId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/users/view/{userId}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/users/index",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/users/index"
+    },
+    {
+      "id": "get-feed",
+      "name": "Get Feed",
+      "description": "Get feed by ID",
+      "method": "GET",
+      "path": "/feeds/view/{feedId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/feeds/view/{feedId}"
+    },
+    {
+      "id": "list-feeds",
+      "name": "List Feeds",
+      "description": "List all feeds",
+      "method": "GET",
+      "path": "/feeds/index",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/feeds/index"
+    },
+    {
+      "id": "get-galaxy",
+      "name": "Get Galaxy",
+      "description": "Get galaxy by ID",
+      "method": "GET",
+      "path": "/galaxies/view/{galaxyId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/galaxies/view/{galaxyId}"
+    },
+    {
+      "id": "list-galaxies",
+      "name": "List Galaxies",
+      "description": "List all galaxies",
+      "method": "GET",
+      "path": "/galaxies/index",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/galaxies/index"
+    },
+    {
+      "id": "get-noticelist",
+      "name": "Get Noticelist",
+      "description": "Get noticelist by ID",
+      "method": "GET",
+      "path": "/noticelists/view/{noticelistId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/noticelists/view/{noticelistId}"
+    },
+    {
+      "id": "list-noticelists",
+      "name": "List Noticelists",
+      "description": "List all noticelists",
+      "method": "GET",
+      "path": "/noticelists/index",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/noticelists/index"
+    },
+    {
+      "id": "get-warninglist",
+      "name": "Get Warninglist",
+      "description": "Get warninglist by ID",
+      "method": "GET",
+      "path": "/warninglists/view/{warninglistId}",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/warninglists/view/{warninglistId}"
+    },
+    {
+      "id": "list-warninglists",
+      "name": "List Warninglists",
+      "description": "List all warninglists",
+      "method": "GET",
+      "path": "/warninglists/index",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "urlTemplate": "https://{your-misp-instance}/warninglists/index"
+    }
+  ]
+}
+

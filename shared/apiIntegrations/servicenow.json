@@ -1,0 +1,468 @@
+{
+  "id": "servicenow",
+  "name": "ServiceNow",
+  "icon": "🔧",
+  "logoUrl": "https://cdn.simpleicons.org/servicenow/81B5A1",
+  "description": "IT service management and workflow automation platform",
+  "baseUrl": "https://{subdomain}.service-now.com/api",
+  "color": {
+    "bg": "from-teal-100 to-green-100",
+    "border": "border-teal-500",
+    "icon": "text-teal-700",
+    "handle": "bg-teal-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(username:password)}",
+    "secretKey": "SERVICENOW_PASSWORD",
+    "emailSecretKey": "SERVICENOW_USERNAME"
+  },
+  "endpoints": [
+    {
+      "id": "create-table-record",
+      "name": "Create Table Record",
+      "description": "Create a new record in any table",
+      "method": "POST",
+      "path": "/now/table/{tableName}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Record data (fields depend on table schema)",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/{tableName}"
+    },
+    {
+      "id": "get-table-record",
+      "name": "Get Table Record",
+      "description": "Get a record from any table by ID",
+      "method": "GET",
+      "path": "/now/table/{tableName}/{id}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/{tableName}/{id}"
+    },
+    {
+      "id": "list-table-records",
+      "name": "List Table Records",
+      "description": "List all records from any table",
+      "method": "GET",
+      "path": "/now/table/{tableName}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "queryParams": {
+        "sysparm_query": "{query}",
+        "sysparm_limit": "100",
+        "sysparm_offset": "0",
+        "sysparm_fields": "{fields}"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/{tableName}"
+    },
+    {
+      "id": "update-table-record",
+      "name": "Update Table Record",
+      "description": "Update a record in any table",
+      "method": "PATCH",
+      "path": "/now/table/{tableName}/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Updated record data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/{tableName}/{id}"
+    },
+    {
+      "id": "delete-table-record",
+      "name": "Delete Table Record",
+      "description": "Delete a record from any table",
+      "method": "DELETE",
+      "path": "/now/table/{tableName}/{id}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/{tableName}/{id}"
+    },
+    {
+      "id": "create-incident",
+      "name": "Create Incident",
+      "description": "Create a new incident",
+      "method": "POST",
+      "path": "/now/table/incident",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "short_description": { "type": "string", "required": true, "description": "Short description" },
+          "description": { "type": "string", "description": "Detailed description" },
+          "urgency": { "type": "string", "enum": ["1", "2", "3"], "default": "3", "description": "Urgency (1=Critical, 2=High, 3=Medium, 4=Low)" },
+          "impact": { "type": "string", "enum": ["1", "2", "3"], "default": "3", "description": "Impact (1=Critical, 2=High, 3=Medium, 4=Low)" },
+          "priority": { "type": "string", "description": "Priority" },
+          "category": { "type": "string", "description": "Category" },
+          "subcategory": { "type": "string", "description": "Subcategory" },
+          "caller_id": { "type": "string", "description": "Caller user ID" },
+          "assigned_to": { "type": "string", "description": "Assigned user ID" },
+          "assignment_group": { "type": "string", "description": "Assignment group ID" }
+        },
+        "required": ["short_description"]
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/incident"
+    },
+    {
+      "id": "get-incident",
+      "name": "Get Incident",
+      "description": "Get incident details by ID",
+      "method": "GET",
+      "path": "/now/table/incident/{id}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/incident/{id}"
+    },
+    {
+      "id": "list-incidents",
+      "name": "List Incidents",
+      "description": "List all incidents",
+      "method": "GET",
+      "path": "/now/table/incident",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "queryParams": {
+        "sysparm_query": "{query}",
+        "sysparm_limit": "100",
+        "sysparm_offset": "0"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/incident"
+    },
+    {
+      "id": "update-incident",
+      "name": "Update Incident",
+      "description": "Update an existing incident",
+      "method": "PATCH",
+      "path": "/now/table/incident/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "short_description": { "type": "string", "description": "Short description" },
+          "description": { "type": "string", "description": "Detailed description" },
+          "urgency": { "type": "string", "enum": ["1", "2", "3", "4"] },
+          "impact": { "type": "string", "enum": ["1", "2", "3", "4"] },
+          "state": { "type": "string", "enum": ["1", "2", "3", "4", "5", "6", "7"], "description": "State (1=New, 2=In Progress, 3=On Hold, 4=Resolved, 5=Closed, 6=Canceled, 7=At Risk)" }
+        }
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/incident/{id}"
+    },
+    {
+      "id": "delete-incident",
+      "name": "Delete Incident",
+      "description": "Delete an incident",
+      "method": "DELETE",
+      "path": "/now/table/incident/{id}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/incident/{id}"
+    },
+    {
+      "id": "create-user",
+      "name": "Create User",
+      "description": "Create a new user",
+      "method": "POST",
+      "path": "/now/table/sys_user",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "user_name": { "type": "string", "required": true, "description": "Username" },
+          "first_name": { "type": "string", "description": "First name" },
+          "last_name": { "type": "string", "description": "Last name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "active": { "type": "boolean", "default": true, "description": "Is active" }
+        },
+        "required": ["user_name"]
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/sys_user"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user details by ID",
+      "method": "GET",
+      "path": "/now/table/sys_user/{id}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/sys_user/{id}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/now/table/sys_user",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "queryParams": {
+        "sysparm_query": "{query}",
+        "sysparm_limit": "100",
+        "sysparm_offset": "0"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/sys_user"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update an existing user",
+      "method": "PATCH",
+      "path": "/now/table/sys_user/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "first_name": { "type": "string", "description": "First name" },
+          "last_name": { "type": "string", "description": "Last name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "active": { "type": "boolean", "description": "Is active" }
+        }
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/sys_user/{id}"
+    },
+    {
+      "id": "delete-user",
+      "name": "Delete User",
+      "description": "Delete a user",
+      "method": "DELETE",
+      "path": "/now/table/sys_user/{id}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/sys_user/{id}"
+    },
+    {
+      "id": "upload-attachment",
+      "name": "Upload Attachment",
+      "description": "Upload a file attachment",
+      "method": "POST",
+      "path": "/now/attachment/file",
+      "headers": {
+        "Content-Type": "multipart/form-data"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "table_name": { "type": "string", "required": true, "description": "Table name" },
+          "table_sys_id": { "type": "string", "required": true, "description": "Record ID" },
+          "file_name": { "type": "string", "required": true, "description": "File name" },
+          "file": { "type": "string", "required": true, "description": "Base64 encoded file data or file path" }
+        },
+        "required": ["table_name", "table_sys_id", "file_name", "file"]
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/attachment/file"
+    },
+    {
+      "id": "get-attachment",
+      "name": "Get Attachment",
+      "description": "Get attachment file by ID",
+      "method": "GET",
+      "path": "/now/attachment/{id}/file",
+      "headers": {},
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/attachment/{id}/file"
+    },
+    {
+      "id": "list-attachments",
+      "name": "List Attachments",
+      "description": "List all attachments",
+      "method": "GET",
+      "path": "/now/attachment",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "queryParams": {
+        "sysparm_query": "{query}",
+        "sysparm_limit": "100"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/attachment"
+    },
+    {
+      "id": "get-business-service",
+      "name": "Get Business Service",
+      "description": "Get business service details by ID",
+      "method": "GET",
+      "path": "/now/table/cmdb_service/{id}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/cmdb_service/{id}"
+    },
+    {
+      "id": "list-business-services",
+      "name": "List Business Services",
+      "description": "List all business services",
+      "method": "GET",
+      "path": "/now/table/cmdb_service",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "queryParams": {
+        "sysparm_query": "{query}",
+        "sysparm_limit": "100"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/cmdb_service"
+    },
+    {
+      "id": "get-configuration-item",
+      "name": "Get Configuration Item",
+      "description": "Get configuration item details by ID",
+      "method": "GET",
+      "path": "/now/table/cmdb_ci/{id}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/cmdb_ci/{id}"
+    },
+    {
+      "id": "list-configuration-items",
+      "name": "List Configuration Items",
+      "description": "List all configuration items",
+      "method": "GET",
+      "path": "/now/table/cmdb_ci",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "queryParams": {
+        "sysparm_query": "{query}",
+        "sysparm_limit": "100"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/cmdb_ci"
+    },
+    {
+      "id": "get-department",
+      "name": "Get Department",
+      "description": "Get department details by ID",
+      "method": "GET",
+      "path": "/now/table/cmdb_department/{id}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/cmdb_department/{id}"
+    },
+    {
+      "id": "list-departments",
+      "name": "List Departments",
+      "description": "List all departments",
+      "method": "GET",
+      "path": "/now/table/cmdb_department",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "queryParams": {
+        "sysparm_query": "{query}",
+        "sysparm_limit": "100"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/cmdb_department"
+    },
+    {
+      "id": "get-dictionary",
+      "name": "Get Dictionary",
+      "description": "Get dictionary entry details by ID",
+      "method": "GET",
+      "path": "/now/table/sys_dictionary/{id}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/sys_dictionary/{id}"
+    },
+    {
+      "id": "list-dictionaries",
+      "name": "List Dictionaries",
+      "description": "List all dictionary entries",
+      "method": "GET",
+      "path": "/now/table/sys_dictionary",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "queryParams": {
+        "sysparm_query": "{query}",
+        "sysparm_limit": "100"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/sys_dictionary"
+    },
+    {
+      "id": "get-user-group",
+      "name": "Get User Group",
+      "description": "Get user group details by ID",
+      "method": "GET",
+      "path": "/now/table/sys_user_group/{id}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/sys_user_group/{id}"
+    },
+    {
+      "id": "list-user-groups",
+      "name": "List User Groups",
+      "description": "List all user groups",
+      "method": "GET",
+      "path": "/now/table/sys_user_group",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "queryParams": {
+        "sysparm_query": "{query}",
+        "sysparm_limit": "100"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/sys_user_group"
+    },
+    {
+      "id": "get-user-role",
+      "name": "Get User Role",
+      "description": "Get user role details by ID",
+      "method": "GET",
+      "path": "/now/table/sys_user_role/{id}",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/sys_user_role/{id}"
+    },
+    {
+      "id": "list-user-roles",
+      "name": "List User Roles",
+      "description": "List all user roles",
+      "method": "GET",
+      "path": "/now/table/sys_user_role",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "queryParams": {
+        "sysparm_query": "{query}",
+        "sysparm_limit": "100"
+      },
+      "urlTemplate": "https://{subdomain}.service-now.com/api/now/table/sys_user_role"
+    }
+  ]
+}
+

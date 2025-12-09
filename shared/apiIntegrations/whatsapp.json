@@ -1,0 +1,230 @@
+{
+  "id": "whatsapp",
+  "name": "WhatsApp",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/whatsapp/25D366",
+  "description": "Messaging and communication platform",
+  "baseUrl": "https://graph.facebook.com/v18.0",
+  "color": {
+    "bg": "from-green-100 to-teal-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "WHATSAPP_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "send-text-message",
+      "name": "Send Text Message",
+      "description": "Send a text message",
+      "method": "POST",
+      "path": "/{phoneNumberId}/messages",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "messaging_product": { "type": "string", "default": "whatsapp", "required": true },
+          "to": { "type": "string", "required": true, "description": "Recipient phone number (E.164 format)" },
+          "type": { "type": "string", "enum": ["text"], "default": "text", "required": true },
+          "text": {
+            "type": "object",
+            "properties": {
+              "body": { "type": "string", "required": true, "description": "Message text" },
+              "preview_url": { "type": "boolean", "default": false, "description": "Enable link preview" }
+            },
+            "required": true
+          }
+        },
+        "required": ["messaging_product", "to", "type", "text"]
+      },
+      "urlTemplate": "https://graph.facebook.com/v18.0/{phoneNumberId}/messages"
+    },
+    {
+      "id": "send-image-message",
+      "name": "Send Image Message",
+      "description": "Send an image message",
+      "method": "POST",
+      "path": "/{phoneNumberId}/messages",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "messaging_product": { "type": "string", "default": "whatsapp", "required": true },
+          "to": { "type": "string", "required": true, "description": "Recipient phone number" },
+          "type": { "type": "string", "enum": ["image"], "default": "image", "required": true },
+          "image": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Media ID (if already uploaded)" },
+              "link": { "type": "string", "format": "uri", "description": "Image URL" },
+              "caption": { "type": "string", "description": "Image caption" }
+            },
+            "required": true
+          }
+        },
+        "required": ["messaging_product", "to", "type", "image"]
+      },
+      "urlTemplate": "https://graph.facebook.com/v18.0/{phoneNumberId}/messages"
+    },
+    {
+      "id": "send-document-message",
+      "name": "Send Document Message",
+      "description": "Send a document message",
+      "method": "POST",
+      "path": "/{phoneNumberId}/messages",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "messaging_product": { "type": "string", "default": "whatsapp", "required": true },
+          "to": { "type": "string", "required": true, "description": "Recipient phone number" },
+          "type": { "type": "string", "enum": ["document"], "default": "document", "required": true },
+          "document": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Media ID" },
+              "link": { "type": "string", "format": "uri", "description": "Document URL" },
+              "caption": { "type": "string", "description": "Document caption" },
+              "filename": { "type": "string", "description": "Document filename" }
+            },
+            "required": true
+          }
+        },
+        "required": ["messaging_product", "to", "type", "document"]
+      },
+      "urlTemplate": "https://graph.facebook.com/v18.0/{phoneNumberId}/messages"
+    },
+    {
+      "id": "send-template-message",
+      "name": "Send Template Message",
+      "description": "Send a template message",
+      "method": "POST",
+      "path": "/{phoneNumberId}/messages",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "messaging_product": { "type": "string", "default": "whatsapp", "required": true },
+          "to": { "type": "string", "required": true, "description": "Recipient phone number" },
+          "type": { "type": "string", "enum": ["template"], "default": "template", "required": true },
+          "template": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "required": true, "description": "Template name" },
+              "language": {
+                "type": "object",
+                "properties": {
+                  "code": { "type": "string", "required": true, "description": "Language code (e.g., 'en', 'de')" }
+                },
+                "required": true
+              },
+              "components": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string", "enum": ["header", "body", "button"], "required": true },
+                    "parameters": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": { "type": "string", "enum": ["text", "image", "document", "video"] },
+                          "text": { "type": "string" },
+                          "image": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string" },
+                              "link": { "type": "string", "format": "uri" }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "sub_type": { "type": "string", "enum": ["url", "quick_reply"], "description": "For button type" },
+                    "index": { "type": "number", "description": "For button type" }
+                  }
+                }
+              }
+            },
+            "required": true
+          }
+        },
+        "required": ["messaging_product", "to", "type", "template"]
+      },
+      "urlTemplate": "https://graph.facebook.com/v18.0/{phoneNumberId}/messages"
+    },
+    {
+      "id": "upload-media",
+      "name": "Upload Media",
+      "description": "Upload media (image, video, document, audio)",
+      "method": "POST",
+      "path": "/{phoneNumberId}/media",
+      "headers": {
+        "Content-Type": "multipart/form-data"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "file": { "type": "string", "required": true, "description": "File path or base64 encoded content" },
+          "type": { "type": "string", "enum": ["image", "video", "document", "audio"], "required": true, "description": "Media type" },
+          "messaging_product": { "type": "string", "default": "whatsapp" }
+        },
+        "required": ["file", "type"]
+      },
+      "urlTemplate": "https://graph.facebook.com/v18.0/{phoneNumberId}/media"
+    },
+    {
+      "id": "get-media",
+      "name": "Get Media",
+      "description": "Get media by ID",
+      "method": "GET",
+      "path": "/{mediaId}",
+      "headers": {},
+      "urlTemplate": "https://graph.facebook.com/v18.0/{mediaId}"
+    },
+    {
+      "id": "delete-media",
+      "name": "Delete Media",
+      "description": "Delete media by ID",
+      "method": "DELETE",
+      "path": "/{mediaId}",
+      "headers": {},
+      "urlTemplate": "https://graph.facebook.com/v18.0/{mediaId}"
+    },
+    {
+      "id": "mark-message-as-read",
+      "name": "Mark Message as Read",
+      "description": "Mark a message as read",
+      "method": "POST",
+      "path": "/{phoneNumberId}/messages",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "messaging_product": { "type": "string", "default": "whatsapp", "required": true },
+          "status": { "type": "string", "enum": ["read"], "default": "read", "required": true },
+          "message_id": { "type": "string", "required": true, "description": "Message ID to mark as read" }
+        },
+        "required": ["messaging_product", "status", "message_id"]
+      },
+      "urlTemplate": "https://graph.facebook.com/v18.0/{phoneNumberId}/messages"
+    }
+  ]
+}
+

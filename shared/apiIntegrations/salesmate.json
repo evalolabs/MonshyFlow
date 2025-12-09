@@ -1,0 +1,320 @@
+{
+  "id": "salesmate",
+  "name": "Salesmate",
+  "icon": "💼",
+  "logoUrl": "https://cdn.simpleicons.org/salesmate/00A9E0",
+  "description": "CRM and sales pipeline management",
+  "baseUrl": "https://apis.salesmate.io",
+  "color": {
+    "bg": "from-cyan-100 to-sky-100",
+    "border": "border-cyan-500",
+    "icon": "text-cyan-700",
+    "handle": "bg-cyan-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "sessionToken",
+    "headerFormat": "{apiKey}",
+    "secretKey": "SALESMATE_SESSION_TOKEN",
+    "emailSecretKey": "SALESMATE_LINK_NAME",
+    "emailHeaderName": "linkName"
+  },
+  "endpoints": [
+    {
+      "id": "create-company",
+      "name": "Create Company",
+      "description": "Create a new company",
+      "method": "POST",
+      "path": "/v1/companies",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Company name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "website": { "type": "string", "format": "uri", "description": "Website URL" },
+          "address": { "type": "string", "description": "Address" },
+          "city": { "type": "string", "description": "City" },
+          "state": { "type": "string", "description": "State" },
+          "zipcode": { "type": "string", "description": "Zip code" },
+          "country": { "type": "string", "description": "Country" },
+          "ownerId": { "type": "number", "description": "Owner user ID" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://apis.salesmate.io/v1/companies"
+    },
+    {
+      "id": "get-company",
+      "name": "Get Company",
+      "description": "Get company details by ID",
+      "method": "GET",
+      "path": "/v1/companies/{id}",
+      "headers": {},
+      "urlTemplate": "https://apis.salesmate.io/v1/companies/{id}"
+    },
+    {
+      "id": "list-companies",
+      "name": "List Companies",
+      "description": "List all companies",
+      "method": "GET",
+      "path": "/v1/companies",
+      "headers": {},
+      "queryParams": {
+        "pageNo": "1",
+        "limit": "20"
+      },
+      "urlTemplate": "https://apis.salesmate.io/v1/companies"
+    },
+    {
+      "id": "update-company",
+      "name": "Update Company",
+      "description": "Update an existing company",
+      "method": "PUT",
+      "path": "/v1/companies/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "name": { "type": "string", "description": "Company name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "website": { "type": "string", "format": "uri", "description": "Website URL" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://apis.salesmate.io/v1/companies/{id}"
+    },
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/v1/contacts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string", "required": true, "description": "First name" },
+          "lastName": { "type": "string", "required": true, "description": "Last name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "mobile": { "type": "string", "description": "Mobile number" },
+          "companyId": { "type": "number", "description": "Associated company ID" },
+          "ownerId": { "type": "number", "description": "Owner user ID" },
+          "address": { "type": "string", "description": "Address" },
+          "city": { "type": "string", "description": "City" },
+          "state": { "type": "string", "description": "State" },
+          "zipcode": { "type": "string", "description": "Zip code" },
+          "country": { "type": "string", "description": "Country" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["firstName", "lastName"]
+      },
+      "urlTemplate": "https://apis.salesmate.io/v1/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact details by ID",
+      "method": "GET",
+      "path": "/v1/contacts/{id}",
+      "headers": {},
+      "urlTemplate": "https://apis.salesmate.io/v1/contacts/{id}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/v1/contacts",
+      "headers": {},
+      "queryParams": {
+        "pageNo": "1",
+        "limit": "20"
+      },
+      "urlTemplate": "https://apis.salesmate.io/v1/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update an existing contact",
+      "method": "PUT",
+      "path": "/v1/contacts/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "firstName": { "type": "string", "description": "First name" },
+          "lastName": { "type": "string", "description": "Last name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://apis.salesmate.io/v1/contacts/{id}"
+    },
+    {
+      "id": "create-deal",
+      "name": "Create Deal",
+      "description": "Create a new deal",
+      "method": "POST",
+      "path": "/v1/deals",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Deal name" },
+          "amount": { "type": "number", "description": "Deal amount" },
+          "currency": { "type": "string", "default": "USD", "description": "Currency code" },
+          "companyId": { "type": "number", "description": "Associated company ID" },
+          "contactId": { "type": "number", "description": "Associated contact ID" },
+          "ownerId": { "type": "number", "description": "Owner user ID" },
+          "pipelineId": { "type": "number", "description": "Pipeline ID" },
+          "stageId": { "type": "number", "description": "Pipeline stage ID" },
+          "expectedCloseDate": { "type": "string", "format": "date", "description": "Expected close date" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://apis.salesmate.io/v1/deals"
+    },
+    {
+      "id": "get-deal",
+      "name": "Get Deal",
+      "description": "Get deal details by ID",
+      "method": "GET",
+      "path": "/v1/deals/{id}",
+      "headers": {},
+      "urlTemplate": "https://apis.salesmate.io/v1/deals/{id}"
+    },
+    {
+      "id": "list-deals",
+      "name": "List Deals",
+      "description": "List all deals",
+      "method": "GET",
+      "path": "/v1/deals",
+      "headers": {},
+      "queryParams": {
+        "pageNo": "1",
+        "limit": "20"
+      },
+      "urlTemplate": "https://apis.salesmate.io/v1/deals"
+    },
+    {
+      "id": "update-deal",
+      "name": "Update Deal",
+      "description": "Update an existing deal",
+      "method": "PUT",
+      "path": "/v1/deals/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "name": { "type": "string", "description": "Deal name" },
+          "amount": { "type": "number", "description": "Deal amount" },
+          "stageId": { "type": "number", "description": "Pipeline stage ID" },
+          "expectedCloseDate": { "type": "string", "format": "date", "description": "Expected close date" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://apis.salesmate.io/v1/deals/{id}"
+    },
+    {
+      "id": "create-activity",
+      "name": "Create Activity",
+      "description": "Create a new activity",
+      "method": "POST",
+      "path": "/v1/activities",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["Call", "Meeting", "Email", "Task"], "required": true, "description": "Activity type" },
+          "title": { "type": "string", "required": true, "description": "Activity title" },
+          "ownerId": { "type": "number", "description": "Owner user ID" },
+          "contactId": { "type": "number", "description": "Associated contact ID" },
+          "companyId": { "type": "number", "description": "Associated company ID" },
+          "dealId": { "type": "number", "description": "Associated deal ID" },
+          "dueDate": { "type": "string", "format": "date-time", "description": "Due date" },
+          "notes": { "type": "string", "description": "Activity notes" }
+        },
+        "required": ["type", "title"]
+      },
+      "urlTemplate": "https://apis.salesmate.io/v1/activities"
+    },
+    {
+      "id": "get-activity",
+      "name": "Get Activity",
+      "description": "Get activity details by ID",
+      "method": "GET",
+      "path": "/v1/activities/{id}",
+      "headers": {},
+      "urlTemplate": "https://apis.salesmate.io/v1/activities/{id}"
+    },
+    {
+      "id": "list-activities",
+      "name": "List Activities",
+      "description": "List all activities",
+      "method": "GET",
+      "path": "/v1/activities",
+      "headers": {},
+      "queryParams": {
+        "pageNo": "1",
+        "limit": "20"
+      },
+      "urlTemplate": "https://apis.salesmate.io/v1/activities"
+    },
+    {
+      "id": "update-activity",
+      "name": "Update Activity",
+      "description": "Update an existing activity",
+      "method": "PUT",
+      "path": "/v1/activities/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "title": { "type": "string", "description": "Activity title" },
+          "dueDate": { "type": "string", "format": "date-time", "description": "Due date" },
+          "notes": { "type": "string", "description": "Activity notes" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://apis.salesmate.io/v1/activities/{id}"
+    }
+  ]
+}
+

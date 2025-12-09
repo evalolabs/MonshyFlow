@@ -1,0 +1,17 @@
+{
+  "name": "monshy-shared-registry",
+  "version": "1.0.0",
+  "description": "Shared registry and code generation for Monshy",
+  "scripts": {
+    "generate:registry": "ts-node scripts/generateRegistry.ts",
+    "validate:registry": "ts-node scripts/validateRegistry.ts",
+    "check:consistency": "ts-node scripts/registryConsistencyCheck.ts",
+    "prebuild": "npm run validate:registry && npm run check:consistency"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
+

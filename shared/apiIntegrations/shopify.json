@@ -1,0 +1,171 @@
+{
+  "id": "shopify",
+  "name": "Shopify",
+  "icon": "🛒",
+  "logoUrl": "https://cdn.simpleicons.org/shopify/96BF48",
+  "description": "E-commerce platform",
+  "baseUrl": "https://{shop}.myshopify.com/admin/api/{version}",
+  "color": {
+    "bg": "from-emerald-100 to-green-100",
+    "border": "border-emerald-500",
+    "icon": "text-emerald-700",
+    "handle": "bg-emerald-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "X-Shopify-Access-Token",
+    "headerFormat": "{apiKey}",
+    "secretKey": "SHOPIFY_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-product",
+      "name": "Create Product",
+      "description": "Create a new product in Shopify",
+      "method": "POST",
+      "path": "/products.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string", "required": true, "description": "Product title" },
+              "body_html": { "type": "string", "description": "Product description (HTML)" },
+              "vendor": { "type": "string", "description": "Product vendor" },
+              "product_type": { "type": "string", "description": "Product type" },
+              "tags": { "type": "string", "description": "Comma-separated tags" },
+              "status": { "type": "string", "enum": ["active", "archived", "draft"], "description": "Product status" },
+              "variants": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "price": { "type": "string", "description": "Product price" },
+                    "sku": { "type": "string", "description": "SKU" },
+                    "inventory_quantity": { "type": "number", "description": "Inventory quantity" },
+                    "compare_at_price": { "type": "string", "description": "Compare at price" },
+                    "barcode": { "type": "string", "description": "Barcode" },
+                    "weight": { "type": "number", "description": "Weight" },
+                    "weight_unit": { "type": "string", "enum": ["kg", "lb", "oz", "g"], "description": "Weight unit" }
+                  }
+                },
+                "description": "Product variants"
+              },
+              "images": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "src": { "type": "string", "description": "Image URL" },
+                    "alt": { "type": "string", "description": "Alt text" },
+                    "position": { "type": "number", "description": "Image position" }
+                  }
+                },
+                "description": "Product images"
+              }
+            },
+            "required": ["title"]
+          }
+        },
+        "required": ["product"]
+      },
+      "urlTemplate": "https://{shop}.myshopify.com/admin/api/{version}/products.json"
+    },
+    {
+      "id": "get-product",
+      "name": "Get Product",
+      "description": "Get product details by ID",
+      "method": "GET",
+      "path": "/products/{id}.json",
+      "queryParams": {
+        "fields": "id,title,vendor,product_type,status,created_at,updated_at"
+      },
+      "urlTemplate": "https://{shop}.myshopify.com/admin/api/{version}/products/{id}.json"
+    },
+    {
+      "id": "get-all-products",
+      "name": "Get All Products",
+      "description": "Get all products",
+      "method": "GET",
+      "path": "/products.json",
+      "queryParams": {
+        "limit": "250",
+        "page": "1",
+        "status": "active",
+        "fields": "id,title,vendor,product_type,status"
+      },
+      "urlTemplate": "https://{shop}.myshopify.com/admin/api/{version}/products.json"
+    },
+    {
+      "id": "update-product",
+      "name": "Update Product",
+      "description": "Update an existing product",
+      "method": "PUT",
+      "path": "/products/{id}.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "number", "required": true, "description": "Product ID" },
+              "title": { "type": "string", "description": "Product title" },
+              "body_html": { "type": "string", "description": "Product description (HTML)" },
+              "vendor": { "type": "string", "description": "Product vendor" },
+              "product_type": { "type": "string", "description": "Product type" },
+              "tags": { "type": "string", "description": "Comma-separated tags" },
+              "status": { "type": "string", "enum": ["active", "archived", "draft"], "description": "Product status" },
+              "variants": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "number", "description": "Variant ID" },
+                    "price": { "type": "string", "description": "Product price" },
+                    "sku": { "type": "string", "description": "SKU" },
+                    "inventory_quantity": { "type": "number", "description": "Inventory quantity" }
+                  }
+                }
+              }
+            },
+            "required": ["id"]
+          }
+        },
+        "required": ["product"]
+      },
+      "urlTemplate": "https://{shop}.myshopify.com/admin/api/{version}/products/{id}.json"
+    },
+    {
+      "id": "get-order",
+      "name": "Get Order",
+      "description": "Get order details by ID",
+      "method": "GET",
+      "path": "/orders/{id}.json",
+      "queryParams": {
+        "fields": "id,name,email,created_at,financial_status,fulfillment_status,total_price"
+      },
+      "urlTemplate": "https://{shop}.myshopify.com/admin/api/{version}/orders/{id}.json"
+    },
+    {
+      "id": "get-all-orders",
+      "name": "Get All Orders",
+      "description": "Get all orders",
+      "method": "GET",
+      "path": "/orders.json",
+      "queryParams": {
+        "limit": "250",
+        "page": "1",
+        "status": "any",
+        "fields": "id,name,email,created_at,financial_status,fulfillment_status,total_price"
+      },
+      "urlTemplate": "https://{shop}.myshopify.com/admin/api/{version}/orders.json"
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "id": "pushover",
+  "name": "Pushover",
+  "icon": "📢",
+  "logoUrl": "https://cdn.simpleicons.org/pushover/000000",
+  "description": "Push notification service for mobile and desktop",
+  "baseUrl": "https://api.pushover.net/1",
+  "color": {
+    "bg": "from-slate-100 to-gray-100",
+    "border": "border-slate-500",
+    "icon": "text-slate-700",
+    "handle": "bg-slate-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "secretKey": "PUSHOVER_API_TOKEN",
+    "queryParamName": "token",
+    "usernameSecretKey": "PUSHOVER_USER_KEY",
+    "note": "API Token is sent as query parameter 'token', and User Key is sent as query parameter 'user'."
+  },
+  "endpoints": [
+    {
+      "id": "push-message",
+      "name": "Push Message",
+      "description": "Send a push notification",
+      "method": "POST",
+      "path": "/messages.json",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "required": true,
+            "description": "Application API token"
+          },
+          "user": {
+            "type": "string",
+            "required": true,
+            "description": "User key"
+          },
+          "message": {
+            "type": "string",
+            "required": true,
+            "description": "Message text"
+          },
+          "title": {
+            "type": "string",
+            "description": "Message title"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to open when notification is clicked"
+          },
+          "url_title": {
+            "type": "string",
+            "description": "URL title"
+          },
+          "priority": {
+            "type": "integer",
+            "enum": [-2, -1, 0, 1, 2],
+            "default": 0,
+            "description": "Priority (-2=lowest, -1=low, 0=normal, 1=high, 2=emergency)"
+          },
+          "sound": {
+            "type": "string",
+            "enum": ["pushover", "bike", "bugle", "cashregister", "classical", "cosmic", "falling", "gamelan", "incoming", "intermission", "magic", "mechanical", "pianobar", "siren", "spacealarm", "tugboat", "alien", "climb", "persistent", "echo", "updown", "none"],
+            "default": "pushover",
+            "description": "Notification sound"
+          },
+          "device": {
+            "type": "string",
+            "description": "Device name (comma-separated for multiple devices)"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Unix timestamp (for delayed delivery)"
+          },
+          "expire": {
+            "type": "integer",
+            "description": "Expiration time in seconds (for emergency priority)"
+          },
+          "retry": {
+            "type": "integer",
+            "description": "Retry interval in seconds (for emergency priority)"
+          },
+          "html": {
+            "type": "integer",
+            "enum": [0, 1],
+            "default": 0,
+            "description": "Enable HTML formatting (0=no, 1=yes)"
+          },
+          "monospace": {
+            "type": "integer",
+            "enum": [0, 1],
+            "default": 0,
+            "description": "Use monospace font (0=no, 1=yes)"
+          },
+          "attachment": {
+            "type": "string",
+            "format": "binary",
+            "description": "Image attachment (multipart/form-data)"
+          }
+        },
+        "required": ["token", "user", "message"]
+      },
+      "urlTemplate": "https://api.pushover.net/1/messages.json"
+    }
+  ]
+}
+

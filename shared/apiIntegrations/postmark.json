@@ -1,0 +1,175 @@
+{
+  "id": "postmark",
+  "name": "Postmark",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/postmark/FFD700",
+  "description": "Transactional email delivery service",
+  "baseUrl": "https://api.postmarkapp.com",
+  "color": {
+    "bg": "from-yellow-100 to-amber-100",
+    "border": "border-yellow-500",
+    "icon": "text-yellow-700",
+    "handle": "bg-yellow-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "X-Postmark-Server-Token",
+    "headerFormat": "{apiKey}",
+    "secretKey": "POSTMARK_API_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "send-email",
+      "name": "Send Email",
+      "description": "Send a single email",
+      "method": "POST",
+      "path": "/email",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "From": { "type": "string", "required": true, "description": "Sender email address (e.g., 'sender@example.com' or 'Sender Name <sender@example.com>')" },
+          "To": { "type": "string", "required": true, "description": "Recipient email address(es), comma-separated for multiple" },
+          "Cc": { "type": "string", "description": "CC email address(es), comma-separated" },
+          "Bcc": { "type": "string", "description": "BCC email address(es), comma-separated" },
+          "Subject": { "type": "string", "required": true, "description": "Email subject" },
+          "TextBody": { "type": "string", "description": "Plain text email body" },
+          "HtmlBody": { "type": "string", "description": "HTML email body" },
+          "MessageStream": { "type": "string", "description": "Message stream (e.g., 'outbound', 'broadcasts')" },
+          "Tag": { "type": "string", "description": "Tag for tracking" },
+          "Metadata": {
+            "type": "object",
+            "description": "Custom metadata (key-value pairs)",
+            "additionalProperties": true
+          },
+          "Headers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Name": { "type": "string", "required": true },
+                "Value": { "type": "string", "required": true }
+              },
+              "required": ["Name", "Value"]
+            },
+            "description": "Custom email headers"
+          },
+          "Attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Name": { "type": "string", "required": true, "description": "Attachment filename" },
+                "Content": { "type": "string", "required": true, "description": "Base64 encoded file content" },
+                "ContentType": { "type": "string", "description": "MIME type (e.g., 'application/pdf')" },
+                "ContentID": { "type": "string", "description": "Content ID for inline attachments" }
+              },
+              "required": ["Name", "Content"]
+            },
+            "description": "Email attachments"
+          },
+          "TrackOpens": { "type": "boolean", "default": true, "description": "Enable open tracking" },
+          "TrackLinks": { "type": "string", "enum": ["None", "HtmlAndText", "HtmlOnly", "TextOnly"], "default": "HtmlAndText", "description": "Link tracking mode" }
+        },
+        "required": ["From", "To", "Subject"]
+      },
+      "urlTemplate": "https://api.postmarkapp.com/email"
+    },
+    {
+      "id": "send-batch-email",
+      "name": "Send Batch Email",
+      "description": "Send multiple emails in a single request",
+      "method": "POST",
+      "path": "/email/batch",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "From": { "type": "string", "required": true },
+                "To": { "type": "string", "required": true },
+                "Cc": { "type": "string" },
+                "Bcc": { "type": "string" },
+                "Subject": { "type": "string", "required": true },
+                "TextBody": { "type": "string" },
+                "HtmlBody": { "type": "string" },
+                "Tag": { "type": "string" },
+                "Metadata": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "TrackOpens": { "type": "boolean", "default": true },
+                "TrackLinks": { "type": "string", "enum": ["None", "HtmlAndText", "HtmlOnly", "TextOnly"] }
+              },
+              "required": ["From", "To", "Subject"]
+            },
+            "required": true,
+            "description": "Array of email messages"
+          }
+        },
+        "required": ["Messages"]
+      },
+      "urlTemplate": "https://api.postmarkapp.com/email/batch"
+    },
+    {
+      "id": "get-bounce",
+      "name": "Get Bounce",
+      "description": "Get bounce details by ID",
+      "method": "GET",
+      "path": "/bounces/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.postmarkapp.com/bounces/{id}"
+    },
+    {
+      "id": "list-bounces",
+      "name": "List Bounces",
+      "description": "List all bounces",
+      "method": "GET",
+      "path": "/bounces",
+      "headers": {},
+      "queryParams": {
+        "count": "500",
+        "offset": "0",
+        "type": "{type}",
+        "inactive": "false",
+        "emailFilter": "{emailFilter}",
+        "tag": "{tag}",
+        "messageID": "{messageID}",
+        "fromdate": "{fromdate}",
+        "todate": "{todate}"
+      },
+      "urlTemplate": "https://api.postmarkapp.com/bounces"
+    },
+    {
+      "id": "get-template",
+      "name": "Get Template",
+      "description": "Get email template details by ID",
+      "method": "GET",
+      "path": "/templates/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.postmarkapp.com/templates/{id}"
+    },
+    {
+      "id": "list-templates",
+      "name": "List Templates",
+      "description": "List all email templates",
+      "method": "GET",
+      "path": "/templates",
+      "headers": {},
+      "queryParams": {
+        "count": "500",
+        "offset": "0"
+      },
+      "urlTemplate": "https://api.postmarkapp.com/templates"
+    }
+  ]
+}
+

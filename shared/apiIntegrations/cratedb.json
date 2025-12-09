@@ -1,0 +1,115 @@
+{
+  "id": "cratedb",
+  "name": "CrateDB",
+  "icon": "🗄️",
+  "logoUrl": "https://cdn.simpleicons.org/cratedb/000000",
+  "description": "Distributed SQL database for machine data",
+  "baseUrl": "postgresql://{host}:{port}/{database}",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(username:password)}",
+    "secretKey": "CRATEDB_PASSWORD",
+    "usernameSecretKey": "CRATEDB_USERNAME",
+    "note": "Base URL should be provided as PostgreSQL connection string (postgresql://{host}:{port}/{database}) or as separate CRATEDB_HOST, CRATEDB_PORT (default: 5432), CRATEDB_DATABASE secret keys. Uses PostgreSQL-compatible SQL queries."
+  },
+  "endpoints": [
+    {
+      "id": "execute-query",
+      "name": "Execute Query",
+      "description": "Execute a SQL query (PostgreSQL-compatible)",
+      "method": "POST",
+      "path": "/sql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "stmt": {
+            "type": "string",
+            "required": true,
+            "description": "SQL query statement"
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "any"
+            },
+            "description": "Query parameters"
+          }
+        },
+        "required": ["stmt"]
+      },
+      "urlTemplate": "postgresql://{host}:{port}/{database}/sql"
+    },
+    {
+      "id": "insert-into-table",
+      "name": "Insert Into Table",
+      "description": "Insert data into a table",
+      "method": "POST",
+      "path": "/sql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "stmt": {
+            "type": "string",
+            "required": true,
+            "description": "INSERT INTO {schema}.{table} ... SQL statement"
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "any"
+            },
+            "description": "Query parameters"
+          }
+        },
+        "required": ["stmt"]
+      },
+      "urlTemplate": "postgresql://{host}:{port}/{database}/sql"
+    },
+    {
+      "id": "update-table",
+      "name": "Update Table",
+      "description": "Update data in a table",
+      "method": "POST",
+      "path": "/sql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "stmt": {
+            "type": "string",
+            "required": true,
+            "description": "UPDATE {schema}.{table} ... SQL statement"
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "any"
+            },
+            "description": "Query parameters"
+          }
+        },
+        "required": ["stmt"]
+      },
+      "urlTemplate": "postgresql://{host}:{port}/{database}/sql"
+    }
+  ]
+}
+

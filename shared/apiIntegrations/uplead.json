@@ -1,0 +1,106 @@
+{
+  "id": "uplead",
+  "name": "Uplead",
+  "icon": "🔍",
+  "logoUrl": "https://cdn.simpleicons.org/uplead/000000",
+  "description": "B2B data enrichment platform for company and person data",
+  "baseUrl": "https://api.uplead.com/v2",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "{apiKey}",
+    "secretKey": "UPLEAD_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "company-enrich-by-domain",
+      "name": "Company Enrich by Domain",
+      "description": "Enrich company data by domain",
+      "method": "GET",
+      "path": "/person-search",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "queryParams": {
+        "domain": {
+          "type": "string",
+          "required": true,
+          "description": "Company domain (e.g., 'example.com')"
+        }
+      },
+      "urlTemplate": "https://api.uplead.com/v2/person-search"
+    },
+    {
+      "id": "company-enrich-by-name",
+      "name": "Company Enrich by Name",
+      "description": "Enrich company data by company name",
+      "method": "GET",
+      "path": "/person-search",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "queryParams": {
+        "company": {
+          "type": "string",
+          "required": true,
+          "description": "Company name"
+        }
+      },
+      "urlTemplate": "https://api.uplead.com/v2/person-search"
+    },
+    {
+      "id": "person-enrich-by-email",
+      "name": "Person Enrich by Email",
+      "description": "Enrich person data by email",
+      "method": "GET",
+      "path": "/person-search",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "queryParams": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "required": true,
+          "description": "Email address"
+        }
+      },
+      "urlTemplate": "https://api.uplead.com/v2/person-search"
+    },
+    {
+      "id": "person-enrich-by-name-and-domain",
+      "name": "Person Enrich by Name and Domain",
+      "description": "Enrich person data by domain, first name, and last name",
+      "method": "GET",
+      "path": "/person-search",
+      "headers": {
+        "Authorization": "{apiKey}"
+      },
+      "queryParams": {
+        "domain": {
+          "type": "string",
+          "required": true,
+          "description": "Company domain (e.g., 'example.com')"
+        },
+        "first_name": {
+          "type": "string",
+          "required": true,
+          "description": "First name"
+        },
+        "last_name": {
+          "type": "string",
+          "required": true,
+          "description": "Last name"
+        }
+      },
+      "urlTemplate": "https://api.uplead.com/v2/person-search"
+    }
+  ]
+}
+

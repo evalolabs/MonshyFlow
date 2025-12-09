@@ -1,0 +1,237 @@
+{
+  "id": "strava",
+  "name": "Strava",
+  "icon": "🏃",
+  "logoUrl": "https://cdn.simpleicons.org/strava/FC4C02",
+  "description": "Fitness tracking platform for accessing activities, athlete data, and more",
+  "baseUrl": "https://www.strava.com/api/v3",
+  "color": {
+    "bg": "from-orange-100 to-pink-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "STRAVA_OAUTH2_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-activity",
+      "name": "Create Activity",
+      "description": "Create a new activity",
+      "method": "POST",
+      "path": "/activities",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Activity name"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["Run", "Ride", "Walk", "Hike", "Swim", "Workout", "Yoga", "Crossfit", "WeightTraining", "VirtualRide", "EBikeRide", "Elliptical", "StairStepper", "AlpineSki", "BackcountrySki", "Canoeing", "Crossfit", "EBikeRide", "Elliptical", "EMountainBikeRide", "Golf", "GravelRide", "Handcycle", "Hike", "IceSkate", "InlineSkate", "Kayaking", "Kitesurf", "MountainBikeRide", "NordicSki", "Ride", "RockClimbing", "RollerSki", "Rowing", "Run", "Sail", "Skateboard", "Snowboard", "Snowshoe", "Soccer", "StairStepper", "StandUpPaddling", "Surfing", "Swim", "Velomobile", "VirtualRide", "VirtualRun", "Walk", "WeightTraining", "Wheelchair", "Windsurf", "Workout", "Yoga"],
+            "required": true,
+            "description": "Activity type"
+          },
+          "start_date_local": {
+            "type": "string",
+            "format": "date-time",
+            "required": true,
+            "description": "Start date and time (ISO 8601)"
+          },
+          "elapsed_time": {
+            "type": "integer",
+            "required": true,
+            "description": "Elapsed time in seconds"
+          },
+          "description": {
+            "type": "string",
+            "description": "Activity description"
+          },
+          "distance": {
+            "type": "number",
+            "description": "Distance in meters"
+          },
+          "trainer": {
+            "type": "boolean",
+            "default": false,
+            "description": "Indoor activity"
+          },
+          "commute": {
+            "type": "boolean",
+            "default": false,
+            "description": "Commute activity"
+          },
+          "hide_from_home": {
+            "type": "boolean",
+            "default": false,
+            "description": "Hide from home feed"
+          }
+        },
+        "required": ["name", "type", "start_date_local", "elapsed_time"]
+      },
+      "urlTemplate": "https://www.strava.com/api/v3/activities"
+    },
+    {
+      "id": "get-activity",
+      "name": "Get Activity",
+      "description": "Get activity by ID",
+      "method": "GET",
+      "path": "/activities/{activityId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "include_all_efforts": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include all segment efforts"
+        }
+      },
+      "urlTemplate": "https://www.strava.com/api/v3/activities/{activityId}"
+    },
+    {
+      "id": "list-activities",
+      "name": "List Activities",
+      "description": "List activities of authenticated athlete",
+      "method": "GET",
+      "path": "/athlete/activities",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "before": {
+          "type": "integer",
+          "description": "Unix timestamp - get activities before this time"
+        },
+        "after": {
+          "type": "integer",
+          "description": "Unix timestamp - get activities after this time"
+        },
+        "page": {
+          "type": "integer",
+          "default": 1,
+          "description": "Page number"
+        },
+        "per_page": {
+          "type": "integer",
+          "default": 30,
+          "description": "Number of results per page"
+        }
+      },
+      "urlTemplate": "https://www.strava.com/api/v3/athlete/activities"
+    },
+    {
+      "id": "update-activity",
+      "name": "Update Activity",
+      "description": "Update an activity",
+      "method": "PUT",
+      "path": "/activities/{activityId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["Run", "Ride", "Walk", "Hike", "Swim", "Workout", "Yoga", "Crossfit", "WeightTraining", "VirtualRide", "EBikeRide", "Elliptical", "StairStepper", "AlpineSki", "BackcountrySki", "Canoeing", "Crossfit", "EBikeRide", "Elliptical", "EMountainBikeRide", "Golf", "GravelRide", "Handcycle", "Hike", "IceSkate", "InlineSkate", "Kayaking", "Kitesurf", "MountainBikeRide", "NordicSki", "Ride", "RockClimbing", "RollerSki", "Rowing", "Run", "Sail", "Skateboard", "Snowboard", "Snowshoe", "Soccer", "StairStepper", "StandUpPaddling", "Surfing", "Swim", "Velomobile", "VirtualRide", "VirtualRun", "Walk", "WeightTraining", "Wheelchair", "Windsurf", "Workout", "Yoga"]
+          },
+          "description": { "type": "string" },
+          "trainer": { "type": "boolean" },
+          "commute": { "type": "boolean" },
+          "hide_from_home": { "type": "boolean" },
+          "gear_id": { "type": "string" }
+        }
+      },
+      "urlTemplate": "https://www.strava.com/api/v3/activities/{activityId}"
+    },
+    {
+      "id": "delete-activity",
+      "name": "Delete Activity",
+      "description": "Delete an activity",
+      "method": "DELETE",
+      "path": "/activities/{activityId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://www.strava.com/api/v3/activities/{activityId}"
+    },
+    {
+      "id": "get-activity-zones",
+      "name": "Get Activity Zones",
+      "description": "Get heart rate and power zones for an activity",
+      "method": "GET",
+      "path": "/activities/{activityId}/zones",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://www.strava.com/api/v3/activities/{activityId}/zones"
+    },
+    {
+      "id": "get-activity-laps",
+      "name": "Get Activity Laps",
+      "description": "Get laps for an activity",
+      "method": "GET",
+      "path": "/activities/{activityId}/laps",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://www.strava.com/api/v3/activities/{activityId}/laps"
+    },
+    {
+      "id": "get-activity-comments",
+      "name": "Get Activity Comments",
+      "description": "Get comments for an activity",
+      "method": "GET",
+      "path": "/activities/{activityId}/comments",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "page": {
+          "type": "integer",
+          "default": 1
+        },
+        "per_page": {
+          "type": "integer",
+          "default": 30
+        }
+      },
+      "urlTemplate": "https://www.strava.com/api/v3/activities/{activityId}/comments"
+    },
+    {
+      "id": "get-activity-kudos",
+      "name": "Get Activity Kudos",
+      "description": "Get kudos (likes) for an activity",
+      "method": "GET",
+      "path": "/activities/{activityId}/kudos",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "page": {
+          "type": "integer",
+          "default": 1
+        },
+        "per_page": {
+          "type": "integer",
+          "default": 30
+        }
+      },
+      "urlTemplate": "https://www.strava.com/api/v3/activities/{activityId}/kudos"
+    }
+  ]
+}
+

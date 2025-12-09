@@ -1,0 +1,221 @@
+{
+  "id": "google-drive",
+  "name": "Google Drive",
+  "icon": "📁",
+  "logoUrl": "https://cdn.simpleicons.org/googledrive/4285F4",
+  "description": "Cloud storage and file sharing service",
+  "baseUrl": "https://www.googleapis.com",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GOOGLE_DRIVE_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "copy-file",
+      "name": "Copy File",
+      "description": "Copy a file in Google Drive",
+      "method": "POST",
+      "path": "/drive/v3/files/{fileId}/copy",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "New file name" },
+          "parents": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Parent folder IDs"
+          },
+          "description": { "type": "string", "description": "File description" },
+          "mimeType": { "type": "string", "description": "MIME type" },
+          "starred": { "type": "boolean", "description": "Star the file" },
+          "trashed": { "type": "boolean", "description": "Move to trash" },
+          "visibility": { "type": "string", "enum": ["private", "public"], "description": "File visibility" }
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/drive/v3/files/{fileId}/copy"
+    },
+    {
+      "id": "get-file",
+      "name": "Get File",
+      "description": "Get file metadata by ID",
+      "method": "GET",
+      "path": "/drive/v3/files/{fileId}",
+      "headers": {},
+      "queryParams": {
+        "fields": "*",
+        "supportsAllDrives": "true",
+        "includeItemsFromAllDrives": "true"
+      },
+      "urlTemplate": "https://www.googleapis.com/drive/v3/files/{fileId}"
+    },
+    {
+      "id": "download-file",
+      "name": "Download File",
+      "description": "Download file content",
+      "method": "GET",
+      "path": "/drive/v3/files/{fileId}",
+      "headers": {
+        "Accept": "application/octet-stream"
+      },
+      "queryParams": {
+        "alt": "media",
+        "supportsAllDrives": "true"
+      },
+      "urlTemplate": "https://www.googleapis.com/drive/v3/files/{fileId}"
+    },
+    {
+      "id": "delete-file",
+      "name": "Delete File",
+      "description": "Delete a file",
+      "method": "DELETE",
+      "path": "/drive/v3/files/{fileId}",
+      "headers": {},
+      "queryParams": {
+        "supportsAllDrives": "true"
+      },
+      "urlTemplate": "https://www.googleapis.com/drive/v3/files/{fileId}"
+    },
+    {
+      "id": "list-files",
+      "name": "List Files",
+      "description": "List all files",
+      "method": "GET",
+      "path": "/drive/v3/files",
+      "headers": {},
+      "queryParams": {
+        "q": "{query}",
+        "pageSize": "100",
+        "pageToken": "{pageToken}",
+        "orderBy": "modifiedTime desc",
+        "fields": "nextPageToken, files(id, name, mimeType, modifiedTime, size)",
+        "supportsAllDrives": "true",
+        "includeItemsFromAllDrives": "true",
+        "corpora": "{corpora}",
+        "driveId": "{driveId}",
+        "spaces": "drive"
+      },
+      "urlTemplate": "https://www.googleapis.com/drive/v3/files"
+    },
+    {
+      "id": "upload-file",
+      "name": "Upload File",
+      "description": "Upload a new file",
+      "method": "POST",
+      "path": "/upload/drive/v3/files",
+      "headers": {
+        "Content-Type": "multipart/related"
+      },
+      "queryParams": {
+        "uploadType": "multipart",
+        "supportsAllDrives": "true"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "File name" },
+          "parents": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Parent folder IDs"
+          },
+          "mimeType": { "type": "string", "description": "MIME type" },
+          "description": { "type": "string", "description": "File description" },
+          "content": { "type": "string", "format": "binary", "description": "File content (binary data)" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://www.googleapis.com/upload/drive/v3/files"
+    },
+    {
+      "id": "create-folder",
+      "name": "Create Folder",
+      "description": "Create a new folder",
+      "method": "POST",
+      "path": "/drive/v3/files",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Folder name" },
+          "mimeType": { "type": "string", "default": "application/vnd.google-apps.folder", "description": "MIME type (must be folder)" },
+          "parents": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Parent folder IDs"
+          },
+          "description": { "type": "string", "description": "Folder description" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://www.googleapis.com/drive/v3/files"
+    },
+    {
+      "id": "get-folder",
+      "name": "Get Folder",
+      "description": "Get folder metadata by ID",
+      "method": "GET",
+      "path": "/drive/v3/files/{folderId}",
+      "headers": {},
+      "queryParams": {
+        "fields": "*",
+        "supportsAllDrives": "true"
+      },
+      "urlTemplate": "https://www.googleapis.com/drive/v3/files/{folderId}"
+    },
+    {
+      "id": "list-folders",
+      "name": "List Folders",
+      "description": "List all folders",
+      "method": "GET",
+      "path": "/drive/v3/files",
+      "headers": {},
+      "queryParams": {
+        "q": "mimeType='application/vnd.google-apps.folder'",
+        "pageSize": "100",
+        "pageToken": "{pageToken}",
+        "fields": "nextPageToken, files(id, name, mimeType, modifiedTime)",
+        "supportsAllDrives": "true",
+        "includeItemsFromAllDrives": "true"
+      },
+      "urlTemplate": "https://www.googleapis.com/drive/v3/files"
+    },
+    {
+      "id": "get-drive",
+      "name": "Get Drive",
+      "description": "Get shared drive details by ID",
+      "method": "GET",
+      "path": "/drive/v3/drives/{driveId}",
+      "headers": {},
+      "urlTemplate": "https://www.googleapis.com/drive/v3/drives/{driveId}"
+    },
+    {
+      "id": "list-drives",
+      "name": "List Drives",
+      "description": "List all shared drives",
+      "method": "GET",
+      "path": "/drive/v3/drives",
+      "headers": {},
+      "queryParams": {
+        "pageSize": "100",
+        "pageToken": "{pageToken}",
+        "q": "{query}",
+        "useDomainAdminAccess": "false"
+      },
+      "urlTemplate": "https://www.googleapis.com/drive/v3/drives"
+    }
+  ]
+}
+

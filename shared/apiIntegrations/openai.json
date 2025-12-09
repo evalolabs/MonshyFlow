@@ -1,0 +1,183 @@
+{
+  "id": "openai",
+  "name": "OpenAI",
+  "icon": "🤖",
+  "logoUrl": "https://cdn.simpleicons.org/openai/412991",
+  "description": "AI platform for language models and image generation",
+  "baseUrl": "https://api.openai.com",
+  "color": {
+    "bg": "from-emerald-100 to-teal-100",
+    "border": "border-emerald-500",
+    "icon": "text-emerald-700",
+    "handle": "bg-emerald-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "OPENAI_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-chat-completion",
+      "name": "Create Chat Completion",
+      "description": "Create a chat completion",
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "model": { "type": "string", "required": true, "description": "Model to use (e.g., gpt-4, gpt-3.5-turbo)" },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "role": { "type": "string", "enum": ["system", "user", "assistant"], "required": true, "description": "Message role" },
+                "content": { "type": "string", "required": true, "description": "Message content" },
+                "name": { "type": "string", "description": "Name of the message author" }
+              },
+              "required": ["role", "content"]
+            },
+            "required": true,
+            "description": "Array of messages"
+          },
+          "temperature": { "type": "number", "default": 1, "minimum": 0, "maximum": 2, "description": "Sampling temperature" },
+          "top_p": { "type": "number", "default": 1, "minimum": 0, "maximum": 1, "description": "Nucleus sampling parameter" },
+          "n": { "type": "integer", "default": 1, "minimum": 1, "description": "Number of completions" },
+          "stream": { "type": "boolean", "default": false, "description": "Stream responses" },
+          "stop": { "type": ["string", "array"], "description": "Stop sequences" },
+          "max_tokens": { "type": "integer", "description": "Maximum tokens to generate" },
+          "presence_penalty": { "type": "number", "default": 0, "minimum": -2, "maximum": 2, "description": "Presence penalty" },
+          "frequency_penalty": { "type": "number", "default": 0, "minimum": -2, "maximum": 2, "description": "Frequency penalty" },
+          "logit_bias": { "type": "object", "description": "Logit bias" },
+          "user": { "type": "string", "description": "User identifier" }
+        },
+        "required": ["model", "messages"]
+      },
+      "urlTemplate": "https://api.openai.com/v1/chat/completions"
+    },
+    {
+      "id": "create-image",
+      "name": "Create Image",
+      "description": "Generate an image",
+      "method": "POST",
+      "path": "/v1/images/generations",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "prompt": { "type": "string", "required": true, "description": "Image prompt" },
+          "n": { "type": "integer", "default": 1, "minimum": 1, "maximum": 10, "description": "Number of images" },
+          "size": { "type": "string", "enum": ["256x256", "512x512", "1024x1024"], "default": "1024x1024", "description": "Image size" },
+          "response_format": { "type": "string", "enum": ["url", "b64_json"], "default": "url", "description": "Response format" },
+          "user": { "type": "string", "description": "User identifier" }
+        },
+        "required": ["prompt"]
+      },
+      "urlTemplate": "https://api.openai.com/v1/images/generations"
+    },
+    {
+      "id": "complete-text",
+      "name": "Complete Text",
+      "description": "Complete text using GPT-3",
+      "method": "POST",
+      "path": "/v1/completions",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "model": { "type": "string", "required": true, "description": "Model to use (e.g., text-davinci-003, text-curie-001)" },
+          "prompt": { "type": ["string", "array"], "required": true, "description": "Text prompt" },
+          "max_tokens": { "type": "integer", "default": 16, "description": "Maximum tokens to generate" },
+          "temperature": { "type": "number", "default": 1, "minimum": 0, "maximum": 2, "description": "Sampling temperature" },
+          "top_p": { "type": "number", "default": 1, "minimum": 0, "maximum": 1, "description": "Nucleus sampling parameter" },
+          "n": { "type": "integer", "default": 1, "minimum": 1, "description": "Number of completions" },
+          "stream": { "type": "boolean", "default": false, "description": "Stream responses" },
+          "logprobs": { "type": "integer", "description": "Log probabilities" },
+          "stop": { "type": ["string", "array"], "description": "Stop sequences" },
+          "presence_penalty": { "type": "number", "default": 0, "minimum": -2, "maximum": 2, "description": "Presence penalty" },
+          "frequency_penalty": { "type": "number", "default": 0, "minimum": -2, "maximum": 2, "description": "Frequency penalty" },
+          "best_of": { "type": "integer", "description": "Best of N completions" },
+          "logit_bias": { "type": "object", "description": "Logit bias" },
+          "user": { "type": "string", "description": "User identifier" },
+          "echo": { "type": "boolean", "default": false, "description": "Echo prompt in response" },
+          "suffix": { "type": "string", "description": "Suffix to append" }
+        },
+        "required": ["model", "prompt"]
+      },
+      "urlTemplate": "https://api.openai.com/v1/completions"
+    },
+    {
+      "id": "classify-text",
+      "name": "Classify Text",
+      "description": "Classify text (deprecated, use chat completions instead)",
+      "method": "POST",
+      "path": "/v1/classifications",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "model": { "type": "string", "required": true, "description": "Model to use" },
+          "query": { "type": "string", "required": true, "description": "Text to classify" },
+          "examples": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "description": "Example classifications"
+          },
+          "file": { "type": "string", "description": "File ID" },
+          "labels": { "type": "array", "items": { "type": "string" }, "description": "Classification labels" },
+          "search_model": { "type": "string", "default": "ada", "description": "Search model" },
+          "temperature": { "type": "number", "default": 0, "minimum": 0, "maximum": 2, "description": "Sampling temperature" },
+          "logprobs": { "type": "integer", "description": "Log probabilities" },
+          "max_examples": { "type": "integer", "description": "Maximum examples" }
+        },
+        "required": ["model", "query"]
+      },
+      "urlTemplate": "https://api.openai.com/v1/classifications"
+    },
+    {
+      "id": "edit-text",
+      "name": "Edit Text",
+      "description": "Edit text (deprecated, use chat completions instead)",
+      "method": "POST",
+      "path": "/v1/edits",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "model": { "type": "string", "required": true, "description": "Model to use (e.g., text-davinci-edit-001, code-davinci-edit-001)" },
+          "input": { "type": "string", "default": "", "description": "Input text" },
+          "instruction": { "type": "string", "required": true, "description": "Edit instruction" },
+          "n": { "type": "integer", "default": 1, "minimum": 1, "description": "Number of edits" },
+          "temperature": { "type": "number", "default": 1, "minimum": 0, "maximum": 2, "description": "Sampling temperature" },
+          "top_p": { "type": "number", "default": 1, "minimum": 0, "maximum": 1, "description": "Nucleus sampling parameter" }
+        },
+        "required": ["model", "instruction"]
+      },
+      "urlTemplate": "https://api.openai.com/v1/edits"
+    }
+  ]
+}
+

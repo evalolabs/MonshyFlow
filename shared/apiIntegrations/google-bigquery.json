@@ -1,0 +1,375 @@
+{
+  "id": "google-bigquery",
+  "name": "Google BigQuery",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/googlebigquery/4285F4",
+  "description": "Data warehouse for large-scale data analytics with SQL-like queries",
+  "baseUrl": "https://bigquery.googleapis.com/bigquery/v2",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GOOGLE_BIGQUERY_OAUTH2_ACCESS_TOKEN",
+    "note": "Supports OAuth2 (GOOGLE_BIGQUERY_OAUTH2_ACCESS_TOKEN) or Service Account (GOOGLE_BIGQUERY_SERVICE_ACCOUNT_KEY) authentication."
+  },
+  "endpoints": [
+    {
+      "id": "execute-query",
+      "name": "Execute Query",
+      "description": "Execute a SQL query",
+      "method": "POST",
+      "path": "/projects/{projectId}/queries",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "SQL query string"
+          },
+          "useLegacySql": {
+            "type": "boolean",
+            "default": false,
+            "description": "Use legacy SQL (default: false, uses standard SQL)"
+          },
+          "useQueryCache": {
+            "type": "boolean",
+            "default": true,
+            "description": "Use query cache"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dry run (validate query without executing)"
+          },
+          "defaultDataset": {
+            "type": "object",
+            "properties": {
+              "datasetId": { "type": "string" },
+              "projectId": { "type": "string" }
+            },
+            "description": "Default dataset for unqualified table names"
+          },
+          "maximumBytesBilled": {
+            "type": "string",
+            "description": "Maximum bytes billed (as string)"
+          },
+          "requestId": {
+            "type": "string",
+            "description": "Request ID for deduplication"
+          },
+          "jobTimeoutMs": {
+            "type": "integer",
+            "description": "Job timeout in milliseconds"
+          },
+          "location": {
+            "type": "string",
+            "description": "Job location"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/queries"
+    },
+    {
+      "id": "insert-data",
+      "name": "Insert Data",
+      "description": "Insert data into a table",
+      "method": "POST",
+      "path": "/projects/{projectId}/datasets/{datasetId}/tables/{tableId}/insertAll",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "insertId": {
+                  "type": "string",
+                  "description": "Insert ID for deduplication"
+                },
+                "json": {
+                  "type": "object",
+                  "description": "Row data as JSON object",
+                  "additionalProperties": true
+                }
+              },
+              "required": ["json"]
+            },
+            "required": true,
+            "description": "Array of rows to insert"
+          },
+          "skipInvalidRows": {
+            "type": "boolean",
+            "default": false,
+            "description": "Skip invalid rows"
+          },
+          "ignoreUnknownValues": {
+            "type": "boolean",
+            "default": false,
+            "description": "Ignore unknown values"
+          },
+          "templateSuffix": {
+            "type": "string",
+            "description": "Template suffix for table decorators"
+          }
+        },
+        "required": ["rows"]
+      },
+      "urlTemplate": "https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/datasets/{datasetId}/tables/{tableId}/insertAll"
+    },
+    {
+      "id": "create-dataset",
+      "name": "Create Dataset",
+      "description": "Create a new dataset",
+      "method": "POST",
+      "path": "/projects/{projectId}/datasets",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "datasetReference": {
+            "type": "object",
+            "properties": {
+              "datasetId": {
+                "type": "string",
+                "required": true,
+                "description": "Dataset ID"
+              },
+              "projectId": { "type": "string" }
+            },
+            "required": ["datasetId"]
+          },
+          "friendlyName": {
+            "type": "string",
+            "description": "Friendly name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Dataset description"
+          },
+          "location": {
+            "type": "string",
+            "description": "Dataset location (e.g., 'US', 'EU')"
+          },
+          "labels": {
+            "type": "object",
+            "description": "Labels",
+            "additionalProperties": { "type": "string" }
+          },
+          "defaultTableExpirationMs": {
+            "type": "string",
+            "description": "Default table expiration in milliseconds"
+          },
+          "defaultPartitionExpirationMs": {
+            "type": "string",
+            "description": "Default partition expiration in milliseconds"
+          }
+        },
+        "required": ["datasetReference"]
+      },
+      "urlTemplate": "https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/datasets"
+    },
+    {
+      "id": "get-dataset",
+      "name": "Get Dataset",
+      "description": "Get dataset by ID",
+      "method": "GET",
+      "path": "/projects/{projectId}/datasets/{datasetId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/datasets/{datasetId}"
+    },
+    {
+      "id": "list-datasets",
+      "name": "List Datasets",
+      "description": "List all datasets in a project",
+      "method": "GET",
+      "path": "/projects/{projectId}/datasets",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "maxResults": {
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum number of results"
+        },
+        "pageToken": {
+          "type": "string",
+          "description": "Page token for pagination"
+        },
+        "all": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include hidden datasets"
+        },
+        "filter": {
+          "type": "string",
+          "description": "Filter expression"
+        }
+      },
+      "urlTemplate": "https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/datasets"
+    },
+    {
+      "id": "delete-dataset",
+      "name": "Delete Dataset",
+      "description": "Delete a dataset",
+      "method": "DELETE",
+      "path": "/projects/{projectId}/datasets/{datasetId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "deleteContents": {
+          "type": "boolean",
+          "default": false,
+          "description": "Delete all tables in the dataset"
+        }
+      },
+      "urlTemplate": "https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/datasets/{datasetId}"
+    },
+    {
+      "id": "create-table",
+      "name": "Create Table",
+      "description": "Create a new table",
+      "method": "POST",
+      "path": "/projects/{projectId}/datasets/{datasetId}/tables",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "tableReference": {
+            "type": "object",
+            "properties": {
+              "tableId": {
+                "type": "string",
+                "required": true,
+                "description": "Table ID"
+              },
+              "datasetId": { "type": "string" },
+              "projectId": { "type": "string" }
+            },
+            "required": ["tableId"]
+          },
+          "friendlyName": { "type": "string" },
+          "description": { "type": "string" },
+          "schema": {
+            "type": "object",
+            "properties": {
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string", "required": true },
+                    "type": { "type": "string", "required": true },
+                    "mode": { "type": "string", "enum": ["NULLABLE", "REQUIRED", "REPEATED"] },
+                    "description": { "type": "string" },
+                    "fields": {
+                      "type": "array",
+                      "items": { "type": "object" }
+                    }
+                  },
+                  "required": ["name", "type"]
+                }
+              }
+            },
+            "description": "Table schema"
+          },
+          "labels": {
+            "type": "object",
+            "description": "Labels",
+            "additionalProperties": { "type": "string" }
+          },
+          "timePartitioning": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["DAY", "HOUR", "MONTH", "YEAR"],
+                "required": true
+              },
+              "expirationMs": { "type": "string" },
+              "field": { "type": "string" }
+            },
+            "description": "Time partitioning configuration"
+          },
+          "expirationTime": {
+            "type": "string",
+            "description": "Table expiration time (Unix timestamp in milliseconds)"
+          }
+        },
+        "required": ["tableReference"]
+      },
+      "urlTemplate": "https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/datasets/{datasetId}/tables"
+    },
+    {
+      "id": "get-table",
+      "name": "Get Table",
+      "description": "Get table by ID",
+      "method": "GET",
+      "path": "/projects/{projectId}/datasets/{datasetId}/tables/{tableId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/datasets/{datasetId}/tables/{tableId}"
+    },
+    {
+      "id": "list-tables",
+      "name": "List Tables",
+      "description": "List all tables in a dataset",
+      "method": "GET",
+      "path": "/projects/{projectId}/datasets/{datasetId}/tables",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "maxResults": {
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum number of results"
+        },
+        "pageToken": {
+          "type": "string",
+          "description": "Page token for pagination"
+        }
+      },
+      "urlTemplate": "https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/datasets/{datasetId}/tables"
+    },
+    {
+      "id": "delete-table",
+      "name": "Delete Table",
+      "description": "Delete a table",
+      "method": "DELETE",
+      "path": "/projects/{projectId}/datasets/{datasetId}/tables/{tableId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://bigquery.googleapis.com/bigquery/v2/projects/{projectId}/datasets/{datasetId}/tables/{tableId}"
+    }
+  ]
+}
+

@@ -1,0 +1,188 @@
+{
+  "id": "customerio",
+  "name": "Customer.io",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/customerio/000000",
+  "description": "Customer engagement and messaging platform",
+  "baseUrl": "https://api.customer.io/v1",
+  "color": {
+    "bg": "from-stone-100 to-gray-100",
+    "border": "border-stone-500",
+    "icon": "text-stone-700",
+    "handle": "bg-stone-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "CUSTOMERIO_APP_API_KEY",
+    "note": "Base URL can be US (https://api.customer.io/v1), EU (https://api-eu.customer.io/v1), or Beta (https://beta-api.customer.io/v1). Use CUSTOMERIO_REGION secret key for region selection (track.customer.io for US or track-eu.customer.io for EU)."
+  },
+  "endpoints": [
+    {
+      "id": "create-customer",
+      "name": "Create Customer",
+      "description": "Create or update a customer",
+      "method": "PUT",
+      "path": "/customers/{customerId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Customer email"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "Unix timestamp of customer creation"
+          },
+          "attributes": {
+            "type": "object",
+            "description": "Customer attributes",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://api.customer.io/v1/customers/{customerId}"
+    },
+    {
+      "id": "get-customer",
+      "name": "Get Customer",
+      "description": "Get customer by ID",
+      "method": "GET",
+      "path": "/customers/{customerId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.customer.io/v1/customers/{customerId}"
+    },
+    {
+      "id": "update-customer",
+      "name": "Update Customer",
+      "description": "Update a customer",
+      "method": "PUT",
+      "path": "/customers/{customerId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Customer email"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "Unix timestamp of customer creation"
+          },
+          "attributes": {
+            "type": "object",
+            "description": "Customer attributes",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://api.customer.io/v1/customers/{customerId}"
+    },
+    {
+      "id": "delete-customer",
+      "name": "Delete Customer",
+      "description": "Delete a customer",
+      "method": "DELETE",
+      "path": "/customers/{customerId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.customer.io/v1/customers/{customerId}"
+    },
+    {
+      "id": "create-event",
+      "name": "Create Event",
+      "description": "Track an event for a customer",
+      "method": "POST",
+      "path": "/events",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Event name"
+          },
+          "data": {
+            "type": "object",
+            "description": "Event data",
+            "additionalProperties": true
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Unix timestamp of the event"
+          },
+          "id": {
+            "type": "string",
+            "description": "Event ID (for deduplication)"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.customer.io/v1/events"
+    },
+    {
+      "id": "get-campaign",
+      "name": "Get Campaign",
+      "description": "Get campaign by ID (Beta API)",
+      "method": "GET",
+      "path": "/campaigns/{campaignId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://beta-api.customer.io/v1/campaigns/{campaignId}"
+    },
+    {
+      "id": "list-campaigns",
+      "name": "List Campaigns",
+      "description": "List all campaigns (Beta API)",
+      "method": "GET",
+      "path": "/campaigns",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://beta-api.customer.io/v1/campaigns"
+    },
+    {
+      "id": "get-segment",
+      "name": "Get Segment",
+      "description": "Get segment by ID (Beta API)",
+      "method": "GET",
+      "path": "/segments/{segmentId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://beta-api.customer.io/v1/segments/{segmentId}"
+    },
+    {
+      "id": "list-segments",
+      "name": "List Segments",
+      "description": "List all segments (Beta API)",
+      "method": "GET",
+      "path": "/segments",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://beta-api.customer.io/v1/segments"
+    }
+  ]
+}
+

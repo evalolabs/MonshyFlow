@@ -1,0 +1,1521 @@
+{
+  "id": "zoho-crm",
+  "name": "Zoho CRM",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/zoho/FF6600",
+  "description": "Customer relationship management platform",
+  "baseUrl": "https://www.zohoapis.com/crm/v2",
+  "color": {
+    "bg": "from-orange-100 to-amber-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Zoho-oauthtoken {apiKey}",
+    "secretKey": "ZOHO_CRM_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-account",
+      "name": "Create Account",
+      "description": "Create a new account",
+      "method": "POST",
+      "path": "/Accounts",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Account_Name": { "type": "string", "required": true, "description": "Account name" },
+                "Phone": { "type": "string", "description": "Phone number" },
+                "Website": { "type": "string", "format": "uri", "description": "Website URL" },
+                "Fax": { "type": "string", "description": "Fax number" },
+                "Ticker_Symbol": { "type": "string", "description": "Ticker symbol" },
+                "Parent_Account": { "type": "object", "description": "Parent account" },
+                "Employees": { "type": "integer", "description": "Number of employees" },
+                "Annual_Revenue": { "type": "number", "description": "Annual revenue" },
+                "Ownership": { "type": "string", "description": "Ownership" },
+                "Industry": { "type": "string", "description": "Industry" },
+                "Account_Type": { "type": "string", "description": "Account type" },
+                "Billing_Street": { "type": "string", "description": "Billing street" },
+                "Billing_City": { "type": "string", "description": "Billing city" },
+                "Billing_State": { "type": "string", "description": "Billing state" },
+                "Billing_Code": { "type": "string", "description": "Billing postal code" },
+                "Billing_Country": { "type": "string", "description": "Billing country" },
+                "Shipping_Street": { "type": "string", "description": "Shipping street" },
+                "Shipping_City": { "type": "string", "description": "Shipping city" },
+                "Shipping_State": { "type": "string", "description": "Shipping state" },
+                "Shipping_Code": { "type": "string", "description": "Shipping postal code" },
+                "Shipping_Country": { "type": "string", "description": "Shipping country" },
+                "Description": { "type": "string", "description": "Description" }
+              },
+              "required": ["Account_Name"]
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          },
+          "duplicate_check_fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Duplicate check fields"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Accounts"
+    },
+    {
+      "id": "get-account",
+      "name": "Get Account",
+      "description": "Get account by ID",
+      "method": "GET",
+      "path": "/Accounts/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Accounts/{id}"
+    },
+    {
+      "id": "list-accounts",
+      "name": "List Accounts",
+      "description": "List all accounts",
+      "method": "GET",
+      "path": "/Accounts",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 200, "description": "Records per page" },
+        "sort_by": { "type": "string", "description": "Sort by field" },
+        "sort_order": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort order" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to retrieve" },
+        "cvid": { "type": "string", "description": "Custom view ID" }
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Accounts"
+    },
+    {
+      "id": "update-account",
+      "name": "Update Account",
+      "description": "Update an existing account",
+      "method": "PUT",
+      "path": "/Accounts/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Account_Name": { "type": "string", "description": "Account name" },
+                "Phone": { "type": "string", "description": "Phone number" },
+                "Website": { "type": "string", "format": "uri", "description": "Website URL" },
+                "Fax": { "type": "string", "description": "Fax number" },
+                "Ticker_Symbol": { "type": "string", "description": "Ticker symbol" },
+                "Parent_Account": { "type": "object", "description": "Parent account" },
+                "Employees": { "type": "integer", "description": "Number of employees" },
+                "Annual_Revenue": { "type": "number", "description": "Annual revenue" },
+                "Ownership": { "type": "string", "description": "Ownership" },
+                "Industry": { "type": "string", "description": "Industry" },
+                "Account_Type": { "type": "string", "description": "Account type" },
+                "Billing_Street": { "type": "string", "description": "Billing street" },
+                "Billing_City": { "type": "string", "description": "Billing city" },
+                "Billing_State": { "type": "string", "description": "Billing state" },
+                "Billing_Code": { "type": "string", "description": "Billing postal code" },
+                "Billing_Country": { "type": "string", "description": "Billing country" },
+                "Shipping_Street": { "type": "string", "description": "Shipping street" },
+                "Shipping_City": { "type": "string", "description": "Shipping city" },
+                "Shipping_State": { "type": "string", "description": "Shipping state" },
+                "Shipping_Code": { "type": "string", "description": "Shipping postal code" },
+                "Shipping_Country": { "type": "string", "description": "Shipping country" },
+                "Description": { "type": "string", "description": "Description" }
+              }
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Accounts/{id}"
+    },
+    {
+      "id": "delete-account",
+      "name": "Delete Account",
+      "description": "Delete an account",
+      "method": "DELETE",
+      "path": "/Accounts/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Accounts/{id}"
+    },
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/Contacts",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "First_Name": { "type": "string", "description": "First name" },
+                "Last_Name": { "type": "string", "required": true, "description": "Last name" },
+                "Email": { "type": "string", "format": "email", "description": "Email address" },
+                "Phone": { "type": "string", "description": "Phone number" },
+                "Mobile": { "type": "string", "description": "Mobile number" },
+                "Account_Name": { "type": "object", "description": "Account name" },
+                "Title": { "type": "string", "description": "Job title" },
+                "Department": { "type": "string", "description": "Department" },
+                "Fax": { "type": "string", "description": "Fax number" },
+                "Mailing_Street": { "type": "string", "description": "Mailing street" },
+                "Mailing_City": { "type": "string", "description": "Mailing city" },
+                "Mailing_State": { "type": "string", "description": "Mailing state" },
+                "Mailing_Code": { "type": "string", "description": "Mailing postal code" },
+                "Mailing_Country": { "type": "string", "description": "Mailing country" },
+                "Other_Street": { "type": "string", "description": "Other street" },
+                "Other_City": { "type": "string", "description": "Other city" },
+                "Other_State": { "type": "string", "description": "Other state" },
+                "Other_Code": { "type": "string", "description": "Other postal code" },
+                "Other_Country": { "type": "string", "description": "Other country" },
+                "Description": { "type": "string", "description": "Description" },
+                "Date_of_Birth": { "type": "string", "format": "date", "description": "Date of birth" },
+                "Lead_Source": { "type": "string", "description": "Lead source" }
+              },
+              "required": ["Last_Name"]
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          },
+          "duplicate_check_fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Duplicate check fields"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact by ID",
+      "method": "GET",
+      "path": "/Contacts/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Contacts/{id}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/Contacts",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 200, "description": "Records per page" },
+        "sort_by": { "type": "string", "description": "Sort by field" },
+        "sort_order": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort order" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to retrieve" },
+        "cvid": { "type": "string", "description": "Custom view ID" }
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update an existing contact",
+      "method": "PUT",
+      "path": "/Contacts/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "First_Name": { "type": "string", "description": "First name" },
+                "Last_Name": { "type": "string", "description": "Last name" },
+                "Email": { "type": "string", "format": "email", "description": "Email address" },
+                "Phone": { "type": "string", "description": "Phone number" },
+                "Mobile": { "type": "string", "description": "Mobile number" },
+                "Account_Name": { "type": "object", "description": "Account name" },
+                "Title": { "type": "string", "description": "Job title" },
+                "Department": { "type": "string", "description": "Department" },
+                "Fax": { "type": "string", "description": "Fax number" },
+                "Mailing_Street": { "type": "string", "description": "Mailing street" },
+                "Mailing_City": { "type": "string", "description": "Mailing city" },
+                "Mailing_State": { "type": "string", "description": "Mailing state" },
+                "Mailing_Code": { "type": "string", "description": "Mailing postal code" },
+                "Mailing_Country": { "type": "string", "description": "Mailing country" },
+                "Other_Street": { "type": "string", "description": "Other street" },
+                "Other_City": { "type": "string", "description": "Other city" },
+                "Other_State": { "type": "string", "description": "Other state" },
+                "Other_Code": { "type": "string", "description": "Other postal code" },
+                "Other_Country": { "type": "string", "description": "Other country" },
+                "Description": { "type": "string", "description": "Description" },
+                "Date_of_Birth": { "type": "string", "format": "date", "description": "Date of birth" },
+                "Lead_Source": { "type": "string", "description": "Lead source" }
+              }
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Contacts/{id}"
+    },
+    {
+      "id": "delete-contact",
+      "name": "Delete Contact",
+      "description": "Delete a contact",
+      "method": "DELETE",
+      "path": "/Contacts/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Contacts/{id}"
+    },
+    {
+      "id": "create-deal",
+      "name": "Create Deal",
+      "description": "Create a new deal",
+      "method": "POST",
+      "path": "/Deals",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Deal_Name": { "type": "string", "required": true, "description": "Deal name" },
+                "Account_Name": { "type": "object", "description": "Account name" },
+                "Contact_Name": { "type": "object", "description": "Contact name" },
+                "Amount": { "type": "number", "description": "Deal amount" },
+                "Stage": { "type": "string", "description": "Deal stage" },
+                "Closing_Date": { "type": "string", "format": "date", "description": "Closing date" },
+                "Probability": { "type": "number", "description": "Probability percentage" },
+                "Type": { "type": "string", "description": "Deal type" },
+                "Lead_Source": { "type": "string", "description": "Lead source" },
+                "Next_Step": { "type": "string", "description": "Next step" },
+                "Description": { "type": "string", "description": "Description" }
+              },
+              "required": ["Deal_Name"]
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          },
+          "duplicate_check_fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Duplicate check fields"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Deals"
+    },
+    {
+      "id": "get-deal",
+      "name": "Get Deal",
+      "description": "Get deal by ID",
+      "method": "GET",
+      "path": "/Deals/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Deals/{id}"
+    },
+    {
+      "id": "list-deals",
+      "name": "List Deals",
+      "description": "List all deals",
+      "method": "GET",
+      "path": "/Deals",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 200, "description": "Records per page" },
+        "sort_by": { "type": "string", "description": "Sort by field" },
+        "sort_order": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort order" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to retrieve" },
+        "cvid": { "type": "string", "description": "Custom view ID" }
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Deals"
+    },
+    {
+      "id": "update-deal",
+      "name": "Update Deal",
+      "description": "Update an existing deal",
+      "method": "PUT",
+      "path": "/Deals/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Deal_Name": { "type": "string", "description": "Deal name" },
+                "Account_Name": { "type": "object", "description": "Account name" },
+                "Contact_Name": { "type": "object", "description": "Contact name" },
+                "Amount": { "type": "number", "description": "Deal amount" },
+                "Stage": { "type": "string", "description": "Deal stage" },
+                "Closing_Date": { "type": "string", "format": "date", "description": "Closing date" },
+                "Probability": { "type": "number", "description": "Probability percentage" },
+                "Type": { "type": "string", "description": "Deal type" },
+                "Lead_Source": { "type": "string", "description": "Lead source" },
+                "Next_Step": { "type": "string", "description": "Next step" },
+                "Description": { "type": "string", "description": "Description" }
+              }
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Deals/{id}"
+    },
+    {
+      "id": "delete-deal",
+      "name": "Delete Deal",
+      "description": "Delete a deal",
+      "method": "DELETE",
+      "path": "/Deals/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Deals/{id}"
+    },
+    {
+      "id": "create-invoice",
+      "name": "Create Invoice",
+      "description": "Create a new invoice",
+      "method": "POST",
+      "path": "/Invoices",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Subject": { "type": "string", "required": true, "description": "Invoice subject" },
+                "Account_Name": { "type": "object", "description": "Account name" },
+                "Contact_Name": { "type": "object", "description": "Contact name" },
+                "Deal_Name": { "type": "object", "description": "Deal name" },
+                "Purchase_Order": { "type": "string", "description": "Purchase order number" },
+                "Invoice_Date": { "type": "string", "format": "date", "description": "Invoice date" },
+                "Due_Date": { "type": "string", "format": "date", "description": "Due date" },
+                "Status": { "type": "string", "description": "Invoice status" },
+                "Grand_Total": { "type": "number", "description": "Grand total" },
+                "Sub_Total": { "type": "number", "description": "Sub total" },
+                "Discount": { "type": "number", "description": "Discount amount" },
+                "Tax": { "type": "number", "description": "Tax amount" },
+                "Adjustment": { "type": "number", "description": "Adjustment amount" },
+                "Billing_Street": { "type": "string", "description": "Billing street" },
+                "Billing_City": { "type": "string", "description": "Billing city" },
+                "Billing_State": { "type": "string", "description": "Billing state" },
+                "Billing_Code": { "type": "string", "description": "Billing postal code" },
+                "Billing_Country": { "type": "string", "description": "Billing country" },
+                "Shipping_Street": { "type": "string", "description": "Shipping street" },
+                "Shipping_City": { "type": "string", "description": "Shipping city" },
+                "Shipping_State": { "type": "string", "description": "Shipping state" },
+                "Shipping_Code": { "type": "string", "description": "Shipping postal code" },
+                "Shipping_Country": { "type": "string", "description": "Shipping country" },
+                "Description": { "type": "string", "description": "Description" },
+                "Terms_and_Conditions": { "type": "string", "description": "Terms and conditions" }
+              },
+              "required": ["Subject"]
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          },
+          "duplicate_check_fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Duplicate check fields"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Invoices"
+    },
+    {
+      "id": "get-invoice",
+      "name": "Get Invoice",
+      "description": "Get invoice by ID",
+      "method": "GET",
+      "path": "/Invoices/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Invoices/{id}"
+    },
+    {
+      "id": "list-invoices",
+      "name": "List Invoices",
+      "description": "List all invoices",
+      "method": "GET",
+      "path": "/Invoices",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 200, "description": "Records per page" },
+        "sort_by": { "type": "string", "description": "Sort by field" },
+        "sort_order": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort order" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to retrieve" },
+        "cvid": { "type": "string", "description": "Custom view ID" }
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Invoices"
+    },
+    {
+      "id": "update-invoice",
+      "name": "Update Invoice",
+      "description": "Update an existing invoice",
+      "method": "PUT",
+      "path": "/Invoices/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Subject": { "type": "string", "description": "Invoice subject" },
+                "Account_Name": { "type": "object", "description": "Account name" },
+                "Contact_Name": { "type": "object", "description": "Contact name" },
+                "Deal_Name": { "type": "object", "description": "Deal name" },
+                "Purchase_Order": { "type": "string", "description": "Purchase order number" },
+                "Invoice_Date": { "type": "string", "format": "date", "description": "Invoice date" },
+                "Due_Date": { "type": "string", "format": "date", "description": "Due date" },
+                "Status": { "type": "string", "description": "Invoice status" },
+                "Grand_Total": { "type": "number", "description": "Grand total" },
+                "Sub_Total": { "type": "number", "description": "Sub total" },
+                "Discount": { "type": "number", "description": "Discount amount" },
+                "Tax": { "type": "number", "description": "Tax amount" },
+                "Adjustment": { "type": "number", "description": "Adjustment amount" },
+                "Billing_Street": { "type": "string", "description": "Billing street" },
+                "Billing_City": { "type": "string", "description": "Billing city" },
+                "Billing_State": { "type": "string", "description": "Billing state" },
+                "Billing_Code": { "type": "string", "description": "Billing postal code" },
+                "Billing_Country": { "type": "string", "description": "Billing country" },
+                "Shipping_Street": { "type": "string", "description": "Shipping street" },
+                "Shipping_City": { "type": "string", "description": "Shipping city" },
+                "Shipping_State": { "type": "string", "description": "Shipping state" },
+                "Shipping_Code": { "type": "string", "description": "Shipping postal code" },
+                "Shipping_Country": { "type": "string", "description": "Shipping country" },
+                "Description": { "type": "string", "description": "Description" },
+                "Terms_and_Conditions": { "type": "string", "description": "Terms and conditions" }
+              }
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Invoices/{id}"
+    },
+    {
+      "id": "delete-invoice",
+      "name": "Delete Invoice",
+      "description": "Delete an invoice",
+      "method": "DELETE",
+      "path": "/Invoices/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Invoices/{id}"
+    },
+    {
+      "id": "create-lead",
+      "name": "Create Lead",
+      "description": "Create a new lead",
+      "method": "POST",
+      "path": "/Leads",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "First_Name": { "type": "string", "description": "First name" },
+                "Last_Name": { "type": "string", "required": true, "description": "Last name" },
+                "Email": { "type": "string", "format": "email", "description": "Email address" },
+                "Phone": { "type": "string", "description": "Phone number" },
+                "Mobile": { "type": "string", "description": "Mobile number" },
+                "Company": { "type": "string", "description": "Company name" },
+                "Title": { "type": "string", "description": "Job title" },
+                "Lead_Source": { "type": "string", "description": "Lead source" },
+                "Lead_Status": { "type": "string", "description": "Lead status" },
+                "Industry": { "type": "string", "description": "Industry" },
+                "Annual_Revenue": { "type": "number", "description": "Annual revenue" },
+                "Rating": { "type": "string", "description": "Rating" },
+                "No_of_Employees": { "type": "integer", "description": "Number of employees" },
+                "Street": { "type": "string", "description": "Street address" },
+                "City": { "type": "string", "description": "City" },
+                "State": { "type": "string", "description": "State" },
+                "Zip_Code": { "type": "string", "description": "Postal code" },
+                "Country": { "type": "string", "description": "Country" },
+                "Description": { "type": "string", "description": "Description" }
+              },
+              "required": ["Last_Name"]
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          },
+          "duplicate_check_fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Duplicate check fields"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Leads"
+    },
+    {
+      "id": "get-lead",
+      "name": "Get Lead",
+      "description": "Get lead by ID",
+      "method": "GET",
+      "path": "/Leads/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Leads/{id}"
+    },
+    {
+      "id": "list-leads",
+      "name": "List Leads",
+      "description": "List all leads",
+      "method": "GET",
+      "path": "/Leads",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 200, "description": "Records per page" },
+        "sort_by": { "type": "string", "description": "Sort by field" },
+        "sort_order": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort order" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to retrieve" },
+        "cvid": { "type": "string", "description": "Custom view ID" }
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Leads"
+    },
+    {
+      "id": "update-lead",
+      "name": "Update Lead",
+      "description": "Update an existing lead",
+      "method": "PUT",
+      "path": "/Leads/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "First_Name": { "type": "string", "description": "First name" },
+                "Last_Name": { "type": "string", "description": "Last name" },
+                "Email": { "type": "string", "format": "email", "description": "Email address" },
+                "Phone": { "type": "string", "description": "Phone number" },
+                "Mobile": { "type": "string", "description": "Mobile number" },
+                "Company": { "type": "string", "description": "Company name" },
+                "Title": { "type": "string", "description": "Job title" },
+                "Lead_Source": { "type": "string", "description": "Lead source" },
+                "Lead_Status": { "type": "string", "description": "Lead status" },
+                "Industry": { "type": "string", "description": "Industry" },
+                "Annual_Revenue": { "type": "number", "description": "Annual revenue" },
+                "Rating": { "type": "string", "description": "Rating" },
+                "No_of_Employees": { "type": "integer", "description": "Number of employees" },
+                "Street": { "type": "string", "description": "Street address" },
+                "City": { "type": "string", "description": "City" },
+                "State": { "type": "string", "description": "State" },
+                "Zip_Code": { "type": "string", "description": "Postal code" },
+                "Country": { "type": "string", "description": "Country" },
+                "Description": { "type": "string", "description": "Description" }
+              }
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Leads/{id}"
+    },
+    {
+      "id": "delete-lead",
+      "name": "Delete Lead",
+      "description": "Delete a lead",
+      "method": "DELETE",
+      "path": "/Leads/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Leads/{id}"
+    },
+    {
+      "id": "create-product",
+      "name": "Create Product",
+      "description": "Create a new product",
+      "method": "POST",
+      "path": "/Products",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Product_Name": { "type": "string", "required": true, "description": "Product name" },
+                "Product_Code": { "type": "string", "description": "Product code" },
+                "Product_Active": { "type": "boolean", "default": true, "description": "Product active status" },
+                "Unit_Price": { "type": "number", "description": "Unit price" },
+                "Taxable": { "type": "boolean", "default": false, "description": "Taxable" },
+                "Tax": { "type": "number", "description": "Tax percentage" },
+                "Vendor_Name": { "type": "object", "description": "Vendor name" },
+                "Product_Category": { "type": "string", "description": "Product category" },
+                "Qty_in_Demand": { "type": "number", "description": "Quantity in demand" },
+                "Qty_in_Stock": { "type": "number", "description": "Quantity in stock" },
+                "Reorder_Level": { "type": "number", "description": "Reorder level" },
+                "Handler": { "type": "object", "description": "Handler" },
+                "Description": { "type": "string", "description": "Description" }
+              },
+              "required": ["Product_Name"]
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          },
+          "duplicate_check_fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Duplicate check fields"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Products"
+    },
+    {
+      "id": "get-product",
+      "name": "Get Product",
+      "description": "Get product by ID",
+      "method": "GET",
+      "path": "/Products/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Products/{id}"
+    },
+    {
+      "id": "list-products",
+      "name": "List Products",
+      "description": "List all products",
+      "method": "GET",
+      "path": "/Products",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 200, "description": "Records per page" },
+        "sort_by": { "type": "string", "description": "Sort by field" },
+        "sort_order": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort order" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to retrieve" },
+        "cvid": { "type": "string", "description": "Custom view ID" }
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Products"
+    },
+    {
+      "id": "update-product",
+      "name": "Update Product",
+      "description": "Update an existing product",
+      "method": "PUT",
+      "path": "/Products/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Product_Name": { "type": "string", "description": "Product name" },
+                "Product_Code": { "type": "string", "description": "Product code" },
+                "Product_Active": { "type": "boolean", "description": "Product active status" },
+                "Unit_Price": { "type": "number", "description": "Unit price" },
+                "Taxable": { "type": "boolean", "description": "Taxable" },
+                "Tax": { "type": "number", "description": "Tax percentage" },
+                "Vendor_Name": { "type": "object", "description": "Vendor name" },
+                "Product_Category": { "type": "string", "description": "Product category" },
+                "Qty_in_Demand": { "type": "number", "description": "Quantity in demand" },
+                "Qty_in_Stock": { "type": "number", "description": "Quantity in stock" },
+                "Reorder_Level": { "type": "number", "description": "Reorder level" },
+                "Handler": { "type": "object", "description": "Handler" },
+                "Description": { "type": "string", "description": "Description" }
+              }
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Products/{id}"
+    },
+    {
+      "id": "delete-product",
+      "name": "Delete Product",
+      "description": "Delete a product",
+      "method": "DELETE",
+      "path": "/Products/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Products/{id}"
+    },
+    {
+      "id": "create-purchase-order",
+      "name": "Create Purchase Order",
+      "description": "Create a new purchase order",
+      "method": "POST",
+      "path": "/Purchase_Orders",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Subject": { "type": "string", "required": true, "description": "Purchase order subject" },
+                "Vendor_Name": { "type": "object", "description": "Vendor name" },
+                "Purchase_Order_Date": { "type": "string", "format": "date", "description": "Purchase order date" },
+                "Due_Date": { "type": "string", "format": "date", "description": "Due date" },
+                "Status": { "type": "string", "description": "Purchase order status" },
+                "Grand_Total": { "type": "number", "description": "Grand total" },
+                "Sub_Total": { "type": "number", "description": "Sub total" },
+                "Discount": { "type": "number", "description": "Discount amount" },
+                "Tax": { "type": "number", "description": "Tax amount" },
+                "Adjustment": { "type": "number", "description": "Adjustment amount" },
+                "Billing_Street": { "type": "string", "description": "Billing street" },
+                "Billing_City": { "type": "string", "description": "Billing city" },
+                "Billing_State": { "type": "string", "description": "Billing state" },
+                "Billing_Code": { "type": "string", "description": "Billing postal code" },
+                "Billing_Country": { "type": "string", "description": "Billing country" },
+                "Shipping_Street": { "type": "string", "description": "Shipping street" },
+                "Shipping_City": { "type": "string", "description": "Shipping city" },
+                "Shipping_State": { "type": "string", "description": "Shipping state" },
+                "Shipping_Code": { "type": "string", "description": "Shipping postal code" },
+                "Shipping_Country": { "type": "string", "description": "Shipping country" },
+                "Description": { "type": "string", "description": "Description" },
+                "Terms_and_Conditions": { "type": "string", "description": "Terms and conditions" }
+              },
+              "required": ["Subject"]
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          },
+          "duplicate_check_fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Duplicate check fields"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Purchase_Orders"
+    },
+    {
+      "id": "get-purchase-order",
+      "name": "Get Purchase Order",
+      "description": "Get purchase order by ID",
+      "method": "GET",
+      "path": "/Purchase_Orders/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Purchase_Orders/{id}"
+    },
+    {
+      "id": "list-purchase-orders",
+      "name": "List Purchase Orders",
+      "description": "List all purchase orders",
+      "method": "GET",
+      "path": "/Purchase_Orders",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 200, "description": "Records per page" },
+        "sort_by": { "type": "string", "description": "Sort by field" },
+        "sort_order": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort order" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to retrieve" },
+        "cvid": { "type": "string", "description": "Custom view ID" }
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Purchase_Orders"
+    },
+    {
+      "id": "update-purchase-order",
+      "name": "Update Purchase Order",
+      "description": "Update an existing purchase order",
+      "method": "PUT",
+      "path": "/Purchase_Orders/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Subject": { "type": "string", "description": "Purchase order subject" },
+                "Vendor_Name": { "type": "object", "description": "Vendor name" },
+                "Purchase_Order_Date": { "type": "string", "format": "date", "description": "Purchase order date" },
+                "Due_Date": { "type": "string", "format": "date", "description": "Due date" },
+                "Status": { "type": "string", "description": "Purchase order status" },
+                "Grand_Total": { "type": "number", "description": "Grand total" },
+                "Sub_Total": { "type": "number", "description": "Sub total" },
+                "Discount": { "type": "number", "description": "Discount amount" },
+                "Tax": { "type": "number", "description": "Tax amount" },
+                "Adjustment": { "type": "number", "description": "Adjustment amount" },
+                "Billing_Street": { "type": "string", "description": "Billing street" },
+                "Billing_City": { "type": "string", "description": "Billing city" },
+                "Billing_State": { "type": "string", "description": "Billing state" },
+                "Billing_Code": { "type": "string", "description": "Billing postal code" },
+                "Billing_Country": { "type": "string", "description": "Billing country" },
+                "Shipping_Street": { "type": "string", "description": "Shipping street" },
+                "Shipping_City": { "type": "string", "description": "Shipping city" },
+                "Shipping_State": { "type": "string", "description": "Shipping state" },
+                "Shipping_Code": { "type": "string", "description": "Shipping postal code" },
+                "Shipping_Country": { "type": "string", "description": "Shipping country" },
+                "Description": { "type": "string", "description": "Description" },
+                "Terms_and_Conditions": { "type": "string", "description": "Terms and conditions" }
+              }
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Purchase_Orders/{id}"
+    },
+    {
+      "id": "delete-purchase-order",
+      "name": "Delete Purchase Order",
+      "description": "Delete a purchase order",
+      "method": "DELETE",
+      "path": "/Purchase_Orders/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Purchase_Orders/{id}"
+    },
+    {
+      "id": "create-quote",
+      "name": "Create Quote",
+      "description": "Create a new quote",
+      "method": "POST",
+      "path": "/Quotes",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Subject": { "type": "string", "required": true, "description": "Quote subject" },
+                "Account_Name": { "type": "object", "description": "Account name" },
+                "Contact_Name": { "type": "object", "description": "Contact name" },
+                "Deal_Name": { "type": "object", "description": "Deal name" },
+                "Quote_Date": { "type": "string", "format": "date", "description": "Quote date" },
+                "Expiry_Date": { "type": "string", "format": "date", "description": "Expiry date" },
+                "Status": { "type": "string", "description": "Quote status" },
+                "Grand_Total": { "type": "number", "description": "Grand total" },
+                "Sub_Total": { "type": "number", "description": "Sub total" },
+                "Discount": { "type": "number", "description": "Discount amount" },
+                "Tax": { "type": "number", "description": "Tax amount" },
+                "Adjustment": { "type": "number", "description": "Adjustment amount" },
+                "Billing_Street": { "type": "string", "description": "Billing street" },
+                "Billing_City": { "type": "string", "description": "Billing city" },
+                "Billing_State": { "type": "string", "description": "Billing state" },
+                "Billing_Code": { "type": "string", "description": "Billing postal code" },
+                "Billing_Country": { "type": "string", "description": "Billing country" },
+                "Shipping_Street": { "type": "string", "description": "Shipping street" },
+                "Shipping_City": { "type": "string", "description": "Shipping city" },
+                "Shipping_State": { "type": "string", "description": "Shipping state" },
+                "Shipping_Code": { "type": "string", "description": "Shipping postal code" },
+                "Shipping_Country": { "type": "string", "description": "Shipping country" },
+                "Description": { "type": "string", "description": "Description" },
+                "Terms_and_Conditions": { "type": "string", "description": "Terms and conditions" }
+              },
+              "required": ["Subject"]
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          },
+          "duplicate_check_fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Duplicate check fields"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Quotes"
+    },
+    {
+      "id": "get-quote",
+      "name": "Get Quote",
+      "description": "Get quote by ID",
+      "method": "GET",
+      "path": "/Quotes/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Quotes/{id}"
+    },
+    {
+      "id": "list-quotes",
+      "name": "List Quotes",
+      "description": "List all quotes",
+      "method": "GET",
+      "path": "/Quotes",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 200, "description": "Records per page" },
+        "sort_by": { "type": "string", "description": "Sort by field" },
+        "sort_order": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort order" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to retrieve" },
+        "cvid": { "type": "string", "description": "Custom view ID" }
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Quotes"
+    },
+    {
+      "id": "update-quote",
+      "name": "Update Quote",
+      "description": "Update an existing quote",
+      "method": "PUT",
+      "path": "/Quotes/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Subject": { "type": "string", "description": "Quote subject" },
+                "Account_Name": { "type": "object", "description": "Account name" },
+                "Contact_Name": { "type": "object", "description": "Contact name" },
+                "Deal_Name": { "type": "object", "description": "Deal name" },
+                "Quote_Date": { "type": "string", "format": "date", "description": "Quote date" },
+                "Expiry_Date": { "type": "string", "format": "date", "description": "Expiry date" },
+                "Status": { "type": "string", "description": "Quote status" },
+                "Grand_Total": { "type": "number", "description": "Grand total" },
+                "Sub_Total": { "type": "number", "description": "Sub total" },
+                "Discount": { "type": "number", "description": "Discount amount" },
+                "Tax": { "type": "number", "description": "Tax amount" },
+                "Adjustment": { "type": "number", "description": "Adjustment amount" },
+                "Billing_Street": { "type": "string", "description": "Billing street" },
+                "Billing_City": { "type": "string", "description": "Billing city" },
+                "Billing_State": { "type": "string", "description": "Billing state" },
+                "Billing_Code": { "type": "string", "description": "Billing postal code" },
+                "Billing_Country": { "type": "string", "description": "Billing country" },
+                "Shipping_Street": { "type": "string", "description": "Shipping street" },
+                "Shipping_City": { "type": "string", "description": "Shipping city" },
+                "Shipping_State": { "type": "string", "description": "Shipping state" },
+                "Shipping_Code": { "type": "string", "description": "Shipping postal code" },
+                "Shipping_Country": { "type": "string", "description": "Shipping country" },
+                "Description": { "type": "string", "description": "Description" },
+                "Terms_and_Conditions": { "type": "string", "description": "Terms and conditions" }
+              }
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Quotes/{id}"
+    },
+    {
+      "id": "delete-quote",
+      "name": "Delete Quote",
+      "description": "Delete a quote",
+      "method": "DELETE",
+      "path": "/Quotes/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Quotes/{id}"
+    },
+    {
+      "id": "create-sales-order",
+      "name": "Create Sales Order",
+      "description": "Create a new sales order",
+      "method": "POST",
+      "path": "/Sales_Orders",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Subject": { "type": "string", "required": true, "description": "Sales order subject" },
+                "Account_Name": { "type": "object", "description": "Account name" },
+                "Contact_Name": { "type": "object", "description": "Contact name" },
+                "Deal_Name": { "type": "object", "description": "Deal name" },
+                "Quote_Name": { "type": "object", "description": "Quote name" },
+                "Sales_Order_Date": { "type": "string", "format": "date", "description": "Sales order date" },
+                "Due_Date": { "type": "string", "format": "date", "description": "Due date" },
+                "Status": { "type": "string", "description": "Sales order status" },
+                "Grand_Total": { "type": "number", "description": "Grand total" },
+                "Sub_Total": { "type": "number", "description": "Sub total" },
+                "Discount": { "type": "number", "description": "Discount amount" },
+                "Tax": { "type": "number", "description": "Tax amount" },
+                "Adjustment": { "type": "number", "description": "Adjustment amount" },
+                "Billing_Street": { "type": "string", "description": "Billing street" },
+                "Billing_City": { "type": "string", "description": "Billing city" },
+                "Billing_State": { "type": "string", "description": "Billing state" },
+                "Billing_Code": { "type": "string", "description": "Billing postal code" },
+                "Billing_Country": { "type": "string", "description": "Billing country" },
+                "Shipping_Street": { "type": "string", "description": "Shipping street" },
+                "Shipping_City": { "type": "string", "description": "Shipping city" },
+                "Shipping_State": { "type": "string", "description": "Shipping state" },
+                "Shipping_Code": { "type": "string", "description": "Shipping postal code" },
+                "Shipping_Country": { "type": "string", "description": "Shipping country" },
+                "Description": { "type": "string", "description": "Description" },
+                "Terms_and_Conditions": { "type": "string", "description": "Terms and conditions" }
+              },
+              "required": ["Subject"]
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          },
+          "duplicate_check_fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Duplicate check fields"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Sales_Orders"
+    },
+    {
+      "id": "get-sales-order",
+      "name": "Get Sales Order",
+      "description": "Get sales order by ID",
+      "method": "GET",
+      "path": "/Sales_Orders/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Sales_Orders/{id}"
+    },
+    {
+      "id": "list-sales-orders",
+      "name": "List Sales Orders",
+      "description": "List all sales orders",
+      "method": "GET",
+      "path": "/Sales_Orders",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 200, "description": "Records per page" },
+        "sort_by": { "type": "string", "description": "Sort by field" },
+        "sort_order": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort order" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to retrieve" },
+        "cvid": { "type": "string", "description": "Custom view ID" }
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Sales_Orders"
+    },
+    {
+      "id": "update-sales-order",
+      "name": "Update Sales Order",
+      "description": "Update an existing sales order",
+      "method": "PUT",
+      "path": "/Sales_Orders/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Subject": { "type": "string", "description": "Sales order subject" },
+                "Account_Name": { "type": "object", "description": "Account name" },
+                "Contact_Name": { "type": "object", "description": "Contact name" },
+                "Deal_Name": { "type": "object", "description": "Deal name" },
+                "Quote_Name": { "type": "object", "description": "Quote name" },
+                "Sales_Order_Date": { "type": "string", "format": "date", "description": "Sales order date" },
+                "Due_Date": { "type": "string", "format": "date", "description": "Due date" },
+                "Status": { "type": "string", "description": "Sales order status" },
+                "Grand_Total": { "type": "number", "description": "Grand total" },
+                "Sub_Total": { "type": "number", "description": "Sub total" },
+                "Discount": { "type": "number", "description": "Discount amount" },
+                "Tax": { "type": "number", "description": "Tax amount" },
+                "Adjustment": { "type": "number", "description": "Adjustment amount" },
+                "Billing_Street": { "type": "string", "description": "Billing street" },
+                "Billing_City": { "type": "string", "description": "Billing city" },
+                "Billing_State": { "type": "string", "description": "Billing state" },
+                "Billing_Code": { "type": "string", "description": "Billing postal code" },
+                "Billing_Country": { "type": "string", "description": "Billing country" },
+                "Shipping_Street": { "type": "string", "description": "Shipping street" },
+                "Shipping_City": { "type": "string", "description": "Shipping city" },
+                "Shipping_State": { "type": "string", "description": "Shipping state" },
+                "Shipping_Code": { "type": "string", "description": "Shipping postal code" },
+                "Shipping_Country": { "type": "string", "description": "Shipping country" },
+                "Description": { "type": "string", "description": "Description" },
+                "Terms_and_Conditions": { "type": "string", "description": "Terms and conditions" }
+              }
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Sales_Orders/{id}"
+    },
+    {
+      "id": "delete-sales-order",
+      "name": "Delete Sales Order",
+      "description": "Delete a sales order",
+      "method": "DELETE",
+      "path": "/Sales_Orders/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Sales_Orders/{id}"
+    },
+    {
+      "id": "create-vendor",
+      "name": "Create Vendor",
+      "description": "Create a new vendor",
+      "method": "POST",
+      "path": "/Vendors",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Vendor_Name": { "type": "string", "required": true, "description": "Vendor name" },
+                "Phone": { "type": "string", "description": "Phone number" },
+                "Email": { "type": "string", "format": "email", "description": "Email address" },
+                "Website": { "type": "string", "format": "uri", "description": "Website URL" },
+                "Category": { "type": "string", "description": "Vendor category" },
+                "Street": { "type": "string", "description": "Street address" },
+                "City": { "type": "string", "description": "City" },
+                "State": { "type": "string", "description": "State" },
+                "Zip_Code": { "type": "string", "description": "Postal code" },
+                "Country": { "type": "string", "description": "Country" },
+                "Description": { "type": "string", "description": "Description" }
+              },
+              "required": ["Vendor_Name"]
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          },
+          "duplicate_check_fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Duplicate check fields"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Vendors"
+    },
+    {
+      "id": "get-vendor",
+      "name": "Get Vendor",
+      "description": "Get vendor by ID",
+      "method": "GET",
+      "path": "/Vendors/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Vendors/{id}"
+    },
+    {
+      "id": "list-vendors",
+      "name": "List Vendors",
+      "description": "List all vendors",
+      "method": "GET",
+      "path": "/Vendors",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 200, "description": "Records per page" },
+        "sort_by": { "type": "string", "description": "Sort by field" },
+        "sort_order": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort order" },
+        "fields": { "type": "string", "description": "Comma-separated list of fields to retrieve" },
+        "cvid": { "type": "string", "description": "Custom view ID" }
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Vendors"
+    },
+    {
+      "id": "update-vendor",
+      "name": "Update Vendor",
+      "description": "Update an existing vendor",
+      "method": "PUT",
+      "path": "/Vendors/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Vendor_Name": { "type": "string", "description": "Vendor name" },
+                "Phone": { "type": "string", "description": "Phone number" },
+                "Email": { "type": "string", "format": "email", "description": "Email address" },
+                "Website": { "type": "string", "format": "uri", "description": "Website URL" },
+                "Category": { "type": "string", "description": "Vendor category" },
+                "Street": { "type": "string", "description": "Street address" },
+                "City": { "type": "string", "description": "City" },
+                "State": { "type": "string", "description": "State" },
+                "Zip_Code": { "type": "string", "description": "Postal code" },
+                "Country": { "type": "string", "description": "Country" },
+                "Description": { "type": "string", "description": "Description" }
+              }
+            },
+            "required": true
+          },
+          "trigger": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Workflow triggers"
+          }
+        },
+        "required": ["data"]
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Vendors/{id}"
+    },
+    {
+      "id": "delete-vendor",
+      "name": "Delete Vendor",
+      "description": "Delete a vendor",
+      "method": "DELETE",
+      "path": "/Vendors/{id}",
+      "headers": {
+        "Authorization": "Zoho-oauthtoken {apiKey}"
+      },
+      "urlTemplate": "https://www.zohoapis.com/crm/v2/Vendors/{id}"
+    }
+  ]
+}
+

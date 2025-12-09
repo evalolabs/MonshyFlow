@@ -1,0 +1,67 @@
+{
+  "id": "deepl",
+  "name": "DeepL",
+  "icon": "🌐",
+  "logoUrl": "https://cdn.simpleicons.org/deepl/0F2B46",
+  "description": "AI-powered translation service",
+  "baseUrl": "https://api.deepl.com/v2",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "DeepL-Auth-Key {apiKey}",
+    "secretKey": "DEEPL_API_KEY",
+    "note": "For Free API, use baseUrl: https://api-free.deepl.com/v2. API key is sent as form data in POST requests or as Authorization header."
+  },
+  "endpoints": [
+    {
+      "id": "list-languages",
+      "name": "List Languages",
+      "description": "Get list of supported languages",
+      "method": "GET",
+      "path": "/languages",
+      "headers": {
+        "Authorization": "DeepL-Auth-Key {apiKey}"
+      },
+      "queryParams": {
+        "type": { "type": "string", "enum": ["source", "target"], "description": "Language type (source or target)" }
+      },
+      "urlTemplate": "https://api.deepl.com/v2/languages"
+    },
+    {
+      "id": "translate",
+      "name": "Translate",
+      "description": "Translate text",
+      "method": "POST",
+      "path": "/translate",
+      "headers": {
+        "Authorization": "DeepL-Auth-Key {apiKey}",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "text": { "type": ["string", "array"], "required": true, "description": "Text to translate (string or array of strings)" },
+          "source_lang": { "type": "string", "description": "Source language code (e.g., EN, DE, FR). Auto-detect if not specified." },
+          "target_lang": { "type": "string", "required": true, "description": "Target language code (e.g., EN, DE, FR)" },
+          "split_sentences": { "type": "string", "enum": ["0", "1", "nonewlines"], "default": "1", "description": "Split sentences (0=no splitting, 1=splitting, nonewlines=no splitting except for newlines)" },
+          "preserve_formatting": { "type": "string", "enum": ["0", "1"], "default": "0", "description": "Preserve formatting (0=no, 1=yes)" },
+          "formality": { "type": "string", "enum": ["default", "more", "less", "prefer_more", "prefer_less"], "description": "Formality level" },
+          "tag_handling": { "type": "string", "enum": ["xml", "html"], "description": "Tag handling mode" },
+          "outline_detection": { "type": "string", "enum": ["0", "1"], "default": "1", "description": "Outline detection (0=disable, 1=enable)" },
+          "non_splitting_tags": { "type": "string", "description": "Comma-separated list of XML/HTML tags that should not split sentences" },
+          "splitting_tags": { "type": "string", "description": "Comma-separated list of XML/HTML tags that should split sentences" },
+          "ignore_tags": { "type": "string", "description": "Comma-separated list of XML/HTML tags that should be ignored" }
+        },
+        "required": ["text", "target_lang"]
+      },
+      "urlTemplate": "https://api.deepl.com/v2/translate"
+    }
+  ]
+}
+

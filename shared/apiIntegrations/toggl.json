@@ -1,0 +1,159 @@
+{
+  "id": "toggl",
+  "name": "Toggl",
+  "icon": "⏱️",
+  "logoUrl": "https://cdn.simpleicons.org/toggl/E01B22",
+  "description": "Time tracking and productivity app",
+  "baseUrl": "https://api.track.toggl.com/api/v9/me",
+  "color": {
+    "bg": "from-red-100 to-orange-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(apiToken:api_token)}",
+    "secretKey": "TOGGL_API_TOKEN",
+    "emailSecretKey": "TOGGL_API_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-time-entry",
+      "name": "Create Time Entry",
+      "description": "Create a new time entry",
+      "method": "POST",
+      "path": "/time_entries",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "workspace_id": { "type": "number", "required": true, "description": "Workspace ID" },
+          "project_id": { "type": "number", "description": "Project ID" },
+          "task_id": { "type": "number", "description": "Task ID" },
+          "description": { "type": "string", "description": "Description" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tag names"
+          },
+          "start": { "type": "string", "format": "date-time", "required": true, "description": "Start time (ISO 8601)" },
+          "stop": { "type": "string", "format": "date-time", "description": "Stop time (ISO 8601)" },
+          "duration": { "type": "number", "description": "Duration in seconds (negative if running)" },
+          "billable": { "type": "boolean", "default": false, "description": "Is billable" },
+          "created_with": { "type": "string", "description": "Application name that created the entry" }
+        },
+        "required": ["workspace_id", "start"]
+      },
+      "urlTemplate": "https://api.track.toggl.com/api/v9/me/time_entries"
+    },
+    {
+      "id": "get-time-entry",
+      "name": "Get Time Entry",
+      "description": "Get time entry details by ID",
+      "method": "GET",
+      "path": "/time_entries/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.track.toggl.com/api/v9/me/time_entries/{id}"
+    },
+    {
+      "id": "list-time-entries",
+      "name": "List Time Entries",
+      "description": "List all time entries",
+      "method": "GET",
+      "path": "/time_entries",
+      "headers": {},
+      "queryParams": {
+        "start_date": "{startDate}",
+        "end_date": "{endDate}",
+        "project_ids": "{projectIds}",
+        "task_ids": "{taskIds}",
+        "tag_ids": "{tagIds}",
+        "billable": "{billable}",
+        "description": "{description}"
+      },
+      "urlTemplate": "https://api.track.toggl.com/api/v9/me/time_entries"
+    },
+    {
+      "id": "update-time-entry",
+      "name": "Update Time Entry",
+      "description": "Update an existing time entry",
+      "method": "PATCH",
+      "path": "/time_entries/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "workspace_id": { "type": "number", "description": "Workspace ID" },
+          "project_id": { "type": "number", "description": "Project ID" },
+          "task_id": { "type": "number", "description": "Task ID" },
+          "description": { "type": "string", "description": "Description" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "start": { "type": "string", "format": "date-time", "description": "Start time" },
+          "stop": { "type": "string", "format": "date-time", "description": "Stop time" },
+          "duration": { "type": "number", "description": "Duration in seconds" },
+          "billable": { "type": "boolean", "description": "Is billable" }
+        }
+      },
+      "urlTemplate": "https://api.track.toggl.com/api/v9/me/time_entries/{id}"
+    },
+    {
+      "id": "delete-time-entry",
+      "name": "Delete Time Entry",
+      "description": "Delete a time entry",
+      "method": "DELETE",
+      "path": "/time_entries/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.track.toggl.com/api/v9/me/time_entries/{id}"
+    },
+    {
+      "id": "get-project",
+      "name": "Get Project",
+      "description": "Get project details by ID",
+      "method": "GET",
+      "path": "/projects/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.track.toggl.com/api/v9/me/projects/{id}"
+    },
+    {
+      "id": "list-projects",
+      "name": "List Projects",
+      "description": "List all projects",
+      "method": "GET",
+      "path": "/projects",
+      "headers": {},
+      "queryParams": {
+        "workspace_id": "{workspaceId}",
+        "active": "true"
+      },
+      "urlTemplate": "https://api.track.toggl.com/api/v9/me/projects"
+    },
+    {
+      "id": "get-workspace",
+      "name": "Get Workspace",
+      "description": "Get workspace details by ID",
+      "method": "GET",
+      "path": "/workspaces/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.track.toggl.com/api/v9/me/workspaces/{id}"
+    },
+    {
+      "id": "list-workspaces",
+      "name": "List Workspaces",
+      "description": "List all workspaces",
+      "method": "GET",
+      "path": "/workspaces",
+      "headers": {},
+      "urlTemplate": "https://api.track.toggl.com/api/v9/me/workspaces"
+    }
+  ]
+}
+

@@ -1,0 +1,271 @@
+{
+  "id": "azure-cosmos-db",
+  "name": "Azure Cosmos DB",
+  "icon": "🗄️",
+  "logoUrl": "https://cdn.simpleicons.org/microsoftazure/0078D4",
+  "description": "NoSQL database service",
+  "baseUrl": "https://{account}.documents.azure.com/dbs/{database}",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "{signature}",
+    "secretKey": "AZURE_COSMOS_DB_SHARED_KEY",
+    "note": "Azure Cosmos DB uses Shared Key authentication with HMAC-SHA256 signature. Account and database should be provided in baseUrl placeholders {account} and {database}, or as separate secret keys AZURE_COSMOS_DB_ACCOUNT and AZURE_COSMOS_DB_DATABASE. Additional headers required: x-ms-date, x-ms-version."
+  },
+  "endpoints": [
+    {
+      "id": "create-container",
+      "name": "Create Container",
+      "description": "Create a new container (collection)",
+      "method": "POST",
+      "path": "/colls",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{signature}",
+        "x-ms-date": "{date}",
+        "x-ms-version": "2018-12-31"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "required": true, "description": "Container ID" },
+          "partitionKey": {
+            "type": "object",
+            "properties": {
+              "paths": {
+                "type": "array",
+                "items": { "type": "string" },
+                "required": true,
+                "description": "Partition key paths"
+              },
+              "kind": { "type": "string", "enum": ["Hash", "Range"], "default": "Hash", "description": "Partition key kind" }
+            },
+            "required": ["paths"]
+          },
+          "indexingPolicy": {
+            "type": "object",
+            "properties": {
+              "automatic": { "type": "boolean", "default": true, "description": "Automatic indexing" },
+              "indexingMode": { "type": "string", "enum": ["consistent", "lazy", "none"], "default": "consistent", "description": "Indexing mode" },
+              "includedPaths": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": { "type": "string", "description": "Path" },
+                    "indexes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": { "type": "string", "enum": ["Range", "Hash", "Spatial"], "description": "Index kind" },
+                          "dataType": { "type": "string", "enum": ["String", "Number", "Point"], "description": "Data type" },
+                          "precision": { "type": "integer", "description": "Precision" }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "excludedPaths": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": { "type": "string", "description": "Path" }
+                  }
+                }
+              }
+            }
+          },
+          "defaultTtl": { "type": "integer", "description": "Default TTL in seconds" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://{account}.documents.azure.com/dbs/{database}/colls"
+    },
+    {
+      "id": "get-container",
+      "name": "Get Container",
+      "description": "Get container by ID",
+      "method": "GET",
+      "path": "/colls/{containerId}",
+      "headers": {
+        "Authorization": "{signature}",
+        "x-ms-date": "{date}",
+        "x-ms-version": "2018-12-31"
+      },
+      "urlTemplate": "https://{account}.documents.azure.com/dbs/{database}/colls/{containerId}"
+    },
+    {
+      "id": "list-containers",
+      "name": "List Containers",
+      "description": "List all containers",
+      "method": "GET",
+      "path": "/colls",
+      "headers": {
+        "Authorization": "{signature}",
+        "x-ms-date": "{date}",
+        "x-ms-version": "2018-12-31"
+      },
+      "queryParams": {
+        "$filter": { "type": "string", "description": "OData filter expression" },
+        "$orderby": { "type": "string", "description": "OData order by expression" },
+        "$top": { "type": "integer", "description": "Number of results" },
+        "$skip": { "type": "integer", "description": "Skip results" }
+      },
+      "urlTemplate": "https://{account}.documents.azure.com/dbs/{database}/colls"
+    },
+    {
+      "id": "delete-container",
+      "name": "Delete Container",
+      "description": "Delete a container",
+      "method": "DELETE",
+      "path": "/colls/{containerId}",
+      "headers": {
+        "Authorization": "{signature}",
+        "x-ms-date": "{date}",
+        "x-ms-version": "2018-12-31"
+      },
+      "urlTemplate": "https://{account}.documents.azure.com/dbs/{database}/colls/{containerId}"
+    },
+    {
+      "id": "create-item",
+      "name": "Create Item",
+      "description": "Create a new document/item",
+      "method": "POST",
+      "path": "/colls/{containerId}/docs",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{signature}",
+        "x-ms-date": "{date}",
+        "x-ms-version": "2018-12-31",
+        "x-ms-documentdb-partitionkey": "{partitionKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "required": true, "description": "Document ID" }
+        },
+        "description": "Document data (any JSON object with 'id' field)",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{account}.documents.azure.com/dbs/{database}/colls/{containerId}/docs"
+    },
+    {
+      "id": "get-item",
+      "name": "Get Item",
+      "description": "Get document/item by ID",
+      "method": "GET",
+      "path": "/colls/{containerId}/docs/{itemId}",
+      "headers": {
+        "Authorization": "{signature}",
+        "x-ms-date": "{date}",
+        "x-ms-version": "2018-12-31",
+        "x-ms-documentdb-partitionkey": "{partitionKey}"
+      },
+      "queryParams": {
+        "$select": { "type": "string", "description": "OData select expression" }
+      },
+      "urlTemplate": "https://{account}.documents.azure.com/dbs/{database}/colls/{containerId}/docs/{itemId}"
+    },
+    {
+      "id": "list-items",
+      "name": "List Items",
+      "description": "List all documents/items",
+      "method": "GET",
+      "path": "/colls/{containerId}/docs",
+      "headers": {
+        "Authorization": "{signature}",
+        "x-ms-date": "{date}",
+        "x-ms-version": "2018-12-31"
+      },
+      "queryParams": {
+        "$filter": { "type": "string", "description": "OData filter expression" },
+        "$orderby": { "type": "string", "description": "OData order by expression" },
+        "$top": { "type": "integer", "description": "Number of results" },
+        "$skip": { "type": "integer", "description": "Skip results" },
+        "$select": { "type": "string", "description": "OData select expression" }
+      },
+      "urlTemplate": "https://{account}.documents.azure.com/dbs/{database}/colls/{containerId}/docs"
+    },
+    {
+      "id": "query-items",
+      "name": "Query Items",
+      "description": "Query documents/items using SQL",
+      "method": "POST",
+      "path": "/colls/{containerId}/docs",
+      "headers": {
+        "Content-Type": "application/query+json",
+        "Authorization": "{signature}",
+        "x-ms-date": "{date}",
+        "x-ms-version": "2018-12-31",
+        "x-ms-documentdb-query-enablecrosspartition": "true"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "required": true, "description": "SQL query (e.g., 'SELECT * FROM c WHERE c.id = @id')" },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "description": "Parameter name" },
+                "value": { "type": ["string", "number", "boolean"], "description": "Parameter value" }
+              }
+            },
+            "description": "Query parameters"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://{account}.documents.azure.com/dbs/{database}/colls/{containerId}/docs"
+    },
+    {
+      "id": "update-item",
+      "name": "Update Item",
+      "description": "Update an existing document/item",
+      "method": "PUT",
+      "path": "/colls/{containerId}/docs/{itemId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "{signature}",
+        "x-ms-date": "{date}",
+        "x-ms-version": "2018-12-31",
+        "x-ms-documentdb-partitionkey": "{partitionKey}",
+        "If-Match": "{etag}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "required": true, "description": "Document ID" }
+        },
+        "description": "Document data (any JSON object with 'id' field)",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{account}.documents.azure.com/dbs/{database}/colls/{containerId}/docs/{itemId}"
+    },
+    {
+      "id": "delete-item",
+      "name": "Delete Item",
+      "description": "Delete a document/item",
+      "method": "DELETE",
+      "path": "/colls/{containerId}/docs/{itemId}",
+      "headers": {
+        "Authorization": "{signature}",
+        "x-ms-date": "{date}",
+        "x-ms-version": "2018-12-31",
+        "x-ms-documentdb-partitionkey": "{partitionKey}"
+      },
+      "urlTemplate": "https://{account}.documents.azure.com/dbs/{database}/colls/{containerId}/docs/{itemId}"
+    }
+  ]
+}
+

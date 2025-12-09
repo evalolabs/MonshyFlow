@@ -1,0 +1,402 @@
+{
+  "id": "airtop",
+  "name": "Airtop",
+  "icon": "🤖",
+  "logoUrl": "https://cdn.simpleicons.org/airtop/000000",
+  "description": "Browser automation API for web scraping and interactions",
+  "baseUrl": "https://api.airtop.ai/api/v1",
+  "color": {
+    "bg": "from-violet-100 to-purple-100",
+    "border": "border-violet-500",
+    "icon": "text-violet-700",
+    "handle": "bg-violet-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "AIRTOP_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-session",
+      "name": "Create Session",
+      "description": "Create a new browser session",
+      "method": "POST",
+      "path": "/sessions",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Session name"
+          },
+          "userAgent": {
+            "type": "string",
+            "description": "Custom user agent"
+          },
+          "viewport": {
+            "type": "object",
+            "properties": {
+              "width": { "type": "integer", "default": 1920 },
+              "height": { "type": "integer", "default": 1080 }
+            },
+            "description": "Viewport dimensions"
+          }
+        }
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions"
+    },
+    {
+      "id": "get-session",
+      "name": "Get Session",
+      "description": "Get session by ID",
+      "method": "GET",
+      "path": "/sessions/{sessionId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}"
+    },
+    {
+      "id": "update-session",
+      "name": "Update Session",
+      "description": "Update a session",
+      "method": "PATCH",
+      "path": "/sessions/{sessionId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Session data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}"
+    },
+    {
+      "id": "delete-session",
+      "name": "Delete Session",
+      "description": "Delete a session",
+      "method": "DELETE",
+      "path": "/sessions/{sessionId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}"
+    },
+    {
+      "id": "create-window",
+      "name": "Create Window",
+      "description": "Create a new window in a session",
+      "method": "POST",
+      "path": "/sessions/{sessionId}/windows",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Initial URL to load"
+          }
+        }
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/windows"
+    },
+    {
+      "id": "get-window",
+      "name": "Get Window",
+      "description": "Get window by ID",
+      "method": "GET",
+      "path": "/sessions/{sessionId}/windows/{windowId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/windows/{windowId}"
+    },
+    {
+      "id": "list-windows",
+      "name": "List Windows",
+      "description": "List all windows in a session",
+      "method": "GET",
+      "path": "/sessions/{sessionId}/windows",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/windows"
+    },
+    {
+      "id": "update-window",
+      "name": "Update Window",
+      "description": "Update a window",
+      "method": "PATCH",
+      "path": "/sessions/{sessionId}/windows/{windowId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Window data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/windows/{windowId}"
+    },
+    {
+      "id": "delete-window",
+      "name": "Delete Window",
+      "description": "Delete a window",
+      "method": "DELETE",
+      "path": "/sessions/{sessionId}/windows/{windowId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/windows/{windowId}"
+    },
+    {
+      "id": "upload-file",
+      "name": "Upload File",
+      "description": "Upload a file to a session",
+      "method": "POST",
+      "path": "/sessions/{sessionId}/files",
+      "headers": {
+        "Content-Type": "multipart/form-data",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "File to upload"
+          }
+        }
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/files"
+    },
+    {
+      "id": "get-file",
+      "name": "Get File",
+      "description": "Get file by ID",
+      "method": "GET",
+      "path": "/sessions/{sessionId}/files/{fileId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/files/{fileId}"
+    },
+    {
+      "id": "list-files",
+      "name": "List Files",
+      "description": "List all files in a session",
+      "method": "GET",
+      "path": "/sessions/{sessionId}/files",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/files"
+    },
+    {
+      "id": "download-file",
+      "name": "Download File",
+      "description": "Download a file",
+      "method": "GET",
+      "path": "/sessions/{sessionId}/files/{fileId}/download",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/files/{fileId}/download"
+    },
+    {
+      "id": "create-extraction",
+      "name": "Create Extraction",
+      "description": "Create a new data extraction",
+      "method": "POST",
+      "path": "/sessions/{sessionId}/extractions",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "selector": {
+            "type": "string",
+            "description": "CSS selector for extraction"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["text", "html", "attribute", "link"],
+            "description": "Extraction type"
+          },
+          "attribute": {
+            "type": "string",
+            "description": "Attribute name (for attribute type)"
+          }
+        }
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/extractions"
+    },
+    {
+      "id": "get-extraction",
+      "name": "Get Extraction",
+      "description": "Get extraction by ID",
+      "method": "GET",
+      "path": "/sessions/{sessionId}/extractions/{extractionId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/extractions/{extractionId}"
+    },
+    {
+      "id": "list-extractions",
+      "name": "List Extractions",
+      "description": "List all extractions in a session",
+      "method": "GET",
+      "path": "/sessions/{sessionId}/extractions",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/extractions"
+    },
+    {
+      "id": "click-interaction",
+      "name": "Click Interaction",
+      "description": "Click on an element",
+      "method": "POST",
+      "path": "/sessions/{sessionId}/interactions/click",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "selector": {
+            "type": "string",
+            "required": true,
+            "description": "CSS selector of the element to click"
+          },
+          "button": {
+            "type": "string",
+            "enum": ["left", "right", "middle"],
+            "default": "left",
+            "description": "Mouse button to use"
+          },
+          "clickCount": {
+            "type": "integer",
+            "default": 1,
+            "description": "Number of clicks"
+          }
+        },
+        "required": ["selector"]
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/interactions/click"
+    },
+    {
+      "id": "type-interaction",
+      "name": "Type Interaction",
+      "description": "Type text into an element",
+      "method": "POST",
+      "path": "/sessions/{sessionId}/interactions/type",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "selector": {
+            "type": "string",
+            "required": true,
+            "description": "CSS selector of the element to type into"
+          },
+          "text": {
+            "type": "string",
+            "required": true,
+            "description": "Text to type"
+          },
+          "clear": {
+            "type": "boolean",
+            "default": false,
+            "description": "Clear existing text before typing"
+          }
+        },
+        "required": ["selector", "text"]
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/interactions/type"
+    },
+    {
+      "id": "scroll-interaction",
+      "name": "Scroll Interaction",
+      "description": "Scroll the page",
+      "method": "POST",
+      "path": "/sessions/{sessionId}/interactions/scroll",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "integer",
+            "default": 0,
+            "description": "Horizontal scroll position"
+          },
+          "y": {
+            "type": "integer",
+            "default": 0,
+            "description": "Vertical scroll position"
+          },
+          "selector": {
+            "type": "string",
+            "description": "CSS selector of element to scroll to"
+          }
+        }
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/interactions/scroll"
+    },
+    {
+      "id": "navigate-interaction",
+      "name": "Navigate Interaction",
+      "description": "Navigate to a URL",
+      "method": "POST",
+      "path": "/sessions/{sessionId}/interactions/navigate",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "required": true,
+            "description": "URL to navigate to"
+          },
+          "waitUntil": {
+            "type": "string",
+            "enum": ["load", "domcontentloaded", "networkidle"],
+            "default": "load",
+            "description": "Wait condition for navigation"
+          }
+        },
+        "required": ["url"]
+      },
+      "urlTemplate": "https://api.airtop.ai/api/v1/sessions/{sessionId}/interactions/navigate"
+    }
+  ]
+}
+

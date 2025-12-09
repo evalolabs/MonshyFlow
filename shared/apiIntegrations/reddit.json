@@ -1,0 +1,198 @@
+{
+  "id": "reddit",
+  "name": "Reddit",
+  "icon": "🤖",
+  "logoUrl": "https://cdn.simpleicons.org/reddit/FF4500",
+  "description": "Social news aggregation and discussion platform",
+  "baseUrl": "https://oauth.reddit.com",
+  "color": {
+    "bg": "from-orange-100 to-red-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "bearer {apiKey}",
+    "secretKey": "REDDIT_ACCESS_TOKEN",
+    "note": "For public requests, use baseUrl: https://www.reddit.com. OAuth2 is optional for public requests."
+  },
+  "endpoints": [
+    {
+      "id": "create-post",
+      "name": "Create Post",
+      "description": "Create a new post",
+      "method": "POST",
+      "path": "/api/submit",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "sr": { "type": "string", "required": true, "description": "Subreddit name" },
+          "title": { "type": "string", "required": true, "description": "Post title" },
+          "text": { "type": "string", "description": "Post text (for self posts)" },
+          "url": { "type": "string", "format": "uri", "description": "Post URL (for link posts)" },
+          "kind": { "type": "string", "enum": ["self", "link"], "default": "self", "description": "Post type" },
+          "sendreplies": { "type": "boolean", "default": true, "description": "Send replies to inbox" },
+          "resubmit": { "type": "boolean", "default": true, "description": "Allow resubmission" },
+          "api_type": { "type": "string", "default": "json", "description": "API type" }
+        },
+        "required": ["sr", "title"]
+      },
+      "urlTemplate": "https://oauth.reddit.com/api/submit"
+    },
+    {
+      "id": "get-post",
+      "name": "Get Post",
+      "description": "Get post with comments",
+      "method": "GET",
+      "path": "/r/{subreddit}/comments/{postId}.json",
+      "headers": {
+        "Authorization": "bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 25, "description": "Number of comments" },
+        "sort": { "type": "string", "enum": ["confidence", "top", "new", "controversial", "old", "random", "qa"], "default": "confidence", "description": "Sort order" },
+        "depth": { "type": "integer", "default": 1, "description": "Comment depth" }
+      },
+      "urlTemplate": "https://oauth.reddit.com/r/{subreddit}/comments/{postId}.json"
+    },
+    {
+      "id": "list-posts-hot",
+      "name": "List Posts (Hot)",
+      "description": "List hot posts from a subreddit",
+      "method": "GET",
+      "path": "/r/{subreddit}/hot.json",
+      "headers": {
+        "Authorization": "bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 25, "description": "Number of results" },
+        "after": { "type": "string", "description": "After post ID (for pagination)" },
+        "before": { "type": "string", "description": "Before post ID (for pagination)" },
+        "count": { "type": "integer", "description": "Number of posts already seen" }
+      },
+      "urlTemplate": "https://oauth.reddit.com/r/{subreddit}/hot.json"
+    },
+    {
+      "id": "list-posts-new",
+      "name": "List Posts (New)",
+      "description": "List new posts from a subreddit",
+      "method": "GET",
+      "path": "/r/{subreddit}/new.json",
+      "headers": {
+        "Authorization": "bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 25, "description": "Number of results" },
+        "after": { "type": "string", "description": "After post ID (for pagination)" },
+        "before": { "type": "string", "description": "Before post ID (for pagination)" },
+        "count": { "type": "integer", "description": "Number of posts already seen" }
+      },
+      "urlTemplate": "https://oauth.reddit.com/r/{subreddit}/new.json"
+    },
+    {
+      "id": "create-comment",
+      "name": "Create Comment",
+      "description": "Create a comment on a post",
+      "method": "POST",
+      "path": "/api/comment",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "thing_id": { "type": "string", "required": true, "description": "Post or comment ID (fullname, e.g., t3_abc123)" },
+          "text": { "type": "string", "required": true, "description": "Comment text" },
+          "api_type": { "type": "string", "default": "json", "description": "API type" }
+        },
+        "required": ["thing_id", "text"]
+      },
+      "urlTemplate": "https://oauth.reddit.com/api/comment"
+    },
+    {
+      "id": "get-comment",
+      "name": "Get Comment",
+      "description": "Get a specific comment",
+      "method": "GET",
+      "path": "/r/{subreddit}/comments/{postId}/{commentId}.json",
+      "headers": {
+        "Authorization": "bearer {apiKey}"
+      },
+      "urlTemplate": "https://oauth.reddit.com/r/{subreddit}/comments/{postId}/{commentId}.json"
+    },
+    {
+      "id": "list-comments",
+      "name": "List Comments",
+      "description": "List all comments for a post",
+      "method": "GET",
+      "path": "/r/{subreddit}/comments/{postId}.json",
+      "headers": {
+        "Authorization": "bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 25, "description": "Number of comments" },
+        "sort": { "type": "string", "enum": ["confidence", "top", "new", "controversial", "old", "random", "qa"], "default": "confidence", "description": "Sort order" },
+        "depth": { "type": "integer", "default": 1, "description": "Comment depth" }
+      },
+      "urlTemplate": "https://oauth.reddit.com/r/{subreddit}/comments/{postId}.json"
+    },
+    {
+      "id": "get-subreddit",
+      "name": "Get Subreddit",
+      "description": "Get subreddit information",
+      "method": "GET",
+      "path": "/r/{subreddit}/about.json",
+      "headers": {
+        "Authorization": "bearer {apiKey}"
+      },
+      "urlTemplate": "https://oauth.reddit.com/r/{subreddit}/about.json"
+    },
+    {
+      "id": "list-popular-subreddits",
+      "name": "List Popular Subreddits",
+      "description": "List popular subreddits",
+      "method": "GET",
+      "path": "/subreddits/popular.json",
+      "headers": {
+        "Authorization": "bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": { "type": "integer", "default": 25, "description": "Number of results" },
+        "after": { "type": "string", "description": "After subreddit ID (for pagination)" },
+        "before": { "type": "string", "description": "Before subreddit ID (for pagination)" },
+        "count": { "type": "integer", "description": "Number of subreddits already seen" }
+      },
+      "urlTemplate": "https://oauth.reddit.com/subreddits/popular.json"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user information",
+      "method": "GET",
+      "path": "/user/{username}/about.json",
+      "headers": {
+        "Authorization": "bearer {apiKey}"
+      },
+      "urlTemplate": "https://oauth.reddit.com/user/{username}/about.json"
+    },
+    {
+      "id": "get-profile",
+      "name": "Get Profile",
+      "description": "Get current user profile",
+      "method": "GET",
+      "path": "/api/v1/me",
+      "headers": {
+        "Authorization": "bearer {apiKey}"
+      },
+      "urlTemplate": "https://oauth.reddit.com/api/v1/me"
+    }
+  ]
+}
+

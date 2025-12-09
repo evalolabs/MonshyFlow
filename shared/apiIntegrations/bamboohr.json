@@ -1,0 +1,210 @@
+{
+  "id": "bamboohr",
+  "name": "BambooHR",
+  "icon": "👔",
+  "logoUrl": "https://cdn.simpleicons.org/bamboohr/000000",
+  "description": "HR management system for employee and time off management",
+  "baseUrl": "https://api.bamboohr.com/api/gateway.php/{subdomain}/v1",
+  "color": {
+    "bg": "from-green-100 to-teal-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "BAMBOOHR_API_KEY",
+    "note": "Base URL should be provided with subdomain placeholder {subdomain}, or as BAMBOOHR_SUBDOMAIN secret key."
+  },
+  "endpoints": [
+    {
+      "id": "create-employee",
+      "name": "Create Employee",
+      "description": "Create a new employee",
+      "method": "POST",
+      "path": "/employees",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Employee data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://api.bamboohr.com/api/gateway.php/{subdomain}/v1/employees"
+    },
+    {
+      "id": "get-employee",
+      "name": "Get Employee",
+      "description": "Get employee by ID",
+      "method": "GET",
+      "path": "/employees/{employeeId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "fields": {
+          "type": "string",
+          "description": "Comma-separated field names to retrieve"
+        }
+      },
+      "urlTemplate": "https://api.bamboohr.com/api/gateway.php/{subdomain}/v1/employees/{employeeId}"
+    },
+    {
+      "id": "list-employees",
+      "name": "List Employees",
+      "description": "List all employees (directory)",
+      "method": "GET",
+      "path": "/employees/directory",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.bamboohr.com/api/gateway.php/{subdomain}/v1/employees/directory"
+    },
+    {
+      "id": "update-employee",
+      "name": "Update Employee",
+      "description": "Update an employee",
+      "method": "POST",
+      "path": "/employees/{employeeId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Employee data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://api.bamboohr.com/api/gateway.php/{subdomain}/v1/employees/{employeeId}"
+    },
+    {
+      "id": "get-time-off-request",
+      "name": "Get Time Off Request",
+      "description": "Get time off request by ID",
+      "method": "GET",
+      "path": "/time_off/requests/{requestId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.bamboohr.com/api/gateway.php/{subdomain}/v1/time_off/requests/{requestId}"
+    },
+    {
+      "id": "list-time-off-requests",
+      "name": "List Time Off Requests",
+      "description": "List all time off requests",
+      "method": "GET",
+      "path": "/time_off/requests",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "start": {
+          "type": "string",
+          "format": "date",
+          "description": "Start date filter"
+        },
+        "end": {
+          "type": "string",
+          "format": "date",
+          "description": "End date filter"
+        },
+        "employeeId": {
+          "type": "string",
+          "description": "Filter by employee ID"
+        },
+        "typeId": {
+          "type": "string",
+          "description": "Filter by time off type ID"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["approved", "denied", "superceded", "requested", "canceled"],
+          "description": "Filter by status"
+        }
+      },
+      "urlTemplate": "https://api.bamboohr.com/api/gateway.php/{subdomain}/v1/time_off/requests"
+    },
+    {
+      "id": "create-time-off-request",
+      "name": "Create Time Off Request",
+      "description": "Create a new time off request",
+      "method": "POST",
+      "path": "/time_off/requests",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "employeeId": {
+            "type": "string",
+            "required": true,
+            "description": "Employee ID"
+          },
+          "start": {
+            "type": "string",
+            "format": "date",
+            "required": true,
+            "description": "Start date"
+          },
+          "end": {
+            "type": "string",
+            "format": "date",
+            "required": true,
+            "description": "End date"
+          },
+          "timeOffTypeId": {
+            "type": "string",
+            "required": true,
+            "description": "Time off type ID"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount of time off"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Notes"
+          }
+        },
+        "required": ["employeeId", "start", "end", "timeOffTypeId"]
+      },
+      "urlTemplate": "https://api.bamboohr.com/api/gateway.php/{subdomain}/v1/time_off/requests"
+    },
+    {
+      "id": "get-report",
+      "name": "Get Report",
+      "description": "Get report by ID",
+      "method": "GET",
+      "path": "/reports/{reportId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "format": {
+          "type": "string",
+          "enum": ["PDF", "XLS", "CSV", "JSON", "XML"],
+          "default": "JSON",
+          "description": "Report format"
+        },
+        "fd": {
+          "type": "string",
+          "format": "date",
+          "description": "Filter start date"
+        },
+        "onlyCurrent": {
+          "type": "boolean",
+          "default": false,
+          "description": "Only current employees"
+        }
+      },
+      "urlTemplate": "https://api.bamboohr.com/api/gateway.php/{subdomain}/v1/reports/{reportId}"
+    }
+  ]
+}
+

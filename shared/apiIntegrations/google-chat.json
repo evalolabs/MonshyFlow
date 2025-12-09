@@ -1,0 +1,243 @@
+{
+  "id": "google-chat",
+  "name": "Google Chat",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/googlechat/00832D",
+  "description": "Google Chat API for integrating with Google Chat Spaces and Messages",
+  "baseUrl": "https://chat.googleapis.com",
+  "color": {
+    "bg": "from-green-100 to-teal-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GOOGLE_CHAT_OAUTH2_ACCESS_TOKEN",
+    "note": "Supports OAuth2 (GOOGLE_CHAT_OAUTH2_ACCESS_TOKEN) or Service Account (GOOGLE_CHAT_SERVICE_ACCOUNT_KEY) authentication."
+  },
+  "endpoints": [
+    {
+      "id": "create-message",
+      "name": "Create Message",
+      "description": "Send a message to a space",
+      "method": "POST",
+      "path": "/v1/{parent}/messages",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Message text"
+          },
+          "cards": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Card object",
+              "additionalProperties": true
+            },
+            "description": "Message cards"
+          },
+          "cardsV2": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Card v2 object",
+              "additionalProperties": true
+            },
+            "description": "Message cards v2"
+          },
+          "thread": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" }
+            },
+            "description": "Thread information"
+          },
+          "requestId": {
+            "type": "string",
+            "description": "Request ID for deduplication"
+          },
+          "messageId": { "type": "string" },
+          "messageReplyOption": {
+            "type": "string",
+            "enum": ["MESSAGE_REPLY_OPTION_UNSPECIFIED", "REPLY_MESSAGE_FALLBACK_TO_NEW_THREAD", "REPLY_MESSAGE_OR_FAIL"],
+            "description": "Message reply option"
+          }
+        }
+      },
+      "urlTemplate": "https://chat.googleapis.com/v1/{parent}/messages"
+    },
+    {
+      "id": "get-message",
+      "name": "Get Message",
+      "description": "Get message by name",
+      "method": "GET",
+      "path": "/v1/{name}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://chat.googleapis.com/v1/{name}"
+    },
+    {
+      "id": "list-messages",
+      "name": "List Messages",
+      "description": "List all messages in a space",
+      "method": "GET",
+      "path": "/v1/{parent}/messages",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "pageSize": {
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum number of results"
+        },
+        "pageToken": {
+          "type": "string",
+          "description": "Page token for pagination"
+        },
+        "filter": {
+          "type": "string",
+          "description": "Filter expression"
+        },
+        "orderBy": {
+          "type": "string",
+          "description": "Sort order"
+        },
+        "showDeleted": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include deleted messages"
+        }
+      },
+      "urlTemplate": "https://chat.googleapis.com/v1/{parent}/messages"
+    },
+    {
+      "id": "update-message",
+      "name": "Update Message",
+      "description": "Update a message",
+      "method": "PUT",
+      "path": "/v1/{name}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string" },
+          "cards": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "cardsV2": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "updateMask": {
+            "type": "string",
+            "description": "Field mask for partial updates"
+          }
+        }
+      },
+      "urlTemplate": "https://chat.googleapis.com/v1/{name}"
+    },
+    {
+      "id": "delete-message",
+      "name": "Delete Message",
+      "description": "Delete a message",
+      "method": "DELETE",
+      "path": "/v1/{name}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://chat.googleapis.com/v1/{name}"
+    },
+    {
+      "id": "get-space",
+      "name": "Get Space",
+      "description": "Get space by name",
+      "method": "GET",
+      "path": "/v1/{name}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://chat.googleapis.com/v1/{name}"
+    },
+    {
+      "id": "list-spaces",
+      "name": "List Spaces",
+      "description": "List all spaces",
+      "method": "GET",
+      "path": "/v1/spaces",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "pageSize": {
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum number of results"
+        },
+        "pageToken": {
+          "type": "string",
+          "description": "Page token for pagination"
+        },
+        "filter": {
+          "type": "string",
+          "description": "Filter expression"
+        }
+      },
+      "urlTemplate": "https://chat.googleapis.com/v1/spaces"
+    },
+    {
+      "id": "get-member",
+      "name": "Get Member",
+      "description": "Get member by name",
+      "method": "GET",
+      "path": "/v1/{name}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://chat.googleapis.com/v1/{name}"
+    },
+    {
+      "id": "list-members",
+      "name": "List Members",
+      "description": "List all members in a space",
+      "method": "GET",
+      "path": "/v1/{parent}/members",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "pageSize": {
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum number of results"
+        },
+        "pageToken": {
+          "type": "string",
+          "description": "Page token for pagination"
+        }
+      },
+      "urlTemplate": "https://chat.googleapis.com/v1/{parent}/members"
+    }
+  ]
+}
+

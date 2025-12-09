@@ -1,0 +1,218 @@
+{
+  "id": "metabase",
+  "name": "Metabase",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/metabase/509EE3",
+  "description": "Business intelligence and analytics platform",
+  "baseUrl": "https://{host}",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "X-Metabase-Session",
+    "headerFormat": "{apiKey}",
+    "secretKey": "METABASE_SESSION_TOKEN",
+    "usernameSecretKey": "METABASE_USERNAME",
+    "note": "Host should be provided in baseUrl placeholder {host} or as METABASE_BASE_URL secret key. Session token is obtained by authenticating with username and password via /api/session endpoint."
+  },
+  "endpoints": [
+    {
+      "id": "get-question",
+      "name": "Get Question",
+      "description": "Get question/card by ID",
+      "method": "GET",
+      "path": "/api/card/{id}",
+      "headers": {
+        "X-Metabase-Session": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/card/{id}"
+    },
+    {
+      "id": "list-questions",
+      "name": "List Questions",
+      "description": "List all questions/cards",
+      "method": "GET",
+      "path": "/api/card",
+      "headers": {
+        "X-Metabase-Session": "{apiKey}"
+      },
+      "queryParams": {
+        "f": { "type": "string", "description": "Filter (e.g., all, mine, database)" },
+        "model": { "type": "string", "enum": ["card", "dataset"], "description": "Model type" }
+      },
+      "urlTemplate": "https://{host}/api/card"
+    },
+    {
+      "id": "get-metric",
+      "name": "Get Metric",
+      "description": "Get metric by ID",
+      "method": "GET",
+      "path": "/api/metric/{id}",
+      "headers": {
+        "X-Metabase-Session": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/metric/{id}"
+    },
+    {
+      "id": "list-metrics",
+      "name": "List Metrics",
+      "description": "List all metrics",
+      "method": "GET",
+      "path": "/api/metric",
+      "headers": {
+        "X-Metabase-Session": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/metric"
+    },
+    {
+      "id": "get-database",
+      "name": "Get Database",
+      "description": "Get database by ID",
+      "method": "GET",
+      "path": "/api/database/{id}",
+      "headers": {
+        "X-Metabase-Session": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/database/{id}"
+    },
+    {
+      "id": "list-databases",
+      "name": "List Databases",
+      "description": "List all databases",
+      "method": "GET",
+      "path": "/api/database",
+      "headers": {
+        "X-Metabase-Session": "{apiKey}"
+      },
+      "queryParams": {
+        "include": { "type": "string", "description": "Include additional data (comma-separated)" }
+      },
+      "urlTemplate": "https://{host}/api/database"
+    },
+    {
+      "id": "create-alert",
+      "name": "Create Alert",
+      "description": "Create a new alert",
+      "method": "POST",
+      "path": "/api/alert",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Metabase-Session": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "card": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "description": "Card ID" }
+            },
+            "description": "Card/question for alert"
+          },
+          "alert_condition": { "type": "string", "enum": ["rows", "goal"], "description": "Alert condition" },
+          "alert_first_only": { "type": "boolean", "default": false, "description": "Alert only first time" },
+          "alert_above_goal": { "type": "boolean", "description": "Alert above goal" },
+          "channels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "channel_type": { "type": "string", "enum": ["email", "slack"], "description": "Channel type" },
+                "enabled": { "type": "boolean", "default": true, "description": "Channel enabled" },
+                "recipients": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer", "description": "Recipient ID" },
+                      "email": { "type": "string", "format": "email", "description": "Email address" }
+                    }
+                  },
+                  "description": "Alert recipients"
+                },
+                "details": {
+                  "type": "object",
+                  "description": "Channel details",
+                  "additionalProperties": true
+                }
+              }
+            },
+            "description": "Alert channels"
+          }
+        }
+      },
+      "urlTemplate": "https://{host}/api/alert"
+    },
+    {
+      "id": "get-alert",
+      "name": "Get Alert",
+      "description": "Get alert by ID",
+      "method": "GET",
+      "path": "/api/alert/{id}",
+      "headers": {
+        "X-Metabase-Session": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/alert/{id}"
+    },
+    {
+      "id": "list-alerts",
+      "name": "List Alerts",
+      "description": "List all alerts",
+      "method": "GET",
+      "path": "/api/alert",
+      "headers": {
+        "X-Metabase-Session": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/alert"
+    },
+    {
+      "id": "update-alert",
+      "name": "Update Alert",
+      "description": "Update an alert",
+      "method": "PUT",
+      "path": "/api/alert/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Metabase-Session": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "card": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" }
+            }
+          },
+          "alert_condition": { "type": "string", "enum": ["rows", "goal"] },
+          "alert_first_only": { "type": "boolean" },
+          "alert_above_goal": { "type": "boolean" },
+          "channels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://{host}/api/alert/{id}"
+    },
+    {
+      "id": "delete-alert",
+      "name": "Delete Alert",
+      "description": "Delete an alert",
+      "method": "DELETE",
+      "path": "/api/alert/{id}",
+      "headers": {
+        "X-Metabase-Session": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/alert/{id}"
+    }
+  ]
+}
+

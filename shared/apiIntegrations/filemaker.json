@@ -1,0 +1,270 @@
+{
+  "id": "filemaker",
+  "name": "FileMaker",
+  "icon": "📁",
+  "logoUrl": "https://cdn.simpleicons.org/filemaker/000000",
+  "description": "Database and application development platform",
+  "baseUrl": "https://{your-filemaker-host}/fmi/data/v1/databases/{database}",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "FILEMAKER_SESSION_TOKEN",
+    "usernameSecretKey": "FILEMAKER_USERNAME",
+    "note": "Base URL should be provided with host placeholder {your-filemaker-host} and database placeholder {database}, or as FILEMAKER_HOST and FILEMAKER_DATABASE secret keys. Session token is obtained via /sessions endpoint (not included here) using username and password."
+  },
+  "endpoints": [
+    {
+      "id": "create-record",
+      "name": "Create Record",
+      "description": "Create a new record in a layout",
+      "method": "POST",
+      "path": "/layouts/{layout}/records",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "fieldData": {
+            "type": "object",
+            "description": "Field data (field names as keys)",
+            "additionalProperties": true
+          },
+          "portalData": {
+            "type": "object",
+            "description": "Portal data (portal names as keys, arrays of field data as values)",
+            "additionalProperties": true
+          },
+          "script": { "type": "string", "description": "Script name to run after creation" },
+          "script.param": { "type": "string", "description": "Script parameter" },
+          "script.prerequest": { "type": "string", "description": "Pre-request script name" },
+          "script.prerequest.param": { "type": "string", "description": "Pre-request script parameter" },
+          "script.presort": { "type": "string", "description": "Pre-sort script name" },
+          "script.presort.param": { "type": "string", "description": "Pre-sort script parameter" }
+        },
+        "required": ["fieldData"]
+      },
+      "urlTemplate": "https://{your-filemaker-host}/fmi/data/v1/databases/{database}/layouts/{layout}/records"
+    },
+    {
+      "id": "get-record",
+      "name": "Get Record",
+      "description": "Get record by ID",
+      "method": "GET",
+      "path": "/layouts/{layout}/records/{recordId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "portal": { "type": "string", "description": "Comma-separated list of portal names to include" },
+        "layout.response": { "type": "string", "description": "Response layout name" },
+        "script": { "type": "string", "description": "Script name to run" },
+        "script.param": { "type": "string", "description": "Script parameter" },
+        "script.prerequest": { "type": "string", "description": "Pre-request script name" },
+        "script.prerequest.param": { "type": "string", "description": "Pre-request script parameter" },
+        "script.presort": { "type": "string", "description": "Pre-sort script name" },
+        "script.presort.param": { "type": "string", "description": "Pre-sort script parameter" }
+      },
+      "urlTemplate": "https://{your-filemaker-host}/fmi/data/v1/databases/{database}/layouts/{layout}/records/{recordId}"
+    },
+    {
+      "id": "list-records",
+      "name": "List Records",
+      "description": "List all records in a layout",
+      "method": "GET",
+      "path": "/layouts/{layout}/records",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "offset": { "type": "integer", "default": 1, "description": "Offset for pagination" },
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" },
+        "sort": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fieldName": { "type": "string" },
+              "sortOrder": { "type": "string", "enum": ["ascend", "descend"] }
+            },
+            "required": ["fieldName", "sortOrder"]
+          },
+          "description": "Sort criteria"
+        },
+        "portal": { "type": "string", "description": "Comma-separated list of portal names to include" },
+        "layout.response": { "type": "string", "description": "Response layout name" },
+        "script": { "type": "string", "description": "Script name to run" },
+        "script.param": { "type": "string", "description": "Script parameter" },
+        "script.prerequest": { "type": "string", "description": "Pre-request script name" },
+        "script.prerequest.param": { "type": "string", "description": "Pre-request script parameter" },
+        "script.presort": { "type": "string", "description": "Pre-sort script name" },
+        "script.presort.param": { "type": "string", "description": "Pre-sort script parameter" }
+      },
+      "urlTemplate": "https://{your-filemaker-host}/fmi/data/v1/databases/{database}/layouts/{layout}/records"
+    },
+    {
+      "id": "update-record",
+      "name": "Update Record",
+      "description": "Update a record",
+      "method": "PATCH",
+      "path": "/layouts/{layout}/records/{recordId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "fieldData": {
+            "type": "object",
+            "description": "Field data to update (field names as keys)",
+            "additionalProperties": true
+          },
+          "portalData": {
+            "type": "object",
+            "description": "Portal data to update",
+            "additionalProperties": true
+          },
+          "modId": { "type": "integer", "description": "Modification ID for optimistic locking" },
+          "script": { "type": "string", "description": "Script name to run after update" },
+          "script.param": { "type": "string", "description": "Script parameter" },
+          "script.prerequest": { "type": "string", "description": "Pre-request script name" },
+          "script.prerequest.param": { "type": "string", "description": "Pre-request script parameter" },
+          "script.presort": { "type": "string", "description": "Pre-sort script name" },
+          "script.presort.param": { "type": "string", "description": "Pre-sort script parameter" }
+        },
+        "required": ["fieldData"]
+      },
+      "urlTemplate": "https://{your-filemaker-host}/fmi/data/v1/databases/{database}/layouts/{layout}/records/{recordId}"
+    },
+    {
+      "id": "delete-record",
+      "name": "Delete Record",
+      "description": "Delete a record",
+      "method": "DELETE",
+      "path": "/layouts/{layout}/records/{recordId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "script": { "type": "string", "description": "Script name to run after deletion" },
+        "script.param": { "type": "string", "description": "Script parameter" },
+        "script.prerequest": { "type": "string", "description": "Pre-request script name" },
+        "script.prerequest.param": { "type": "string", "description": "Pre-request script parameter" },
+        "script.presort": { "type": "string", "description": "Pre-sort script name" },
+        "script.presort.param": { "type": "string", "description": "Pre-sort script parameter" }
+      },
+      "urlTemplate": "https://{your-filemaker-host}/fmi/data/v1/databases/{database}/layouts/{layout}/records/{recordId}"
+    },
+    {
+      "id": "duplicate-record",
+      "name": "Duplicate Record",
+      "description": "Duplicate a record",
+      "method": "POST",
+      "path": "/layouts/{layout}/records/{recordId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "fieldData": {
+            "type": "object",
+            "description": "Field data to override in duplicate (field names as keys)",
+            "additionalProperties": true
+          },
+          "script": { "type": "string", "description": "Script name to run after duplication" },
+          "script.param": { "type": "string", "description": "Script parameter" },
+          "script.prerequest": { "type": "string", "description": "Pre-request script name" },
+          "script.prerequest.param": { "type": "string", "description": "Pre-request script parameter" },
+          "script.presort": { "type": "string", "description": "Pre-sort script name" },
+          "script.presort.param": { "type": "string", "description": "Pre-sort script parameter" }
+        }
+      },
+      "urlTemplate": "https://{your-filemaker-host}/fmi/data/v1/databases/{database}/layouts/{layout}/records/{recordId}"
+    },
+    {
+      "id": "find-records",
+      "name": "Find Records",
+      "description": "Find records using query criteria",
+      "method": "POST",
+      "path": "/layouts/{layout}/_find",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fieldName": { "type": "string", "required": true },
+                "value": { "type": "string", "required": true },
+                "omit": { "type": "boolean", "default": false, "description": "Omit this criterion" }
+              },
+              "required": ["fieldName", "value"]
+            },
+            "required": true,
+            "description": "Query criteria"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fieldName": { "type": "string" },
+                "sortOrder": { "type": "string", "enum": ["ascend", "descend"] }
+              },
+              "required": ["fieldName", "sortOrder"]
+            },
+            "description": "Sort criteria"
+          },
+          "offset": { "type": "integer", "default": 1, "description": "Offset for pagination" },
+          "limit": { "type": "integer", "default": 100, "description": "Number of results" },
+          "portal": { "type": "string", "description": "Comma-separated list of portal names to include" },
+          "layout.response": { "type": "string", "description": "Response layout name" },
+          "script": { "type": "string", "description": "Script name to run" },
+          "script.param": { "type": "string", "description": "Script parameter" },
+          "script.prerequest": { "type": "string", "description": "Pre-request script name" },
+          "script.prerequest.param": { "type": "string", "description": "Pre-request script parameter" },
+          "script.presort": { "type": "string", "description": "Pre-sort script name" },
+          "script.presort.param": { "type": "string", "description": "Pre-sort script parameter" }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://{your-filemaker-host}/fmi/data/v1/databases/{database}/layouts/{layout}/_find"
+    },
+    {
+      "id": "perform-script",
+      "name": "Perform Script",
+      "description": "Execute a script",
+      "method": "POST",
+      "path": "/scripts/{scriptName}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "script.param": { "type": "string", "description": "Script parameter" },
+          "layout": { "type": "string", "description": "Layout name" }
+        }
+      },
+      "urlTemplate": "https://{your-filemaker-host}/fmi/data/v1/databases/{database}/scripts/{scriptName}"
+    }
+  ]
+}
+

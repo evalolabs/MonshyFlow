@@ -1,0 +1,138 @@
+{
+  "id": "mindee",
+  "name": "Mindee",
+  "icon": "📄",
+  "logoUrl": "https://cdn.simpleicons.org/mindee/1C6EFC",
+  "description": "OCR and document parsing API",
+  "baseUrl": "https://api.mindee.net/v1/products/mindee",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Token {apiKey}",
+    "secretKey": "MINDEE_API_KEY",
+    "note": "Mindee uses Token-based authentication. API key is sent in Authorization header as 'Token {apiKey}'. For V1 API, use baseUrl: https://api.mindee.net/products"
+  },
+  "endpoints": [
+    {
+      "id": "predict-receipt-v3",
+      "name": "Predict Receipt (V3+)",
+      "description": "Analyze a receipt using OCR and ML",
+      "method": "POST",
+      "path": "/receipts/v3/predict",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "string",
+            "format": "binary",
+            "description": "Receipt image file (binary data)"
+          },
+          "file": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to receipt image file"
+          },
+          "cut_pdf": { "type": "boolean", "default": false, "description": "Cut PDF pages" },
+          "cropper": { "type": "boolean", "default": false, "description": "Enable cropper" },
+          "include_mvision": { "type": "boolean", "default": false, "description": "Include mvision" }
+        },
+        "description": "Either 'document' (binary) or 'file' (URL) must be provided"
+      },
+      "urlTemplate": "https://api.mindee.net/v1/products/mindee/receipts/v3/predict"
+    },
+    {
+      "id": "predict-receipt-v1",
+      "name": "Predict Receipt (V1)",
+      "description": "Analyze a receipt using OCR and ML (V1 API)",
+      "method": "POST",
+      "path": "/receipts/v1/predict",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "string",
+            "format": "binary",
+            "description": "Receipt image file (binary data)"
+          },
+          "file": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to receipt image file"
+          }
+        },
+        "description": "Either 'document' (binary) or 'file' (URL) must be provided"
+      },
+      "urlTemplate": "https://api.mindee.net/products/receipts/v1/predict"
+    },
+    {
+      "id": "predict-invoice-v3",
+      "name": "Predict Invoice (V3+)",
+      "description": "Analyze an invoice using OCR and ML",
+      "method": "POST",
+      "path": "/invoices/v3/predict",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "string",
+            "format": "binary",
+            "description": "Invoice image file (binary data)"
+          },
+          "file": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to invoice image file"
+          },
+          "cut_pdf": { "type": "boolean", "default": false, "description": "Cut PDF pages" },
+          "cropper": { "type": "boolean", "default": false, "description": "Enable cropper" },
+          "include_mvision": { "type": "boolean", "default": false, "description": "Include mvision" }
+        },
+        "description": "Either 'document' (binary) or 'file' (URL) must be provided"
+      },
+      "urlTemplate": "https://api.mindee.net/v1/products/mindee/invoices/v3/predict"
+    },
+    {
+      "id": "predict-invoice-v1",
+      "name": "Predict Invoice (V1)",
+      "description": "Analyze an invoice using OCR and ML (V1 API)",
+      "method": "POST",
+      "path": "/invoices/v1/predict",
+      "headers": {
+        "Authorization": "Token {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "string",
+            "format": "binary",
+            "description": "Invoice image file (binary data)"
+          },
+          "file": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to invoice image file"
+          }
+        },
+        "description": "Either 'document' (binary) or 'file' (URL) must be provided"
+      },
+      "urlTemplate": "https://api.mindee.net/products/invoices/v1/predict"
+    }
+  ]
+}
+

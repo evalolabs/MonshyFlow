@@ -1,0 +1,109 @@
+{
+  "id": "supabase",
+  "name": "Supabase",
+  "icon": "🗄️",
+  "logoUrl": "https://cdn.simpleicons.org/supabase/3ECF8E",
+  "description": "Open-source Firebase alternative with PostgreSQL",
+  "baseUrl": "https://{projectId}.supabase.co/rest/v1",
+  "color": {
+    "bg": "from-green-100 to-teal-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "SUPABASE_SERVICE_ROLE_KEY",
+    "emailSecretKey": "SUPABASE_ANON_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-row",
+      "name": "Create Row",
+      "description": "Create a new row in a table",
+      "method": "POST",
+      "path": "/{tableName}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Row data (columns depend on table schema)",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{projectId}.supabase.co/rest/v1/{tableName}"
+    },
+    {
+      "id": "get-row",
+      "name": "Get Row",
+      "description": "Get rows from a table with filters",
+      "method": "GET",
+      "path": "/{tableName}",
+      "headers": {
+        "Prefer": "return=representation"
+      },
+      "queryParams": {
+        "select": "{select}",
+        "filter": "{filter}",
+        "order": "{order}",
+        "limit": "{limit}",
+        "offset": "{offset}"
+      },
+      "urlTemplate": "https://{projectId}.supabase.co/rest/v1/{tableName}"
+    },
+    {
+      "id": "list-rows",
+      "name": "List Rows",
+      "description": "List all rows from a table",
+      "method": "GET",
+      "path": "/{tableName}",
+      "headers": {
+        "Prefer": "return=representation"
+      },
+      "queryParams": {
+        "select": "*",
+        "limit": "1000",
+        "offset": "0"
+      },
+      "urlTemplate": "https://{projectId}.supabase.co/rest/v1/{tableName}"
+    },
+    {
+      "id": "update-row",
+      "name": "Update Row",
+      "description": "Update rows in a table with filters",
+      "method": "PATCH",
+      "path": "/{tableName}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
+      "queryParams": {
+        "filter": "{filter}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Updated row data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{projectId}.supabase.co/rest/v1/{tableName}"
+    },
+    {
+      "id": "delete-row",
+      "name": "Delete Row",
+      "description": "Delete rows from a table with filters",
+      "method": "DELETE",
+      "path": "/{tableName}",
+      "headers": {
+        "Prefer": "return=representation"
+      },
+      "queryParams": {
+        "filter": "{filter}"
+      },
+      "urlTemplate": "https://{projectId}.supabase.co/rest/v1/{tableName}"
+    }
+  ]
+}
+

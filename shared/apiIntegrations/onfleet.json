@@ -1,0 +1,512 @@
+{
+  "id": "onfleet",
+  "name": "Onfleet",
+  "icon": "🚚",
+  "logoUrl": "https://cdn.simpleicons.org/onfleet/000000",
+  "description": "Delivery management platform for last-mile deliveries",
+  "baseUrl": "https://onfleet.com/api/v2",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "ONFLEET_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new delivery task",
+      "method": "POST",
+      "path": "/tasks",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "object",
+                "properties": {
+                  "number": { "type": "string" },
+                  "street": { "type": "string" },
+                  "city": { "type": "string" },
+                  "state": { "type": "string" },
+                  "country": { "type": "string" },
+                  "postalCode": { "type": "string" },
+                  "name": { "type": "string" },
+                  "apartment": { "type": "string" },
+                  "unparsed": { "type": "string" }
+                }
+              },
+              "location": {
+                "type": "array",
+                "items": { "type": "number" },
+                "minItems": 2,
+                "maxItems": 2,
+                "description": "Coordinates [longitude, latitude]"
+              },
+              "notes": { "type": "string" }
+            },
+            "required": true
+          },
+          "recipients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "required": true },
+                "phone": { "type": "string" },
+                "notes": { "type": "string" },
+                "skipSMSNotifications": { "type": "boolean", "default": false }
+              },
+              "required": ["name"]
+            },
+            "required": true
+          },
+          "merchant": { "type": "string" },
+          "executor": { "type": "string" },
+          "creator": { "type": "string" },
+          "organization": { "type": "string" },
+          "dependencies": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Task IDs that must be completed before this task"
+          },
+          "autoAssign": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "integer",
+                "enum": [0, 1, 2],
+                "description": "Auto-assign mode (0=manual, 1=automatic, 2=time-based)"
+              },
+              "considerTraffic": { "type": "boolean", "default": false }
+            }
+          },
+          "completeAfter": {
+            "type": "integer",
+            "description": "Unix timestamp - task cannot be completed before this time"
+          },
+          "completeBefore": {
+            "type": "integer",
+            "description": "Unix timestamp - task must be completed before this time"
+          },
+          "pickupTask": { "type": "boolean", "default": false },
+          "notes": { "type": "string" },
+          "quantity": { "type": "integer", "default": 1 },
+          "serviceTime": { "type": "integer", "description": "Service time in seconds" },
+          "trackingURL": { "type": "string", "format": "uri" },
+          "container": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["WORKER", "TEAM", "ORGANIZATION"],
+                "required": true
+              },
+              "worker": { "type": "string" },
+              "team": { "type": "string" }
+            },
+            "required": ["type"]
+          }
+        },
+        "required": ["destination", "recipients"]
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/tasks"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get task by ID",
+      "method": "GET",
+      "path": "/tasks/{taskId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/tasks/{taskId}"
+    },
+    {
+      "id": "list-tasks",
+      "name": "List Tasks",
+      "description": "List all tasks",
+      "method": "GET",
+      "path": "/tasks",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "from": {
+          "type": "integer",
+          "description": "Unix timestamp - filter tasks from this time"
+        },
+        "to": {
+          "type": "integer",
+          "description": "Unix timestamp - filter tasks to this time"
+        },
+        "lastId": {
+          "type": "string",
+          "description": "Last task ID for pagination"
+        },
+        "state": {
+          "type": "integer",
+          "enum": [0, 1, 2, 3],
+          "description": "Task state (0=unassigned, 1=assigned, 2=active, 3=completed)"
+        },
+        "worker": { "type": "string", "description": "Filter by worker ID" },
+        "team": { "type": "string", "description": "Filter by team ID" },
+        "organization": { "type": "string", "description": "Filter by organization ID" }
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/tasks"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update a task",
+      "method": "PUT",
+      "path": "/tasks/{taskId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Task data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/tasks/{taskId}"
+    },
+    {
+      "id": "delete-task",
+      "name": "Delete Task",
+      "description": "Delete a task",
+      "method": "DELETE",
+      "path": "/tasks/{taskId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/tasks/{taskId}"
+    },
+    {
+      "id": "create-worker",
+      "name": "Create Worker",
+      "description": "Create a new worker",
+      "method": "POST",
+      "path": "/workers",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Worker name"
+          },
+          "phone": {
+            "type": "string",
+            "required": true,
+            "description": "Worker phone number"
+          },
+          "teams": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Team IDs"
+          },
+          "vehicle": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["CAR", "TRUCK", "BICYCLE", "MOTORCYCLE", "WALKING"],
+                "required": true
+              },
+              "description": { "type": "string" },
+              "licensePlate": { "type": "string" },
+              "color": { "type": "string" }
+            },
+            "required": ["type"]
+          },
+          "capacity": {
+            "type": "integer",
+            "description": "Worker capacity"
+          },
+          "displayName": { "type": "string" },
+          "isActive": { "type": "boolean", "default": true }
+        },
+        "required": ["name", "phone"]
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/workers"
+    },
+    {
+      "id": "get-worker",
+      "name": "Get Worker",
+      "description": "Get worker by ID",
+      "method": "GET",
+      "path": "/workers/{workerId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/workers/{workerId}"
+    },
+    {
+      "id": "list-workers",
+      "name": "List Workers",
+      "description": "List all workers",
+      "method": "GET",
+      "path": "/workers",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/workers"
+    },
+    {
+      "id": "update-worker",
+      "name": "Update Worker",
+      "description": "Update a worker",
+      "method": "PUT",
+      "path": "/workers/{workerId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Worker data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/workers/{workerId}"
+    },
+    {
+      "id": "delete-worker",
+      "name": "Delete Worker",
+      "description": "Delete a worker",
+      "method": "DELETE",
+      "path": "/workers/{workerId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/workers/{workerId}"
+    },
+    {
+      "id": "create-destination",
+      "name": "Create Destination",
+      "description": "Create a new destination",
+      "method": "POST",
+      "path": "/destinations",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "object",
+            "properties": {
+              "number": { "type": "string" },
+              "street": { "type": "string" },
+              "city": { "type": "string" },
+              "state": { "type": "string" },
+              "country": { "type": "string" },
+              "postalCode": { "type": "string" },
+              "name": { "type": "string" },
+              "apartment": { "type": "string" },
+              "unparsed": { "type": "string" }
+            }
+          },
+          "location": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "Coordinates [longitude, latitude]"
+          },
+          "notes": { "type": "string" }
+        }
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/destinations"
+    },
+    {
+      "id": "get-destination",
+      "name": "Get Destination",
+      "description": "Get destination by ID",
+      "method": "GET",
+      "path": "/destinations/{destinationId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/destinations/{destinationId}"
+    },
+    {
+      "id": "create-recipient",
+      "name": "Create Recipient",
+      "description": "Create a new recipient",
+      "method": "POST",
+      "path": "/recipients",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Recipient name"
+          },
+          "phone": {
+            "type": "string",
+            "required": true,
+            "description": "Recipient phone number"
+          },
+          "notes": { "type": "string" },
+          "skipSMSNotifications": { "type": "boolean", "default": false },
+          "skipPhoneNumberValidation": { "type": "boolean", "default": false }
+        },
+        "required": ["name", "phone"]
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/recipients"
+    },
+    {
+      "id": "get-recipient",
+      "name": "Get Recipient",
+      "description": "Get recipient by ID or phone number",
+      "method": "GET",
+      "path": "/recipients/{recipientId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/recipients/{recipientId}"
+    },
+    {
+      "id": "list-recipients",
+      "name": "List Recipients",
+      "description": "List all recipients",
+      "method": "GET",
+      "path": "/recipients",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/recipients"
+    },
+    {
+      "id": "update-recipient",
+      "name": "Update Recipient",
+      "description": "Update a recipient",
+      "method": "PUT",
+      "path": "/recipients/{recipientId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Recipient data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/recipients/{recipientId}"
+    },
+    {
+      "id": "get-team",
+      "name": "Get Team",
+      "description": "Get team by ID",
+      "method": "GET",
+      "path": "/teams/{teamId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/teams/{teamId}"
+    },
+    {
+      "id": "list-teams",
+      "name": "List Teams",
+      "description": "List all teams",
+      "method": "GET",
+      "path": "/teams",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/teams"
+    },
+    {
+      "id": "get-hub",
+      "name": "Get Hub",
+      "description": "Get hub by ID",
+      "method": "GET",
+      "path": "/hubs/{hubId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/hubs/{hubId}"
+    },
+    {
+      "id": "list-hubs",
+      "name": "List Hubs",
+      "description": "List all hubs",
+      "method": "GET",
+      "path": "/hubs",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/hubs"
+    },
+    {
+      "id": "get-organization",
+      "name": "Get Organization",
+      "description": "Get organization information",
+      "method": "GET",
+      "path": "/organization",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/organization"
+    },
+    {
+      "id": "get-admin",
+      "name": "Get Admin",
+      "description": "Get admin by ID",
+      "method": "GET",
+      "path": "/admins/{adminId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/admins/{adminId}"
+    },
+    {
+      "id": "list-admins",
+      "name": "List Admins",
+      "description": "List all admins",
+      "method": "GET",
+      "path": "/admins",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/admins"
+    },
+    {
+      "id": "get-container",
+      "name": "Get Container",
+      "description": "Get container by ID",
+      "method": "GET",
+      "path": "/containers/{containerId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://onfleet.com/api/v2/containers/{containerId}"
+    }
+  ]
+}
+

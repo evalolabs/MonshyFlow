@@ -1,0 +1,354 @@
+{
+  "id": "google-gsuite-admin",
+  "name": "Google G Suite Admin",
+  "icon": "👥",
+  "logoUrl": "https://cdn.simpleicons.org/googleworkspace/4285F4",
+  "description": "Google Workspace (formerly G Suite) Admin API for managing users, groups, and devices",
+  "baseUrl": "https://www.googleapis.com/admin",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GOOGLE_GSUITE_ADMIN_OAUTH2_ACCESS_TOKEN",
+    "note": "Supports OAuth2 (GOOGLE_GSUITE_ADMIN_OAUTH2_ACCESS_TOKEN) or Service Account (GOOGLE_GSUITE_ADMIN_SERVICE_ACCOUNT_KEY) authentication."
+  },
+  "endpoints": [
+    {
+      "id": "create-user",
+      "name": "Create User",
+      "description": "Create a new user",
+      "method": "POST",
+      "path": "/directory/v1/users",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "primaryEmail": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Primary email address"
+          },
+          "name": {
+            "type": "object",
+            "properties": {
+              "givenName": { "type": "string" },
+              "familyName": { "type": "string" },
+              "fullName": { "type": "string" }
+            },
+            "description": "User name"
+          },
+          "password": {
+            "type": "string",
+            "required": true,
+            "description": "User password"
+          },
+          "changePasswordAtNextLogin": {
+            "type": "boolean",
+            "default": false,
+            "description": "Require password change at next login"
+          },
+          "suspended": {
+            "type": "boolean",
+            "default": false,
+            "description": "User suspended status"
+          },
+          "orgUnitPath": {
+            "type": "string",
+            "default": "/",
+            "description": "Organizational unit path"
+          },
+          "isAdmin": {
+            "type": "boolean",
+            "default": false,
+            "description": "Is admin user"
+          },
+          "isDelegatedAdmin": {
+            "type": "boolean",
+            "default": false,
+            "description": "Is delegated admin"
+          },
+          "recoveryEmail": {
+            "type": "string",
+            "format": "email",
+            "description": "Recovery email"
+          },
+          "recoveryPhone": {
+            "type": "string",
+            "description": "Recovery phone number"
+          }
+        },
+        "required": ["primaryEmail", "password"]
+      },
+      "urlTemplate": "https://www.googleapis.com/admin/directory/v1/users"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user by key",
+      "method": "GET",
+      "path": "/directory/v1/users/{userKey}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "customFieldMask": {
+          "type": "string",
+          "description": "Custom field mask"
+        },
+        "projection": {
+          "type": "string",
+          "enum": ["basic", "custom", "full"],
+          "default": "basic",
+          "description": "Projection type"
+        },
+        "viewType": {
+          "type": "string",
+          "enum": ["admin_view", "domain_public"],
+          "default": "admin_view",
+          "description": "View type"
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/admin/directory/v1/users/{userKey}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/directory/v1/users",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "customer": {
+          "type": "string",
+          "description": "Customer ID"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain name"
+        },
+        "maxResults": {
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum number of results"
+        },
+        "pageToken": {
+          "type": "string",
+          "description": "Page token for pagination"
+        },
+        "orderBy": {
+          "type": "string",
+          "enum": ["email", "familyName", "givenName"],
+          "description": "Sort order"
+        },
+        "sortOrder": {
+          "type": "string",
+          "enum": ["ASCENDING", "DESCENDING"],
+          "description": "Sort direction"
+        },
+        "query": {
+          "type": "string",
+          "description": "Search query"
+        },
+        "projection": {
+          "type": "string",
+          "enum": ["basic", "custom", "full"],
+          "default": "basic"
+        },
+        "viewType": {
+          "type": "string",
+          "enum": ["admin_view", "domain_public"],
+          "default": "admin_view"
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/admin/directory/v1/users"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update a user",
+      "method": "PUT",
+      "path": "/directory/v1/users/{userKey}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "User data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://www.googleapis.com/admin/directory/v1/users/{userKey}"
+    },
+    {
+      "id": "delete-user",
+      "name": "Delete User",
+      "description": "Delete a user",
+      "method": "DELETE",
+      "path": "/directory/v1/users/{userKey}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://www.googleapis.com/admin/directory/v1/users/{userKey}"
+    },
+    {
+      "id": "create-group",
+      "name": "Create Group",
+      "description": "Create a new group",
+      "method": "POST",
+      "path": "/directory/v1/groups",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Group email address"
+          },
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Group name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Group description"
+          }
+        },
+        "required": ["email", "name"]
+      },
+      "urlTemplate": "https://www.googleapis.com/admin/directory/v1/groups"
+    },
+    {
+      "id": "get-group",
+      "name": "Get Group",
+      "description": "Get group by key",
+      "method": "GET",
+      "path": "/directory/v1/groups/{groupKey}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://www.googleapis.com/admin/directory/v1/groups/{groupKey}"
+    },
+    {
+      "id": "list-groups",
+      "name": "List Groups",
+      "description": "List all groups",
+      "method": "GET",
+      "path": "/directory/v1/groups",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "customer": { "type": "string", "description": "Customer ID" },
+        "domain": { "type": "string", "description": "Domain name" },
+        "maxResults": {
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum number of results"
+        },
+        "pageToken": {
+          "type": "string",
+          "description": "Page token for pagination"
+        },
+        "userKey": {
+          "type": "string",
+          "description": "Filter groups by user key"
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/admin/directory/v1/groups"
+    },
+    {
+      "id": "update-group",
+      "name": "Update Group",
+      "description": "Update a group",
+      "method": "PUT",
+      "path": "/directory/v1/groups/{groupKey}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Group data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://www.googleapis.com/admin/directory/v1/groups/{groupKey}"
+    },
+    {
+      "id": "delete-group",
+      "name": "Delete Group",
+      "description": "Delete a group",
+      "method": "DELETE",
+      "path": "/directory/v1/groups/{groupKey}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://www.googleapis.com/admin/directory/v1/groups/{groupKey}"
+    },
+    {
+      "id": "get-device",
+      "name": "Get Device",
+      "description": "Get device by ID",
+      "method": "GET",
+      "path": "/directory/v1/customer/{customerId}/devices/{deviceId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://www.googleapis.com/admin/directory/v1/customer/{customerId}/devices/{deviceId}"
+    },
+    {
+      "id": "list-devices",
+      "name": "List Devices",
+      "description": "List all devices for a customer",
+      "method": "GET",
+      "path": "/directory/v1/customer/{customerId}/devices",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "maxResults": {
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum number of results"
+        },
+        "pageToken": {
+          "type": "string",
+          "description": "Page token for pagination"
+        },
+        "orderBy": {
+          "type": "string",
+          "description": "Sort order"
+        },
+        "projection": {
+          "type": "string",
+          "enum": ["BASIC", "FULL"],
+          "default": "BASIC",
+          "description": "Projection type"
+        },
+        "query": {
+          "type": "string",
+          "description": "Search query"
+        }
+      },
+      "urlTemplate": "https://www.googleapis.com/admin/directory/v1/customer/{customerId}/devices"
+    }
+  ]
+}
+

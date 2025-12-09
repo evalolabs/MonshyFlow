@@ -1,0 +1,115 @@
+{
+  "id": "timescaledb",
+  "name": "TimescaleDB",
+  "icon": "🗄️",
+  "logoUrl": "https://cdn.simpleicons.org/timescaledb/000000",
+  "description": "PostgreSQL extension for time-series data",
+  "baseUrl": "postgresql://{host}:{port}/{database}",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(username:password)}",
+    "secretKey": "TIMESCALEDB_PASSWORD",
+    "usernameSecretKey": "TIMESCALEDB_USERNAME",
+    "note": "Base URL should be provided as PostgreSQL connection string (postgresql://{host}:{port}/{database}) or as separate TIMESCALEDB_HOST, TIMESCALEDB_PORT (default: 5432), TIMESCALEDB_DATABASE secret keys. Uses PostgreSQL-compatible SQL queries."
+  },
+  "endpoints": [
+    {
+      "id": "execute-query",
+      "name": "Execute Query",
+      "description": "Execute a SQL query (PostgreSQL-compatible)",
+      "method": "POST",
+      "path": "/query",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "SQL query statement"
+          },
+          "params": {
+            "type": "array",
+            "items": {
+              "type": "any"
+            },
+            "description": "Query parameters"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "postgresql://{host}:{port}/{database}/query"
+    },
+    {
+      "id": "insert-into-table",
+      "name": "Insert Into Table",
+      "description": "Insert data into a table",
+      "method": "POST",
+      "path": "/query",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "INSERT INTO {schema}.{table} ... SQL statement"
+          },
+          "params": {
+            "type": "array",
+            "items": {
+              "type": "any"
+            },
+            "description": "Query parameters"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "postgresql://{host}:{port}/{database}/query"
+    },
+    {
+      "id": "update-table",
+      "name": "Update Table",
+      "description": "Update data in a table",
+      "method": "POST",
+      "path": "/query",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {base64(username:password)}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "UPDATE {schema}.{table} ... SQL statement"
+          },
+          "params": {
+            "type": "array",
+            "items": {
+              "type": "any"
+            },
+            "description": "Query parameters"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "postgresql://{host}:{port}/{database}/query"
+    }
+  ]
+}
+

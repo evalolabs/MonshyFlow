@@ -1,0 +1,226 @@
+{
+  "id": "okta",
+  "name": "Okta",
+  "icon": "🔐",
+  "logoUrl": "https://cdn.simpleicons.org/okta/007DC1",
+  "description": "Identity and access management platform",
+  "baseUrl": "https://{domain}/api/v1",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "SSWS {apiKey}",
+    "secretKey": "OKTA_API_TOKEN",
+    "note": "Domain should be provided in baseUrl placeholder {domain} or as separate secret key OKTA_DOMAIN"
+  },
+  "endpoints": [
+    {
+      "id": "create-user",
+      "name": "Create User",
+      "description": "Create a new user",
+      "method": "POST",
+      "path": "/users",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SSWS {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "type": "object",
+            "properties": {
+              "firstName": { "type": "string", "required": true, "description": "First name" },
+              "lastName": { "type": "string", "required": true, "description": "Last name" },
+              "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+              "login": { "type": "string", "required": true, "description": "Login username" },
+              "mobilePhone": { "type": "string", "description": "Mobile phone number" },
+              "secondEmail": { "type": "string", "format": "email", "description": "Second email address" },
+              "middleName": { "type": "string", "description": "Middle name" },
+              "honorificPrefix": { "type": "string", "description": "Honorific prefix" },
+              "honorificSuffix": { "type": "string", "description": "Honorific suffix" },
+              "title": { "type": "string", "description": "Job title" },
+              "displayName": { "type": "string", "description": "Display name" },
+              "nickName": { "type": "string", "description": "Nickname" },
+              "profileUrl": { "type": "string", "format": "uri", "description": "Profile URL" },
+              "primaryPhone": { "type": "string", "description": "Primary phone number" },
+              "streetAddress": { "type": "string", "description": "Street address" },
+              "city": { "type": "string", "description": "City" },
+              "state": { "type": "string", "description": "State" },
+              "zipCode": { "type": "string", "description": "Postal code" },
+              "countryCode": { "type": "string", "description": "Country code" },
+              "postalAddress": { "type": "string", "description": "Postal address" },
+              "preferredLanguage": { "type": "string", "description": "Preferred language" },
+              "locale": { "type": "string", "description": "Locale" },
+              "timezone": { "type": "string", "description": "Timezone" },
+              "userType": { "type": "string", "description": "User type" },
+              "employeeNumber": { "type": "string", "description": "Employee number" },
+              "costCenter": { "type": "string", "description": "Cost center" },
+              "organization": { "type": "string", "description": "Organization" },
+              "division": { "type": "string", "description": "Division" },
+              "department": { "type": "string", "description": "Department" },
+              "managerId": { "type": "string", "description": "Manager ID" },
+              "manager": { "type": "string", "description": "Manager" }
+            },
+            "required": ["firstName", "lastName", "email", "login"]
+          },
+          "credentials": {
+            "type": "object",
+            "properties": {
+              "password": {
+                "type": "object",
+                "properties": {
+                  "value": { "type": "string", "description": "Password value" }
+                }
+              },
+              "recovery_question": {
+                "type": "object",
+                "properties": {
+                  "question": { "type": "string", "description": "Recovery question" },
+                  "answer": { "type": "string", "description": "Recovery answer" }
+                }
+              },
+              "provider": {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["OKTA", "ACTIVE_DIRECTORY", "LDAP", "FEDERATION", "SOCIAL"], "description": "Provider type" },
+                  "name": { "type": "string", "description": "Provider name" }
+                }
+              }
+            }
+          },
+          "groupIds": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Group IDs"
+          },
+          "activate": { "type": "boolean", "default": true, "description": "Activate user immediately" }
+        },
+        "required": ["profile"]
+      },
+      "urlTemplate": "https://{domain}/api/v1/users"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user by ID or login",
+      "method": "GET",
+      "path": "/users/{id}",
+      "headers": {
+        "Authorization": "SSWS {apiKey}"
+      },
+      "urlTemplate": "https://{domain}/api/v1/users/{id}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/users",
+      "headers": {
+        "Authorization": "SSWS {apiKey}"
+      },
+      "queryParams": {
+        "q": { "type": "string", "description": "Search query" },
+        "filter": { "type": "string", "description": "Filter expression" },
+        "after": { "type": "string", "description": "Cursor for pagination" },
+        "limit": { "type": "integer", "default": 200, "description": "Number of results" },
+        "sortBy": { "type": "string", "description": "Sort by field" },
+        "sortOrder": { "type": "string", "enum": ["ASC", "DESC"], "default": "ASC", "description": "Sort order" },
+        "search": { "type": "string", "description": "Search expression" }
+      },
+      "urlTemplate": "https://{domain}/api/v1/users"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update an existing user",
+      "method": "PUT",
+      "path": "/users/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SSWS {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "type": "object",
+            "properties": {
+              "firstName": { "type": "string", "description": "First name" },
+              "lastName": { "type": "string", "description": "Last name" },
+              "email": { "type": "string", "format": "email", "description": "Email address" },
+              "login": { "type": "string", "description": "Login username" },
+              "mobilePhone": { "type": "string", "description": "Mobile phone number" },
+              "secondEmail": { "type": "string", "format": "email", "description": "Second email address" },
+              "middleName": { "type": "string", "description": "Middle name" },
+              "honorificPrefix": { "type": "string", "description": "Honorific prefix" },
+              "honorificSuffix": { "type": "string", "description": "Honorific suffix" },
+              "title": { "type": "string", "description": "Job title" },
+              "displayName": { "type": "string", "description": "Display name" },
+              "nickName": { "type": "string", "description": "Nickname" },
+              "profileUrl": { "type": "string", "format": "uri", "description": "Profile URL" },
+              "primaryPhone": { "type": "string", "description": "Primary phone number" },
+              "streetAddress": { "type": "string", "description": "Street address" },
+              "city": { "type": "string", "description": "City" },
+              "state": { "type": "string", "description": "State" },
+              "zipCode": { "type": "string", "description": "Postal code" },
+              "countryCode": { "type": "string", "description": "Country code" },
+              "postalAddress": { "type": "string", "description": "Postal address" },
+              "preferredLanguage": { "type": "string", "description": "Preferred language" },
+              "locale": { "type": "string", "description": "Locale" },
+              "timezone": { "type": "string", "description": "Timezone" },
+              "userType": { "type": "string", "description": "User type" },
+              "employeeNumber": { "type": "string", "description": "Employee number" },
+              "costCenter": { "type": "string", "description": "Cost center" },
+              "organization": { "type": "string", "description": "Organization" },
+              "division": { "type": "string", "description": "Division" },
+              "department": { "type": "string", "description": "Department" },
+              "managerId": { "type": "string", "description": "Manager ID" },
+              "manager": { "type": "string", "description": "Manager" }
+            }
+          },
+          "credentials": {
+            "type": "object",
+            "properties": {
+              "password": {
+                "type": "object",
+                "properties": {
+                  "value": { "type": "string", "description": "Password value" }
+                }
+              },
+              "recovery_question": {
+                "type": "object",
+                "properties": {
+                  "question": { "type": "string", "description": "Recovery question" },
+                  "answer": { "type": "string", "description": "Recovery answer" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://{domain}/api/v1/users/{id}"
+    },
+    {
+      "id": "delete-user",
+      "name": "Delete User",
+      "description": "Delete a user",
+      "method": "DELETE",
+      "path": "/users/{id}",
+      "headers": {
+        "Authorization": "SSWS {apiKey}"
+      },
+      "queryParams": {
+        "sendEmail": { "type": "boolean", "default": false, "description": "Send deactivation email" }
+      },
+      "urlTemplate": "https://{domain}/api/v1/users/{id}"
+    }
+  ]
+}
+

@@ -1,0 +1,271 @@
+{
+  "id": "microsoft-teams",
+  "name": "Microsoft Teams",
+  "icon": "👥",
+  "logoUrl": "https://cdn.simpleicons.org/microsoftteams/6264A7",
+  "description": "Team collaboration and communication platform",
+  "baseUrl": "https://graph.microsoft.com/v1.0",
+  "color": {
+    "bg": "from-indigo-100 to-blue-100",
+    "border": "border-indigo-500",
+    "icon": "text-indigo-700",
+    "handle": "bg-indigo-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {accessToken}",
+    "secretKey": "MICROSOFT_TEAMS_ACCESS_TOKEN",
+    "tokenUrl": "https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token",
+    "clientIdSecretKey": "MICROSOFT_TEAMS_CLIENT_ID",
+    "clientSecretSecretKey": "MICROSOFT_TEAMS_CLIENT_SECRET"
+  },
+  "endpoints": [
+    {
+      "id": "send-channel-message",
+      "name": "Send Channel Message",
+      "description": "Send a message to a channel",
+      "method": "POST",
+      "path": "/teams/{teamId}/channels/{channelId}/messages",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "contentType": { "type": "string", "enum": ["html", "text"], "default": "html", "required": true },
+              "content": { "type": "string", "required": true, "description": "Message content" }
+            },
+            "required": true
+          },
+          "subject": { "type": "string", "description": "Message subject" },
+          "importance": { "type": "string", "enum": ["normal", "high", "urgent"], "default": "normal" },
+          "mentions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "number" },
+                "mentionText": { "type": "string" },
+                "mentioned": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "displayName": { "type": "string" },
+                    "userIdentityType": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": ["body"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/teams/{teamId}/channels/{channelId}/messages"
+    },
+    {
+      "id": "get-channel-message",
+      "name": "Get Channel Message",
+      "description": "Get a message from a channel",
+      "method": "GET",
+      "path": "/teams/{teamId}/channels/{channelId}/messages/{messageId}",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/teams/{teamId}/channels/{channelId}/messages/{messageId}"
+    },
+    {
+      "id": "list-channel-messages",
+      "name": "List Channel Messages",
+      "description": "List messages in a channel",
+      "method": "GET",
+      "path": "/teams/{teamId}/channels/{channelId}/messages",
+      "headers": {},
+      "queryParams": {
+        "$top": "50",
+        "$skip": "0",
+        "$filter": "{filter}",
+        "$orderby": "createdDateTime desc"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/teams/{teamId}/channels/{channelId}/messages"
+    },
+    {
+      "id": "reply-to-message",
+      "name": "Reply to Message",
+      "description": "Reply to a message in a channel",
+      "method": "POST",
+      "path": "/teams/{teamId}/channels/{channelId}/messages/{messageId}/replies",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "contentType": { "type": "string", "enum": ["html", "text"], "default": "html", "required": true },
+              "content": { "type": "string", "required": true }
+            },
+            "required": true
+          }
+        },
+        "required": ["body"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/teams/{teamId}/channels/{channelId}/messages/{messageId}/replies"
+    },
+    {
+      "id": "create-channel",
+      "name": "Create Channel",
+      "description": "Create a new channel in a team",
+      "method": "POST",
+      "path": "/teams/{teamId}/channels",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "displayName": { "type": "string", "required": true, "description": "Channel name" },
+          "description": { "type": "string", "description": "Channel description" },
+          "membershipType": { "type": "string", "enum": ["standard", "private"], "default": "standard", "description": "Channel type" },
+          "moderationSettings": {
+            "type": "object",
+            "properties": {
+              "allowNewMessageFromBots": { "type": "boolean" },
+              "allowNewMessageFromConnectors": { "type": "boolean" },
+              "replyRestriction": { "type": "string", "enum": ["everyone", "authorAndModerators"] }
+            }
+          }
+        },
+        "required": ["displayName"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/teams/{teamId}/channels"
+    },
+    {
+      "id": "get-channel",
+      "name": "Get Channel",
+      "description": "Get channel details by ID",
+      "method": "GET",
+      "path": "/teams/{teamId}/channels/{channelId}",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/teams/{teamId}/channels/{channelId}"
+    },
+    {
+      "id": "list-channels",
+      "name": "List Channels",
+      "description": "List all channels in a team",
+      "method": "GET",
+      "path": "/teams/{teamId}/channels",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/teams/{teamId}/channels"
+    },
+    {
+      "id": "update-channel",
+      "name": "Update Channel",
+      "description": "Update a channel",
+      "method": "PATCH",
+      "path": "/teams/{teamId}/channels/{channelId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "displayName": { "type": "string", "description": "Channel name" },
+          "description": { "type": "string", "description": "Channel description" },
+          "moderationSettings": {
+            "type": "object",
+            "properties": {
+              "allowNewMessageFromBots": { "type": "boolean" },
+              "allowNewMessageFromConnectors": { "type": "boolean" },
+              "replyRestriction": { "type": "string", "enum": ["everyone", "authorAndModerators"] }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/teams/{teamId}/channels/{channelId}"
+    },
+    {
+      "id": "delete-channel",
+      "name": "Delete Channel",
+      "description": "Delete a channel",
+      "method": "DELETE",
+      "path": "/teams/{teamId}/channels/{channelId}",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/teams/{teamId}/channels/{channelId}"
+    },
+    {
+      "id": "send-chat-message",
+      "name": "Send Chat Message",
+      "description": "Send a message in a chat",
+      "method": "POST",
+      "path": "/chats/{chatId}/messages",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "contentType": { "type": "string", "enum": ["html", "text"], "default": "html", "required": true },
+              "content": { "type": "string", "required": true }
+            },
+            "required": true
+          },
+          "importance": { "type": "string", "enum": ["normal", "high", "urgent"], "default": "normal" }
+        },
+        "required": ["body"]
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/chats/{chatId}/messages"
+    },
+    {
+      "id": "list-chats",
+      "name": "List Chats",
+      "description": "List all chats for the authenticated user",
+      "method": "GET",
+      "path": "/chats",
+      "headers": {},
+      "queryParams": {
+        "$top": "50",
+        "$filter": "{filter}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/chats"
+    },
+    {
+      "id": "get-team",
+      "name": "Get Team",
+      "description": "Get team details by ID",
+      "method": "GET",
+      "path": "/teams/{teamId}",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/teams/{teamId}"
+    },
+    {
+      "id": "list-teams",
+      "name": "List Teams",
+      "description": "List all teams",
+      "method": "GET",
+      "path": "/teams",
+      "headers": {},
+      "queryParams": {
+        "$top": "50",
+        "$filter": "{filter}"
+      },
+      "urlTemplate": "https://graph.microsoft.com/v1.0/teams"
+    },
+    {
+      "id": "get-me",
+      "name": "Get Me",
+      "description": "Get authenticated user details",
+      "method": "GET",
+      "path": "/me",
+      "headers": {},
+      "urlTemplate": "https://graph.microsoft.com/v1.0/me"
+    }
+  ]
+}
+

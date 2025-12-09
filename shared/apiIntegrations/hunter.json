@@ -1,0 +1,128 @@
+{
+  "id": "hunter",
+  "name": "Hunter.io",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/hunter/FF0A00",
+  "description": "Email finder and email verification service",
+  "baseUrl": "https://api.hunter.io/v2",
+  "color": {
+    "bg": "from-red-100 to-rose-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "secretKey": "HUNTER_API_KEY",
+    "queryParamName": "api_key",
+    "note": "API Key is sent as query parameter 'api_key'."
+  },
+  "endpoints": [
+    {
+      "id": "domain-search",
+      "name": "Domain Search",
+      "description": "Search for email addresses by domain",
+      "method": "GET",
+      "path": "/domain-search",
+      "queryParams": {
+        "api_key": {
+          "type": "string",
+          "required": true,
+          "description": "API key"
+        },
+        "domain": {
+          "type": "string",
+          "required": true,
+          "description": "Domain name (e.g., 'example.com')"
+        },
+        "company": {
+          "type": "string",
+          "description": "Company name"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["personal", "generic"],
+          "description": "Filter by email type"
+        },
+        "seniority": {
+          "type": "string",
+          "enum": ["junior", "senior", "executive"],
+          "description": "Filter by seniority"
+        },
+        "department": {
+          "type": "string",
+          "description": "Filter by department"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 10,
+          "description": "Maximum number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0,
+          "description": "Offset for pagination"
+        }
+      },
+      "urlTemplate": "https://api.hunter.io/v2/domain-search"
+    },
+    {
+      "id": "email-finder",
+      "name": "Email Finder",
+      "description": "Find email address by domain and name",
+      "method": "GET",
+      "path": "/email-finder",
+      "queryParams": {
+        "api_key": {
+          "type": "string",
+          "required": true,
+          "description": "API key"
+        },
+        "domain": {
+          "type": "string",
+          "required": true,
+          "description": "Domain name (e.g., 'example.com')"
+        },
+        "first_name": {
+          "type": "string",
+          "description": "First name"
+        },
+        "last_name": {
+          "type": "string",
+          "description": "Last name"
+        },
+        "full_name": {
+          "type": "string",
+          "description": "Full name (alternative to first_name + last_name)"
+        },
+        "company": {
+          "type": "string",
+          "description": "Company name"
+        }
+      },
+      "urlTemplate": "https://api.hunter.io/v2/email-finder"
+    },
+    {
+      "id": "email-verifier",
+      "name": "Email Verifier",
+      "description": "Verify an email address",
+      "method": "GET",
+      "path": "/email-verifier",
+      "queryParams": {
+        "api_key": {
+          "type": "string",
+          "required": true,
+          "description": "API key"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "required": true,
+          "description": "Email address to verify"
+        }
+      },
+      "urlTemplate": "https://api.hunter.io/v2/email-verifier"
+    }
+  ]
+}
+

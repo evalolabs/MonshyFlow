@@ -1,0 +1,282 @@
+{
+  "id": "autopilot",
+  "name": "Autopilot",
+  "icon": "✈️",
+  "logoUrl": "https://cdn.simpleicons.org/autopilot/000000",
+  "description": "Marketing automation platform",
+  "baseUrl": "https://api2.autopilothq.com/v1",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "autopilotapikey",
+    "secretKey": "AUTOPILOT_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/contacts",
+      "headers": {
+        "Content-Type": "application/json",
+        "autopilotapikey": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Email address"
+          },
+          "FirstName": {
+            "type": "string",
+            "description": "First name"
+          },
+          "LastName": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "Phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "Company": {
+            "type": "string",
+            "description": "Company name"
+          },
+          "Title": {
+            "type": "string",
+            "description": "Job title"
+          },
+          "MailingStreet": {
+            "type": "string",
+            "description": "Street address"
+          },
+          "MailingCity": {
+            "type": "string",
+            "description": "City"
+          },
+          "MailingState": {
+            "type": "string",
+            "description": "State"
+          },
+          "MailingPostalCode": {
+            "type": "string",
+            "description": "Postal code"
+          },
+          "MailingCountry": {
+            "type": "string",
+            "description": "Country"
+          },
+          "custom": {
+            "type": "object",
+            "description": "Custom fields",
+            "additionalProperties": true
+          }
+        },
+        "required": ["Email"]
+      },
+      "urlTemplate": "https://api2.autopilothq.com/v1/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact by ID",
+      "method": "GET",
+      "path": "/contacts/{contactId}",
+      "headers": {
+        "autopilotapikey": "{apiKey}"
+      },
+      "urlTemplate": "https://api2.autopilothq.com/v1/contacts/{contactId}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/contacts",
+      "headers": {
+        "autopilotapikey": "{apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 100,
+          "description": "Number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0,
+          "description": "Offset for pagination"
+        }
+      },
+      "urlTemplate": "https://api2.autopilothq.com/v1/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update a contact",
+      "method": "PUT",
+      "path": "/contacts/{contactId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "autopilotapikey": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address"
+          },
+          "FirstName": {
+            "type": "string",
+            "description": "First name"
+          },
+          "LastName": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "Phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "Company": {
+            "type": "string",
+            "description": "Company name"
+          },
+          "Title": {
+            "type": "string",
+            "description": "Job title"
+          },
+          "MailingStreet": {
+            "type": "string",
+            "description": "Street address"
+          },
+          "MailingCity": {
+            "type": "string",
+            "description": "City"
+          },
+          "MailingState": {
+            "type": "string",
+            "description": "State"
+          },
+          "MailingPostalCode": {
+            "type": "string",
+            "description": "Postal code"
+          },
+          "MailingCountry": {
+            "type": "string",
+            "description": "Country"
+          },
+          "custom": {
+            "type": "object",
+            "description": "Custom fields",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://api2.autopilothq.com/v1/contacts/{contactId}"
+    },
+    {
+      "id": "add-contact-to-journey",
+      "name": "Add Contact to Journey",
+      "description": "Add a contact to a journey",
+      "method": "POST",
+      "path": "/journeys/{journeyId}/contacts",
+      "headers": {
+        "Content-Type": "application/json",
+        "autopilotapikey": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "contact_id": {
+            "type": "string",
+            "required": true,
+            "description": "Contact ID"
+          }
+        },
+        "required": ["contact_id"]
+      },
+      "urlTemplate": "https://api2.autopilothq.com/v1/journeys/{journeyId}/contacts"
+    },
+    {
+      "id": "remove-contact-from-journey",
+      "name": "Remove Contact from Journey",
+      "description": "Remove a contact from a journey",
+      "method": "DELETE",
+      "path": "/journeys/{journeyId}/contacts/{contactId}",
+      "headers": {
+        "autopilotapikey": "{apiKey}"
+      },
+      "urlTemplate": "https://api2.autopilothq.com/v1/journeys/{journeyId}/contacts/{contactId}"
+    },
+    {
+      "id": "add-contact-to-list",
+      "name": "Add Contact to List",
+      "description": "Add a contact to a list",
+      "method": "POST",
+      "path": "/lists/{listId}/contacts",
+      "headers": {
+        "Content-Type": "application/json",
+        "autopilotapikey": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "contact_id": {
+            "type": "string",
+            "required": true,
+            "description": "Contact ID"
+          }
+        },
+        "required": ["contact_id"]
+      },
+      "urlTemplate": "https://api2.autopilothq.com/v1/lists/{listId}/contacts"
+    },
+    {
+      "id": "remove-contact-from-list",
+      "name": "Remove Contact from List",
+      "description": "Remove a contact from a list",
+      "method": "DELETE",
+      "path": "/lists/{listId}/contacts/{contactId}",
+      "headers": {
+        "autopilotapikey": "{apiKey}"
+      },
+      "urlTemplate": "https://api2.autopilothq.com/v1/lists/{listId}/contacts/{contactId}"
+    },
+    {
+      "id": "get-list",
+      "name": "Get List",
+      "description": "Get list by ID",
+      "method": "GET",
+      "path": "/lists/{listId}",
+      "headers": {
+        "autopilotapikey": "{apiKey}"
+      },
+      "urlTemplate": "https://api2.autopilothq.com/v1/lists/{listId}"
+    },
+    {
+      "id": "list-lists",
+      "name": "List Lists",
+      "description": "List all lists",
+      "method": "GET",
+      "path": "/lists",
+      "headers": {
+        "autopilotapikey": "{apiKey}"
+      },
+      "urlTemplate": "https://api2.autopilothq.com/v1/lists"
+    }
+  ]
+}
+

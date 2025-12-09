@@ -1,0 +1,250 @@
+{
+  "id": "tapfiliate",
+  "name": "Tapfiliate",
+  "icon": "🎯",
+  "logoUrl": "https://cdn.simpleicons.org/tapfiliate/000000",
+  "description": "Affiliate marketing and referral tracking platform",
+  "baseUrl": "https://api.tapfiliate.com/1.6",
+  "color": {
+    "bg": "from-purple-100 to-fuchsia-100",
+    "border": "border-purple-500",
+    "icon": "text-purple-700",
+    "handle": "bg-purple-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Api-Key",
+    "headerFormat": "{apiKey}",
+    "secretKey": "TAPFILIATE_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-affiliate",
+      "name": "Create Affiliate",
+      "description": "Create a new affiliate",
+      "method": "POST",
+      "path": "/affiliates",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstname": { "type": "string", "description": "First name" },
+          "lastname": { "type": "string", "description": "Last name" },
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "password": { "type": "string", "description": "Password" },
+          "company": { "type": "string", "description": "Company name" },
+          "address": { "type": "string", "description": "Address" },
+          "city": { "type": "string", "description": "City" },
+          "state": { "type": "string", "description": "State" },
+          "zip": { "type": "string", "description": "ZIP code" },
+          "country": { "type": "string", "description": "Country code" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "currency": { "type": "string", "description": "Currency code" },
+          "meta": {
+            "type": "object",
+            "description": "Custom metadata",
+            "additionalProperties": true
+          }
+        },
+        "required": ["email"]
+      },
+      "urlTemplate": "https://api.tapfiliate.com/1.6/affiliates"
+    },
+    {
+      "id": "get-affiliate",
+      "name": "Get Affiliate",
+      "description": "Get affiliate by ID",
+      "method": "GET",
+      "path": "/affiliates/{affiliateId}",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "urlTemplate": "https://api.tapfiliate.com/1.6/affiliates/{affiliateId}"
+    },
+    {
+      "id": "list-affiliates",
+      "name": "List Affiliates",
+      "description": "List all affiliates",
+      "method": "GET",
+      "path": "/affiliates",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 50, "description": "Results per page" }
+      },
+      "urlTemplate": "https://api.tapfiliate.com/1.6/affiliates"
+    },
+    {
+      "id": "update-affiliate",
+      "name": "Update Affiliate",
+      "description": "Update an affiliate",
+      "method": "PUT",
+      "path": "/affiliates/{affiliateId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstname": { "type": "string", "description": "First name" },
+          "lastname": { "type": "string", "description": "Last name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "company": { "type": "string", "description": "Company name" },
+          "address": { "type": "string", "description": "Address" },
+          "city": { "type": "string", "description": "City" },
+          "state": { "type": "string", "description": "State" },
+          "zip": { "type": "string", "description": "ZIP code" },
+          "country": { "type": "string", "description": "Country code" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "currency": { "type": "string", "description": "Currency code" },
+          "meta": {
+            "type": "object",
+            "description": "Custom metadata",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://api.tapfiliate.com/1.6/affiliates/{affiliateId}"
+    },
+    {
+      "id": "get-commission",
+      "name": "Get Commission",
+      "description": "Get commission by ID",
+      "method": "GET",
+      "path": "/commissions/{commissionId}",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "urlTemplate": "https://api.tapfiliate.com/1.6/commissions/{commissionId}"
+    },
+    {
+      "id": "list-commissions",
+      "name": "List Commissions",
+      "description": "List all commissions",
+      "method": "GET",
+      "path": "/commissions",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "queryParams": {
+        "affiliate_id": { "type": "integer", "description": "Filter by affiliate ID" },
+        "program_id": { "type": "integer", "description": "Filter by program ID" },
+        "status": { "type": "string", "enum": ["pending", "approved", "declined"], "description": "Filter by status" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 50, "description": "Results per page" }
+      },
+      "urlTemplate": "https://api.tapfiliate.com/1.6/commissions"
+    },
+    {
+      "id": "create-program",
+      "name": "Create Program",
+      "description": "Create a new program",
+      "method": "POST",
+      "path": "/programs",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Program name" },
+          "currency": { "type": "string", "required": true, "description": "Currency code" },
+          "commission_type": { "type": "string", "enum": ["fixed", "percentage"], "required": true, "description": "Commission type" },
+          "commission_value": { "type": "number", "required": true, "description": "Commission value" },
+          "cookie_ttl": { "type": "integer", "default": 30, "description": "Cookie TTL in days" },
+          "approval": { "type": "boolean", "default": false, "description": "Require approval" },
+          "auto_approve": { "type": "boolean", "default": false, "description": "Auto approve affiliates" }
+        },
+        "required": ["name", "currency", "commission_type", "commission_value"]
+      },
+      "urlTemplate": "https://api.tapfiliate.com/1.6/programs"
+    },
+    {
+      "id": "get-program",
+      "name": "Get Program",
+      "description": "Get program by ID",
+      "method": "GET",
+      "path": "/programs/{programId}",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "urlTemplate": "https://api.tapfiliate.com/1.6/programs/{programId}"
+    },
+    {
+      "id": "list-programs",
+      "name": "List Programs",
+      "description": "List all programs",
+      "method": "GET",
+      "path": "/programs",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 50, "description": "Results per page" }
+      },
+      "urlTemplate": "https://api.tapfiliate.com/1.6/programs"
+    },
+    {
+      "id": "update-program",
+      "name": "Update Program",
+      "description": "Update a program",
+      "method": "PUT",
+      "path": "/programs/{programId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Program name" },
+          "currency": { "type": "string", "description": "Currency code" },
+          "commission_type": { "type": "string", "enum": ["fixed", "percentage"], "description": "Commission type" },
+          "commission_value": { "type": "number", "description": "Commission value" },
+          "cookie_ttl": { "type": "integer", "description": "Cookie TTL in days" },
+          "approval": { "type": "boolean", "description": "Require approval" },
+          "auto_approve": { "type": "boolean", "description": "Auto approve affiliates" }
+        }
+      },
+      "urlTemplate": "https://api.tapfiliate.com/1.6/programs/{programId}"
+    },
+    {
+      "id": "get-referral",
+      "name": "Get Referral",
+      "description": "Get referral by ID",
+      "method": "GET",
+      "path": "/referrals/{referralId}",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "urlTemplate": "https://api.tapfiliate.com/1.6/referrals/{referralId}"
+    },
+    {
+      "id": "list-referrals",
+      "name": "List Referrals",
+      "description": "List all referrals",
+      "method": "GET",
+      "path": "/referrals",
+      "headers": {
+        "Api-Key": "{apiKey}"
+      },
+      "queryParams": {
+        "affiliate_id": { "type": "integer", "description": "Filter by affiliate ID" },
+        "program_id": { "type": "integer", "description": "Filter by program ID" },
+        "status": { "type": "string", "enum": ["pending", "approved", "declined"], "description": "Filter by status" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 50, "description": "Results per page" }
+      },
+      "urlTemplate": "https://api.tapfiliate.com/1.6/referrals"
+    }
+  ]
+}
+

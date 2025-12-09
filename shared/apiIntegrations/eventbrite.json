@@ -1,0 +1,390 @@
+{
+  "id": "eventbrite",
+  "name": "Eventbrite",
+  "icon": "🎫",
+  "logoUrl": "https://cdn.simpleicons.org/eventbrite/F05537",
+  "description": "Event management and ticketing platform",
+  "baseUrl": "https://www.eventbriteapi.com/v3",
+  "color": {
+    "bg": "from-red-100 to-amber-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "EVENTBRITE_OAUTH2_ACCESS_TOKEN",
+    "note": "Use EVENTBRITE_API_KEY for Private Key authentication (Bearer token). Use EVENTBRITE_OAUTH2_ACCESS_TOKEN for OAuth2."
+  },
+  "endpoints": [
+    {
+      "id": "create-event",
+      "name": "Create Event",
+      "description": "Create a new event",
+      "method": "POST",
+      "path": "/events",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "object",
+                "properties": {
+                  "html": { "type": "string", "description": "Event name (HTML)" },
+                  "text": { "type": "string", "description": "Event name (plain text)" }
+                },
+                "required": ["html"]
+              },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "html": { "type": "string", "description": "Event description (HTML)" },
+                  "text": { "type": "string", "description": "Event description (plain text)" }
+                }
+              },
+              "start": {
+                "type": "object",
+                "properties": {
+                  "timezone": { "type": "string", "description": "Timezone (e.g., 'America/New_York')" },
+                  "utc": { "type": "string", "format": "date-time", "description": "Start time (ISO 8601 UTC)" },
+                  "local": { "type": "string", "format": "date-time", "description": "Start time (local)" }
+                },
+                "required": ["timezone", "utc"]
+              },
+              "end": {
+                "type": "object",
+                "properties": {
+                  "timezone": { "type": "string", "description": "Timezone" },
+                  "utc": { "type": "string", "format": "date-time", "description": "End time (ISO 8601 UTC)" },
+                  "local": { "type": "string", "format": "date-time", "description": "End time (local)" }
+                },
+                "required": ["timezone", "utc"]
+              },
+              "currency": { "type": "string", "default": "USD", "description": "Currency code (e.g., 'USD')" },
+              "online_event": { "type": "boolean", "default": false, "description": "Is online event" },
+              "organizer_id": { "type": "string", "description": "Organizer ID" },
+              "venue_id": { "type": "string", "description": "Venue ID" },
+              "category_id": { "type": "string", "description": "Category ID" },
+              "subcategory_id": { "type": "string", "description": "Subcategory ID" },
+              "format_id": { "type": "string", "description": "Format ID" },
+              "listed": { "type": "boolean", "default": true, "description": "List event publicly" },
+              "shareable": { "type": "boolean", "default": true, "description": "Allow sharing" },
+              "invite_only": { "type": "boolean", "default": false, "description": "Invite only" },
+              "show_remaining": { "type": "boolean", "default": true, "description": "Show remaining tickets" },
+              "password": { "type": "string", "description": "Event password" },
+              "capacity": { "type": "integer", "description": "Event capacity" },
+              "is_reserved_seating": { "type": "boolean", "default": false, "description": "Reserved seating" },
+              "is_series": { "type": "boolean", "default": false, "description": "Is series event" },
+              "is_series_parent": { "type": "boolean", "default": false, "description": "Is series parent" },
+              "series_id": { "type": "string", "description": "Series ID" },
+              "locale": { "type": "string", "default": "en_US", "description": "Locale" }
+            },
+            "required": ["name", "start"]
+          }
+        },
+        "required": ["event"]
+      },
+      "urlTemplate": "https://www.eventbriteapi.com/v3/events"
+    },
+    {
+      "id": "get-event",
+      "name": "Get Event",
+      "description": "Get event by ID",
+      "method": "GET",
+      "path": "/events/{eventId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://www.eventbriteapi.com/v3/events/{eventId}"
+    },
+    {
+      "id": "list-events",
+      "name": "List Events",
+      "description": "List all events for an organization",
+      "method": "GET",
+      "path": "/organizations/{organizationId}/events",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "status": { "type": "string", "enum": ["draft", "live", "started", "ended", "completed", "canceled"], "description": "Filter by status" },
+        "order_by": { "type": "string", "enum": ["start_asc", "start_desc", "created_asc", "created_desc"], "default": "start_asc", "description": "Sort order" },
+        "time_filter": { "type": "string", "enum": ["current_future", "past", "all"], "default": "current_future", "description": "Time filter" },
+        "expand": { "type": "string", "description": "Comma-separated list of fields to expand" }
+      },
+      "urlTemplate": "https://www.eventbriteapi.com/v3/organizations/{organizationId}/events"
+    },
+    {
+      "id": "update-event",
+      "name": "Update Event",
+      "description": "Update an event",
+      "method": "POST",
+      "path": "/events/{eventId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "object",
+                "properties": {
+                  "html": { "type": "string" },
+                  "text": { "type": "string" }
+                }
+              },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "html": { "type": "string" },
+                  "text": { "type": "string" }
+                }
+              },
+              "start": {
+                "type": "object",
+                "properties": {
+                  "timezone": { "type": "string" },
+                  "utc": { "type": "string", "format": "date-time" },
+                  "local": { "type": "string", "format": "date-time" }
+                }
+              },
+              "end": {
+                "type": "object",
+                "properties": {
+                  "timezone": { "type": "string" },
+                  "utc": { "type": "string", "format": "date-time" },
+                  "local": { "type": "string", "format": "date-time" }
+                }
+              },
+              "currency": { "type": "string" },
+              "online_event": { "type": "boolean" },
+              "venue_id": { "type": "string" },
+              "category_id": { "type": "string" },
+              "subcategory_id": { "type": "string" },
+              "format_id": { "type": "string" },
+              "listed": { "type": "boolean" },
+              "shareable": { "type": "boolean" },
+              "invite_only": { "type": "boolean" },
+              "show_remaining": { "type": "boolean" },
+              "password": { "type": "string" },
+              "capacity": { "type": "integer" },
+              "is_reserved_seating": { "type": "boolean" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://www.eventbriteapi.com/v3/events/{eventId}"
+    },
+    {
+      "id": "get-attendee",
+      "name": "Get Attendee",
+      "description": "Get attendee by ID",
+      "method": "GET",
+      "path": "/events/{eventId}/attendees/{attendeeId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://www.eventbriteapi.com/v3/events/{eventId}/attendees/{attendeeId}"
+    },
+    {
+      "id": "list-attendees",
+      "name": "List Attendees",
+      "description": "List all attendees for an event",
+      "method": "GET",
+      "path": "/events/{eventId}/attendees",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "status": { "type": "string", "enum": ["attending", "not_attending", "unanswered"], "description": "Filter by status" },
+        "changed_since": { "type": "string", "format": "date-time", "description": "Filter by changed since (ISO 8601)" },
+        "expand": { "type": "string", "description": "Comma-separated list of fields to expand" }
+      },
+      "urlTemplate": "https://www.eventbriteapi.com/v3/events/{eventId}/attendees"
+    },
+    {
+      "id": "get-order",
+      "name": "Get Order",
+      "description": "Get order by ID",
+      "method": "GET",
+      "path": "/orders/{orderId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://www.eventbriteapi.com/v3/orders/{orderId}"
+    },
+    {
+      "id": "list-orders",
+      "name": "List Orders",
+      "description": "List all orders for an event",
+      "method": "GET",
+      "path": "/events/{eventId}/orders",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "status": { "type": "string", "enum": ["placed", "paid", "refunded", "partially_refunded", "cancelled"], "description": "Filter by status" },
+        "changed_since": { "type": "string", "format": "date-time", "description": "Filter by changed since (ISO 8601)" },
+        "expand": { "type": "string", "description": "Comma-separated list of fields to expand" }
+      },
+      "urlTemplate": "https://www.eventbriteapi.com/v3/events/{eventId}/orders"
+    },
+    {
+      "id": "create-ticket-class",
+      "name": "Create Ticket Class",
+      "description": "Create a new ticket class",
+      "method": "POST",
+      "path": "/events/{eventId}/ticket_classes",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "ticket_class": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "required": true, "description": "Ticket class name" },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "html": { "type": "string", "description": "Description (HTML)" },
+                  "text": { "type": "string", "description": "Description (plain text)" }
+                }
+              },
+              "quantity_total": { "type": "integer", "description": "Total quantity available" },
+              "quantity_sold": { "type": "integer", "description": "Quantity sold" },
+              "sales_start": { "type": "string", "format": "date-time", "description": "Sales start time (ISO 8601)" },
+              "sales_end": { "type": "string", "format": "date-time", "description": "Sales end time (ISO 8601)" },
+              "cost": {
+                "type": "object",
+                "properties": {
+                  "currency": { "type": "string", "default": "USD", "description": "Currency code" },
+                  "value": { "type": "integer", "description": "Cost in cents" },
+                  "display": { "type": "string", "description": "Display value" }
+                },
+                "description": "Ticket cost"
+              },
+              "fee": {
+                "type": "object",
+                "properties": {
+                  "currency": { "type": "string" },
+                  "value": { "type": "integer", "description": "Fee in cents" },
+                  "display": { "type": "string" }
+                },
+                "description": "Ticket fee"
+              },
+              "donation": { "type": "boolean", "default": false, "description": "Is donation ticket" },
+              "free": { "type": "boolean", "default": false, "description": "Is free ticket" },
+              "minimum_quantity": { "type": "integer", "default": 1, "description": "Minimum quantity per order" },
+              "maximum_quantity": { "type": "integer", "description": "Maximum quantity per order" },
+              "auto_hide": { "type": "boolean", "default": false, "description": "Auto hide when sold out" },
+              "auto_hide_before": { "type": "string", "format": "date-time", "description": "Auto hide before time" },
+              "auto_hide_after": { "type": "string", "format": "date-time", "description": "Auto hide after time" },
+              "hidden": { "type": "boolean", "default": false, "description": "Hidden ticket class" },
+              "include_fee": { "type": "boolean", "default": false, "description": "Include fee in price" }
+            },
+            "required": ["name"]
+          }
+        },
+        "required": ["ticket_class"]
+      },
+      "urlTemplate": "https://www.eventbriteapi.com/v3/events/{eventId}/ticket_classes"
+    },
+    {
+      "id": "get-ticket-class",
+      "name": "Get Ticket Class",
+      "description": "Get ticket class by ID",
+      "method": "GET",
+      "path": "/events/{eventId}/ticket_classes/{ticketClassId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://www.eventbriteapi.com/v3/events/{eventId}/ticket_classes/{ticketClassId}"
+    },
+    {
+      "id": "list-ticket-classes",
+      "name": "List Ticket Classes",
+      "description": "List all ticket classes for an event",
+      "method": "GET",
+      "path": "/events/{eventId}/ticket_classes",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://www.eventbriteapi.com/v3/events/{eventId}/ticket_classes"
+    },
+    {
+      "id": "update-ticket-class",
+      "name": "Update Ticket Class",
+      "description": "Update a ticket class",
+      "method": "POST",
+      "path": "/events/{eventId}/ticket_classes/{ticketClassId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "ticket_class": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "html": { "type": "string" },
+                  "text": { "type": "string" }
+                }
+              },
+              "quantity_total": { "type": "integer" },
+              "sales_start": { "type": "string", "format": "date-time" },
+              "sales_end": { "type": "string", "format": "date-time" },
+              "cost": {
+                "type": "object",
+                "properties": {
+                  "currency": { "type": "string" },
+                  "value": { "type": "integer" },
+                  "display": { "type": "string" }
+                }
+              },
+              "fee": {
+                "type": "object",
+                "properties": {
+                  "currency": { "type": "string" },
+                  "value": { "type": "integer" },
+                  "display": { "type": "string" }
+                }
+              },
+              "donation": { "type": "boolean" },
+              "free": { "type": "boolean" },
+              "minimum_quantity": { "type": "integer" },
+              "maximum_quantity": { "type": "integer" },
+              "auto_hide": { "type": "boolean" },
+              "auto_hide_before": { "type": "string", "format": "date-time" },
+              "auto_hide_after": { "type": "string", "format": "date-time" },
+              "hidden": { "type": "boolean" },
+              "include_fee": { "type": "boolean" }
+            }
+          }
+        },
+        "required": ["ticket_class"]
+      },
+      "urlTemplate": "https://www.eventbriteapi.com/v3/events/{eventId}/ticket_classes/{ticketClassId}"
+    }
+  ]
+}
+

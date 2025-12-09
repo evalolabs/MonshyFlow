@@ -1,0 +1,573 @@
+{
+  "id": "slack",
+  "name": "Slack",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/slack/4A154B",
+  "description": "Team communication and collaboration",
+  "baseUrl": "https://slack.com/api",
+  "color": {
+    "bg": "from-purple-100 to-pink-100",
+    "border": "border-purple-500",
+    "icon": "text-purple-700",
+    "handle": "bg-purple-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "SLACK_BOT_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "post-message",
+      "name": "Post Message",
+      "description": "Send a message to a Slack channel",
+      "method": "POST",
+      "path": "/chat.postMessage",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string", "required": true, "description": "Channel ID or name (e.g., #general or C1234567890)" },
+          "text": { "type": "string", "description": "Message text (fallback for blocks)" },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Block Kit blocks for rich formatting"
+            },
+            "description": "Rich formatting blocks (optional)"
+          },
+          "thread_ts": { "type": "string", "description": "Thread timestamp to reply to" },
+          "username": { "type": "string", "description": "Bot username override" },
+          "icon_emoji": { "type": "string", "description": "Emoji icon override" },
+          "icon_url": { "type": "string", "description": "Icon URL override" },
+          "unfurl_links": { "type": "boolean", "description": "Enable link unfurling" },
+          "unfurl_media": { "type": "boolean", "description": "Enable media unfurling" }
+        },
+        "required": ["channel"]
+      },
+      "urlTemplate": "https://slack.com/api/chat.postMessage"
+    },
+    {
+      "id": "update-message",
+      "name": "Update Message",
+      "description": "Update an existing message",
+      "method": "POST",
+      "path": "/chat.update",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string", "required": true, "description": "Channel ID" },
+          "ts": { "type": "string", "required": true, "description": "Message timestamp" },
+          "text": { "type": "string", "description": "Updated message text" },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Block Kit blocks"
+            },
+            "description": "Updated blocks"
+          }
+        },
+        "required": ["channel", "ts"]
+      },
+      "urlTemplate": "https://slack.com/api/chat.update"
+    },
+    {
+      "id": "delete-message",
+      "name": "Delete Message",
+      "description": "Delete a message",
+      "method": "POST",
+      "path": "/chat.delete",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string", "required": true, "description": "Channel ID" },
+          "ts": { "type": "string", "required": true, "description": "Message timestamp" }
+        },
+        "required": ["channel", "ts"]
+      },
+      "urlTemplate": "https://slack.com/api/chat.delete"
+    },
+    {
+      "id": "get-message-permalink",
+      "name": "Get Message Permalink",
+      "description": "Get a permalink for a message",
+      "method": "GET",
+      "path": "/chat.getPermalink",
+      "queryParams": {
+        "channel": "{channelId}",
+        "message_ts": "{messageTs}"
+      },
+      "urlTemplate": "https://slack.com/api/chat.getPermalink?channel={channelId}&message_ts={messageTs}"
+    },
+    {
+      "id": "search-messages",
+      "name": "Search Messages",
+      "description": "Search for messages",
+      "method": "GET",
+      "path": "/search.messages",
+      "queryParams": {
+        "query": "{searchQuery}",
+        "count": "20",
+        "page": "1"
+      },
+      "urlTemplate": "https://slack.com/api/search.messages?query={searchQuery}"
+    },
+    {
+      "id": "create-channel",
+      "name": "Create Channel",
+      "description": "Create a new channel",
+      "method": "POST",
+      "path": "/conversations.create",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Channel name (without #)" },
+          "is_private": { "type": "boolean", "description": "Create as private channel", "default": false }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://slack.com/api/conversations.create"
+    },
+    {
+      "id": "get-channel-info",
+      "name": "Get Channel Info",
+      "description": "Get information about a channel",
+      "method": "GET",
+      "path": "/conversations.info",
+      "queryParams": {
+        "channel": "{channelId}",
+        "include_num_members": "true"
+      },
+      "urlTemplate": "https://slack.com/api/conversations.info?channel={channelId}"
+    },
+    {
+      "id": "list-channels",
+      "name": "List Channels",
+      "description": "List all channels in the workspace",
+      "method": "GET",
+      "path": "/conversations.list",
+      "queryParams": {
+        "types": "public_channel,private_channel",
+        "limit": "200",
+        "cursor": "{cursor}"
+      },
+      "urlTemplate": "https://slack.com/api/conversations.list?types=public_channel,private_channel"
+    },
+    {
+      "id": "get-channel-history",
+      "name": "Get Channel History",
+      "description": "Get message history for a channel",
+      "method": "GET",
+      "path": "/conversations.history",
+      "queryParams": {
+        "channel": "{channelId}",
+        "limit": "100",
+        "cursor": "{cursor}",
+        "oldest": "{oldestTs}",
+        "latest": "{latestTs}"
+      },
+      "urlTemplate": "https://slack.com/api/conversations.history?channel={channelId}"
+    },
+    {
+      "id": "get-channel-replies",
+      "name": "Get Channel Replies",
+      "description": "Get replies to a message thread",
+      "method": "GET",
+      "path": "/conversations.replies",
+      "queryParams": {
+        "channel": "{channelId}",
+        "ts": "{threadTs}",
+        "limit": "100",
+        "cursor": "{cursor}"
+      },
+      "urlTemplate": "https://slack.com/api/conversations.replies?channel={channelId}&ts={threadTs}"
+    },
+    {
+      "id": "invite-to-channel",
+      "name": "Invite to Channel",
+      "description": "Invite users to a channel",
+      "method": "POST",
+      "path": "/conversations.invite",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string", "required": true, "description": "Channel ID" },
+          "users": {
+            "type": "array",
+            "items": { "type": "string" },
+            "required": true,
+            "description": "Array of user IDs to invite"
+          }
+        },
+        "required": ["channel", "users"]
+      },
+      "urlTemplate": "https://slack.com/api/conversations.invite"
+    },
+    {
+      "id": "join-channel",
+      "name": "Join Channel",
+      "description": "Join a channel",
+      "method": "POST",
+      "path": "/conversations.join",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string", "required": true, "description": "Channel ID or name" }
+        },
+        "required": ["channel"]
+      },
+      "urlTemplate": "https://slack.com/api/conversations.join"
+    },
+    {
+      "id": "get-channel-members",
+      "name": "Get Channel Members",
+      "description": "Get members of a channel",
+      "method": "GET",
+      "path": "/conversations.members",
+      "queryParams": {
+        "channel": "{channelId}",
+        "limit": "100",
+        "cursor": "{cursor}"
+      },
+      "urlTemplate": "https://slack.com/api/conversations.members?channel={channelId}"
+    },
+    {
+      "id": "open-channel",
+      "name": "Open Channel",
+      "description": "Open or create a direct message or group message",
+      "method": "POST",
+      "path": "/conversations.open",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Array of user IDs for group DM"
+          },
+          "channel": { "type": "string", "description": "Channel ID" }
+        }
+      },
+      "urlTemplate": "https://slack.com/api/conversations.open"
+    },
+    {
+      "id": "set-channel-topic",
+      "name": "Set Channel Topic",
+      "description": "Set the topic for a channel",
+      "method": "POST",
+      "path": "/conversations.setTopic",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string", "required": true, "description": "Channel ID" },
+          "topic": { "type": "string", "required": true, "description": "Channel topic" }
+        },
+        "required": ["channel", "topic"]
+      },
+      "urlTemplate": "https://slack.com/api/conversations.setTopic"
+    },
+    {
+      "id": "upload-file",
+      "name": "Upload File",
+      "description": "Upload a file to Slack",
+      "method": "POST",
+      "path": "/files.upload",
+      "headers": {
+        "Content-Type": "multipart/form-data"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "channels": { "type": "string", "description": "Comma-separated channel IDs" },
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "required": true,
+            "description": "File to upload"
+          },
+          "filename": { "type": "string", "description": "Filename" },
+          "title": { "type": "string", "description": "File title" },
+          "initial_comment": { "type": "string", "description": "Initial comment" }
+        },
+        "required": ["file"]
+      },
+      "urlTemplate": "https://slack.com/api/files.upload"
+    },
+    {
+      "id": "get-file-info",
+      "name": "Get File Info",
+      "description": "Get information about a file",
+      "method": "GET",
+      "path": "/files.info",
+      "queryParams": {
+        "file": "{fileId}",
+        "count": "100",
+        "page": "1"
+      },
+      "urlTemplate": "https://slack.com/api/files.info?file={fileId}"
+    },
+    {
+      "id": "list-files",
+      "name": "List Files",
+      "description": "List files in the workspace",
+      "method": "GET",
+      "path": "/files.list",
+      "queryParams": {
+        "channel": "{channelId}",
+        "ts_from": "{timestampFrom}",
+        "ts_to": "{timestampTo}",
+        "types": "all",
+        "count": "100",
+        "page": "1"
+      },
+      "urlTemplate": "https://slack.com/api/files.list"
+    },
+    {
+      "id": "add-reaction",
+      "name": "Add Reaction",
+      "description": "Add a reaction (emoji) to a message",
+      "method": "POST",
+      "path": "/reactions.add",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string", "required": true, "description": "Channel ID" },
+          "timestamp": { "type": "string", "required": true, "description": "Message timestamp" },
+          "name": { "type": "string", "required": true, "description": "Emoji name (e.g., 'thumbsup')" }
+        },
+        "required": ["channel", "timestamp", "name"]
+      },
+      "urlTemplate": "https://slack.com/api/reactions.add"
+    },
+    {
+      "id": "get-reactions",
+      "name": "Get Reactions",
+      "description": "Get reactions for a message",
+      "method": "GET",
+      "path": "/reactions.get",
+      "queryParams": {
+        "channel": "{channelId}",
+        "timestamp": "{messageTs}",
+        "full": "true"
+      },
+      "urlTemplate": "https://slack.com/api/reactions.get?channel={channelId}&timestamp={messageTs}"
+    },
+    {
+      "id": "remove-reaction",
+      "name": "Remove Reaction",
+      "description": "Remove a reaction from a message",
+      "method": "POST",
+      "path": "/reactions.remove",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string", "required": true, "description": "Channel ID" },
+          "timestamp": { "type": "string", "required": true, "description": "Message timestamp" },
+          "name": { "type": "string", "required": true, "description": "Emoji name" }
+        },
+        "required": ["channel", "timestamp", "name"]
+      },
+      "urlTemplate": "https://slack.com/api/reactions.remove"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users in the workspace",
+      "method": "GET",
+      "path": "/users.list",
+      "queryParams": {
+        "limit": "200",
+        "cursor": "{cursor}",
+        "include_locale": "true"
+      },
+      "urlTemplate": "https://slack.com/api/users.list"
+    },
+    {
+      "id": "get-user-info",
+      "name": "Get User Info",
+      "description": "Get information about a user",
+      "method": "GET",
+      "path": "/users.info",
+      "queryParams": {
+        "user": "{userId}",
+        "include_locale": "true"
+      },
+      "urlTemplate": "https://slack.com/api/users.info?user={userId}"
+    },
+    {
+      "id": "get-user-presence",
+      "name": "Get User Presence",
+      "description": "Get user presence status",
+      "method": "GET",
+      "path": "/users.getPresence",
+      "queryParams": {
+        "user": "{userId}"
+      },
+      "urlTemplate": "https://slack.com/api/users.getPresence?user={userId}"
+    },
+    {
+      "id": "get-user-profile",
+      "name": "Get User Profile",
+      "description": "Get user profile information",
+      "method": "GET",
+      "path": "/users.profile.get",
+      "queryParams": {
+        "user": "{userId}",
+        "include_labels": "true"
+      },
+      "urlTemplate": "https://slack.com/api/users.profile.get?user={userId}"
+    },
+    {
+      "id": "update-user-profile",
+      "name": "Update User Profile",
+      "description": "Update user profile information",
+      "method": "POST",
+      "path": "/users.profile.set",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "user": { "type": "string", "description": "User ID (defaults to authed user)" },
+          "profile": {
+            "type": "object",
+            "properties": {
+              "status_text": { "type": "string", "description": "Status text" },
+              "status_emoji": { "type": "string", "description": "Status emoji" },
+              "real_name": { "type": "string", "description": "Real name" },
+              "display_name": { "type": "string", "description": "Display name" },
+              "email": { "type": "string", "description": "Email address" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://slack.com/api/users.profile.set"
+    },
+    {
+      "id": "create-user-group",
+      "name": "Create User Group",
+      "description": "Create a new user group",
+      "method": "POST",
+      "path": "/usergroups.create",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "User group name" },
+          "description": { "type": "string", "description": "User group description" },
+          "handle": { "type": "string", "description": "User group handle" },
+          "include_count": { "type": "boolean", "description": "Include user count" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://slack.com/api/usergroups.create"
+    },
+    {
+      "id": "list-user-groups",
+      "name": "List User Groups",
+      "description": "List all user groups",
+      "method": "GET",
+      "path": "/usergroups.list",
+      "queryParams": {
+        "include_disabled": "false",
+        "include_count": "true",
+        "include_users": "true"
+      },
+      "urlTemplate": "https://slack.com/api/usergroups.list"
+    },
+    {
+      "id": "update-user-group",
+      "name": "Update User Group",
+      "description": "Update a user group",
+      "method": "POST",
+      "path": "/usergroups.update",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "usergroup": { "type": "string", "required": true, "description": "User group ID" },
+          "name": { "type": "string", "description": "User group name" },
+          "description": { "type": "string", "description": "User group description" },
+          "handle": { "type": "string", "description": "User group handle" }
+        },
+        "required": ["usergroup"]
+      },
+      "urlTemplate": "https://slack.com/api/usergroups.update"
+    },
+    {
+      "id": "enable-user-group",
+      "name": "Enable User Group",
+      "description": "Enable a user group",
+      "method": "POST",
+      "path": "/usergroups.enable",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "usergroup": { "type": "string", "required": true, "description": "User group ID" },
+          "include_count": { "type": "boolean", "description": "Include user count" }
+        },
+        "required": ["usergroup"]
+      },
+      "urlTemplate": "https://slack.com/api/usergroups.enable"
+    },
+    {
+      "id": "disable-user-group",
+      "name": "Disable User Group",
+      "description": "Disable a user group",
+      "method": "POST",
+      "path": "/usergroups.disable",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "usergroup": { "type": "string", "required": true, "description": "User group ID" },
+          "include_count": { "type": "boolean", "description": "Include user count" }
+        },
+        "required": ["usergroup"]
+      },
+      "urlTemplate": "https://slack.com/api/usergroups.disable"
+    }
+  ]
+}

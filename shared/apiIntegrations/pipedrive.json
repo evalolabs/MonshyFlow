@@ -1,0 +1,517 @@
+{
+  "id": "pipedrive",
+  "name": "Pipedrive",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/pipedrive/1a7598",
+  "description": "CRM and sales pipeline management",
+  "baseUrl": "https://api.pipedrive.com/v1",
+  "color": {
+    "bg": "from-teal-100 to-emerald-100",
+    "border": "border-teal-500",
+    "icon": "text-teal-700",
+    "handle": "bg-teal-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "location": "query",
+    "parameterName": "api_token",
+    "secretKey": "PIPEDRIVE_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-activity",
+      "name": "Create Activity",
+      "description": "Create a new activity in Pipedrive",
+      "method": "POST",
+      "path": "/activities",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "required": true, "description": "Activity subject" },
+          "type": { "type": "string", "description": "Activity type" },
+          "due_date": { "type": "string", "format": "date", "description": "Due date (YYYY-MM-DD)" },
+          "due_time": { "type": "string", "description": "Due time (HH:MM)" },
+          "duration": { "type": "string", "description": "Duration" },
+          "deal_id": { "type": "number", "description": "Associated deal ID" },
+          "person_id": { "type": "number", "description": "Associated person ID" },
+          "org_id": { "type": "number", "description": "Associated organization ID" },
+          "note": { "type": "string", "description": "Activity note" }
+        },
+        "required": ["subject"]
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/activities"
+    },
+    {
+      "id": "get-activity",
+      "name": "Get Activity",
+      "description": "Get activity details by ID",
+      "method": "GET",
+      "path": "/activities/{id}",
+      "urlTemplate": "https://api.pipedrive.com/v1/activities/{id}"
+    },
+    {
+      "id": "get-all-activities",
+      "name": "Get All Activities",
+      "description": "Get all activities",
+      "method": "GET",
+      "path": "/activities",
+      "queryParams": {
+        "start": "0",
+        "limit": "100"
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/activities"
+    },
+    {
+      "id": "update-activity",
+      "name": "Update Activity",
+      "description": "Update an existing activity",
+      "method": "PUT",
+      "path": "/activities/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "description": "Activity subject" },
+          "type": { "type": "string", "description": "Activity type" },
+          "due_date": { "type": "string", "format": "date", "description": "Due date (YYYY-MM-DD)" },
+          "due_time": { "type": "string", "description": "Due time (HH:MM)" },
+          "duration": { "type": "string", "description": "Duration" },
+          "note": { "type": "string", "description": "Activity note" }
+        }
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/activities/{id}"
+    },
+    {
+      "id": "delete-activity",
+      "name": "Delete Activity",
+      "description": "Delete an activity by ID",
+      "method": "DELETE",
+      "path": "/activities/{id}",
+      "urlTemplate": "https://api.pipedrive.com/v1/activities/{id}"
+    },
+    {
+      "id": "create-deal",
+      "name": "Create Deal",
+      "description": "Create a new deal in Pipedrive",
+      "method": "POST",
+      "path": "/deals",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Deal title" },
+          "value": { "type": "number", "description": "Deal value" },
+          "currency": { "type": "string", "default": "USD", "description": "Currency code" },
+          "stage_id": { "type": "number", "description": "Deal stage ID" },
+          "person_id": { "type": "number", "description": "Associated person ID" },
+          "org_id": { "type": "number", "description": "Associated organization ID" },
+          "expected_close_date": { "type": "string", "format": "date", "description": "Expected close date (YYYY-MM-DD)" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/deals"
+    },
+    {
+      "id": "get-deal",
+      "name": "Get Deal",
+      "description": "Get deal details by ID",
+      "method": "GET",
+      "path": "/deals/{id}",
+      "urlTemplate": "https://api.pipedrive.com/v1/deals/{id}"
+    },
+    {
+      "id": "get-all-deals",
+      "name": "Get All Deals",
+      "description": "Get all deals",
+      "method": "GET",
+      "path": "/deals",
+      "queryParams": {
+        "start": "0",
+        "limit": "100"
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/deals"
+    },
+    {
+      "id": "search-deals",
+      "name": "Search Deals",
+      "description": "Search for deals",
+      "method": "GET",
+      "path": "/deals/search",
+      "queryParams": {
+        "term": "{searchTerm}",
+        "fields": "title,value"
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/deals/search?term={searchTerm}"
+    },
+    {
+      "id": "update-deal",
+      "name": "Update Deal",
+      "description": "Update an existing deal in Pipedrive",
+      "method": "PUT",
+      "path": "/deals/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Deal title" },
+          "value": { "type": "number", "description": "Deal value" },
+          "stage_id": { "type": "number", "description": "Deal stage ID" },
+          "expected_close_date": { "type": "string", "format": "date", "description": "Expected close date (YYYY-MM-DD)" }
+        }
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/deals/{id}"
+    },
+    {
+      "id": "delete-deal",
+      "name": "Delete Deal",
+      "description": "Delete a deal by ID",
+      "method": "DELETE",
+      "path": "/deals/{id}",
+      "urlTemplate": "https://api.pipedrive.com/v1/deals/{id}"
+    },
+    {
+      "id": "duplicate-deal",
+      "name": "Duplicate Deal",
+      "description": "Duplicate an existing deal",
+      "method": "POST",
+      "path": "/deals/{id}/duplicate",
+      "urlTemplate": "https://api.pipedrive.com/v1/deals/{id}/duplicate"
+    },
+    {
+      "id": "get-deal-activities",
+      "name": "Get Deal Activities",
+      "description": "Get all activities for a deal",
+      "method": "GET",
+      "path": "/deals/{id}/activities",
+      "urlTemplate": "https://api.pipedrive.com/v1/deals/{id}/activities"
+    },
+    {
+      "id": "add-deal-product",
+      "name": "Add Product to Deal",
+      "description": "Add a product to a deal",
+      "method": "POST",
+      "path": "/deals/{id}/products",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "product_id": { "type": "number", "required": true, "description": "Product ID" },
+          "item_price": { "type": "number", "description": "Item price" },
+          "quantity": { "type": "number", "description": "Quantity", "default": 1 }
+        },
+        "required": ["product_id"]
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/deals/{id}/products"
+    },
+    {
+      "id": "get-deal-products",
+      "name": "Get Deal Products",
+      "description": "Get all products for a deal",
+      "method": "GET",
+      "path": "/deals/{id}/products",
+      "urlTemplate": "https://api.pipedrive.com/v1/deals/{id}/products"
+    },
+    {
+      "id": "remove-deal-product",
+      "name": "Remove Product from Deal",
+      "description": "Remove a product from a deal",
+      "method": "DELETE",
+      "path": "/deals/{id}/products/{productId}",
+      "urlTemplate": "https://api.pipedrive.com/v1/deals/{id}/products/{productId}"
+    },
+    {
+      "id": "upload-file",
+      "name": "Upload File",
+      "description": "Upload a file to Pipedrive",
+      "method": "POST",
+      "path": "/files",
+      "headers": {
+        "Content-Type": "multipart/form-data"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "file": { "type": "string", "required": true, "description": "File content (base64 or file path)" },
+          "deal_id": { "type": "number", "description": "Associated deal ID" },
+          "person_id": { "type": "number", "description": "Associated person ID" },
+          "org_id": { "type": "number", "description": "Associated organization ID" }
+        },
+        "required": ["file"]
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/files"
+    },
+    {
+      "id": "get-file",
+      "name": "Get File",
+      "description": "Get file details by ID",
+      "method": "GET",
+      "path": "/files/{id}",
+      "urlTemplate": "https://api.pipedrive.com/v1/files/{id}"
+    },
+    {
+      "id": "get-all-files",
+      "name": "Get All Files",
+      "description": "Get all files",
+      "method": "GET",
+      "path": "/files",
+      "queryParams": {
+        "start": "0",
+        "limit": "100"
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/files"
+    },
+    {
+      "id": "delete-file",
+      "name": "Delete File",
+      "description": "Delete a file by ID",
+      "method": "DELETE",
+      "path": "/files/{id}",
+      "urlTemplate": "https://api.pipedrive.com/v1/files/{id}"
+    },
+    {
+      "id": "create-lead",
+      "name": "Create Lead",
+      "description": "Create a new lead in Pipedrive",
+      "method": "POST",
+      "path": "/leads",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Lead title" },
+          "person_id": { "type": "number", "description": "Associated person ID" },
+          "organization_id": { "type": "number", "description": "Associated organization ID" },
+          "value": { "type": "number", "description": "Lead value" },
+          "currency": { "type": "string", "default": "USD", "description": "Currency code" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/leads"
+    },
+    {
+      "id": "get-lead",
+      "name": "Get Lead",
+      "description": "Get lead details by ID",
+      "method": "GET",
+      "path": "/leads/{id}",
+      "urlTemplate": "https://api.pipedrive.com/v1/leads/{id}"
+    },
+    {
+      "id": "get-all-leads",
+      "name": "Get All Leads",
+      "description": "Get all leads",
+      "method": "GET",
+      "path": "/leads",
+      "queryParams": {
+        "start": "0",
+        "limit": "100"
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/leads"
+    },
+    {
+      "id": "create-note",
+      "name": "Create Note",
+      "description": "Create a new note in Pipedrive",
+      "method": "POST",
+      "path": "/notes",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "content": { "type": "string", "required": true, "description": "Note content" },
+          "deal_id": { "type": "number", "description": "Associated deal ID" },
+          "person_id": { "type": "number", "description": "Associated person ID" },
+          "org_id": { "type": "number", "description": "Associated organization ID" }
+        },
+        "required": ["content"]
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/notes"
+    },
+    {
+      "id": "get-all-notes",
+      "name": "Get All Notes",
+      "description": "Get all notes",
+      "method": "GET",
+      "path": "/notes",
+      "queryParams": {
+        "start": "0",
+        "limit": "100"
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/notes"
+    },
+    {
+      "id": "create-organization",
+      "name": "Create Organization",
+      "description": "Create a new organization in Pipedrive",
+      "method": "POST",
+      "path": "/organizations",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Organization name" },
+          "address": { "type": "string", "description": "Organization address" },
+          "email": { "type": "string", "description": "Organization email" },
+          "phone": { "type": "string", "description": "Organization phone" },
+          "visible_to": { "type": "string", "description": "Visibility level" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/organizations"
+    },
+    {
+      "id": "get-organization",
+      "name": "Get Organization",
+      "description": "Get organization details by ID",
+      "method": "GET",
+      "path": "/organizations/{id}",
+      "urlTemplate": "https://api.pipedrive.com/v1/organizations/{id}"
+    },
+    {
+      "id": "get-all-organizations",
+      "name": "Get All Organizations",
+      "description": "Get all organizations",
+      "method": "GET",
+      "path": "/organizations",
+      "queryParams": {
+        "start": "0",
+        "limit": "100"
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/organizations"
+    },
+    {
+      "id": "search-organizations",
+      "name": "Search Organizations",
+      "description": "Search for organizations",
+      "method": "GET",
+      "path": "/organizations/search",
+      "queryParams": {
+        "term": "{searchTerm}",
+        "fields": "name,address"
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/organizations/search?term={searchTerm}"
+    },
+    {
+      "id": "update-organization",
+      "name": "Update Organization",
+      "description": "Update an existing organization",
+      "method": "PUT",
+      "path": "/organizations/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Organization name" },
+          "address": { "type": "string", "description": "Organization address" },
+          "email": { "type": "string", "description": "Organization email" },
+          "phone": { "type": "string", "description": "Organization phone" }
+        }
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/organizations/{id}"
+    },
+    {
+      "id": "create-person",
+      "name": "Create Person",
+      "description": "Create a new person (contact) in Pipedrive",
+      "method": "POST",
+      "path": "/persons",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Person name" },
+          "email": { "type": "array", "items": { "type": "object", "properties": { "value": { "type": "string" }, "primary": { "type": "boolean" } } }, "description": "Email addresses" },
+          "phone": { "type": "array", "items": { "type": "object", "properties": { "value": { "type": "string" }, "primary": { "type": "boolean" } } }, "description": "Phone numbers" },
+          "org_id": { "type": "number", "description": "Associated organization ID" },
+          "visible_to": { "type": "string", "description": "Visibility level" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/persons"
+    },
+    {
+      "id": "get-person",
+      "name": "Get Person",
+      "description": "Get person details by ID",
+      "method": "GET",
+      "path": "/persons/{id}",
+      "urlTemplate": "https://api.pipedrive.com/v1/persons/{id}"
+    },
+    {
+      "id": "get-all-persons",
+      "name": "Get All Persons",
+      "description": "Get all persons (contacts)",
+      "method": "GET",
+      "path": "/persons",
+      "queryParams": {
+        "start": "0",
+        "limit": "100"
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/persons"
+    },
+    {
+      "id": "search-persons",
+      "name": "Search Persons",
+      "description": "Search for persons (contacts) in Pipedrive",
+      "method": "GET",
+      "path": "/persons/search",
+      "queryParams": {
+        "term": "{searchTerm}",
+        "fields": "name,email,phone"
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/persons/search?term={searchTerm}"
+    },
+    {
+      "id": "update-person",
+      "name": "Update Person",
+      "description": "Update an existing person (contact)",
+      "method": "PUT",
+      "path": "/persons/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Person name" },
+          "email": { "type": "array", "items": { "type": "object", "properties": { "value": { "type": "string" }, "primary": { "type": "boolean" } } }, "description": "Email addresses" },
+          "phone": { "type": "array", "items": { "type": "object", "properties": { "value": { "type": "string" }, "primary": { "type": "boolean" } } }, "description": "Phone numbers" }
+        }
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/persons/{id}"
+    },
+    {
+      "id": "get-all-products",
+      "name": "Get All Products",
+      "description": "Get all products",
+      "method": "GET",
+      "path": "/products",
+      "queryParams": {
+        "start": "0",
+        "limit": "100"
+      },
+      "urlTemplate": "https://api.pipedrive.com/v1/products"
+    }
+  ]
+}

@@ -1,0 +1,663 @@
+{
+  "id": "spotify",
+  "name": "Spotify",
+  "icon": "🎵",
+  "logoUrl": "https://cdn.simpleicons.org/spotify/1DB954",
+  "description": "Music streaming platform API for accessing music data, playlists, player control, and personal library",
+  "baseUrl": "https://api.spotify.com/v1",
+  "color": {
+    "bg": "from-green-100 to-teal-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "SPOTIFY_OAUTH2_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "get-album",
+      "name": "Get Album",
+      "description": "Get album by ID",
+      "method": "GET",
+      "path": "/albums/{albumId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "market": {
+          "type": "string",
+          "description": "Market code (ISO 3166-1 alpha-2)"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/albums/{albumId}"
+    },
+    {
+      "id": "list-albums",
+      "name": "List Albums",
+      "description": "List multiple albums by IDs",
+      "method": "GET",
+      "path": "/albums",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "ids": {
+          "type": "string",
+          "required": true,
+          "description": "Comma-separated album IDs"
+        },
+        "market": {
+          "type": "string",
+          "description": "Market code (ISO 3166-1 alpha-2)"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/albums"
+    },
+    {
+      "id": "get-album-tracks",
+      "name": "Get Album Tracks",
+      "description": "Get tracks from an album",
+      "method": "GET",
+      "path": "/albums/{albumId}/tracks",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "market": {
+          "type": "string",
+          "description": "Market code (ISO 3166-1 alpha-2)"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 20,
+          "description": "Maximum number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0,
+          "description": "Offset for pagination"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/albums/{albumId}/tracks"
+    },
+    {
+      "id": "get-artist",
+      "name": "Get Artist",
+      "description": "Get artist by ID",
+      "method": "GET",
+      "path": "/artists/{artistId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.spotify.com/v1/artists/{artistId}"
+    },
+    {
+      "id": "list-artists",
+      "name": "List Artists",
+      "description": "List multiple artists by IDs",
+      "method": "GET",
+      "path": "/artists",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "ids": {
+          "type": "string",
+          "required": true,
+          "description": "Comma-separated artist IDs"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/artists"
+    },
+    {
+      "id": "get-artist-albums",
+      "name": "Get Artist Albums",
+      "description": "Get albums by an artist",
+      "method": "GET",
+      "path": "/artists/{artistId}/albums",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "include_groups": {
+          "type": "string",
+          "description": "Comma-separated album types (album, single, appears_on, compilation)"
+        },
+        "market": {
+          "type": "string",
+          "description": "Market code (ISO 3166-1 alpha-2)"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 20
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/artists/{artistId}/albums"
+    },
+    {
+      "id": "get-artist-top-tracks",
+      "name": "Get Artist Top Tracks",
+      "description": "Get top tracks by an artist",
+      "method": "GET",
+      "path": "/artists/{artistId}/top-tracks",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "market": {
+          "type": "string",
+          "required": true,
+          "description": "Market code (ISO 3166-1 alpha-2)"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/artists/{artistId}/top-tracks"
+    },
+    {
+      "id": "get-track",
+      "name": "Get Track",
+      "description": "Get track by ID",
+      "method": "GET",
+      "path": "/tracks/{trackId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "market": {
+          "type": "string",
+          "description": "Market code (ISO 3166-1 alpha-2)"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/tracks/{trackId}"
+    },
+    {
+      "id": "list-tracks",
+      "name": "List Tracks",
+      "description": "List multiple tracks by IDs",
+      "method": "GET",
+      "path": "/tracks",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "ids": {
+          "type": "string",
+          "required": true,
+          "description": "Comma-separated track IDs"
+        },
+        "market": {
+          "type": "string",
+          "description": "Market code (ISO 3166-1 alpha-2)"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/tracks"
+    },
+    {
+      "id": "get-audio-features",
+      "name": "Get Audio Features",
+      "description": "Get audio features for a track",
+      "method": "GET",
+      "path": "/audio-features/{trackId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.spotify.com/v1/audio-features/{trackId}"
+    },
+    {
+      "id": "create-playlist",
+      "name": "Create Playlist",
+      "description": "Create a new playlist",
+      "method": "POST",
+      "path": "/users/{userId}/playlists",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Playlist name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Playlist description"
+          },
+          "public": {
+            "type": "boolean",
+            "default": false,
+            "description": "Public playlist"
+          },
+          "collaborative": {
+            "type": "boolean",
+            "default": false,
+            "description": "Collaborative playlist"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.spotify.com/v1/users/{userId}/playlists"
+    },
+    {
+      "id": "get-playlist",
+      "name": "Get Playlist",
+      "description": "Get playlist by ID",
+      "method": "GET",
+      "path": "/playlists/{playlistId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "market": {
+          "type": "string",
+          "description": "Market code (ISO 3166-1 alpha-2)"
+        },
+        "fields": {
+          "type": "string",
+          "description": "Fields to return"
+        },
+        "additional_types": {
+          "type": "string",
+          "description": "Additional types (comma-separated)"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/playlists/{playlistId}"
+    },
+    {
+      "id": "list-playlists",
+      "name": "List Playlists",
+      "description": "List playlists of authenticated user",
+      "method": "GET",
+      "path": "/me/playlists",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 20
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/me/playlists"
+    },
+    {
+      "id": "update-playlist",
+      "name": "Update Playlist",
+      "description": "Update a playlist",
+      "method": "PUT",
+      "path": "/playlists/{playlistId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "public": { "type": "boolean" },
+          "collaborative": { "type": "boolean" }
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/playlists/{playlistId}"
+    },
+    {
+      "id": "unfollow-playlist",
+      "name": "Unfollow Playlist",
+      "description": "Unfollow a playlist",
+      "method": "DELETE",
+      "path": "/playlists/{playlistId}/followers",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.spotify.com/v1/playlists/{playlistId}/followers"
+    },
+    {
+      "id": "add-playlist-items",
+      "name": "Add Playlist Items",
+      "description": "Add tracks to a playlist",
+      "method": "POST",
+      "path": "/playlists/{playlistId}/tracks",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "position": {
+          "type": "integer",
+          "description": "Position to insert tracks"
+        },
+        "uris": {
+          "type": "string",
+          "description": "Comma-separated track URIs (alternative to body)"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "uris": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Track URIs"
+          },
+          "position": {
+            "type": "integer",
+            "description": "Position to insert tracks"
+          }
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/playlists/{playlistId}/tracks"
+    },
+    {
+      "id": "remove-playlist-items",
+      "name": "Remove Playlist Items",
+      "description": "Remove tracks from a playlist",
+      "method": "DELETE",
+      "path": "/playlists/{playlistId}/tracks",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "tracks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "uri": { "type": "string" },
+                "positions": {
+                  "type": "array",
+                  "items": { "type": "integer" }
+                }
+              }
+            },
+            "required": true,
+            "description": "Tracks to remove"
+          },
+          "snapshot_id": {
+            "type": "string",
+            "description": "Playlist snapshot ID for optimistic locking"
+          }
+        },
+        "required": ["tracks"]
+      },
+      "urlTemplate": "https://api.spotify.com/v1/playlists/{playlistId}/tracks"
+    },
+    {
+      "id": "pause-player",
+      "name": "Pause Player",
+      "description": "Pause playback",
+      "method": "PUT",
+      "path": "/me/player/pause",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "device_id": {
+          "type": "string",
+          "description": "Device ID"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/me/player/pause"
+    },
+    {
+      "id": "play-player",
+      "name": "Play Player",
+      "description": "Start or resume playback",
+      "method": "PUT",
+      "path": "/me/player/play",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "device_id": {
+          "type": "string",
+          "description": "Device ID"
+        }
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "context_uri": {
+            "type": "string",
+            "description": "Context URI (album, artist, playlist)"
+          },
+          "uris": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Track URIs"
+          },
+          "offset": {
+            "type": "object",
+            "properties": {
+              "position": { "type": "integer" },
+              "uri": { "type": "string" }
+            },
+            "description": "Offset for playback"
+          },
+          "position_ms": {
+            "type": "integer",
+            "description": "Position in milliseconds"
+          }
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/me/player/play"
+    },
+    {
+      "id": "get-currently-playing",
+      "name": "Get Currently Playing",
+      "description": "Get currently playing track",
+      "method": "GET",
+      "path": "/me/player/currently-playing",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "market": {
+          "type": "string",
+          "description": "Market code (ISO 3166-1 alpha-2)"
+        },
+        "additional_types": {
+          "type": "string",
+          "description": "Additional types"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/me/player/currently-playing"
+    },
+    {
+      "id": "get-recently-played",
+      "name": "Get Recently Played",
+      "description": "Get recently played tracks",
+      "method": "GET",
+      "path": "/me/player/recently-played",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 20,
+          "max": 50
+        },
+        "after": {
+          "type": "integer",
+          "description": "Unix timestamp - get tracks after this time"
+        },
+        "before": {
+          "type": "integer",
+          "description": "Unix timestamp - get tracks before this time"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/me/player/recently-played"
+    },
+    {
+      "id": "next-track",
+      "name": "Next Track",
+      "description": "Skip to next track",
+      "method": "POST",
+      "path": "/me/player/next",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "device_id": {
+          "type": "string",
+          "description": "Device ID"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/me/player/next"
+    },
+    {
+      "id": "previous-track",
+      "name": "Previous Track",
+      "description": "Skip to previous track",
+      "method": "POST",
+      "path": "/me/player/previous",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "device_id": {
+          "type": "string",
+          "description": "Device ID"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/me/player/previous"
+    },
+    {
+      "id": "add-to-queue",
+      "name": "Add to Queue",
+      "description": "Add track to queue",
+      "method": "POST",
+      "path": "/me/player/queue",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "uri": {
+          "type": "string",
+          "required": true,
+          "description": "Track URI"
+        },
+        "device_id": {
+          "type": "string",
+          "description": "Device ID"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/me/player/queue"
+    },
+    {
+      "id": "set-volume",
+      "name": "Set Volume",
+      "description": "Set playback volume",
+      "method": "PUT",
+      "path": "/me/player/volume",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "volume_percent": {
+          "type": "integer",
+          "required": true,
+          "min": 0,
+          "max": 100,
+          "description": "Volume percentage (0-100)"
+        },
+        "device_id": {
+          "type": "string",
+          "description": "Device ID"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/me/player/volume"
+    },
+    {
+      "id": "add-to-library",
+      "name": "Add to Library",
+      "description": "Add tracks to user's library",
+      "method": "PUT",
+      "path": "/me/tracks",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "ids": {
+          "type": "string",
+          "required": true,
+          "description": "Comma-separated track IDs"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/me/tracks"
+    },
+    {
+      "id": "list-library",
+      "name": "List Library",
+      "description": "List tracks in user's library",
+      "method": "GET",
+      "path": "/me/tracks",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 20
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0
+        },
+        "market": {
+          "type": "string",
+          "description": "Market code (ISO 3166-1 alpha-2)"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/me/tracks"
+    },
+    {
+      "id": "remove-from-library",
+      "name": "Remove from Library",
+      "description": "Remove tracks from user's library",
+      "method": "DELETE",
+      "path": "/me/tracks",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "ids": {
+          "type": "string",
+          "required": true,
+          "description": "Comma-separated track IDs"
+        }
+      },
+      "urlTemplate": "https://api.spotify.com/v1/me/tracks"
+    },
+    {
+      "id": "get-me",
+      "name": "Get Me",
+      "description": "Get current user's profile",
+      "method": "GET",
+      "path": "/me",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://api.spotify.com/v1/me"
+    }
+  ]
+}
+

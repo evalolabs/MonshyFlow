@@ -1,0 +1,260 @@
+{
+  "id": "quickbase",
+  "name": "QuickBase",
+  "icon": "🗄️",
+  "logoUrl": "https://cdn.simpleicons.org/quickbase/000000",
+  "description": "Low-code application development platform",
+  "baseUrl": "https://api.quickbase.com/v1",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "QB-User-Token",
+    "secretKey": "QUICKBASE_USER_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-record",
+      "name": "Create Record",
+      "description": "Create a new record",
+      "method": "POST",
+      "path": "/records",
+      "headers": {
+        "Content-Type": "application/json",
+        "QB-User-Token": "{apiKey}",
+        "QB-Realm-Hostname": "{realmHostname}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "to": { "type": "string", "required": true, "description": "Table ID (dbid)" },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Record data (field IDs as keys)",
+              "additionalProperties": true
+            },
+            "required": true,
+            "description": "Array of records to create"
+          },
+          "fieldsToReturn": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Field IDs to return in response"
+          }
+        },
+        "required": ["to", "data"]
+      },
+      "urlTemplate": "https://api.quickbase.com/v1/records"
+    },
+    {
+      "id": "get-record",
+      "name": "Get Record",
+      "description": "Get record by ID",
+      "method": "GET",
+      "path": "/records/{recordId}",
+      "headers": {
+        "QB-User-Token": "{apiKey}",
+        "QB-Realm-Hostname": "{realmHostname}"
+      },
+      "queryParams": {
+        "tableId": { "type": "string", "required": true, "description": "Table ID (dbid)" },
+        "fieldIds": { "type": "string", "description": "Comma-separated list of field IDs to return" }
+      },
+      "urlTemplate": "https://api.quickbase.com/v1/records/{recordId}"
+    },
+    {
+      "id": "list-records",
+      "name": "List Records",
+      "description": "List all records from a table",
+      "method": "GET",
+      "path": "/records",
+      "headers": {
+        "QB-User-Token": "{apiKey}",
+        "QB-Realm-Hostname": "{realmHostname}"
+      },
+      "queryParams": {
+        "tableId": { "type": "string", "required": true, "description": "Table ID (dbid)" },
+        "fieldIds": { "type": "string", "description": "Comma-separated list of field IDs to return" },
+        "where": { "type": "string", "description": "Where clause (QuickBase query syntax)" },
+        "sortBy": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fieldId": { "type": "integer" },
+              "order": { "type": "string", "enum": ["ASC", "DESC"] }
+            },
+            "required": ["fieldId", "order"]
+          },
+          "description": "Sort criteria"
+        },
+        "groupBy": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fieldId": { "type": "integer" },
+              "grouping": { "type": "string", "enum": ["equal-values"] }
+            },
+            "required": ["fieldId", "grouping"]
+          },
+          "description": "Group by criteria"
+        },
+        "options": {
+          "type": "object",
+          "properties": {
+            "skip": { "type": "integer", "default": 0, "description": "Skip records" },
+            "top": { "type": "integer", "default": 100, "description": "Number of records to return" }
+          },
+          "description": "Pagination options"
+        }
+      },
+      "urlTemplate": "https://api.quickbase.com/v1/records"
+    },
+    {
+      "id": "update-record",
+      "name": "Update Record",
+      "description": "Update a record",
+      "method": "POST",
+      "path": "/records",
+      "headers": {
+        "Content-Type": "application/json",
+        "QB-User-Token": "{apiKey}",
+        "QB-Realm-Hostname": "{realmHostname}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "to": { "type": "string", "required": true, "description": "Table ID (dbid)" },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "3": { "type": "integer", "description": "Record ID (field ID 3)" }
+              },
+              "description": "Record data (field IDs as keys, field ID 3 is record ID)",
+              "additionalProperties": true
+            },
+            "required": true,
+            "description": "Array of records to update"
+          },
+          "fieldsToReturn": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Field IDs to return in response"
+          },
+          "mergeFieldId": { "type": "integer", "description": "Field ID to use for merge/upsert" }
+        },
+        "required": ["to", "data"]
+      },
+      "urlTemplate": "https://api.quickbase.com/v1/records"
+    },
+    {
+      "id": "delete-record",
+      "name": "Delete Record",
+      "description": "Delete a record",
+      "method": "DELETE",
+      "path": "/records/{recordId}",
+      "headers": {
+        "QB-User-Token": "{apiKey}",
+        "QB-Realm-Hostname": "{realmHostname}"
+      },
+      "queryParams": {
+        "tableId": { "type": "string", "required": true, "description": "Table ID (dbid)" }
+      },
+      "urlTemplate": "https://api.quickbase.com/v1/records/{recordId}"
+    },
+    {
+      "id": "get-field",
+      "name": "Get Field",
+      "description": "Get field by ID",
+      "method": "GET",
+      "path": "/fields/{fieldId}",
+      "headers": {
+        "QB-User-Token": "{apiKey}",
+        "QB-Realm-Hostname": "{realmHostname}"
+      },
+      "queryParams": {
+        "tableId": { "type": "string", "required": true, "description": "Table ID (dbid)" }
+      },
+      "urlTemplate": "https://api.quickbase.com/v1/fields/{fieldId}"
+    },
+    {
+      "id": "list-fields",
+      "name": "List Fields",
+      "description": "List all fields in a table",
+      "method": "GET",
+      "path": "/fields",
+      "headers": {
+        "QB-User-Token": "{apiKey}",
+        "QB-Realm-Hostname": "{realmHostname}"
+      },
+      "queryParams": {
+        "tableId": { "type": "string", "required": true, "description": "Table ID (dbid)" },
+        "includeFieldPerms": { "type": "boolean", "default": false, "description": "Include field permissions" }
+      },
+      "urlTemplate": "https://api.quickbase.com/v1/fields"
+    },
+    {
+      "id": "upload-file",
+      "name": "Upload File",
+      "description": "Upload a file",
+      "method": "POST",
+      "path": "/files",
+      "headers": {
+        "Content-Type": "multipart/form-data",
+        "QB-User-Token": "{apiKey}",
+        "QB-Realm-Hostname": "{realmHostname}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "tableId": { "type": "string", "required": true, "description": "Table ID (dbid)" },
+          "fieldId": { "type": "integer", "required": true, "description": "File field ID" },
+          "recordId": { "type": "integer", "required": true, "description": "Record ID" },
+          "file": { "type": "string", "format": "binary", "required": true, "description": "File to upload" }
+        },
+        "required": ["tableId", "fieldId", "recordId", "file"]
+      },
+      "urlTemplate": "https://api.quickbase.com/v1/files"
+    },
+    {
+      "id": "get-report",
+      "name": "Get Report",
+      "description": "Get report by ID",
+      "method": "GET",
+      "path": "/reports/{reportId}",
+      "headers": {
+        "QB-User-Token": "{apiKey}",
+        "QB-Realm-Hostname": "{realmHostname}"
+      },
+      "queryParams": {
+        "tableId": { "type": "string", "required": true, "description": "Table ID (dbid)" }
+      },
+      "urlTemplate": "https://api.quickbase.com/v1/reports/{reportId}"
+    },
+    {
+      "id": "list-reports",
+      "name": "List Reports",
+      "description": "List all reports in a table",
+      "method": "GET",
+      "path": "/reports",
+      "headers": {
+        "QB-User-Token": "{apiKey}",
+        "QB-Realm-Hostname": "{realmHostname}"
+      },
+      "queryParams": {
+        "tableId": { "type": "string", "required": true, "description": "Table ID (dbid)" }
+      },
+      "urlTemplate": "https://api.quickbase.com/v1/reports"
+    }
+  ]
+}
+

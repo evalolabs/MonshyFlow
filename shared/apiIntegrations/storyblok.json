@@ -1,0 +1,212 @@
+{
+  "id": "storyblok",
+  "name": "Storyblok",
+  "icon": "📝",
+  "logoUrl": "https://cdn.simpleicons.org/storyblok/09B3AF",
+  "description": "Headless content management system",
+  "baseUrl": "https://api.storyblok.com",
+  "color": {
+    "bg": "from-teal-100 to-emerald-100",
+    "border": "border-teal-500",
+    "icon": "text-teal-700",
+    "handle": "bg-teal-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "STORYBLOK_API_KEY",
+    "queryParamName": "token",
+    "note": "Content API uses token query parameter. Management API uses Bearer token in Authorization header."
+  },
+  "endpoints": [
+    {
+      "id": "get-story-content",
+      "name": "Get Story (Content API)",
+      "description": "Get story by slug from Content API",
+      "method": "GET",
+      "path": "/v1/cdn/stories/{slug}",
+      "headers": {},
+      "queryParams": {
+        "token": "{token}",
+        "version": "{version}",
+        "cv": "{cv}",
+        "resolve_relations": "{resolveRelations}",
+        "resolve_links": "{resolveLinks}",
+        "resolve_assets": "{resolveAssets}",
+        "language": "{language}",
+        "fallback_lang": "{fallbackLang}"
+      },
+      "urlTemplate": "https://api.storyblok.com/v1/cdn/stories/{slug}"
+    },
+    {
+      "id": "list-stories-content",
+      "name": "List Stories (Content API)",
+      "description": "List all stories from Content API",
+      "method": "GET",
+      "path": "/v1/cdn/stories",
+      "headers": {},
+      "queryParams": {
+        "token": "{token}",
+        "version": "{version}",
+        "cv": "{cv}",
+        "resolve_relations": "{resolveRelations}",
+        "resolve_links": "{resolveLinks}",
+        "resolve_assets": "{resolveAssets}",
+        "language": "{language}",
+        "fallback_lang": "{fallbackLang}",
+        "filter_query": "{filterQuery}",
+        "sort_by": "{sortBy}",
+        "per_page": "25",
+        "page": "1",
+        "starts_with": "{startsWith}",
+        "with_tag": "{withTag}"
+      },
+      "urlTemplate": "https://api.storyblok.com/v1/cdn/stories"
+    },
+    {
+      "id": "create-story-management",
+      "name": "Create Story (Management API)",
+      "description": "Create a new story",
+      "method": "POST",
+      "path": "/v1/spaces/{spaceId}/stories",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "story": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "required": true, "description": "Story name" },
+              "slug": { "type": "string", "required": true, "description": "Story slug" },
+              "content": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Story content"
+              },
+              "parent_id": { "type": "number", "description": "Parent story ID" },
+              "is_folder": { "type": "boolean", "default": false, "description": "Is folder" },
+              "is_startpage": { "type": "boolean", "default": false, "description": "Is startpage" },
+              "is_published": { "type": "boolean", "default": false, "description": "Is published" },
+              "default_root": { "type": "string", "description": "Default root" },
+              "path": { "type": "string", "description": "Story path" },
+              "position": { "type": "number", "description": "Position" },
+              "tag_list": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Tags"
+              }
+            },
+            "required": ["name", "slug"]
+          },
+          "publish": { "type": "boolean", "default": false, "description": "Publish immediately" }
+        },
+        "required": ["story"]
+      },
+      "urlTemplate": "https://mapi.storyblok.com/v1/spaces/{spaceId}/stories"
+    },
+    {
+      "id": "get-story-management",
+      "name": "Get Story (Management API)",
+      "description": "Get story details by ID",
+      "method": "GET",
+      "path": "/v1/spaces/{spaceId}/stories/{storyId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "version": "{version}",
+        "resolve_links": "{resolveLinks}",
+        "resolve_relations": "{resolveRelations}"
+      },
+      "urlTemplate": "https://mapi.storyblok.com/v1/spaces/{spaceId}/stories/{storyId}"
+    },
+    {
+      "id": "list-stories-management",
+      "name": "List Stories (Management API)",
+      "description": "List all stories",
+      "method": "GET",
+      "path": "/v1/spaces/{spaceId}/stories",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "per_page": "25",
+        "page": "1",
+        "with_slug": "{withSlug}",
+        "starts_with": "{startsWith}",
+        "is_folder": "{isFolder}",
+        "is_startpage": "{isStartpage}",
+        "sort_by": "{sortBy}",
+        "filter_query": "{filterQuery}",
+        "version": "{version}"
+      },
+      "urlTemplate": "https://mapi.storyblok.com/v1/spaces/{spaceId}/stories"
+    },
+    {
+      "id": "update-story-management",
+      "name": "Update Story (Management API)",
+      "description": "Update an existing story",
+      "method": "PUT",
+      "path": "/v1/spaces/{spaceId}/stories/{storyId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "story": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Story name" },
+              "slug": { "type": "string", "description": "Story slug" },
+              "content": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "parent_id": { "type": "number", "description": "Parent story ID" },
+              "is_folder": { "type": "boolean", "description": "Is folder" },
+              "is_startpage": { "type": "boolean", "description": "Is startpage" },
+              "is_published": { "type": "boolean", "description": "Is published" },
+              "tag_list": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          },
+          "publish": { "type": "boolean", "description": "Publish immediately" }
+        }
+      },
+      "urlTemplate": "https://mapi.storyblok.com/v1/spaces/{spaceId}/stories/{storyId}"
+    },
+    {
+      "id": "delete-story-management",
+      "name": "Delete Story (Management API)",
+      "description": "Delete a story",
+      "method": "DELETE",
+      "path": "/v1/spaces/{spaceId}/stories/{storyId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://mapi.storyblok.com/v1/spaces/{spaceId}/stories/{storyId}"
+    },
+    {
+      "id": "publish-story-management",
+      "name": "Publish Story (Management API)",
+      "description": "Publish a story",
+      "method": "GET",
+      "path": "/v1/spaces/{spaceId}/stories/{storyId}/publish",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "release_id": "{releaseId}"
+      },
+      "urlTemplate": "https://mapi.storyblok.com/v1/spaces/{spaceId}/stories/{storyId}/publish"
+    }
+  ]
+}

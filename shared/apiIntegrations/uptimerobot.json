@@ -1,0 +1,409 @@
+{
+  "id": "uptimerobot",
+  "name": "UptimeRobot",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/uptimerobot/00C100",
+  "description": "Website monitoring and uptime tracking",
+  "baseUrl": "https://api.uptimerobot.com/v2",
+  "color": {
+    "bg": "from-green-100 to-cyan-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Content-Type",
+    "headerFormat": "application/x-www-form-urlencoded",
+    "secretKey": "UPTIMEROBOT_API_KEY",
+    "note": "UptimeRobot API uses POST requests for all operations, including GET operations. API key is sent as form data."
+  },
+  "endpoints": [
+    {
+      "id": "get-account-details",
+      "name": "Get Account Details",
+      "description": "Get account information",
+      "method": "POST",
+      "path": "/getAccountDetails",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" }
+        },
+        "required": ["api_key"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/getAccountDetails"
+    },
+    {
+      "id": "create-monitor",
+      "name": "Create Monitor",
+      "description": "Create a new monitor",
+      "method": "POST",
+      "path": "/newMonitor",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "friendly_name": { "type": "string", "required": true, "description": "Monitor friendly name" },
+          "url": { "type": "string", "format": "uri", "required": true, "description": "URL to monitor" },
+          "type": { "type": "integer", "required": true, "enum": [1, 2, 3, 4], "description": "Monitor type: 1=HTTP(s), 2=Keyword, 3=Ping, 4=Port" },
+          "interval": { "type": "integer", "default": 300, "description": "Monitoring interval in seconds" },
+          "keyword_type": { "type": "integer", "enum": [1, 2], "description": "Keyword type: 1=exists, 2=not exists (for type 2)" },
+          "keyword_value": { "type": "string", "description": "Keyword value (for type 2)" },
+          "http_username": { "type": "string", "description": "HTTP basic auth username" },
+          "http_password": { "type": "string", "description": "HTTP basic auth password" },
+          "alert_contacts": { "type": "string", "description": "Comma-separated alert contact IDs" },
+          "mwindows": { "type": "string", "description": "Comma-separated maintenance window IDs" }
+        },
+        "required": ["api_key", "friendly_name", "url", "type"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/newMonitor"
+    },
+    {
+      "id": "get-monitors",
+      "name": "Get Monitors",
+      "description": "Get all monitors",
+      "method": "POST",
+      "path": "/getMonitors",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "monitors": { "type": "string", "description": "Comma-separated monitor IDs" },
+          "types": { "type": "string", "description": "Comma-separated monitor types" },
+          "statuses": { "type": "string", "description": "Comma-separated statuses: 0=paused, 1=not checked yet, 2=up, 8=seems down, 9=down" },
+          "custom_uptime_ratios": { "type": "string", "description": "Comma-separated custom uptime ratios" },
+          "custom_uptime_ranges": { "type": "string", "description": "Comma-separated custom uptime ranges" },
+          "logs": { "type": "integer", "enum": [0, 1], "default": 0, "description": "Include logs: 0=no, 1=yes" },
+          "log_types": { "type": "string", "description": "Comma-separated log types" },
+          "log_limit": { "type": "integer", "default": 1, "description": "Number of logs to return" },
+          "response_times": { "type": "integer", "enum": [0, 1], "default": 0, "description": "Include response times: 0=no, 1=yes" },
+          "response_times_limit": { "type": "integer", "default": 2, "description": "Number of response times to return" },
+          "response_times_average": { "type": "integer", "default": 0, "description": "Average response time in seconds" },
+          "response_times_start_date": { "type": "integer", "description": "Start date (Unix timestamp)" },
+          "response_times_end_date": { "type": "integer", "description": "End date (Unix timestamp)" },
+          "alert_contacts": { "type": "integer", "enum": [0, 1], "default": 0, "description": "Include alert contacts: 0=no, 1=yes" },
+          "mwindows": { "type": "integer", "enum": [0, 1], "default": 0, "description": "Include maintenance windows: 0=no, 1=yes" },
+          "timezone": { "type": "integer", "default": 1, "description": "Timezone offset" },
+          "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" },
+          "limit": { "type": "integer", "default": 50, "description": "Number of results" }
+        },
+        "required": ["api_key"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/getMonitors"
+    },
+    {
+      "id": "edit-monitor",
+      "name": "Edit Monitor",
+      "description": "Edit an existing monitor",
+      "method": "POST",
+      "path": "/editMonitor",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "id": { "type": "string", "required": true, "description": "Monitor ID" },
+          "friendly_name": { "type": "string", "description": "Monitor friendly name" },
+          "url": { "type": "string", "format": "uri", "description": "URL to monitor" },
+          "type": { "type": "integer", "enum": [1, 2, 3, 4], "description": "Monitor type" },
+          "interval": { "type": "integer", "description": "Monitoring interval in seconds" },
+          "keyword_type": { "type": "integer", "enum": [1, 2], "description": "Keyword type" },
+          "keyword_value": { "type": "string", "description": "Keyword value" },
+          "http_username": { "type": "string", "description": "HTTP basic auth username" },
+          "http_password": { "type": "string", "description": "HTTP basic auth password" },
+          "alert_contacts": { "type": "string", "description": "Comma-separated alert contact IDs" },
+          "mwindows": { "type": "string", "description": "Comma-separated maintenance window IDs" },
+          "status": { "type": "integer", "enum": [0, 1], "description": "Monitor status: 0=pause, 1=resume" }
+        },
+        "required": ["api_key", "id"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/editMonitor"
+    },
+    {
+      "id": "delete-monitor",
+      "name": "Delete Monitor",
+      "description": "Delete a monitor",
+      "method": "POST",
+      "path": "/deleteMonitor",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "id": { "type": "string", "required": true, "description": "Monitor ID" }
+        },
+        "required": ["api_key", "id"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/deleteMonitor"
+    },
+    {
+      "id": "reset-monitor",
+      "name": "Reset Monitor",
+      "description": "Reset monitor statistics",
+      "method": "POST",
+      "path": "/resetMonitor",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "id": { "type": "string", "required": true, "description": "Monitor ID" }
+        },
+        "required": ["api_key", "id"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/resetMonitor"
+    },
+    {
+      "id": "create-alert-contact",
+      "name": "Create Alert Contact",
+      "description": "Create a new alert contact",
+      "method": "POST",
+      "path": "/newAlertContact",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "type": { "type": "integer", "required": true, "enum": [1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], "description": "Alert contact type: 1=SMS, 2=E-mail, 3=Twitter DM, 4=Boxcar, 5=Web-hook, 6=Pushbullet, 7=Zapier, 9=Pushover, 10=HipChat, 11=Slack, 12=PD, 13=OpsGenie, 14=Webhook, 15=Telegram, 16=Discord, 17=Line, 18=Microsoft Teams" },
+          "value": { "type": "string", "required": true, "description": "Contact value (email, phone, webhook URL, etc.)" },
+          "friendly_name": { "type": "string", "description": "Friendly name" }
+        },
+        "required": ["api_key", "type", "value"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/newAlertContact"
+    },
+    {
+      "id": "get-alert-contacts",
+      "name": "Get Alert Contacts",
+      "description": "Get all alert contacts",
+      "method": "POST",
+      "path": "/getAlertContacts",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "alert_contacts": { "type": "string", "description": "Comma-separated alert contact IDs" },
+          "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" },
+          "limit": { "type": "integer", "default": 50, "description": "Number of results" }
+        },
+        "required": ["api_key"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/getAlertContacts"
+    },
+    {
+      "id": "delete-alert-contact",
+      "name": "Delete Alert Contact",
+      "description": "Delete an alert contact",
+      "method": "POST",
+      "path": "/deleteAlertContact",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "id": { "type": "string", "required": true, "description": "Alert contact ID" }
+        },
+        "required": ["api_key", "id"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/deleteAlertContact"
+    },
+    {
+      "id": "create-maintenance-window",
+      "name": "Create Maintenance Window",
+      "description": "Create a new maintenance window",
+      "method": "POST",
+      "path": "/newMWindow",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "friendly_name": { "type": "string", "required": true, "description": "Maintenance window friendly name" },
+          "type": { "type": "integer", "required": true, "enum": [1, 2, 3], "description": "Type: 1=once, 2=daily, 3=weekly" },
+          "start_time": { "type": "string", "required": true, "description": "Start time (Unix timestamp)" },
+          "duration": { "type": "integer", "required": true, "description": "Duration in minutes" },
+          "value": { "type": "integer", "description": "Value for weekly (0-6 for day of week)" }
+        },
+        "required": ["api_key", "friendly_name", "type", "start_time", "duration"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/newMWindow"
+    },
+    {
+      "id": "get-maintenance-windows",
+      "name": "Get Maintenance Windows",
+      "description": "Get all maintenance windows",
+      "method": "POST",
+      "path": "/getMWindows",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "mwindows": { "type": "string", "description": "Comma-separated maintenance window IDs" },
+          "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" },
+          "limit": { "type": "integer", "default": 50, "description": "Number of results" }
+        },
+        "required": ["api_key"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/getMWindows"
+    },
+    {
+      "id": "edit-maintenance-window",
+      "name": "Edit Maintenance Window",
+      "description": "Edit an existing maintenance window",
+      "method": "POST",
+      "path": "/editMWindow",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "id": { "type": "string", "required": true, "description": "Maintenance window ID" },
+          "friendly_name": { "type": "string", "description": "Maintenance window friendly name" },
+          "type": { "type": "integer", "enum": [1, 2, 3], "description": "Type" },
+          "start_time": { "type": "string", "description": "Start time (Unix timestamp)" },
+          "duration": { "type": "integer", "description": "Duration in minutes" },
+          "value": { "type": "integer", "description": "Value for weekly" }
+        },
+        "required": ["api_key", "id"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/editMWindow"
+    },
+    {
+      "id": "delete-maintenance-window",
+      "name": "Delete Maintenance Window",
+      "description": "Delete a maintenance window",
+      "method": "POST",
+      "path": "/deleteMWindow",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "id": { "type": "string", "required": true, "description": "Maintenance window ID" }
+        },
+        "required": ["api_key", "id"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/deleteMWindow"
+    },
+    {
+      "id": "create-public-status-page",
+      "name": "Create Public Status Page",
+      "description": "Create a new public status page",
+      "method": "POST",
+      "path": "/newPSP",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "friendly_name": { "type": "string", "required": true, "description": "Status page friendly name" },
+          "monitors": { "type": "string", "required": true, "description": "Comma-separated monitor IDs" },
+          "custom_domain": { "type": "string", "description": "Custom domain" },
+          "password": { "type": "string", "description": "Password protection" },
+          "sort": { "type": "integer", "enum": [1, 2], "default": 1, "description": "Sort order: 1=friendly name, 2=status" }
+        },
+        "required": ["api_key", "friendly_name", "monitors"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/newPSP"
+    },
+    {
+      "id": "get-public-status-pages",
+      "name": "Get Public Status Pages",
+      "description": "Get all public status pages",
+      "method": "POST",
+      "path": "/getPSPs",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "psps": { "type": "string", "description": "Comma-separated status page IDs" },
+          "offset": { "type": "integer", "default": 0, "description": "Offset for pagination" },
+          "limit": { "type": "integer", "default": 50, "description": "Number of results" }
+        },
+        "required": ["api_key"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/getPSPs"
+    },
+    {
+      "id": "edit-public-status-page",
+      "name": "Edit Public Status Page",
+      "description": "Edit an existing public status page",
+      "method": "POST",
+      "path": "/editPSP",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "id": { "type": "string", "required": true, "description": "Status page ID" },
+          "friendly_name": { "type": "string", "description": "Status page friendly name" },
+          "monitors": { "type": "string", "description": "Comma-separated monitor IDs" },
+          "custom_domain": { "type": "string", "description": "Custom domain" },
+          "password": { "type": "string", "description": "Password protection" },
+          "sort": { "type": "integer", "enum": [1, 2], "description": "Sort order" }
+        },
+        "required": ["api_key", "id"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/editPSP"
+    },
+    {
+      "id": "delete-public-status-page",
+      "name": "Delete Public Status Page",
+      "description": "Delete a public status page",
+      "method": "POST",
+      "path": "/deletePSP",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": { "type": "string", "required": true, "description": "API key" },
+          "id": { "type": "string", "required": true, "description": "Status page ID" }
+        },
+        "required": ["api_key", "id"]
+      },
+      "urlTemplate": "https://api.uptimerobot.com/v2/deletePSP"
+    }
+  ]
+}
+

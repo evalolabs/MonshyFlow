@@ -1,0 +1,163 @@
+{
+  "id": "flow",
+  "name": "Flow",
+  "icon": "✅",
+  "logoUrl": "https://cdn.simpleicons.org/flow/000000",
+  "description": "Task management and collaboration platform",
+  "baseUrl": "https://api.getflow.com/v2",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "FLOW_API_TOKEN",
+    "note": "API Token is used for Basic Auth. Organization ID is required and should be provided as FLOW_ORGANIZATION_ID secret key."
+  },
+  "endpoints": [
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new task",
+      "method": "POST",
+      "path": "/tasks",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Task name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Task description"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Project ID"
+          },
+          "assigneeId": {
+            "type": "string",
+            "description": "Assignee user ID"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Due date (ISO 8601)"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["incomplete", "complete"],
+            "default": "incomplete",
+            "description": "Task status"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.getflow.com/v2/tasks"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get task by ID",
+      "method": "GET",
+      "path": "/tasks/{taskId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.getflow.com/v2/tasks/{taskId}"
+    },
+    {
+      "id": "list-tasks",
+      "name": "List Tasks",
+      "description": "List all tasks",
+      "method": "GET",
+      "path": "/tasks",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "projectId": {
+          "type": "string",
+          "description": "Filter by project ID"
+        },
+        "assigneeId": {
+          "type": "string",
+          "description": "Filter by assignee ID"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["incomplete", "complete"],
+          "description": "Filter by status"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 50,
+          "description": "Maximum number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0,
+          "description": "Offset for pagination"
+        }
+      },
+      "urlTemplate": "https://api.getflow.com/v2/tasks"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update a task",
+      "method": "PUT",
+      "path": "/tasks/{taskId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "projectId": { "type": "string" },
+          "assigneeId": { "type": "string" },
+          "dueDate": { "type": "string", "format": "date-time" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "status": {
+            "type": "string",
+            "enum": ["incomplete", "complete"]
+          }
+        }
+      },
+      "urlTemplate": "https://api.getflow.com/v2/tasks/{taskId}"
+    },
+    {
+      "id": "delete-task",
+      "name": "Delete Task",
+      "description": "Delete a task",
+      "method": "DELETE",
+      "path": "/tasks/{taskId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.getflow.com/v2/tasks/{taskId}"
+    }
+  ]
+}
+

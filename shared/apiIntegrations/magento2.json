@@ -1,0 +1,306 @@
+{
+  "id": "magento2",
+  "name": "Magento 2",
+  "icon": "🛒",
+  "logoUrl": "https://cdn.simpleicons.org/magento/EE672F",
+  "description": "Open-source e-commerce platform",
+  "baseUrl": "{host}",
+  "color": {
+    "bg": "from-orange-100 to-pink-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "MAGENTO2_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-customer",
+      "name": "Create Customer",
+      "description": "Create a new customer",
+      "method": "POST",
+      "path": "/customers",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "object",
+            "properties": {
+              "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+              "firstname": { "type": "string", "required": true, "description": "First name" },
+              "lastname": { "type": "string", "required": true, "description": "Last name" },
+              "website_id": { "type": "number", "default": 1, "description": "Website ID" },
+              "store_id": { "type": "number", "default": 1, "description": "Store ID" },
+              "group_id": { "type": "number", "default": 1, "description": "Customer group ID" },
+              "dob": { "type": "string", "format": "date", "description": "Date of birth (YYYY-MM-DD)" },
+              "taxvat": { "type": "string", "description": "Tax/VAT number" },
+              "gender": { "type": "number", "enum": [0, 1, 2], "description": "Gender (0=Not Specified, 1=Male, 2=Female)" },
+              "addresses": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "default_shipping": { "type": "boolean", "default": false },
+                    "default_billing": { "type": "boolean", "default": false },
+                    "firstname": { "type": "string", "required": true },
+                    "lastname": { "type": "string", "required": true },
+                    "street": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "required": true
+                    },
+                    "city": { "type": "string", "required": true },
+                    "region": { "type": "string" },
+                    "postcode": { "type": "string", "required": true },
+                    "country_id": { "type": "string", "required": true },
+                    "telephone": { "type": "string" }
+                  },
+                  "required": ["firstname", "lastname", "street", "city", "postcode", "country_id"]
+                }
+              }
+            },
+            "required": ["email", "firstname", "lastname"]
+          },
+          "password": { "type": "string", "description": "Password (if creating account)" }
+        },
+        "required": ["customer"]
+      },
+      "urlTemplate": "{host}/customers"
+    },
+    {
+      "id": "get-customer",
+      "name": "Get Customer",
+      "description": "Get customer details by ID",
+      "method": "GET",
+      "path": "/customers/{customerId}",
+      "headers": {},
+      "urlTemplate": "{host}/customers/{customerId}"
+    },
+    {
+      "id": "list-customers",
+      "name": "List Customers",
+      "description": "Search customers",
+      "method": "GET",
+      "path": "/customers/search",
+      "headers": {},
+      "queryParams": {
+        "searchCriteria[filterGroups][0][filters][0][field]": "email",
+        "searchCriteria[filterGroups][0][filters][0][value]": "{email}",
+        "searchCriteria[pageSize]": "20",
+        "searchCriteria[currentPage]": "1"
+      },
+      "urlTemplate": "{host}/customers/search"
+    },
+    {
+      "id": "update-customer",
+      "name": "Update Customer",
+      "description": "Update an existing customer",
+      "method": "PUT",
+      "path": "/customers/{customerId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "number", "required": true },
+              "email": { "type": "string", "format": "email", "description": "Email address" },
+              "firstname": { "type": "string", "description": "First name" },
+              "lastname": { "type": "string", "description": "Last name" }
+            },
+            "required": ["id"]
+          }
+        },
+        "required": ["customer"]
+      },
+      "urlTemplate": "{host}/customers/{customerId}"
+    },
+    {
+      "id": "create-product",
+      "name": "Create Product",
+      "description": "Create a new product",
+      "method": "POST",
+      "path": "/products",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "object",
+            "properties": {
+              "sku": { "type": "string", "required": true, "description": "SKU" },
+              "name": { "type": "string", "required": true, "description": "Product name" },
+              "type_id": { "type": "string", "enum": ["simple", "configurable", "grouped", "virtual", "bundle", "downloadable"], "default": "simple", "description": "Product type" },
+              "attribute_set_id": { "type": "number", "default": 4, "description": "Attribute set ID" },
+              "price": { "type": "number", "required": true, "description": "Price" },
+              "status": { "type": "number", "enum": [0, 1], "default": 1, "description": "Status (0=Disabled, 1=Enabled)" },
+              "visibility": { "type": "number", "enum": [1, 2, 3, 4], "default": 4, "description": "Visibility (1=Not Visible, 2=Catalog, 3=Search, 4=Catalog/Search)" },
+              "weight": { "type": "number", "description": "Weight" },
+              "description": { "type": "string", "description": "Description" },
+              "short_description": { "type": "string", "description": "Short description" },
+              "qty": { "type": "number", "description": "Quantity" },
+              "is_in_stock": { "type": "boolean", "default": true, "description": "Is in stock" },
+              "category_ids": {
+                "type": "array",
+                "items": { "type": "number" },
+                "description": "Category IDs"
+              }
+            },
+            "required": ["sku", "name", "price"]
+          }
+        },
+        "required": ["product"]
+      },
+      "urlTemplate": "{host}/products"
+    },
+    {
+      "id": "get-product",
+      "name": "Get Product",
+      "description": "Get product details by SKU",
+      "method": "GET",
+      "path": "/products/{sku}",
+      "headers": {},
+      "urlTemplate": "{host}/products/{sku}"
+    },
+    {
+      "id": "list-products",
+      "name": "List Products",
+      "description": "List all products",
+      "method": "GET",
+      "path": "/products",
+      "headers": {},
+      "queryParams": {
+        "searchCriteria[pageSize]": "20",
+        "searchCriteria[currentPage]": "1"
+      },
+      "urlTemplate": "{host}/products"
+    },
+    {
+      "id": "update-product",
+      "name": "Update Product",
+      "description": "Update an existing product",
+      "method": "PUT",
+      "path": "/products/{sku}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "object",
+            "properties": {
+              "sku": { "type": "string", "required": true },
+              "name": { "type": "string", "description": "Product name" },
+              "price": { "type": "number", "description": "Price" },
+              "status": { "type": "number", "enum": [0, 1], "description": "Status" },
+              "qty": { "type": "number", "description": "Quantity" },
+              "is_in_stock": { "type": "boolean", "description": "Is in stock" }
+            },
+            "required": ["sku"]
+          }
+        },
+        "required": ["product"]
+      },
+      "urlTemplate": "{host}/products/{sku}"
+    },
+    {
+      "id": "delete-product",
+      "name": "Delete Product",
+      "description": "Delete a product",
+      "method": "DELETE",
+      "path": "/products/{sku}",
+      "headers": {},
+      "urlTemplate": "{host}/products/{sku}"
+    },
+    {
+      "id": "get-order",
+      "name": "Get Order",
+      "description": "Get order details by ID",
+      "method": "GET",
+      "path": "/orders/{orderId}",
+      "headers": {},
+      "urlTemplate": "{host}/orders/{orderId}"
+    },
+    {
+      "id": "list-orders",
+      "name": "List Orders",
+      "description": "List all orders",
+      "method": "GET",
+      "path": "/orders",
+      "headers": {},
+      "queryParams": {
+        "searchCriteria[pageSize]": "20",
+        "searchCriteria[currentPage]": "1"
+      },
+      "urlTemplate": "{host}/orders"
+    },
+    {
+      "id": "cancel-order",
+      "name": "Cancel Order",
+      "description": "Cancel an order",
+      "method": "POST",
+      "path": "/order/{orderId}/cancel",
+      "headers": {},
+      "urlTemplate": "{host}/order/{orderId}/cancel"
+    },
+    {
+      "id": "ship-order",
+      "name": "Ship Order",
+      "description": "Ship an order",
+      "method": "POST",
+      "path": "/order/{orderId}/ship",
+      "headers": {},
+      "urlTemplate": "{host}/order/{orderId}/ship"
+    },
+    {
+      "id": "create-invoice",
+      "name": "Create Invoice",
+      "description": "Create an invoice for an order",
+      "method": "POST",
+      "path": "/order/{orderId}/invoice",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "order_item_id": { "type": "number", "required": true },
+                "qty": { "type": "number", "required": true }
+              },
+              "required": ["order_item_id", "qty"]
+            }
+          },
+          "notify": { "type": "boolean", "default": false, "description": "Send invoice email" },
+          "appendComment": { "type": "boolean", "default": false, "description": "Append comment" },
+          "comment": {
+            "type": "object",
+            "properties": {
+              "comment": { "type": "string" },
+              "is_visible_on_front": { "type": "number", "enum": [0, 1], "default": 0 }
+            }
+          }
+        }
+      },
+      "urlTemplate": "{host}/order/{orderId}/invoice"
+    }
+  ]
+}
+

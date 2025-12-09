@@ -1,0 +1,245 @@
+{
+  "id": "freshdesk",
+  "name": "Freshdesk",
+  "icon": "🎫",
+  "logoUrl": "https://cdn.simpleicons.org/freshdesk/25B24A",
+  "description": "Customer support and help desk software",
+  "baseUrl": "https://{domain}.freshdesk.com/api/v2",
+  "color": {
+    "bg": "from-green-100 to-lime-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(apiKey:X)}",
+    "secretKey": "FRESHDESK_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/contacts",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Contact name" },
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "mobile": { "type": "string", "description": "Mobile number" },
+          "twitter_id": { "type": "string", "description": "Twitter ID" },
+          "unique_external_id": { "type": "string", "description": "Unique external ID" },
+          "other_emails": {
+            "type": "array",
+            "items": { "type": "string", "format": "email" },
+            "description": "Additional email addresses"
+          },
+          "company_id": { "type": "number", "description": "Company ID" },
+          "view_all_tickets": { "type": "boolean", "default": false, "description": "Can view all tickets" },
+          "other_companies": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "Other company IDs"
+          },
+          "address": { "type": "string", "description": "Address" },
+          "avatar": {
+            "type": "object",
+            "properties": {
+              "content_type": { "type": "string", "required": true },
+              "content": { "type": "string", "required": true, "description": "Base64 encoded image" }
+            }
+          },
+          "custom_fields": {
+            "type": "object",
+            "description": "Custom field values",
+            "additionalProperties": true
+          }
+        },
+        "required": ["name", "email"]
+      },
+      "urlTemplate": "https://{domain}.freshdesk.com/api/v2/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact details by ID",
+      "method": "GET",
+      "path": "/contacts/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshdesk.com/api/v2/contacts/{id}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/contacts",
+      "headers": {},
+      "queryParams": {
+        "email": "{email}",
+        "mobile": "{mobile}",
+        "phone": "{phone}",
+        "company_id": "{companyId}",
+        "state": "{state}",
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshdesk.com/api/v2/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update an existing contact",
+      "method": "PUT",
+      "path": "/contacts/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Contact name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "mobile": { "type": "string", "description": "Mobile number" },
+          "company_id": { "type": "number", "description": "Company ID" },
+          "view_all_tickets": { "type": "boolean", "description": "Can view all tickets" },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://{domain}.freshdesk.com/api/v2/contacts/{id}"
+    },
+    {
+      "id": "delete-contact",
+      "name": "Delete Contact",
+      "description": "Delete a contact",
+      "method": "DELETE",
+      "path": "/contacts/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshdesk.com/api/v2/contacts/{id}"
+    },
+    {
+      "id": "create-ticket",
+      "name": "Create Ticket",
+      "description": "Create a new support ticket",
+      "method": "POST",
+      "path": "/tickets",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email", "required": true, "description": "Requester email" },
+          "subject": { "type": "string", "required": true, "description": "Ticket subject" },
+          "description": { "type": "string", "required": true, "description": "Ticket description" },
+          "status": { "type": "number", "enum": [2, 3, 4, 5], "default": 2, "description": "Status (2=Open, 3=Pending, 4=Resolved, 5=Closed)" },
+          "priority": { "type": "number", "enum": [1, 2, 3, 4], "default": 1, "description": "Priority (1=Low, 2=Medium, 3=High, 4=Urgent)" },
+          "source": { "type": "number", "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "default": 2, "description": "Source (1=Email, 2=Portal, 3=Phone, 4=Chat, 5=Feedback Widget, 6=Outbound Email, 7=E-commerce, 8=Facebook, 9=Twitter, 10=Walk-up)" },
+          "type": { "type": "string", "description": "Ticket type" },
+          "requester_id": { "type": "number", "description": "Requester contact ID" },
+          "responder_id": { "type": "number", "description": "Assigned agent ID" },
+          "cc_emails": {
+            "type": "array",
+            "items": { "type": "string", "format": "email" },
+            "description": "CC email addresses"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "content_type": { "type": "string", "required": true },
+                "content": { "type": "string", "required": true, "description": "Base64 encoded file content" },
+                "name": { "type": "string", "required": true }
+              },
+              "required": ["content_type", "content", "name"]
+            }
+          }
+        },
+        "required": ["email", "subject", "description"]
+      },
+      "urlTemplate": "https://{domain}.freshdesk.com/api/v2/tickets"
+    },
+    {
+      "id": "get-ticket",
+      "name": "Get Ticket",
+      "description": "Get ticket details by ID",
+      "method": "GET",
+      "path": "/tickets/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshdesk.com/api/v2/tickets/{id}"
+    },
+    {
+      "id": "list-tickets",
+      "name": "List Tickets",
+      "description": "List all tickets",
+      "method": "GET",
+      "path": "/tickets",
+      "headers": {},
+      "queryParams": {
+        "email": "{email}",
+        "requester_id": "{requesterId}",
+        "updated_since": "{updatedSince}",
+        "filter": "{filter}",
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshdesk.com/api/v2/tickets"
+    },
+    {
+      "id": "update-ticket",
+      "name": "Update Ticket",
+      "description": "Update an existing ticket",
+      "method": "PUT",
+      "path": "/tickets/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "description": "Ticket subject" },
+          "description": { "type": "string", "description": "Ticket description" },
+          "status": { "type": "number", "enum": [2, 3, 4, 5], "description": "Status" },
+          "priority": { "type": "number", "enum": [1, 2, 3, 4], "description": "Priority" },
+          "responder_id": { "type": "number", "description": "Assigned agent ID" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "urlTemplate": "https://{domain}.freshdesk.com/api/v2/tickets/{id}"
+    },
+    {
+      "id": "delete-ticket",
+      "name": "Delete Ticket",
+      "description": "Delete a ticket",
+      "method": "DELETE",
+      "path": "/tickets/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshdesk.com/api/v2/tickets/{id}"
+    }
+  ]
+}
+

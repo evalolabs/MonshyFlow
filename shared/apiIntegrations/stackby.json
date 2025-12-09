@@ -1,0 +1,86 @@
+{
+  "id": "stackby",
+  "name": "Stackby",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/stackby/000000",
+  "description": "Database and spreadsheet platform similar to Airtable",
+  "baseUrl": "https://stackby.com/api/betav1",
+  "color": {
+    "bg": "from-indigo-100 to-purple-100",
+    "border": "border-indigo-500",
+    "icon": "text-indigo-700",
+    "handle": "bg-indigo-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "api-key",
+    "headerFormat": "{apiKey}",
+    "secretKey": "STACKBY_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "append-record",
+      "name": "Append Record",
+      "description": "Append a new record",
+      "method": "POST",
+      "path": "/{stackId}/{table}/append",
+      "headers": {
+        "Content-Type": "application/json",
+        "api-key": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Record data",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://stackby.com/api/betav1/{stackId}/{table}/append"
+    },
+    {
+      "id": "get-record",
+      "name": "Get Record",
+      "description": "Get record by ID",
+      "method": "GET",
+      "path": "/{stackId}/{table}/{id}",
+      "headers": {
+        "api-key": "{apiKey}"
+      },
+      "urlTemplate": "https://stackby.com/api/betav1/{stackId}/{table}/{id}"
+    },
+    {
+      "id": "list-records",
+      "name": "List Records",
+      "description": "List all records",
+      "method": "GET",
+      "path": "/{stackId}/{table}/list",
+      "headers": {
+        "api-key": "{apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "description": "Maximum number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "description": "Offset for pagination"
+        },
+        "filter": {
+          "type": "string",
+          "description": "Filter conditions"
+        }
+      },
+      "urlTemplate": "https://stackby.com/api/betav1/{stackId}/{table}/list"
+    },
+    {
+      "id": "delete-record",
+      "name": "Delete Record",
+      "description": "Delete a record",
+      "method": "DELETE",
+      "path": "/{stackId}/{table}/{id}",
+      "headers": {
+        "api-key": "{apiKey}"
+      },
+      "urlTemplate": "https://stackby.com/api/betav1/{stackId}/{table}/{id}"
+    }
+  ]
+}

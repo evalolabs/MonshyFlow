@@ -1,0 +1,74 @@
+{
+  "id": "circleci",
+  "name": "CircleCI",
+  "icon": "🔄",
+  "logoUrl": "https://cdn.simpleicons.org/circleci/343434",
+  "description": "Continuous integration and deployment platform",
+  "baseUrl": "https://circleci.com/api/v2",
+  "color": {
+    "bg": "from-slate-100 to-gray-100",
+    "border": "border-slate-500",
+    "icon": "text-slate-700",
+    "handle": "bg-slate-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Circle-Token",
+    "headerFormat": "{apiKey}",
+    "secretKey": "CIRCLECI_API_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "get-pipeline",
+      "name": "Get Pipeline",
+      "description": "Get pipeline details by number",
+      "method": "GET",
+      "path": "/project/{vcs}/{projectSlug}/pipeline/{pipelineNumber}",
+      "headers": {
+        "Circle-Token": "{apiKey}"
+      },
+      "urlTemplate": "https://circleci.com/api/v2/project/{vcs}/{projectSlug}/pipeline/{pipelineNumber}"
+    },
+    {
+      "id": "list-pipelines",
+      "name": "List Pipelines",
+      "description": "List all pipelines for a project",
+      "method": "GET",
+      "path": "/project/{vcs}/{projectSlug}/pipeline",
+      "headers": {
+        "Circle-Token": "{apiKey}"
+      },
+      "queryParams": {
+        "branch": { "type": "string", "description": "Filter by branch name" },
+        "page-token": { "type": "string", "description": "Token for pagination" },
+        "mine": { "type": "boolean", "description": "Show only pipelines triggered by the authenticated user" }
+      },
+      "urlTemplate": "https://circleci.com/api/v2/project/{vcs}/{projectSlug}/pipeline"
+    },
+    {
+      "id": "trigger-pipeline",
+      "name": "Trigger Pipeline",
+      "description": "Trigger a new pipeline",
+      "method": "POST",
+      "path": "/project/{vcs}/{projectSlug}/pipeline",
+      "headers": {
+        "Content-Type": "application/json",
+        "Circle-Token": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "branch": { "type": "string", "description": "Branch name to trigger pipeline for" },
+          "tag": { "type": "string", "description": "Tag to trigger pipeline for" },
+          "parameters": {
+            "type": "object",
+            "description": "Pipeline parameters",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://circleci.com/api/v2/project/{vcs}/{projectSlug}/pipeline"
+    }
+  ]
+}
+

@@ -1,0 +1,117 @@
+{
+  "id": "wufoo",
+  "name": "Wufoo",
+  "icon": "📝",
+  "logoUrl": "https://cdn.simpleicons.org/wufoo/000000",
+  "description": "Online form builder",
+  "baseUrl": "https://{subdomain}.wufoo.com/api/v3",
+  "color": {
+    "bg": "from-gray-100 to-neutral-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "WUFOO_API_KEY",
+    "usernameSecretKey": "WUFOO_SUBDOMAIN",
+    "note": "Subdomain should be provided in baseUrl placeholder {subdomain} or as WUFOO_SUBDOMAIN secret key. Basic Auth uses subdomain as username and API key as password. Format: Basic base64(subdomain:apiKey)"
+  },
+  "endpoints": [
+    {
+      "id": "get-form",
+      "name": "Get Form",
+      "description": "Get form by ID",
+      "method": "GET",
+      "path": "/forms/{formId}.json",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.wufoo.com/api/v3/forms/{formId}.json"
+    },
+    {
+      "id": "list-forms",
+      "name": "List Forms",
+      "description": "List all forms",
+      "method": "GET",
+      "path": "/forms.json",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.wufoo.com/api/v3/forms.json"
+    },
+    {
+      "id": "create-entry",
+      "name": "Create Entry",
+      "description": "Create a new entry",
+      "method": "POST",
+      "path": "/forms/{formId}/entries.json",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Entry data (field IDs as keys, e.g., Field1, Field2)",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{subdomain}.wufoo.com/api/v3/forms/{formId}/entries.json"
+    },
+    {
+      "id": "get-entry",
+      "name": "Get Entry",
+      "description": "Get entry by ID",
+      "method": "GET",
+      "path": "/forms/{formId}/entries/{entryId}.json",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.wufoo.com/api/v3/forms/{formId}/entries/{entryId}.json"
+    },
+    {
+      "id": "list-entries",
+      "name": "List Entries",
+      "description": "List all entries for a form",
+      "method": "GET",
+      "path": "/forms/{formId}/entries.json",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "pageStart": { "type": "integer", "default": 0, "description": "Start index" },
+        "pageSize": { "type": "integer", "default": 25, "description": "Number of results" },
+        "sort": { "type": "integer", "description": "Sort field ID" },
+        "sortDirection": { "type": "string", "enum": ["ASC", "DESC"], "default": "ASC", "description": "Sort direction" },
+        "filter1": { "type": "string", "description": "Filter expression 1" },
+        "filter2": { "type": "string", "description": "Filter expression 2" },
+        "filter3": { "type": "string", "description": "Filter expression 3" }
+      },
+      "urlTemplate": "https://{subdomain}.wufoo.com/api/v3/forms/{formId}/entries.json"
+    },
+    {
+      "id": "get-report",
+      "name": "Get Report",
+      "description": "Get report by ID",
+      "method": "GET",
+      "path": "/reports/{reportId}.json",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.wufoo.com/api/v3/reports/{reportId}.json"
+    },
+    {
+      "id": "list-reports",
+      "name": "List Reports",
+      "description": "List all reports",
+      "method": "GET",
+      "path": "/reports.json",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{subdomain}.wufoo.com/api/v3/reports.json"
+    }
+  ]
+}
+

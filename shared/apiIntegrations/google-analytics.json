@@ -1,0 +1,244 @@
+{
+  "id": "google-analytics",
+  "name": "Google Analytics",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/googleanalytics/E37400",
+  "description": "Web analytics and reporting platform",
+  "baseUrl": "https://analyticsdata.googleapis.com",
+  "color": {
+    "bg": "from-orange-100 to-yellow-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GOOGLE_ANALYTICS_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "run-report-ga4",
+      "name": "Run Report (GA4)",
+      "description": "Run a GA4 analytics report",
+      "method": "POST",
+      "path": "/v1beta/{property}:runReport",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dateRanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startDate": { "type": "string", "format": "date", "required": true, "description": "Start date (YYYY-MM-DD)" },
+                "endDate": { "type": "string", "format": "date", "required": true, "description": "End date (YYYY-MM-DD)" },
+                "name": { "type": "string", "description": "Date range name" }
+              },
+              "required": ["startDate", "endDate"]
+            },
+            "required": true
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "required": true, "description": "Dimension name" }
+              },
+              "required": ["name"]
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "required": true, "description": "Metric name" },
+                "expression": { "type": "string", "description": "Metric expression" }
+              },
+              "required": ["name"]
+            },
+            "required": true
+          },
+          "dimensionFilter": {
+            "type": "object",
+            "properties": {
+              "filter": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          },
+          "metricFilter": {
+            "type": "object",
+            "properties": {
+              "filter": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          },
+          "offset": { "type": "number", "default": 0, "description": "Row offset" },
+          "limit": { "type": "number", "default": 10000, "description": "Row limit" },
+          "orderBys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "metric": {
+                  "type": "object",
+                  "properties": {
+                    "metricName": { "type": "string", "required": true }
+                  },
+                  "required": ["metricName"]
+                },
+                "desc": { "type": "boolean", "default": false, "description": "Descending order" }
+              }
+            }
+          },
+          "keepEmptyRows": { "type": "boolean", "default": false, "description": "Keep empty rows" },
+          "currencyCode": { "type": "string", "description": "Currency code" }
+        },
+        "required": ["dateRanges", "metrics"]
+      },
+      "urlTemplate": "https://analyticsdata.googleapis.com/v1beta/{property}:runReport"
+    },
+    {
+      "id": "batch-get-reports-universal",
+      "name": "Batch Get Reports (Universal Analytics)",
+      "description": "Get batch reports from Universal Analytics",
+      "method": "POST",
+      "path": "/v4/reports:batchGet",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "reportRequests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "viewId": { "type": "string", "required": true, "description": "View ID" },
+                "dateRanges": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "startDate": { "type": "string", "format": "date", "required": true },
+                      "endDate": { "type": "string", "format": "date", "required": true }
+                    },
+                    "required": ["startDate", "endDate"]
+                  },
+                  "required": true
+                },
+                "metrics": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "expression": { "type": "string", "required": true, "description": "Metric expression" },
+                      "alias": { "type": "string", "description": "Metric alias" }
+                    },
+                    "required": ["expression"]
+                  },
+                  "required": true
+                },
+                "dimensions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string", "required": true }
+                    },
+                    "required": ["name"]
+                  }
+                },
+                "dimensionFilterClauses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "metricFilterClauses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "orderBys": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "fieldName": { "type": "string", "required": true },
+                      "sortOrder": { "type": "string", "enum": ["ASCENDING", "DESCENDING"], "default": "ASCENDING" }
+                    },
+                    "required": ["fieldName"]
+                  }
+                },
+                "pageSize": { "type": "number", "default": 1000, "description": "Page size" },
+                "pageToken": { "type": "string", "description": "Page token" },
+                "samplingLevel": { "type": "string", "enum": ["DEFAULT", "SMALL", "LARGE"], "default": "DEFAULT", "description": "Sampling level" }
+              },
+              "required": ["viewId", "dateRanges", "metrics"]
+            },
+            "required": true
+          }
+        },
+        "required": ["reportRequests"]
+      },
+      "urlTemplate": "https://analyticsreporting.googleapis.com/v4/reports:batchGet"
+    },
+    {
+      "id": "search-user-activity",
+      "name": "Search User Activity",
+      "description": "Search for user activity",
+      "method": "POST",
+      "path": "/v4/userActivity:search",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "viewId": { "type": "string", "required": true, "description": "View ID" },
+          "user": {
+            "type": "object",
+            "properties": {
+              "userId": { "type": "string", "description": "User ID" },
+              "type": { "type": "string", "enum": ["USER_ID", "CLIENT_ID"], "description": "User type" }
+            },
+            "required": true
+          },
+          "dateRange": {
+            "type": "object",
+            "properties": {
+              "startDate": { "type": "string", "format": "date", "required": true },
+              "endDate": { "type": "string", "format": "date", "required": true }
+            },
+            "required": true
+          },
+          "activityTypes": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["PAGEVIEW", "SCREENVIEW", "GOAL", "ECOMMERCE", "EVENT"] },
+            "description": "Activity types to include"
+          },
+          "pageSize": { "type": "number", "default": 10, "description": "Page size" },
+          "pageToken": { "type": "string", "description": "Page token" }
+        },
+        "required": ["viewId", "user", "dateRange"]
+      },
+      "urlTemplate": "https://analyticsreporting.googleapis.com/v4/userActivity:search"
+    }
+  ]
+}
+

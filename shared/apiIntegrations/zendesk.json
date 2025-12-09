@@ -1,0 +1,266 @@
+{
+  "id": "zendesk",
+  "name": "Zendesk",
+  "icon": "🎫",
+  "logoUrl": "https://cdn.simpleicons.org/zendesk/03363D",
+  "description": "Customer service and support ticketing platform",
+  "baseUrl": "https://{subdomain}.zendesk.com/api/v2",
+  "color": {
+    "bg": "from-lime-100 to-green-100",
+    "border": "border-lime-500",
+    "icon": "text-lime-700",
+    "handle": "bg-lime-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(email/token:apiToken)}",
+    "secretKey": "ZENDESK_API_TOKEN",
+    "emailSecretKey": "ZENDESK_EMAIL"
+  },
+  "endpoints": [
+    {
+      "id": "create-ticket",
+      "name": "Create Ticket",
+      "description": "Create a new support ticket",
+      "method": "POST",
+      "path": "/tickets.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "ticket": {
+            "type": "object",
+            "properties": {
+              "subject": { "type": "string", "required": true, "description": "Ticket subject" },
+              "comment": {
+                "type": "object",
+                "properties": {
+                  "body": { "type": "string", "required": true, "description": "Ticket comment body" },
+                  "public": { "type": "boolean", "description": "Make comment public", "default": true }
+                },
+                "required": ["body"]
+              },
+              "priority": { "type": "string", "enum": ["urgent", "high", "normal", "low"], "description": "Ticket priority" },
+              "status": { "type": "string", "enum": ["new", "open", "pending", "hold", "solved", "closed"], "description": "Ticket status", "default": "new" },
+              "type": { "type": "string", "enum": ["question", "incident", "problem", "task"], "description": "Ticket type" },
+              "requester_id": { "type": "number", "description": "Requester user ID" },
+              "assignee_id": { "type": "number", "description": "Assignee user ID" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Ticket tags"
+              }
+            },
+            "required": ["subject", "comment"]
+          }
+        },
+        "required": ["ticket"]
+      },
+      "urlTemplate": "https://{subdomain}.zendesk.com/api/v2/tickets.json"
+    },
+    {
+      "id": "get-ticket",
+      "name": "Get Ticket",
+      "description": "Get ticket details by ID",
+      "method": "GET",
+      "path": "/tickets/{id}.json",
+      "urlTemplate": "https://{subdomain}.zendesk.com/api/v2/tickets/{id}.json"
+    },
+    {
+      "id": "list-tickets",
+      "name": "List Tickets",
+      "description": "List all tickets",
+      "method": "GET",
+      "path": "/tickets.json",
+      "queryParams": {
+        "page": "1",
+        "per_page": "100",
+        "sort_by": "created_at",
+        "sort_order": "desc"
+      },
+      "urlTemplate": "https://{subdomain}.zendesk.com/api/v2/tickets.json"
+    },
+    {
+      "id": "update-ticket",
+      "name": "Update Ticket",
+      "description": "Update an existing ticket",
+      "method": "PUT",
+      "path": "/tickets/{id}.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "ticket": {
+            "type": "object",
+            "properties": {
+              "subject": { "type": "string", "description": "Ticket subject" },
+              "comment": {
+                "type": "object",
+                "properties": {
+                  "body": { "type": "string", "description": "Comment body" },
+                  "public": { "type": "boolean", "description": "Make comment public" }
+                }
+              },
+              "priority": { "type": "string", "enum": ["urgent", "high", "normal", "low"] },
+              "status": { "type": "string", "enum": ["new", "open", "pending", "hold", "solved", "closed"] },
+              "type": { "type": "string", "enum": ["question", "incident", "problem", "task"] },
+              "assignee_id": { "type": "number", "description": "Assignee user ID" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
+        "required": ["ticket"]
+      },
+      "urlTemplate": "https://{subdomain}.zendesk.com/api/v2/tickets/{id}.json"
+    },
+    {
+      "id": "delete-ticket",
+      "name": "Delete Ticket",
+      "description": "Delete a ticket by ID",
+      "method": "DELETE",
+      "path": "/tickets/{id}.json",
+      "urlTemplate": "https://{subdomain}.zendesk.com/api/v2/tickets/{id}.json"
+    },
+    {
+      "id": "create-ticket-comment",
+      "name": "Create Ticket Comment",
+      "description": "Add a comment to a ticket",
+      "method": "POST",
+      "path": "/tickets/{id}/comments.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "object",
+            "properties": {
+              "body": { "type": "string", "required": true, "description": "Comment body" },
+              "public": { "type": "boolean", "description": "Make comment public", "default": true },
+              "author_id": { "type": "number", "description": "Author user ID" }
+            },
+            "required": ["body"]
+          }
+        },
+        "required": ["comment"]
+      },
+      "urlTemplate": "https://{subdomain}.zendesk.com/api/v2/tickets/{id}/comments.json"
+    },
+    {
+      "id": "get-ticket-comments",
+      "name": "Get Ticket Comments",
+      "description": "Get all comments for a ticket",
+      "method": "GET",
+      "path": "/tickets/{id}/comments.json",
+      "urlTemplate": "https://{subdomain}.zendesk.com/api/v2/tickets/{id}/comments.json"
+    },
+    {
+      "id": "create-user",
+      "name": "Create User",
+      "description": "Create a new user",
+      "method": "POST",
+      "path": "/users.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "required": true, "description": "User name" },
+              "email": { "type": "string", "required": true, "description": "User email" },
+              "role": { "type": "string", "enum": ["end-user", "agent", "admin"], "description": "User role", "default": "end-user" },
+              "phone": { "type": "string", "description": "Phone number" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "User tags"
+              }
+            },
+            "required": ["name", "email"]
+          }
+        },
+        "required": ["user"]
+      },
+      "urlTemplate": "https://{subdomain}.zendesk.com/api/v2/users.json"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user details by ID",
+      "method": "GET",
+      "path": "/users/{id}.json",
+      "urlTemplate": "https://{subdomain}.zendesk.com/api/v2/users/{id}.json"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/users.json",
+      "queryParams": {
+        "page": "1",
+        "per_page": "100",
+        "role": "{role}",
+        "role_type": "{roleType}"
+      },
+      "urlTemplate": "https://{subdomain}.zendesk.com/api/v2/users.json"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update an existing user",
+      "method": "PUT",
+      "path": "/users/{id}.json",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "User name" },
+              "email": { "type": "string", "description": "User email" },
+              "role": { "type": "string", "enum": ["end-user", "agent", "admin"] },
+              "phone": { "type": "string", "description": "Phone number" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
+        "required": ["user"]
+      },
+      "urlTemplate": "https://{subdomain}.zendesk.com/api/v2/users/{id}.json"
+    },
+    {
+      "id": "search-tickets",
+      "name": "Search Tickets",
+      "description": "Search for tickets",
+      "method": "GET",
+      "path": "/search.json",
+      "queryParams": {
+        "query": "{searchQuery}",
+        "type": "ticket",
+        "page": "1",
+        "per_page": "100"
+      },
+      "urlTemplate": "https://{subdomain}.zendesk.com/api/v2/search.json?query={searchQuery}&type=ticket"
+    }
+  ]
+}
+

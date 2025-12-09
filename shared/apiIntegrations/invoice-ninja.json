@@ -1,0 +1,733 @@
+{
+  "id": "invoice-ninja",
+  "name": "Invoice Ninja",
+  "icon": "🧾",
+  "logoUrl": "https://cdn.simpleicons.org/invoiceninja/000000",
+  "description": "Open-source invoicing and billing platform",
+  "baseUrl": "https://{host}/api/v4",
+  "color": {
+    "bg": "from-red-100 to-rose-100",
+    "border": "border-red-500",
+    "icon": "text-red-700",
+    "handle": "bg-red-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "X-API-TOKEN",
+    "headerFormat": "{apiKey}",
+    "secretKey": "INVOICE_NINJA_API_TOKEN",
+    "note": "Host should be provided in baseUrl placeholder {host} or as INVOICE_NINJA_BASE_URL secret key. API version can be v4 or v5."
+  },
+  "endpoints": [
+    {
+      "id": "create-client",
+      "name": "Create Client",
+      "description": "Create a new client",
+      "method": "POST",
+      "path": "/clients",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Client name" },
+          "id_number": { "type": "string", "description": "ID number" },
+          "vat_number": { "type": "string", "description": "VAT number" },
+          "website": { "type": "string", "format": "uri", "description": "Website URL" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "address1": { "type": "string", "description": "Address line 1" },
+          "address2": { "type": "string", "description": "Address line 2" },
+          "city": { "type": "string", "description": "City" },
+          "state": { "type": "string", "description": "State" },
+          "postal_code": { "type": "string", "description": "Postal code" },
+          "country_id": { "type": "string", "description": "Country ID" },
+          "contacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "first_name": { "type": "string" },
+                "last_name": { "type": "string" },
+                "email": { "type": "string", "format": "email" },
+                "phone": { "type": "string" }
+              }
+            },
+            "description": "Client contacts"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{host}/api/v4/clients"
+    },
+    {
+      "id": "get-client",
+      "name": "Get Client",
+      "description": "Get client by ID",
+      "method": "GET",
+      "path": "/clients/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/clients/{id}"
+    },
+    {
+      "id": "list-clients",
+      "name": "List Clients",
+      "description": "List all clients",
+      "method": "GET",
+      "path": "/clients",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "queryParams": {
+        "per_page": { "type": "integer", "default": 15, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://{host}/api/v4/clients"
+    },
+    {
+      "id": "update-client",
+      "name": "Update Client",
+      "description": "Update a client",
+      "method": "PUT",
+      "path": "/clients/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Client name" },
+          "id_number": { "type": "string", "description": "ID number" },
+          "vat_number": { "type": "string", "description": "VAT number" },
+          "website": { "type": "string", "format": "uri" },
+          "phone": { "type": "string" },
+          "address1": { "type": "string" },
+          "address2": { "type": "string" },
+          "city": { "type": "string" },
+          "state": { "type": "string" },
+          "postal_code": { "type": "string" },
+          "country_id": { "type": "string" },
+          "contacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://{host}/api/v4/clients/{id}"
+    },
+    {
+      "id": "delete-client",
+      "name": "Delete Client",
+      "description": "Delete a client",
+      "method": "DELETE",
+      "path": "/clients/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/clients/{id}"
+    },
+    {
+      "id": "create-invoice",
+      "name": "Create Invoice",
+      "description": "Create a new invoice",
+      "method": "POST",
+      "path": "/invoices",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "string", "required": true, "description": "Client ID" },
+          "number": { "type": "string", "description": "Invoice number" },
+          "date": { "type": "string", "format": "date", "description": "Invoice date" },
+          "due_date": { "type": "string", "format": "date", "description": "Due date" },
+          "line_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_key": { "type": "string", "description": "Product key" },
+                "notes": { "type": "string", "description": "Item notes" },
+                "cost": { "type": "number", "description": "Item cost" },
+                "quantity": { "type": "number", "description": "Item quantity" },
+                "tax_name1": { "type": "string", "description": "Tax name 1" },
+                "tax_rate1": { "type": "number", "description": "Tax rate 1" }
+              }
+            },
+            "description": "Invoice line items"
+          },
+          "terms": { "type": "string", "description": "Terms and conditions" },
+          "public_notes": { "type": "string", "description": "Public notes" },
+          "private_notes": { "type": "string", "description": "Private notes" }
+        },
+        "required": ["client_id"]
+      },
+      "urlTemplate": "https://{host}/api/v4/invoices"
+    },
+    {
+      "id": "get-invoice",
+      "name": "Get Invoice",
+      "description": "Get invoice by ID",
+      "method": "GET",
+      "path": "/invoices/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/invoices/{id}"
+    },
+    {
+      "id": "list-invoices",
+      "name": "List Invoices",
+      "description": "List all invoices",
+      "method": "GET",
+      "path": "/invoices",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "queryParams": {
+        "per_page": { "type": "integer", "default": 15, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://{host}/api/v4/invoices"
+    },
+    {
+      "id": "update-invoice",
+      "name": "Update Invoice",
+      "description": "Update an invoice",
+      "method": "PUT",
+      "path": "/invoices/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "string", "description": "Client ID" },
+          "number": { "type": "string" },
+          "date": { "type": "string", "format": "date" },
+          "due_date": { "type": "string", "format": "date" },
+          "line_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "terms": { "type": "string" },
+          "public_notes": { "type": "string" },
+          "private_notes": { "type": "string" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/v4/invoices/{id}"
+    },
+    {
+      "id": "delete-invoice",
+      "name": "Delete Invoice",
+      "description": "Delete an invoice",
+      "method": "DELETE",
+      "path": "/invoices/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/invoices/{id}"
+    },
+    {
+      "id": "email-invoice",
+      "name": "Email Invoice",
+      "description": "Send invoice via email",
+      "method": "POST",
+      "path": "/invoices/{id}/email",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "description": "Email subject" },
+          "body": { "type": "string", "description": "Email body" },
+          "template": { "type": "string", "description": "Email template" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/v4/invoices/{id}/email"
+    },
+    {
+      "id": "create-payment",
+      "name": "Create Payment",
+      "description": "Create a new payment",
+      "method": "POST",
+      "path": "/payments",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "string", "required": true, "description": "Client ID" },
+          "invoice_id": { "type": "string", "description": "Invoice ID" },
+          "amount": { "type": "number", "required": true, "description": "Payment amount" },
+          "date": { "type": "string", "format": "date", "description": "Payment date" },
+          "transaction_reference": { "type": "string", "description": "Transaction reference" },
+          "type_id": { "type": "string", "description": "Payment type ID" }
+        },
+        "required": ["client_id", "amount"]
+      },
+      "urlTemplate": "https://{host}/api/v4/payments"
+    },
+    {
+      "id": "get-payment",
+      "name": "Get Payment",
+      "description": "Get payment by ID",
+      "method": "GET",
+      "path": "/payments/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/payments/{id}"
+    },
+    {
+      "id": "list-payments",
+      "name": "List Payments",
+      "description": "List all payments",
+      "method": "GET",
+      "path": "/payments",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "queryParams": {
+        "per_page": { "type": "integer", "default": 15, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://{host}/api/v4/payments"
+    },
+    {
+      "id": "update-payment",
+      "name": "Update Payment",
+      "description": "Update a payment",
+      "method": "PUT",
+      "path": "/payments/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "string" },
+          "invoice_id": { "type": "string" },
+          "amount": { "type": "number" },
+          "date": { "type": "string", "format": "date" },
+          "transaction_reference": { "type": "string" },
+          "type_id": { "type": "string" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/v4/payments/{id}"
+    },
+    {
+      "id": "delete-payment",
+      "name": "Delete Payment",
+      "description": "Delete a payment",
+      "method": "DELETE",
+      "path": "/payments/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/payments/{id}"
+    },
+    {
+      "id": "create-quote",
+      "name": "Create Quote",
+      "description": "Create a new quote",
+      "method": "POST",
+      "path": "/quotes",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "string", "required": true, "description": "Client ID" },
+          "number": { "type": "string", "description": "Quote number" },
+          "date": { "type": "string", "format": "date", "description": "Quote date" },
+          "valid_until": { "type": "string", "format": "date", "description": "Valid until date" },
+          "line_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_key": { "type": "string" },
+                "notes": { "type": "string" },
+                "cost": { "type": "number" },
+                "quantity": { "type": "number" },
+                "tax_name1": { "type": "string" },
+                "tax_rate1": { "type": "number" }
+              }
+            }
+          },
+          "terms": { "type": "string" },
+          "public_notes": { "type": "string" },
+          "private_notes": { "type": "string" }
+        },
+        "required": ["client_id"]
+      },
+      "urlTemplate": "https://{host}/api/v4/quotes"
+    },
+    {
+      "id": "get-quote",
+      "name": "Get Quote",
+      "description": "Get quote by ID",
+      "method": "GET",
+      "path": "/quotes/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/quotes/{id}"
+    },
+    {
+      "id": "list-quotes",
+      "name": "List Quotes",
+      "description": "List all quotes",
+      "method": "GET",
+      "path": "/quotes",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "queryParams": {
+        "per_page": { "type": "integer", "default": 15, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://{host}/api/v4/quotes"
+    },
+    {
+      "id": "update-quote",
+      "name": "Update Quote",
+      "description": "Update a quote",
+      "method": "PUT",
+      "path": "/quotes/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "string" },
+          "number": { "type": "string" },
+          "date": { "type": "string", "format": "date" },
+          "valid_until": { "type": "string", "format": "date" },
+          "line_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "terms": { "type": "string" },
+          "public_notes": { "type": "string" },
+          "private_notes": { "type": "string" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/v4/quotes/{id}"
+    },
+    {
+      "id": "delete-quote",
+      "name": "Delete Quote",
+      "description": "Delete a quote",
+      "method": "DELETE",
+      "path": "/quotes/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/quotes/{id}"
+    },
+    {
+      "id": "email-quote",
+      "name": "Email Quote",
+      "description": "Send quote via email",
+      "method": "POST",
+      "path": "/quotes/{id}/email",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string" },
+          "body": { "type": "string" },
+          "template": { "type": "string" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/v4/quotes/{id}/email"
+    },
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new task",
+      "method": "POST",
+      "path": "/tasks",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "string", "description": "Client ID" },
+          "description": { "type": "string", "required": true, "description": "Task description" },
+          "time_log": { "type": "string", "description": "Time log" },
+          "rate": { "type": "number", "description": "Hourly rate" },
+          "status_id": { "type": "string", "description": "Status ID" }
+        },
+        "required": ["description"]
+      },
+      "urlTemplate": "https://{host}/api/v4/tasks"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get task by ID",
+      "method": "GET",
+      "path": "/tasks/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/tasks/{id}"
+    },
+    {
+      "id": "list-tasks",
+      "name": "List Tasks",
+      "description": "List all tasks",
+      "method": "GET",
+      "path": "/tasks",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "queryParams": {
+        "per_page": { "type": "integer", "default": 15, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://{host}/api/v4/tasks"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update a task",
+      "method": "PUT",
+      "path": "/tasks/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "string" },
+          "description": { "type": "string" },
+          "time_log": { "type": "string" },
+          "rate": { "type": "number" },
+          "status_id": { "type": "string" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/v4/tasks/{id}"
+    },
+    {
+      "id": "delete-task",
+      "name": "Delete Task",
+      "description": "Delete a task",
+      "method": "DELETE",
+      "path": "/tasks/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/tasks/{id}"
+    },
+    {
+      "id": "create-expense",
+      "name": "Create Expense",
+      "description": "Create a new expense",
+      "method": "POST",
+      "path": "/expenses",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "string", "description": "Client ID" },
+          "vendor_id": { "type": "string", "description": "Vendor ID" },
+          "amount": { "type": "number", "required": true, "description": "Expense amount" },
+          "date": { "type": "string", "format": "date", "description": "Expense date" },
+          "category_id": { "type": "string", "description": "Category ID" },
+          "payment_date": { "type": "string", "format": "date", "description": "Payment date" },
+          "payment_type_id": { "type": "string", "description": "Payment type ID" },
+          "public_notes": { "type": "string", "description": "Public notes" },
+          "private_notes": { "type": "string", "description": "Private notes" }
+        },
+        "required": ["amount"]
+      },
+      "urlTemplate": "https://{host}/api/v4/expenses"
+    },
+    {
+      "id": "get-expense",
+      "name": "Get Expense",
+      "description": "Get expense by ID",
+      "method": "GET",
+      "path": "/expenses/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/expenses/{id}"
+    },
+    {
+      "id": "list-expenses",
+      "name": "List Expenses",
+      "description": "List all expenses",
+      "method": "GET",
+      "path": "/expenses",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "queryParams": {
+        "per_page": { "type": "integer", "default": 15, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://{host}/api/v4/expenses"
+    },
+    {
+      "id": "update-expense",
+      "name": "Update Expense",
+      "description": "Update an expense",
+      "method": "PUT",
+      "path": "/expenses/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "client_id": { "type": "string" },
+          "vendor_id": { "type": "string" },
+          "amount": { "type": "number" },
+          "date": { "type": "string", "format": "date" },
+          "category_id": { "type": "string" },
+          "payment_date": { "type": "string", "format": "date" },
+          "payment_type_id": { "type": "string" },
+          "public_notes": { "type": "string" },
+          "private_notes": { "type": "string" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/v4/expenses/{id}"
+    },
+    {
+      "id": "delete-expense",
+      "name": "Delete Expense",
+      "description": "Delete an expense",
+      "method": "DELETE",
+      "path": "/expenses/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/expenses/{id}"
+    },
+    {
+      "id": "create-bank-transaction",
+      "name": "Create Bank Transaction",
+      "description": "Create a new bank transaction",
+      "method": "POST",
+      "path": "/bank_transactions",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "bank_account_id": { "type": "string", "required": true, "description": "Bank account ID" },
+          "amount": { "type": "number", "required": true, "description": "Transaction amount" },
+          "date": { "type": "string", "format": "date", "description": "Transaction date" },
+          "description": { "type": "string", "description": "Transaction description" },
+          "category_id": { "type": "string", "description": "Category ID" },
+          "vendor_id": { "type": "string", "description": "Vendor ID" }
+        },
+        "required": ["bank_account_id", "amount"]
+      },
+      "urlTemplate": "https://{host}/api/v4/bank_transactions"
+    },
+    {
+      "id": "get-bank-transaction",
+      "name": "Get Bank Transaction",
+      "description": "Get bank transaction by ID",
+      "method": "GET",
+      "path": "/bank_transactions/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/bank_transactions/{id}"
+    },
+    {
+      "id": "list-bank-transactions",
+      "name": "List Bank Transactions",
+      "description": "List all bank transactions",
+      "method": "GET",
+      "path": "/bank_transactions",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "queryParams": {
+        "per_page": { "type": "integer", "default": 15, "description": "Results per page" },
+        "page": { "type": "integer", "default": 1, "description": "Page number" }
+      },
+      "urlTemplate": "https://{host}/api/v4/bank_transactions"
+    },
+    {
+      "id": "update-bank-transaction",
+      "name": "Update Bank Transaction",
+      "description": "Update a bank transaction",
+      "method": "PUT",
+      "path": "/bank_transactions/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "bank_account_id": { "type": "string" },
+          "amount": { "type": "number" },
+          "date": { "type": "string", "format": "date" },
+          "description": { "type": "string" },
+          "category_id": { "type": "string" },
+          "vendor_id": { "type": "string" }
+        }
+      },
+      "urlTemplate": "https://{host}/api/v4/bank_transactions/{id}"
+    },
+    {
+      "id": "delete-bank-transaction",
+      "name": "Delete Bank Transaction",
+      "description": "Delete a bank transaction",
+      "method": "DELETE",
+      "path": "/bank_transactions/{id}",
+      "headers": {
+        "X-API-TOKEN": "{apiKey}"
+      },
+      "urlTemplate": "https://{host}/api/v4/bank_transactions/{id}"
+    }
+  ]
+}
+

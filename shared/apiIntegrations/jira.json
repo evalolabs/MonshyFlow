@@ -1,0 +1,368 @@
+{
+  "id": "jira",
+  "name": "Jira",
+  "icon": "🎯",
+  "logoUrl": "https://cdn.simpleicons.org/jira/0052CC",
+  "description": "Project management and issue tracking",
+  "baseUrl": "https://{domain}.atlassian.net/rest/api/3",
+  "color": {
+    "bg": "from-blue-100 to-indigo-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(email:apiToken)}",
+    "secretKey": "JIRA_API_TOKEN",
+    "emailSecretKey": "JIRA_EMAIL"
+  },
+  "endpoints": [
+    {
+      "id": "create-issue",
+      "name": "Create Issue",
+      "description": "Create a new issue in Jira",
+      "method": "POST",
+      "path": "/issue",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "object",
+                "properties": {
+                  "key": { "type": "string", "required": true, "description": "Project key" }
+                },
+                "required": ["key"]
+              },
+              "summary": { "type": "string", "required": true, "description": "Issue summary" },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "default": "doc" },
+                  "version": { "type": "number", "default": 1 },
+                  "content": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": { "type": "string", "default": "paragraph" },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": { "type": "string", "default": "text" },
+                              "text": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "issuetype": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "default": "Task", "description": "Issue type (Task, Bug, Story, etc.)" }
+                }
+              },
+              "priority": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "description": "Priority (Highest, High, Medium, Low, Lowest)" }
+                }
+              },
+              "assignee": {
+                "type": "object",
+                "properties": {
+                  "accountId": { "type": "string", "description": "Assignee account ID" }
+                }
+              },
+              "labels": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Issue labels"
+              }
+            },
+            "required": ["project", "summary"]
+          }
+        },
+        "required": ["fields"]
+      },
+      "urlTemplate": "https://{domain}.atlassian.net/rest/api/3/issue"
+    },
+    {
+      "id": "get-issue",
+      "name": "Get Issue",
+      "description": "Get issue details by ID or key",
+      "method": "GET",
+      "path": "/issue/{issueIdOrKey}",
+      "queryParams": {
+        "fields": "summary,description,status,assignee,priority,labels",
+        "expand": "renderedFields,names,schema,transitions,operations,editmeta,changelog"
+      },
+      "urlTemplate": "https://{domain}.atlassian.net/rest/api/3/issue/{issueIdOrKey}"
+    },
+    {
+      "id": "search-issues",
+      "name": "Search Issues (JQL)",
+      "description": "Search for issues using JQL (Jira Query Language)",
+      "method": "GET",
+      "path": "/search",
+      "queryParams": {
+        "jql": "{jqlQuery}",
+        "startAt": "0",
+        "maxResults": "50",
+        "fields": "summary,status,assignee,priority",
+        "expand": "changelog"
+      },
+      "urlTemplate": "https://{domain}.atlassian.net/rest/api/3/search?jql={jqlQuery}"
+    },
+    {
+      "id": "update-issue",
+      "name": "Update Issue",
+      "description": "Update an existing issue",
+      "method": "PUT",
+      "path": "/issue/{issueIdOrKey}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "object",
+            "properties": {
+              "summary": { "type": "string", "description": "Issue summary" },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "default": "doc" },
+                  "version": { "type": "number", "default": 1 },
+                  "content": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": { "type": "string", "default": "paragraph" },
+                        "content": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": { "type": "string", "default": "text" },
+                              "text": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "priority": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "description": "Priority (Highest, High, Medium, Low, Lowest)" }
+                }
+              },
+              "assignee": {
+                "type": "object",
+                "properties": {
+                  "accountId": { "type": "string", "description": "Assignee account ID" }
+                }
+              },
+              "labels": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Issue labels"
+              }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://{domain}.atlassian.net/rest/api/3/issue/{issueIdOrKey}"
+    },
+    {
+      "id": "get-issue-changelog",
+      "name": "Get Issue Changelog",
+      "description": "Get the changelog for an issue",
+      "method": "GET",
+      "path": "/issue/{issueIdOrKey}/changelog",
+      "queryParams": {
+        "startAt": "0",
+        "maxResults": "50"
+      },
+      "urlTemplate": "https://{domain}.atlassian.net/rest/api/3/issue/{issueIdOrKey}/changelog"
+    },
+    {
+      "id": "get-issue-transitions",
+      "name": "Get Issue Transitions",
+      "description": "Get available transitions for an issue",
+      "method": "GET",
+      "path": "/issue/{issueIdOrKey}/transitions",
+      "queryParams": {
+        "expand": "transitions.fields"
+      },
+      "urlTemplate": "https://{domain}.atlassian.net/rest/api/3/issue/{issueIdOrKey}/transitions"
+    },
+    {
+      "id": "transition-issue",
+      "name": "Transition Issue",
+      "description": "Transition an issue to a different status",
+      "method": "POST",
+      "path": "/issue/{issueIdOrKey}/transitions",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "transition": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "required": true, "description": "Transition ID" }
+            },
+            "required": ["id"]
+          },
+          "fields": {
+            "type": "object",
+            "description": "Fields to update during transition"
+          },
+          "update": {
+            "type": "object",
+            "description": "Update operations (e.g., comment)"
+          }
+        },
+        "required": ["transition"]
+      },
+      "urlTemplate": "https://{domain}.atlassian.net/rest/api/3/issue/{issueIdOrKey}/transitions"
+    },
+    {
+      "id": "add-issue-attachment",
+      "name": "Add Issue Attachment",
+      "description": "Add an attachment to an issue",
+      "method": "POST",
+      "path": "/issue/{issueIdOrKey}/attachments",
+      "headers": {
+        "X-Atlassian-Token": "no-check"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Multipart form data with file(s)",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "required": true,
+            "description": "File to attach"
+          }
+        },
+        "required": ["file"]
+      },
+      "urlTemplate": "https://{domain}.atlassian.net/rest/api/3/issue/{issueIdOrKey}/attachments"
+    },
+    {
+      "id": "get-attachment",
+      "name": "Get Attachment",
+      "description": "Get attachment details by ID",
+      "method": "GET",
+      "path": "/attachment/{id}",
+      "urlTemplate": "https://{domain}.atlassian.net/rest/api/3/attachment/{id}"
+    },
+    {
+      "id": "get-issue-attachments",
+      "name": "Get Issue Attachments",
+      "description": "Get all attachments for an issue",
+      "method": "GET",
+      "path": "/issue/{issueIdOrKey}/attachments",
+      "urlTemplate": "https://{domain}.atlassian.net/rest/api/3/issue/{issueIdOrKey}/attachments"
+    },
+    {
+      "id": "add-issue-comment",
+      "name": "Add Issue Comment",
+      "description": "Add a comment to an issue",
+      "method": "POST",
+      "path": "/issue/{issueIdOrKey}/comment",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "default": "doc" },
+              "version": { "type": "number", "default": 1 },
+              "content": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string", "default": "paragraph" },
+                    "content": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": { "type": "string", "default": "text" },
+                          "text": { "type": "string", "required": true }
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": true
+              }
+            },
+            "required": ["content"]
+          },
+          "visibility": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "default": "role", "enum": ["role", "group"] },
+              "value": { "type": "string", "description": "Role or group name" }
+            }
+          }
+        },
+        "required": ["body"]
+      },
+      "urlTemplate": "https://{domain}.atlassian.net/rest/api/3/issue/{issueIdOrKey}/comment"
+    },
+    {
+      "id": "get-issue-comments",
+      "name": "Get Issue Comments",
+      "description": "Get all comments for an issue",
+      "method": "GET",
+      "path": "/issue/{issueIdOrKey}/comment",
+      "queryParams": {
+        "startAt": "0",
+        "maxResults": "50",
+        "orderBy": "created",
+        "expand": "renderedBody"
+      },
+      "urlTemplate": "https://{domain}.atlassian.net/rest/api/3/issue/{issueIdOrKey}/comment"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user details by account ID",
+      "method": "GET",
+      "path": "/user",
+      "queryParams": {
+        "accountId": "{accountId}",
+        "expand": "groups,applicationRoles"
+      },
+      "urlTemplate": "https://{domain}.atlassian.net/rest/api/3/user?accountId={accountId}"
+    }
+  ]
+}

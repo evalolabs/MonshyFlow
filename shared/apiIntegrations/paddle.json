@@ -1,0 +1,301 @@
+{
+  "id": "paddle",
+  "name": "Paddle",
+  "icon": "💳",
+  "logoUrl": "https://cdn.simpleicons.org/paddle/34495E",
+  "description": "Payment processing and subscription management",
+  "baseUrl": "https://vendors.paddle.com/api",
+  "color": {
+    "bg": "from-gray-100 to-stone-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "{apiKey}",
+    "secretKey": "PADDLE_VENDOR_AUTH_CODE",
+    "emailSecretKey": "PADDLE_VENDOR_ID"
+  },
+  "endpoints": [
+    {
+      "id": "create-product",
+      "name": "Create Product",
+      "description": "Create a new product",
+      "method": "POST",
+      "path": "/2.0/product",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "vendor_id": { "type": "number", "required": true, "description": "Vendor ID" },
+          "vendor_auth_code": { "type": "string", "required": true, "description": "Vendor auth code" },
+          "name": { "type": "string", "required": true, "description": "Product name" },
+          "description": { "type": "string", "description": "Product description" },
+          "price": { "type": "string", "required": true, "description": "Price (e.g., '10.00')" },
+          "currency": { "type": "string", "default": "USD", "description": "Currency code" },
+          "product_type": { "type": "string", "enum": ["standard", "digital"], "default": "standard", "description": "Product type" }
+        },
+        "required": ["vendor_id", "vendor_auth_code", "name", "price"]
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/product"
+    },
+    {
+      "id": "get-product",
+      "name": "Get Product",
+      "description": "Get product details by ID",
+      "method": "GET",
+      "path": "/2.0/product/{productId}",
+      "headers": {},
+      "queryParams": {
+        "vendor_id": "{vendorId}",
+        "vendor_auth_code": "{vendorAuthCode}"
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/product/{productId}"
+    },
+    {
+      "id": "list-products",
+      "name": "List Products",
+      "description": "List all products",
+      "method": "GET",
+      "path": "/2.0/product",
+      "headers": {},
+      "queryParams": {
+        "vendor_id": "{vendorId}",
+        "vendor_auth_code": "{vendorAuthCode}"
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/product"
+    },
+    {
+      "id": "update-product",
+      "name": "Update Product",
+      "description": "Update an existing product",
+      "method": "PUT",
+      "path": "/2.0/product/{productId}",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "vendor_id": { "type": "number", "required": true },
+          "vendor_auth_code": { "type": "string", "required": true },
+          "name": { "type": "string", "description": "Product name" },
+          "description": { "type": "string", "description": "Product description" },
+          "price": { "type": "string", "description": "Price" }
+        },
+        "required": ["vendor_id", "vendor_auth_code"]
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/product/{productId}"
+    },
+    {
+      "id": "create-coupon",
+      "name": "Create Coupon",
+      "description": "Create a new coupon for a product",
+      "method": "POST",
+      "path": "/2.0/product/{productId}/coupons",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "vendor_id": { "type": "number", "required": true },
+          "vendor_auth_code": { "type": "string", "required": true },
+          "coupon_code": { "type": "string", "required": true, "description": "Coupon code" },
+          "discount_type": { "type": "string", "enum": ["percentage", "flat"], "required": true, "description": "Discount type" },
+          "discount_amount": { "type": "string", "required": true, "description": "Discount amount" },
+          "currency": { "type": "string", "default": "USD", "description": "Currency code (for flat discount)" },
+          "allowed_uses": { "type": "number", "description": "Number of times coupon can be used" },
+          "expires": { "type": "string", "format": "date", "description": "Expiration date (YYYY-MM-DD)" }
+        },
+        "required": ["vendor_id", "vendor_auth_code", "coupon_code", "discount_type", "discount_amount"]
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/product/{productId}/coupons"
+    },
+    {
+      "id": "get-coupon",
+      "name": "Get Coupon",
+      "description": "Get coupon details by ID",
+      "method": "GET",
+      "path": "/2.0/product/{productId}/coupons/{couponId}",
+      "headers": {},
+      "queryParams": {
+        "vendor_id": "{vendorId}",
+        "vendor_auth_code": "{vendorAuthCode}"
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/product/{productId}/coupons/{couponId}"
+    },
+    {
+      "id": "list-coupons",
+      "name": "List Coupons",
+      "description": "List all coupons for a product",
+      "method": "GET",
+      "path": "/2.0/product/{productId}/coupons",
+      "headers": {},
+      "queryParams": {
+        "vendor_id": "{vendorId}",
+        "vendor_auth_code": "{vendorAuthCode}"
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/product/{productId}/coupons"
+    },
+    {
+      "id": "update-coupon",
+      "name": "Update Coupon",
+      "description": "Update an existing coupon",
+      "method": "PUT",
+      "path": "/2.0/product/{productId}/coupons/{couponId}",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "vendor_id": { "type": "number", "required": true },
+          "vendor_auth_code": { "type": "string", "required": true },
+          "coupon_code": { "type": "string", "description": "Coupon code" },
+          "discount_amount": { "type": "string", "description": "Discount amount" },
+          "allowed_uses": { "type": "number", "description": "Number of times coupon can be used" },
+          "expires": { "type": "string", "format": "date", "description": "Expiration date" }
+        },
+        "required": ["vendor_id", "vendor_auth_code"]
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/product/{productId}/coupons/{couponId}"
+    },
+    {
+      "id": "create-subscription-plan",
+      "name": "Create Subscription Plan",
+      "description": "Create a new subscription plan",
+      "method": "POST",
+      "path": "/2.0/subscription/plans",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "vendor_id": { "type": "number", "required": true },
+          "vendor_auth_code": { "type": "string", "required": true },
+          "plan_name": { "type": "string", "required": true, "description": "Plan name" },
+          "plan_length": { "type": "number", "required": true, "description": "Plan length (1=Monthly, 2=Yearly, etc.)" },
+          "plan_type": { "type": "string", "enum": ["day", "week", "month", "year"], "required": true, "description": "Plan type" },
+          "plan_price": { "type": "string", "required": true, "description": "Plan price" },
+          "currency": { "type": "string", "default": "USD", "description": "Currency code" },
+          "recurring_price": { "type": "string", "description": "Recurring price (if different from initial price)" },
+          "initial_price": { "type": "string", "description": "Initial price" },
+          "trial_days": { "type": "number", "description": "Trial period in days" }
+        },
+        "required": ["vendor_id", "vendor_auth_code", "plan_name", "plan_length", "plan_type", "plan_price"]
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/subscription/plans"
+    },
+    {
+      "id": "get-subscription-plan",
+      "name": "Get Subscription Plan",
+      "description": "Get subscription plan details by ID",
+      "method": "GET",
+      "path": "/2.0/subscription/plans/{planId}",
+      "headers": {},
+      "queryParams": {
+        "vendor_id": "{vendorId}",
+        "vendor_auth_code": "{vendorAuthCode}"
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/subscription/plans/{planId}"
+    },
+    {
+      "id": "list-subscription-plans",
+      "name": "List Subscription Plans",
+      "description": "List all subscription plans",
+      "method": "GET",
+      "path": "/2.0/subscription/plans",
+      "headers": {},
+      "queryParams": {
+        "vendor_id": "{vendorId}",
+        "vendor_auth_code": "{vendorAuthCode}"
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/subscription/plans"
+    },
+    {
+      "id": "update-subscription-plan",
+      "name": "Update Subscription Plan",
+      "description": "Update an existing subscription plan",
+      "method": "PUT",
+      "path": "/2.0/subscription/plans/{planId}",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "vendor_id": { "type": "number", "required": true },
+          "vendor_auth_code": { "type": "string", "required": true },
+          "plan_name": { "type": "string", "description": "Plan name" },
+          "plan_price": { "type": "string", "description": "Plan price" },
+          "trial_days": { "type": "number", "description": "Trial period in days" }
+        },
+        "required": ["vendor_id", "vendor_auth_code"]
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/subscription/plans/{planId}"
+    },
+    {
+      "id": "get-transaction",
+      "name": "Get Transaction",
+      "description": "Get transaction/payment details by ID",
+      "method": "GET",
+      "path": "/2.0/transaction/{transactionId}",
+      "headers": {},
+      "queryParams": {
+        "vendor_id": "{vendorId}",
+        "vendor_auth_code": "{vendorAuthCode}"
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/transaction/{transactionId}"
+    },
+    {
+      "id": "list-transactions",
+      "name": "List Transactions",
+      "description": "List all transactions/payments",
+      "method": "GET",
+      "path": "/2.0/transaction",
+      "headers": {},
+      "queryParams": {
+        "vendor_id": "{vendorId}",
+        "vendor_auth_code": "{vendorAuthCode}",
+        "page": "1",
+        "results_per_page": "200"
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/transaction"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user/customer details by ID",
+      "method": "GET",
+      "path": "/2.0/user/{userId}",
+      "headers": {},
+      "queryParams": {
+        "vendor_id": "{vendorId}",
+        "vendor_auth_code": "{vendorAuthCode}"
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/user/{userId}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users/customers",
+      "method": "GET",
+      "path": "/2.0/user",
+      "headers": {},
+      "queryParams": {
+        "vendor_id": "{vendorId}",
+        "vendor_auth_code": "{vendorAuthCode}",
+        "page": "1",
+        "results_per_page": "200"
+      },
+      "urlTemplate": "https://vendors.paddle.com/api/2.0/user"
+    }
+  ]
+}
+

@@ -1,0 +1,64 @@
+{
+  "id": "clearbit",
+  "name": "Clearbit",
+  "icon": "🔍",
+  "logoUrl": "https://cdn.simpleicons.org/clearbit/000000",
+  "description": "Data enrichment platform for company and person data",
+  "baseUrl": "https://{api}.clearbit.com",
+  "color": {
+    "bg": "from-blue-100 to-sky-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "CLEARBIT_API_KEY",
+    "note": "Base URL should be 'person.clearbit.com' for Person API or 'company.clearbit.com' for Company API. Use {api} placeholder or provide CLEARBIT_API_TYPE secret key ('person' or 'company')."
+  },
+  "endpoints": [
+    {
+      "id": "company-autocomplete",
+      "name": "Company Autocomplete",
+      "description": "Autocomplete company names",
+      "method": "GET",
+      "path": "/v1/companies/suggest",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "query": {
+          "type": "string",
+          "required": true,
+          "description": "Company name query"
+        }
+      },
+      "urlTemplate": "https://company.clearbit.com/v1/companies/suggest"
+    },
+    {
+      "id": "company-enrich",
+      "name": "Company Enrich",
+      "description": "Enrich company data by domain",
+      "method": "GET",
+      "path": "/v1/companies/domain={domain}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://company.clearbit.com/v1/companies/domain={domain}"
+    },
+    {
+      "id": "person-enrich",
+      "name": "Person Enrich",
+      "description": "Enrich person data by email",
+      "method": "GET",
+      "path": "/v1/people/email={email}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://person.clearbit.com/v1/people/email={email}"
+    }
+  ]
+}
+

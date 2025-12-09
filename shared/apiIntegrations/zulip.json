@@ -1,0 +1,393 @@
+{
+  "id": "zulip",
+  "name": "Zulip",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/zulip/000000",
+  "description": "Team chat and collaboration platform",
+  "baseUrl": "https://{your-zulip-instance}/api/v1",
+  "color": {
+    "bg": "from-slate-100 to-zinc-100",
+    "border": "border-slate-500",
+    "icon": "text-slate-700",
+    "handle": "bg-slate-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "ZULIP_API_KEY",
+    "usernameSecretKey": "ZULIP_EMAIL",
+    "note": "Base URL should be provided in baseUrl placeholder {your-zulip-instance} or as ZULIP_BASE_URL secret key. Basic Auth uses email:apiKey format."
+  },
+  "endpoints": [
+    {
+      "id": "create-message",
+      "name": "Create Message",
+      "description": "Send a message",
+      "method": "POST",
+      "path": "/messages",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["stream", "private"],
+            "required": true,
+            "description": "Message type"
+          },
+          "to": {
+            "type": "string",
+            "description": "Stream name (for stream messages) or comma-separated user emails (for private messages)"
+          },
+          "topic": {
+            "type": "string",
+            "description": "Topic name (for stream messages)"
+          },
+          "content": {
+            "type": "string",
+            "required": true,
+            "description": "Message content"
+          }
+        },
+        "required": ["type", "content"]
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/messages"
+    },
+    {
+      "id": "get-message",
+      "name": "Get Message",
+      "description": "Get message by ID",
+      "method": "GET",
+      "path": "/messages/{messageId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/messages/{messageId}"
+    },
+    {
+      "id": "list-messages",
+      "name": "List Messages",
+      "description": "List all messages",
+      "method": "GET",
+      "path": "/messages",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "anchor": {
+          "type": "string",
+          "description": "Message ID to anchor to"
+        },
+        "num_before": {
+          "type": "integer",
+          "default": 0,
+          "description": "Number of messages before anchor"
+        },
+        "num_after": {
+          "type": "integer",
+          "default": 0,
+          "description": "Number of messages after anchor"
+        },
+        "narrow": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "operator": { "type": "string" },
+              "operand": { "type": "string" }
+            }
+          },
+          "description": "Narrow filter array"
+        }
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/messages"
+    },
+    {
+      "id": "update-message",
+      "name": "Update Message",
+      "description": "Update a message",
+      "method": "PATCH",
+      "path": "/messages/{messageId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "New message content"
+          },
+          "topic": {
+            "type": "string",
+            "description": "New topic name (for stream messages)"
+          },
+          "propagate_mode": {
+            "type": "string",
+            "enum": ["change_one", "change_later", "change_all"],
+            "default": "change_one",
+            "description": "Propagation mode for topic changes"
+          },
+          "send_notification_to_old_thread": {
+            "type": "boolean",
+            "default": true,
+            "description": "Send notification to old thread"
+          },
+          "send_notification_to_new_thread": {
+            "type": "boolean",
+            "default": true,
+            "description": "Send notification to new thread"
+          }
+        }
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/messages/{messageId}"
+    },
+    {
+      "id": "delete-message",
+      "name": "Delete Message",
+      "description": "Delete a message",
+      "method": "DELETE",
+      "path": "/messages/{messageId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/messages/{messageId}"
+    },
+    {
+      "id": "create-stream",
+      "name": "Create Stream",
+      "description": "Create a new stream",
+      "method": "POST",
+      "path": "/streams",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Stream name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Stream description"
+          },
+          "invite_only": {
+            "type": "boolean",
+            "default": false,
+            "description": "Invite-only stream"
+          },
+          "principals": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "User emails to subscribe"
+          },
+          "announce": {
+            "type": "boolean",
+            "default": false,
+            "description": "Announce stream creation"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/streams"
+    },
+    {
+      "id": "get-stream",
+      "name": "Get Stream",
+      "description": "Get stream by ID",
+      "method": "GET",
+      "path": "/streams/{streamId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/streams/{streamId}"
+    },
+    {
+      "id": "list-streams",
+      "name": "List Streams",
+      "description": "List all streams",
+      "method": "GET",
+      "path": "/streams",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "include_public": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include public streams"
+        },
+        "include_web_public": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include web-public streams"
+        },
+        "include_subscribed": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include subscribed streams"
+        },
+        "include_all_active": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include all active streams"
+        },
+        "include_default": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include default streams"
+        },
+        "include_owner_subscribed": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include owner-subscribed streams"
+        }
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/streams"
+    },
+    {
+      "id": "update-stream",
+      "name": "Update Stream",
+      "description": "Update a stream",
+      "method": "PATCH",
+      "path": "/streams/{streamId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "is_private": { "type": "boolean" },
+          "is_announcement_only": { "type": "boolean" },
+          "stream_post_policy": {
+            "type": "integer",
+            "enum": [1, 2, 3],
+            "description": "Stream post policy (1=anyone, 2=admins, 3=owners)"
+          }
+        }
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/streams/{streamId}"
+    },
+    {
+      "id": "delete-stream",
+      "name": "Delete Stream",
+      "description": "Delete a stream",
+      "method": "DELETE",
+      "path": "/streams/{streamId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/streams/{streamId}"
+    },
+    {
+      "id": "create-user",
+      "name": "Create User",
+      "description": "Create a new user",
+      "method": "POST",
+      "path": "/users",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "User email"
+          },
+          "password": {
+            "type": "string",
+            "required": true,
+            "description": "User password"
+          },
+          "full_name": {
+            "type": "string",
+            "required": true,
+            "description": "User full name"
+          },
+          "short_name": {
+            "type": "string",
+            "description": "User short name"
+          }
+        },
+        "required": ["email", "password", "full_name"]
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/users"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user by ID",
+      "method": "GET",
+      "path": "/users/{userId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/users/{userId}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/users",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "client_gravatar": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include gravatar URLs"
+        },
+        "include_custom_profile_fields": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include custom profile fields"
+        }
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/users"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update a user",
+      "method": "PATCH",
+      "path": "/users/{userId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "full_name": { "type": "string" },
+          "is_admin": { "type": "boolean" },
+          "is_guest": { "type": "boolean" },
+          "is_active": { "type": "boolean" },
+          "role": {
+            "type": "integer",
+            "enum": [100, 200, 300, 400, 600],
+            "description": "User role (100=Owner, 200=Admin, 300=Moderator, 400=Member, 600=Guest)"
+          }
+        }
+      },
+      "urlTemplate": "https://{your-zulip-instance}/api/v1/users/{userId}"
+    }
+  ]
+}
+

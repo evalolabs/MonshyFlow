@@ -1,0 +1,497 @@
+{
+  "id": "pagerduty",
+  "name": "PagerDuty",
+  "icon": "🚨",
+  "logoUrl": "https://cdn.simpleicons.org/pagerduty/06AC38",
+  "description": "Incident management system for DevOps teams",
+  "baseUrl": "https://api.pagerduty.com",
+  "color": {
+    "bg": "from-green-100 to-lime-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Token token={apiKey}",
+    "secretKey": "PAGERDUTY_API_TOKEN",
+    "note": "API Token is sent as 'Token token={apiKey}'. OAuth2 is also supported (PAGERDUTY_OAUTH2_ACCESS_TOKEN with 'Bearer {apiKey}' format)."
+  },
+  "endpoints": [
+    {
+      "id": "create-incident",
+      "name": "Create Incident",
+      "description": "Create a new incident",
+      "method": "POST",
+      "path": "/incidents",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "incident": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "default": "incident",
+                "description": "Incident type"
+              },
+              "title": {
+                "type": "string",
+                "required": true,
+                "description": "Incident title"
+              },
+              "service": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "type": { "type": "string", "default": "service_reference" }
+                },
+                "required": true,
+                "description": "Service reference"
+              },
+              "priority": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "type": { "type": "string", "default": "priority_reference" }
+                },
+                "description": "Priority reference"
+              },
+              "urgency": {
+                "type": "string",
+                "enum": ["low", "high"],
+                "description": "Urgency level"
+              },
+              "body": {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "default": "incident_body" },
+                  "details": { "type": "string" }
+                },
+                "description": "Incident body"
+              },
+              "escalation_policy": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "type": { "type": "string", "default": "escalation_policy_reference" }
+                },
+                "description": "Escalation policy reference"
+              },
+              "assignments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "assignee": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "type": { "type": "string", "default": "user_reference" }
+                      },
+                      "required": true
+                    }
+                  },
+                  "required": ["assignee"]
+                },
+                "description": "Assignments"
+              }
+            },
+            "required": ["title", "service"]
+          }
+        },
+        "required": ["incident"]
+      },
+      "urlTemplate": "https://api.pagerduty.com/incidents"
+    },
+    {
+      "id": "get-incident",
+      "name": "Get Incident",
+      "description": "Get incident by ID",
+      "method": "GET",
+      "path": "/incidents/{incidentId}",
+      "headers": {
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "queryParams": {
+        "include": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Additional data to include (comma-separated)"
+        }
+      },
+      "urlTemplate": "https://api.pagerduty.com/incidents/{incidentId}"
+    },
+    {
+      "id": "list-incidents",
+      "name": "List Incidents",
+      "description": "List all incidents",
+      "method": "GET",
+      "path": "/incidents",
+      "headers": {
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 25,
+          "description": "Maximum number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0,
+          "description": "Offset for pagination"
+        },
+        "total": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include total count"
+        },
+        "date_range": {
+          "type": "string",
+          "enum": ["all"],
+          "description": "Date range filter"
+        },
+        "incident_key": {
+          "type": "string",
+          "description": "Filter by incident key"
+        },
+        "service_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Filter by service IDs"
+        },
+        "team_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Filter by team IDs"
+        },
+        "user_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Filter by user IDs"
+        },
+        "urgencies": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["low", "high"] },
+          "description": "Filter by urgencies"
+        },
+        "time_zone": {
+          "type": "string",
+          "description": "Time zone (e.g., 'UTC')"
+        },
+        "statuses": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["triggered", "acknowledged", "resolved"] },
+          "description": "Filter by statuses"
+        },
+        "sort_by": {
+          "type": "string",
+          "enum": ["created_at", "urgency", "priority"],
+          "description": "Sort field"
+        },
+        "include": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Additional data to include"
+        }
+      },
+      "urlTemplate": "https://api.pagerduty.com/incidents"
+    },
+    {
+      "id": "update-incident",
+      "name": "Update Incident",
+      "description": "Update an incident",
+      "method": "PUT",
+      "path": "/incidents/{incidentId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "incident": {
+            "type": "object",
+            "description": "Incident data to update",
+            "additionalProperties": true
+          }
+        },
+        "required": ["incident"]
+      },
+      "urlTemplate": "https://api.pagerduty.com/incidents/{incidentId}"
+    },
+    {
+      "id": "resolve-incident",
+      "name": "Resolve Incident",
+      "description": "Resolve an incident",
+      "method": "PUT",
+      "path": "/incidents/{incidentId}/resolve",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "resolution": {
+            "type": "string",
+            "description": "Resolution description"
+          }
+        }
+      },
+      "urlTemplate": "https://api.pagerduty.com/incidents/{incidentId}/resolve"
+    },
+    {
+      "id": "acknowledge-incident",
+      "name": "Acknowledge Incident",
+      "description": "Acknowledge an incident",
+      "method": "PUT",
+      "path": "/incidents/{incidentId}/acknowledge",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "requester_id": {
+            "type": "string",
+            "description": "Requester user ID"
+          }
+        }
+      },
+      "urlTemplate": "https://api.pagerduty.com/incidents/{incidentId}/acknowledge"
+    },
+    {
+      "id": "delete-incident",
+      "name": "Delete Incident",
+      "description": "Delete an incident",
+      "method": "DELETE",
+      "path": "/incidents/{incidentId}",
+      "headers": {
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "urlTemplate": "https://api.pagerduty.com/incidents/{incidentId}"
+    },
+    {
+      "id": "create-incident-note",
+      "name": "Create Incident Note",
+      "description": "Create a note on an incident",
+      "method": "POST",
+      "path": "/incidents/{incidentId}/notes",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "string",
+                "required": true,
+                "description": "Note content"
+              }
+            },
+            "required": ["content"]
+          }
+        },
+        "required": ["note"]
+      },
+      "urlTemplate": "https://api.pagerduty.com/incidents/{incidentId}/notes"
+    },
+    {
+      "id": "get-incident-note",
+      "name": "Get Incident Note",
+      "description": "Get note by ID",
+      "method": "GET",
+      "path": "/incidents/{incidentId}/notes/{noteId}",
+      "headers": {
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "urlTemplate": "https://api.pagerduty.com/incidents/{incidentId}/notes/{noteId}"
+    },
+    {
+      "id": "list-incident-notes",
+      "name": "List Incident Notes",
+      "description": "List all notes for an incident",
+      "method": "GET",
+      "path": "/incidents/{incidentId}/notes",
+      "headers": {
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "urlTemplate": "https://api.pagerduty.com/incidents/{incidentId}/notes"
+    },
+    {
+      "id": "get-log-entry",
+      "name": "Get Log Entry",
+      "description": "Get log entry by ID",
+      "method": "GET",
+      "path": "/log_entries/{logEntryId}",
+      "headers": {
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "queryParams": {
+        "include": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Additional data to include"
+        },
+        "time_zone": {
+          "type": "string",
+          "description": "Time zone"
+        }
+      },
+      "urlTemplate": "https://api.pagerduty.com/log_entries/{logEntryId}"
+    },
+    {
+      "id": "list-log-entries",
+      "name": "List Log Entries",
+      "description": "List all log entries",
+      "method": "GET",
+      "path": "/log_entries",
+      "headers": {
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 25
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0
+        },
+        "total": {
+          "type": "boolean",
+          "default": false
+        },
+        "since": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Start date (ISO 8601)"
+        },
+        "until": {
+          "type": "string",
+          "format": "date-time",
+          "description": "End date (ISO 8601)"
+        },
+        "is_overview": {
+          "type": "boolean",
+          "default": false,
+          "description": "Overview mode"
+        },
+        "include": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "time_zone": {
+          "type": "string"
+        }
+      },
+      "urlTemplate": "https://api.pagerduty.com/log_entries"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user by ID",
+      "method": "GET",
+      "path": "/users/{userId}",
+      "headers": {
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "queryParams": {
+        "include": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "urlTemplate": "https://api.pagerduty.com/users/{userId}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/users",
+      "headers": {
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 25
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0
+        },
+        "total": {
+          "type": "boolean",
+          "default": false
+        },
+        "include": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "query": {
+          "type": "string",
+          "description": "Search query"
+        },
+        "team_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Filter by team IDs"
+        }
+      },
+      "urlTemplate": "https://api.pagerduty.com/users"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update a user",
+      "method": "PUT",
+      "path": "/users/{userId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Token token={apiKey}",
+        "Accept": "application/vnd.pagerduty+json;version=2"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "description": "User data to update",
+            "additionalProperties": true
+          }
+        },
+        "required": ["user"]
+      },
+      "urlTemplate": "https://api.pagerduty.com/users/{userId}"
+    }
+  ]
+}
+

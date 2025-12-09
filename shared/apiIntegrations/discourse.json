@@ -1,0 +1,353 @@
+{
+  "id": "discourse",
+  "name": "Discourse",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/discourse/000000",
+  "description": "Open-source discussion platform",
+  "baseUrl": "https://{your-discourse-instance}",
+  "color": {
+    "bg": "from-gray-100 to-stone-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Api-Key",
+    "headerFormat": "{apiKey}",
+    "secretKey": "DISCOURSE_API_KEY",
+    "note": "Base URL should be provided in baseUrl placeholder {your-discourse-instance} or as DISCOURSE_BASE_URL secret key. Requires both Api-Key header and Api-Username header (DISCOURSE_USERNAME)."
+  },
+  "endpoints": [
+    {
+      "id": "create-post",
+      "name": "Create Post",
+      "description": "Create a new post",
+      "method": "POST",
+      "path": "/posts.json",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Topic title (for new topics)"
+          },
+          "raw": {
+            "type": "string",
+            "required": true,
+            "description": "Post content (raw markdown)"
+          },
+          "category": {
+            "type": "integer",
+            "description": "Category ID"
+          },
+          "target_usernames": {
+            "type": "string",
+            "description": "Comma-separated usernames (for private messages)"
+          },
+          "archetype": {
+            "type": "string",
+            "enum": ["regular", "banner", "private_message"],
+            "default": "regular",
+            "description": "Post archetype"
+          },
+          "reply_to_post_number": {
+            "type": "integer",
+            "description": "Post number to reply to"
+          },
+          "topic_id": {
+            "type": "integer",
+            "description": "Topic ID (for replies)"
+          }
+        },
+        "required": ["raw"]
+      },
+      "urlTemplate": "https://{your-discourse-instance}/posts.json"
+    },
+    {
+      "id": "get-post",
+      "name": "Get Post",
+      "description": "Get post by ID",
+      "method": "GET",
+      "path": "/posts/{postId}.json",
+      "headers": {
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "urlTemplate": "https://{your-discourse-instance}/posts/{postId}.json"
+    },
+    {
+      "id": "list-posts",
+      "name": "List Posts",
+      "description": "List all posts",
+      "method": "GET",
+      "path": "/posts.json",
+      "headers": {
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "queryParams": {
+        "before": {
+          "type": "integer",
+          "description": "Get posts before this post ID"
+        }
+      },
+      "urlTemplate": "https://{your-discourse-instance}/posts.json"
+    },
+    {
+      "id": "update-post",
+      "name": "Update Post",
+      "description": "Update a post",
+      "method": "PUT",
+      "path": "/posts/{postId}.json",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "post": {
+            "type": "object",
+            "properties": {
+              "raw": {
+                "type": "string",
+                "description": "Post content (raw markdown)"
+              },
+              "edit_reason": {
+                "type": "string",
+                "description": "Edit reason"
+              }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://{your-discourse-instance}/posts/{postId}.json"
+    },
+    {
+      "id": "create-category",
+      "name": "Create Category",
+      "description": "Create a new category",
+      "method": "POST",
+      "path": "/categories.json",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Category name"
+          },
+          "color": {
+            "type": "string",
+            "description": "Category color (hex code)"
+          },
+          "text_color": {
+            "type": "string",
+            "description": "Text color (hex code)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Category description"
+          },
+          "parent_category_id": {
+            "type": "integer",
+            "description": "Parent category ID"
+          },
+          "permissions": {
+            "type": "object",
+            "description": "Category permissions",
+            "additionalProperties": { "type": "integer" }
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{your-discourse-instance}/categories.json"
+    },
+    {
+      "id": "get-category",
+      "name": "Get Category",
+      "description": "Get category by ID",
+      "method": "GET",
+      "path": "/categories/{categoryId}.json",
+      "headers": {
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "urlTemplate": "https://{your-discourse-instance}/categories/{categoryId}.json"
+    },
+    {
+      "id": "list-categories",
+      "name": "List Categories",
+      "description": "List all categories",
+      "method": "GET",
+      "path": "/categories.json",
+      "headers": {
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "urlTemplate": "https://{your-discourse-instance}/categories.json"
+    },
+    {
+      "id": "update-category",
+      "name": "Update Category",
+      "description": "Update a category",
+      "method": "PUT",
+      "path": "/categories/{categoryId}.json",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Category data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-discourse-instance}/categories/{categoryId}.json"
+    },
+    {
+      "id": "get-group",
+      "name": "Get Group",
+      "description": "Get group by name",
+      "method": "GET",
+      "path": "/groups/{groupName}.json",
+      "headers": {
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "urlTemplate": "https://{your-discourse-instance}/groups/{groupName}.json"
+    },
+    {
+      "id": "list-groups",
+      "name": "List Groups",
+      "description": "List all groups",
+      "method": "GET",
+      "path": "/groups.json",
+      "headers": {
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "urlTemplate": "https://{your-discourse-instance}/groups.json"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user by username",
+      "method": "GET",
+      "path": "/users/{username}.json",
+      "headers": {
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "urlTemplate": "https://{your-discourse-instance}/users/{username}.json"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List users with filter",
+      "method": "GET",
+      "path": "/admin/users/list/{filter}.json",
+      "headers": {
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "queryParams": {
+        "order": {
+          "type": "string",
+          "enum": ["created", "username", "last_emailed", "last_seen", "post_count", "read_count", "trust_level", "days_visited"],
+          "description": "Sort order"
+        },
+        "ascending": {
+          "type": "boolean",
+          "default": false,
+          "description": "Ascending order"
+        },
+        "page": {
+          "type": "integer",
+          "default": 0,
+          "description": "Page number"
+        }
+      },
+      "urlTemplate": "https://{your-discourse-instance}/admin/users/list/{filter}.json"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update a user",
+      "method": "PUT",
+      "path": "/users/{username}.json",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "User data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-discourse-instance}/users/{username}.json"
+    },
+    {
+      "id": "add-user-to-group",
+      "name": "Add User to Group",
+      "description": "Add users to a group",
+      "method": "PUT",
+      "path": "/groups/{groupId}/members.json",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "usernames": {
+            "type": "string",
+            "required": true,
+            "description": "Comma-separated usernames"
+          }
+        },
+        "required": ["usernames"]
+      },
+      "urlTemplate": "https://{your-discourse-instance}/groups/{groupId}/members.json"
+    },
+    {
+      "id": "remove-user-from-group",
+      "name": "Remove User from Group",
+      "description": "Remove users from a group",
+      "method": "DELETE",
+      "path": "/groups/{groupId}/members.json",
+      "headers": {
+        "Content-Type": "application/json",
+        "Api-Key": "{apiKey}",
+        "Api-Username": "{username}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "usernames": {
+            "type": "string",
+            "required": true,
+            "description": "Comma-separated usernames"
+          }
+        },
+        "required": ["usernames"]
+      },
+      "urlTemplate": "https://{your-discourse-instance}/groups/{groupId}/members.json"
+    }
+  ]
+}
+

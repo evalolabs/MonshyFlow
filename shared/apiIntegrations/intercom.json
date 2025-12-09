@@ -1,0 +1,381 @@
+{
+  "id": "intercom",
+  "name": "Intercom",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/intercom/1F8DED",
+  "description": "Customer messaging and support platform",
+  "baseUrl": "https://api.intercom.io",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "INTERCOM_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/contacts",
+      "headers": {
+        "Content-Type": "application/json",
+        "Intercom-Version": "2.10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "role": { "type": "string", "enum": ["user", "lead"], "description": "Contact role", "default": "user" },
+          "email": { "type": "string", "format": "email", "description": "Contact email" },
+          "phone": { "type": "string", "description": "Contact phone number" },
+          "name": { "type": "string", "description": "Contact name" },
+          "external_id": { "type": "string", "description": "External ID" },
+          "custom_attributes": {
+            "type": "object",
+            "description": "Custom attributes",
+            "additionalProperties": true
+          },
+          "companies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" }
+              }
+            },
+            "description": "Associated companies"
+          }
+        }
+      },
+      "urlTemplate": "https://api.intercom.io/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact details by ID",
+      "method": "GET",
+      "path": "/contacts/{id}",
+      "headers": {
+        "Intercom-Version": "2.10"
+      },
+      "urlTemplate": "https://api.intercom.io/contacts/{id}"
+    },
+    {
+      "id": "search-contacts",
+      "name": "Search Contacts",
+      "description": "Search for contacts",
+      "method": "POST",
+      "path": "/contacts/search",
+      "headers": {
+        "Content-Type": "application/json",
+        "Intercom-Version": "2.10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "object",
+            "properties": {
+              "operator": { "type": "string", "enum": ["AND", "OR"], "default": "AND" },
+              "value": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "field": { "type": "string" },
+                    "operator": { "type": "string", "enum": ["=", "!=", ">", "<", ">=", "<=", "IN", "NIN", "CONTAINS"] },
+                    "value": { "type": "string" }
+                  }
+                }
+              }
+            },
+            "required": true
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "per_page": { "type": "number", "default": 50 },
+              "starting_after": { "type": "string" }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.intercom.io/contacts/search"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update an existing contact",
+      "method": "PUT",
+      "path": "/contacts/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Intercom-Version": "2.10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email", "description": "Contact email" },
+          "phone": { "type": "string", "description": "Contact phone number" },
+          "name": { "type": "string", "description": "Contact name" },
+          "custom_attributes": {
+            "type": "object",
+            "description": "Custom attributes",
+            "additionalProperties": true
+          },
+          "companies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.intercom.io/contacts/{id}"
+    },
+    {
+      "id": "delete-contact",
+      "name": "Delete Contact",
+      "description": "Delete a contact",
+      "method": "DELETE",
+      "path": "/contacts/{id}",
+      "headers": {
+        "Intercom-Version": "2.10"
+      },
+      "urlTemplate": "https://api.intercom.io/contacts/{id}"
+    },
+    {
+      "id": "create-conversation",
+      "name": "Create Conversation",
+      "description": "Create a new conversation",
+      "method": "POST",
+      "path": "/conversations",
+      "headers": {
+        "Content-Type": "application/json",
+        "Intercom-Version": "2.10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["user", "admin"], "required": true },
+              "id": { "type": "string", "required": true }
+            },
+            "required": true
+          },
+          "to": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["admin", "user"], "required": true },
+              "id": { "type": "string", "required": true }
+            },
+            "required": true
+          },
+          "body": { "type": "string", "required": true, "description": "Message body" },
+          "message_type": { "type": "string", "enum": ["comment", "assignment", "open", "close"], "description": "Message type", "default": "comment" }
+        },
+        "required": ["from", "to", "body"]
+      },
+      "urlTemplate": "https://api.intercom.io/conversations"
+    },
+    {
+      "id": "get-conversation",
+      "name": "Get Conversation",
+      "description": "Get conversation details by ID",
+      "method": "GET",
+      "path": "/conversations/{id}",
+      "headers": {
+        "Intercom-Version": "2.10"
+      },
+      "urlTemplate": "https://api.intercom.io/conversations/{id}"
+    },
+    {
+      "id": "list-conversations",
+      "name": "List Conversations",
+      "description": "List conversations",
+      "method": "GET",
+      "path": "/conversations",
+      "headers": {
+        "Intercom-Version": "2.10"
+      },
+      "queryParams": {
+        "type": "admin",
+        "admin_id": "{adminId}",
+        "open": "true",
+        "page": "1",
+        "per_page": "50"
+      },
+      "urlTemplate": "https://api.intercom.io/conversations"
+    },
+    {
+      "id": "reply-to-conversation",
+      "name": "Reply to Conversation",
+      "description": "Reply to a conversation",
+      "method": "POST",
+      "path": "/conversations/{id}/parts",
+      "headers": {
+        "Content-Type": "application/json",
+        "Intercom-Version": "2.10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["admin", "user"], "required": true, "description": "Reply type" },
+          "admin_id": { "type": "string", "description": "Admin ID (if type is admin)" },
+          "body": { "type": "string", "required": true, "description": "Reply body" },
+          "message_type": { "type": "string", "enum": ["comment", "assignment", "open", "close"], "description": "Message type", "default": "comment" }
+        },
+        "required": ["type", "body"]
+      },
+      "urlTemplate": "https://api.intercom.io/conversations/{id}/parts"
+    },
+    {
+      "id": "create-company",
+      "name": "Create Company",
+      "description": "Create a new company",
+      "method": "POST",
+      "path": "/companies",
+      "headers": {
+        "Content-Type": "application/json",
+        "Intercom-Version": "2.10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Company name" },
+          "company_id": { "type": "string", "description": "Company ID" },
+          "custom_attributes": {
+            "type": "object",
+            "description": "Custom attributes",
+            "additionalProperties": true
+          },
+          "plan": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "id": { "type": "string" }
+            },
+            "description": "Company plan"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.intercom.io/companies"
+    },
+    {
+      "id": "get-company",
+      "name": "Get Company",
+      "description": "Get company details by ID",
+      "method": "GET",
+      "path": "/companies/{id}",
+      "headers": {
+        "Intercom-Version": "2.10"
+      },
+      "urlTemplate": "https://api.intercom.io/companies/{id}"
+    },
+    {
+      "id": "list-companies",
+      "name": "List Companies",
+      "description": "List all companies",
+      "method": "GET",
+      "path": "/companies",
+      "headers": {
+        "Intercom-Version": "2.10"
+      },
+      "queryParams": {
+        "page": "1",
+        "per_page": "50"
+      },
+      "urlTemplate": "https://api.intercom.io/companies"
+    },
+    {
+      "id": "update-company",
+      "name": "Update Company",
+      "description": "Update an existing company",
+      "method": "PUT",
+      "path": "/companies/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Intercom-Version": "2.10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Company name" },
+          "custom_attributes": {
+            "type": "object",
+            "description": "Custom attributes",
+            "additionalProperties": true
+          },
+          "plan": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "id": { "type": "string" }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://api.intercom.io/companies/{id}"
+    },
+    {
+      "id": "create-event",
+      "name": "Create Event",
+      "description": "Create a custom event",
+      "method": "POST",
+      "path": "/events",
+      "headers": {
+        "Content-Type": "application/json",
+        "Intercom-Version": "2.10"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "event_name": { "type": "string", "required": true, "description": "Event name" },
+          "created_at": { "type": "number", "description": "Event timestamp" },
+          "user_id": { "type": "string", "description": "User ID" },
+          "email": { "type": "string", "format": "email", "description": "User email" },
+          "metadata": {
+            "type": "object",
+            "description": "Event metadata",
+            "additionalProperties": true
+          }
+        },
+        "required": ["event_name"]
+      },
+      "urlTemplate": "https://api.intercom.io/events"
+    },
+    {
+      "id": "list-events",
+      "name": "List Events",
+      "description": "List events for a contact",
+      "method": "GET",
+      "path": "/events",
+      "headers": {
+        "Intercom-Version": "2.10"
+      },
+      "queryParams": {
+        "type": "user",
+        "user_id": "{userId}",
+        "email": "{email}",
+        "per_page": "50"
+      },
+      "urlTemplate": "https://api.intercom.io/events"
+    }
+  ]
+}
+

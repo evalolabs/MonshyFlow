@@ -1,0 +1,542 @@
+{
+  "id": "copper",
+  "name": "Copper",
+  "icon": "💼",
+  "logoUrl": "https://cdn.simpleicons.org/copper/BC7B3B",
+  "description": "CRM and sales pipeline management",
+  "baseUrl": "https://api.copper.com/developer_api/v1",
+  "color": {
+    "bg": "from-amber-100 to-orange-100",
+    "border": "border-amber-500",
+    "icon": "text-amber-700",
+    "handle": "bg-amber-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "X-PW-AccessToken",
+    "headerFormat": "{apiKey}",
+    "secretKey": "COPPER_API_TOKEN",
+    "emailSecretKey": "COPPER_EMAIL"
+  },
+  "endpoints": [
+    {
+      "id": "create-opportunity",
+      "name": "Create Opportunity",
+      "description": "Create a new opportunity",
+      "method": "POST",
+      "path": "/opportunities",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-PW-Application": "developer_api"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Opportunity name" },
+          "assignee_id": { "type": "number", "description": "Assignee user ID" },
+          "close_date": { "type": "string", "format": "date", "description": "Close date (YYYY-MM-DD)" },
+          "pipeline_id": { "type": "number", "description": "Pipeline ID" },
+          "pipeline_stage_id": { "type": "number", "description": "Pipeline stage ID" },
+          "monetary_value": { "type": "number", "description": "Monetary value" },
+          "win_probability": { "type": "number", "description": "Win probability (0-100)" },
+          "currency": { "type": "string", "default": "USD", "description": "Currency code" },
+          "source_id": { "type": "number", "description": "Source ID" },
+          "customer_source_id": { "type": "number", "description": "Customer source ID" },
+          "loss_reason_id": { "type": "number", "description": "Loss reason ID" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "custom_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "custom_field_definition_id": { "type": "number", "required": true },
+                "value": {
+                  "type": ["string", "number", "boolean", "array"],
+                  "required": true
+                }
+              },
+              "required": ["custom_field_definition_id", "value"]
+            }
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/opportunities"
+    },
+    {
+      "id": "get-opportunity",
+      "name": "Get Opportunity",
+      "description": "Get opportunity details by ID",
+      "method": "GET",
+      "path": "/opportunities/{id}",
+      "headers": {
+        "X-PW-Application": "developer_api"
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/opportunities/{id}"
+    },
+    {
+      "id": "list-opportunities",
+      "name": "List Opportunities",
+      "description": "List all opportunities",
+      "method": "POST",
+      "path": "/opportunities/search",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-PW-Application": "developer_api"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "page_size": { "type": "number", "default": 200, "description": "Page size" },
+          "page_number": { "type": "number", "default": 1, "description": "Page number" },
+          "sort_by": { "type": "string", "default": "name", "description": "Sort field" },
+          "sort_direction": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort direction" }
+        }
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/opportunities/search"
+    },
+    {
+      "id": "update-opportunity",
+      "name": "Update Opportunity",
+      "description": "Update an existing opportunity",
+      "method": "PUT",
+      "path": "/opportunities/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-PW-Application": "developer_api"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "name": { "type": "string", "description": "Opportunity name" },
+          "monetary_value": { "type": "number", "description": "Monetary value" },
+          "win_probability": { "type": "number", "description": "Win probability" },
+          "pipeline_stage_id": { "type": "number", "description": "Pipeline stage ID" },
+          "close_date": { "type": "string", "format": "date", "description": "Close date" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/opportunities/{id}"
+    },
+    {
+      "id": "delete-opportunity",
+      "name": "Delete Opportunity",
+      "description": "Delete an opportunity",
+      "method": "DELETE",
+      "path": "/opportunities/{id}",
+      "headers": {
+        "X-PW-Application": "developer_api"
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/opportunities/{id}"
+    },
+    {
+      "id": "create-person",
+      "name": "Create Person",
+      "description": "Create a new person (contact)",
+      "method": "POST",
+      "path": "/people",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-PW-Application": "developer_api"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Person name" },
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email", "required": true },
+                "category": { "type": "string", "enum": ["work", "personal"], "default": "work" }
+              },
+              "required": ["email"]
+            },
+            "description": "Email addresses"
+          },
+          "phone_numbers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "number": { "type": "string", "required": true },
+                "category": { "type": "string", "enum": ["work", "mobile", "home", "other"], "default": "work" }
+              },
+              "required": ["number"]
+            }
+          },
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "street": { "type": "string" },
+                "city": { "type": "string" },
+                "state": { "type": "string" },
+                "postal_code": { "type": "string" },
+                "country": { "type": "string" }
+              }
+            }
+          },
+          "assignee_id": { "type": "number", "description": "Assignee user ID" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "custom_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "custom_field_definition_id": { "type": "number", "required": true },
+                "value": {
+                  "type": ["string", "number", "boolean", "array"],
+                  "required": true
+                }
+              }
+            }
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/people"
+    },
+    {
+      "id": "get-person",
+      "name": "Get Person",
+      "description": "Get person details by ID",
+      "method": "GET",
+      "path": "/people/{id}",
+      "headers": {
+        "X-PW-Application": "developer_api"
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/people/{id}"
+    },
+    {
+      "id": "list-people",
+      "name": "List People",
+      "description": "List all people",
+      "method": "POST",
+      "path": "/people/search",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-PW-Application": "developer_api"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "page_size": { "type": "number", "default": 200 },
+          "page_number": { "type": "number", "default": 1 },
+          "sort_by": { "type": "string", "default": "name" },
+          "sort_direction": { "type": "string", "enum": ["asc", "desc"], "default": "asc" }
+        }
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/people/search"
+    },
+    {
+      "id": "update-person",
+      "name": "Update Person",
+      "description": "Update an existing person",
+      "method": "PUT",
+      "path": "/people/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-PW-Application": "developer_api"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "name": { "type": "string", "description": "Person name" },
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email", "required": true },
+                "category": { "type": "string", "enum": ["work", "personal"] }
+              }
+            }
+          },
+          "phone_numbers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "number": { "type": "string", "required": true },
+                "category": { "type": "string", "enum": ["work", "mobile", "home", "other"] }
+              }
+            }
+          }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/people/{id}"
+    },
+    {
+      "id": "delete-person",
+      "name": "Delete Person",
+      "description": "Delete a person",
+      "method": "DELETE",
+      "path": "/people/{id}",
+      "headers": {
+        "X-PW-Application": "developer_api"
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/people/{id}"
+    },
+    {
+      "id": "create-company",
+      "name": "Create Company",
+      "description": "Create a new company",
+      "method": "POST",
+      "path": "/companies",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-PW-Application": "developer_api"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Company name" },
+          "assignee_id": { "type": "number", "description": "Assignee user ID" },
+          "phone_numbers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "number": { "type": "string", "required": true },
+                "category": { "type": "string", "enum": ["work", "mobile", "home", "other"], "default": "work" }
+              }
+            }
+          },
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string", "format": "email", "required": true },
+                "category": { "type": "string", "enum": ["work", "personal"], "default": "work" }
+              }
+            }
+          },
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "street": { "type": "string" },
+                "city": { "type": "string" },
+                "state": { "type": "string" },
+                "postal_code": { "type": "string" },
+                "country": { "type": "string" }
+              }
+            }
+          },
+          "website": {
+            "type": "object",
+            "properties": {
+              "url": { "type": "string", "format": "uri" }
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "custom_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "custom_field_definition_id": { "type": "number", "required": true },
+                "value": {
+                  "type": ["string", "number", "boolean", "array"],
+                  "required": true
+                }
+              }
+            }
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/companies"
+    },
+    {
+      "id": "get-company",
+      "name": "Get Company",
+      "description": "Get company details by ID",
+      "method": "GET",
+      "path": "/companies/{id}",
+      "headers": {
+        "X-PW-Application": "developer_api"
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/companies/{id}"
+    },
+    {
+      "id": "list-companies",
+      "name": "List Companies",
+      "description": "List all companies",
+      "method": "POST",
+      "path": "/companies/search",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-PW-Application": "developer_api"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "page_size": { "type": "number", "default": 200 },
+          "page_number": { "type": "number", "default": 1 },
+          "sort_by": { "type": "string", "default": "name" },
+          "sort_direction": { "type": "string", "enum": ["asc", "desc"], "default": "asc" }
+        }
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/companies/search"
+    },
+    {
+      "id": "update-company",
+      "name": "Update Company",
+      "description": "Update an existing company",
+      "method": "PUT",
+      "path": "/companies/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-PW-Application": "developer_api"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "name": { "type": "string", "description": "Company name" },
+          "website": {
+            "type": "object",
+            "properties": {
+              "url": { "type": "string", "format": "uri" }
+            }
+          }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/companies/{id}"
+    },
+    {
+      "id": "delete-company",
+      "name": "Delete Company",
+      "description": "Delete a company",
+      "method": "DELETE",
+      "path": "/companies/{id}",
+      "headers": {
+        "X-PW-Application": "developer_api"
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/companies/{id}"
+    },
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new task",
+      "method": "POST",
+      "path": "/tasks",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-PW-Application": "developer_api"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Task name" },
+          "related_resource": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "number", "required": true },
+              "type": { "type": "string", "enum": ["opportunity", "person", "company", "project"], "required": true }
+            },
+            "description": "Related resource (opportunity, person, company, project)"
+          },
+          "assignee_id": { "type": "number", "description": "Assignee user ID" },
+          "due_date": { "type": "string", "format": "date", "description": "Due date (YYYY-MM-DD)" },
+          "reminder_date": { "type": "string", "format": "date", "description": "Reminder date" },
+          "priority": { "type": "string", "enum": ["None", "Low", "Medium", "High"], "description": "Task priority" },
+          "status": { "type": "string", "enum": ["Open", "Completed"], "default": "Open", "description": "Task status" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/tasks"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get task details by ID",
+      "method": "GET",
+      "path": "/tasks/{id}",
+      "headers": {
+        "X-PW-Application": "developer_api"
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/tasks/{id}"
+    },
+    {
+      "id": "list-tasks",
+      "name": "List Tasks",
+      "description": "List all tasks",
+      "method": "POST",
+      "path": "/tasks/search",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-PW-Application": "developer_api"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "page_size": { "type": "number", "default": 200 },
+          "page_number": { "type": "number", "default": 1 },
+          "sort_by": { "type": "string", "default": "name" },
+          "sort_direction": { "type": "string", "enum": ["asc", "desc"], "default": "asc" }
+        }
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/tasks/search"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update an existing task",
+      "method": "PUT",
+      "path": "/tasks/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "X-PW-Application": "developer_api"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number", "required": true },
+          "name": { "type": "string", "description": "Task name" },
+          "status": { "type": "string", "enum": ["Open", "Completed"] },
+          "priority": { "type": "string", "enum": ["None", "Low", "Medium", "High"] },
+          "due_date": { "type": "string", "format": "date", "description": "Due date" }
+        },
+        "required": ["id"]
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/tasks/{id}"
+    },
+    {
+      "id": "delete-task",
+      "name": "Delete Task",
+      "description": "Delete a task",
+      "method": "DELETE",
+      "path": "/tasks/{id}",
+      "headers": {
+        "X-PW-Application": "developer_api"
+      },
+      "urlTemplate": "https://api.copper.com/developer_api/v1/tasks/{id}"
+    }
+  ]
+}
+

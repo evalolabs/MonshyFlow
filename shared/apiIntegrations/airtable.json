@@ -1,0 +1,130 @@
+{
+  "id": "airtable",
+  "name": "Airtable",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/airtable/18BFFF",
+  "description": "Cloud-based database and collaboration platform",
+  "baseUrl": "https://api.airtable.com/v0/{baseId}",
+  "color": {
+    "bg": "from-cyan-100 to-sky-100",
+    "border": "border-cyan-500",
+    "icon": "text-cyan-700",
+    "handle": "bg-cyan-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "AIRTABLE_PERSONAL_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-record",
+      "name": "Create Record",
+      "description": "Create a new record in a table",
+      "method": "POST",
+      "path": "/{tableId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "object",
+            "required": true,
+            "description": "Record fields (field names as keys)",
+            "additionalProperties": true
+          },
+          "typecast": {
+            "type": "boolean",
+            "description": "Enable automatic type conversion"
+          }
+        },
+        "required": ["fields"]
+      },
+      "urlTemplate": "https://api.airtable.com/v0/{baseId}/{tableId}"
+    },
+    {
+      "id": "get-record",
+      "name": "Get Record",
+      "description": "Get a record by ID",
+      "method": "GET",
+      "path": "/{tableId}/{recordId}",
+      "queryParams": {
+        "fields[]": "{fieldNames}",
+        "cellFormat": "json"
+      },
+      "urlTemplate": "https://api.airtable.com/v0/{baseId}/{tableId}/{recordId}"
+    },
+    {
+      "id": "list-records",
+      "name": "List Records",
+      "description": "List all records in a table",
+      "method": "GET",
+      "path": "/{tableId}",
+      "queryParams": {
+        "maxRecords": "100",
+        "pageSize": "100",
+        "view": "{viewId}",
+        "fields[]": "{fieldNames}",
+        "filterByFormula": "{formula}",
+        "sort[]": "{sortField}",
+        "cellFormat": "json"
+      },
+      "urlTemplate": "https://api.airtable.com/v0/{baseId}/{tableId}"
+    },
+    {
+      "id": "update-record",
+      "name": "Update Record",
+      "description": "Update an existing record",
+      "method": "PATCH",
+      "path": "/{tableId}/{recordId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "object",
+            "required": true,
+            "description": "Record fields to update (field names as keys)",
+            "additionalProperties": true
+          },
+          "typecast": {
+            "type": "boolean",
+            "description": "Enable automatic type conversion"
+          }
+        },
+        "required": ["fields"]
+      },
+      "urlTemplate": "https://api.airtable.com/v0/{baseId}/{tableId}/{recordId}"
+    },
+    {
+      "id": "delete-record",
+      "name": "Delete Record",
+      "description": "Delete a record by ID",
+      "method": "DELETE",
+      "path": "/{tableId}/{recordId}",
+      "urlTemplate": "https://api.airtable.com/v0/{baseId}/{tableId}/{recordId}"
+    },
+    {
+      "id": "search-records",
+      "name": "Search Records",
+      "description": "Search records using filterByFormula",
+      "method": "GET",
+      "path": "/{tableId}",
+      "queryParams": {
+        "filterByFormula": "{formula}",
+        "maxRecords": "100",
+        "pageSize": "100",
+        "fields[]": "{fieldNames}",
+        "sort[]": "{sortField}",
+        "cellFormat": "json"
+      },
+      "urlTemplate": "https://api.airtable.com/v0/{baseId}/{tableId}?filterByFormula={formula}"
+    }
+  ]
+}
+

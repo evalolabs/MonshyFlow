@@ -1,0 +1,30 @@
+{
+  "name": "monshyflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MonshyFlow - Professional Node.js-Only Workflow Automation Platform",
+  "workspaces": [
+    "packages/*",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "pnpm --filter './packages/*' --parallel dev",
+    "build": "pnpm --recursive build",
+    "test": "pnpm --recursive test",
+    "lint": "pnpm --recursive lint",
+    "format": "prettier --write \"packages/**/*.ts\"",
+    "clean": "pnpm --recursive clean",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^24.7.1"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
+

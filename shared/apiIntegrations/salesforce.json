@@ -1,0 +1,538 @@
+{
+  "id": "salesforce",
+  "name": "Salesforce",
+  "icon": "☁️",
+  "logoUrl": "https://cdn.simpleicons.org/salesforce/00A1E0",
+  "description": "Customer relationship management platform",
+  "baseUrl": "https://{instance}.salesforce.com/services/data/v{version}",
+  "color": {
+    "bg": "from-cyan-100 to-blue-100",
+    "border": "border-cyan-500",
+    "icon": "text-cyan-700",
+    "handle": "bg-cyan-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {accessToken}",
+    "secretKey": "SALESFORCE_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-account",
+      "name": "Create Account",
+      "description": "Create a new account in Salesforce",
+      "method": "POST",
+      "path": "/sobjects/Account",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Name": { "type": "string", "required": true, "description": "Account name" },
+          "Type": { "type": "string", "description": "Account type (e.g., Customer, Partner)" },
+          "Industry": { "type": "string", "description": "Industry" },
+          "Phone": { "type": "string", "description": "Phone number" },
+          "Website": { "type": "string", "description": "Website URL" },
+          "BillingStreet": { "type": "string", "description": "Billing street address" },
+          "BillingCity": { "type": "string", "description": "Billing city" },
+          "BillingState": { "type": "string", "description": "Billing state" },
+          "BillingPostalCode": { "type": "string", "description": "Billing postal code" },
+          "BillingCountry": { "type": "string", "description": "Billing country" }
+        },
+        "required": ["Name"]
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Account"
+    },
+    {
+      "id": "get-account",
+      "name": "Get Account",
+      "description": "Get account details by ID",
+      "method": "GET",
+      "path": "/sobjects/Account/{id}",
+      "queryParams": {
+        "fields": "Id,Name,Type,Industry,Phone,Website"
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Account/{id}"
+    },
+    {
+      "id": "query-accounts",
+      "name": "Query Accounts (SOQL)",
+      "description": "Query accounts using SOQL",
+      "method": "GET",
+      "path": "/query",
+      "queryParams": {
+        "q": "SELECT Id, Name, Type, Industry, Phone FROM Account WHERE Name LIKE '%{searchTerm}%' LIMIT 200"
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/query?q=SELECT Id, Name, Type, Industry, Phone FROM Account WHERE Name LIKE '%{searchTerm}%' LIMIT 200"
+    },
+    {
+      "id": "update-account",
+      "name": "Update Account",
+      "description": "Update an existing account",
+      "method": "PATCH",
+      "path": "/sobjects/Account/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Name": { "type": "string", "description": "Account name" },
+          "Type": { "type": "string", "description": "Account type" },
+          "Industry": { "type": "string", "description": "Industry" },
+          "Phone": { "type": "string", "description": "Phone number" },
+          "Website": { "type": "string", "description": "Website URL" }
+        }
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Account/{id}"
+    },
+    {
+      "id": "create-case",
+      "name": "Create Case",
+      "description": "Create a new case in Salesforce",
+      "method": "POST",
+      "path": "/sobjects/Case",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Subject": { "type": "string", "required": true, "description": "Case subject" },
+          "Description": { "type": "string", "description": "Case description" },
+          "Status": { "type": "string", "description": "Case status (New, Working, Escalated, Closed)" },
+          "Priority": { "type": "string", "description": "Case priority (Low, Medium, High, Critical)" },
+          "Origin": { "type": "string", "description": "Case origin (Web, Email, Phone, etc.)" },
+          "AccountId": { "type": "string", "description": "Related account ID" },
+          "ContactId": { "type": "string", "description": "Related contact ID" }
+        },
+        "required": ["Subject"]
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Case"
+    },
+    {
+      "id": "get-case",
+      "name": "Get Case",
+      "description": "Get case details by ID",
+      "method": "GET",
+      "path": "/sobjects/Case/{id}",
+      "queryParams": {
+        "fields": "Id,Subject,Description,Status,Priority,Origin"
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Case/{id}"
+    },
+    {
+      "id": "query-cases",
+      "name": "Query Cases (SOQL)",
+      "description": "Query cases using SOQL",
+      "method": "GET",
+      "path": "/query",
+      "queryParams": {
+        "q": "SELECT Id, Subject, Status, Priority, CreatedDate FROM Case WHERE Status != 'Closed' LIMIT 200"
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/query?q=SELECT Id, Subject, Status, Priority, CreatedDate FROM Case WHERE Status != 'Closed' LIMIT 200"
+    },
+    {
+      "id": "update-case",
+      "name": "Update Case",
+      "description": "Update an existing case",
+      "method": "PATCH",
+      "path": "/sobjects/Case/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Subject": { "type": "string", "description": "Case subject" },
+          "Description": { "type": "string", "description": "Case description" },
+          "Status": { "type": "string", "description": "Case status" },
+          "Priority": { "type": "string", "description": "Case priority" }
+        }
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Case/{id}"
+    },
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact in Salesforce",
+      "method": "POST",
+      "path": "/sobjects/Contact",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "FirstName": { "type": "string", "description": "First name" },
+          "LastName": { "type": "string", "required": true, "description": "Last name" },
+          "Email": { "type": "string", "description": "Email address" },
+          "Phone": { "type": "string", "description": "Phone number" },
+          "Title": { "type": "string", "description": "Job title" },
+          "AccountId": { "type": "string", "description": "Related account ID" },
+          "MailingStreet": { "type": "string", "description": "Mailing street address" },
+          "MailingCity": { "type": "string", "description": "Mailing city" },
+          "MailingState": { "type": "string", "description": "Mailing state" },
+          "MailingPostalCode": { "type": "string", "description": "Mailing postal code" },
+          "MailingCountry": { "type": "string", "description": "Mailing country" }
+        },
+        "required": ["LastName"]
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Contact"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact details by ID",
+      "method": "GET",
+      "path": "/sobjects/Contact/{id}",
+      "queryParams": {
+        "fields": "Id,FirstName,LastName,Email,Phone,Title"
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Contact/{id}"
+    },
+    {
+      "id": "query-contacts",
+      "name": "Query Contacts (SOQL)",
+      "description": "Query contacts using SOQL",
+      "method": "GET",
+      "path": "/query",
+      "queryParams": {
+        "q": "SELECT Id, FirstName, LastName, Email, Phone FROM Contact WHERE LastName LIKE '%{searchTerm}%' LIMIT 200"
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/query?q=SELECT Id, FirstName, LastName, Email, Phone FROM Contact WHERE LastName LIKE '%{searchTerm}%' LIMIT 200"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update an existing contact",
+      "method": "PATCH",
+      "path": "/sobjects/Contact/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "FirstName": { "type": "string", "description": "First name" },
+          "LastName": { "type": "string", "description": "Last name" },
+          "Email": { "type": "string", "description": "Email address" },
+          "Phone": { "type": "string", "description": "Phone number" },
+          "Title": { "type": "string", "description": "Job title" }
+        }
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Contact/{id}"
+    },
+    {
+      "id": "delete-contact",
+      "name": "Delete Contact",
+      "description": "Delete a contact by ID",
+      "method": "DELETE",
+      "path": "/sobjects/Contact/{id}",
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Contact/{id}"
+    },
+    {
+      "id": "upsert-contact",
+      "name": "Upsert Contact",
+      "description": "Create or update a contact using external ID",
+      "method": "PATCH",
+      "path": "/sobjects/Contact/{externalIdField}/{externalId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "FirstName": { "type": "string", "description": "First name" },
+          "LastName": { "type": "string", "description": "Last name" },
+          "Email": { "type": "string", "description": "Email address" },
+          "Phone": { "type": "string", "description": "Phone number" }
+        }
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Contact/{externalIdField}/{externalId}"
+    },
+    {
+      "id": "create-lead",
+      "name": "Create Lead",
+      "description": "Create a new lead in Salesforce",
+      "method": "POST",
+      "path": "/sobjects/Lead",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "FirstName": { "type": "string", "description": "First name" },
+          "LastName": { "type": "string", "required": true, "description": "Last name" },
+          "Company": { "type": "string", "required": true, "description": "Company name" },
+          "Email": { "type": "string", "description": "Email address" },
+          "Phone": { "type": "string", "description": "Phone number" },
+          "Title": { "type": "string", "description": "Job title" },
+          "Status": { "type": "string", "description": "Lead status (Open, Qualified, Converted, etc.)" },
+          "LeadSource": { "type": "string", "description": "Lead source (Web, Phone, Referral, etc.)" },
+          "Industry": { "type": "string", "description": "Industry" }
+        },
+        "required": ["LastName", "Company"]
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Lead"
+    },
+    {
+      "id": "get-lead",
+      "name": "Get Lead",
+      "description": "Get lead details by ID",
+      "method": "GET",
+      "path": "/sobjects/Lead/{id}",
+      "queryParams": {
+        "fields": "Id,FirstName,LastName,Company,Email,Phone,Status"
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Lead/{id}"
+    },
+    {
+      "id": "query-leads",
+      "name": "Query Leads (SOQL)",
+      "description": "Query leads using SOQL",
+      "method": "GET",
+      "path": "/query",
+      "queryParams": {
+        "q": "SELECT Id, FirstName, LastName, Company, Email, Status FROM Lead WHERE Status = 'Open' LIMIT 200"
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/query?q=SELECT Id, FirstName, LastName, Company, Email, Status FROM Lead WHERE Status = 'Open' LIMIT 200"
+    },
+    {
+      "id": "update-lead",
+      "name": "Update Lead",
+      "description": "Update an existing lead",
+      "method": "PATCH",
+      "path": "/sobjects/Lead/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "FirstName": { "type": "string", "description": "First name" },
+          "LastName": { "type": "string", "description": "Last name" },
+          "Company": { "type": "string", "description": "Company name" },
+          "Email": { "type": "string", "description": "Email address" },
+          "Phone": { "type": "string", "description": "Phone number" },
+          "Status": { "type": "string", "description": "Lead status" }
+        }
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Lead/{id}"
+    },
+    {
+      "id": "upsert-lead",
+      "name": "Upsert Lead",
+      "description": "Create or update a lead using external ID",
+      "method": "PATCH",
+      "path": "/sobjects/Lead/{externalIdField}/{externalId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "FirstName": { "type": "string", "description": "First name" },
+          "LastName": { "type": "string", "description": "Last name" },
+          "Company": { "type": "string", "description": "Company name" },
+          "Email": { "type": "string", "description": "Email address" }
+        }
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Lead/{externalIdField}/{externalId}"
+    },
+    {
+      "id": "create-opportunity",
+      "name": "Create Opportunity",
+      "description": "Create a new sales opportunity",
+      "method": "POST",
+      "path": "/sobjects/Opportunity",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Name": { "type": "string", "required": true, "description": "Opportunity name" },
+          "Amount": { "type": "number", "description": "Opportunity amount" },
+          "CloseDate": { "type": "string", "format": "date", "required": true, "description": "Expected close date (YYYY-MM-DD)" },
+          "StageName": { "type": "string", "required": true, "description": "Sales stage (Prospecting, Qualification, Proposal, Negotiation, Closed Won, Closed Lost)" },
+          "AccountId": { "type": "string", "description": "Related account ID" },
+          "Type": { "type": "string", "description": "Opportunity type" },
+          "Probability": { "type": "number", "description": "Probability percentage (0-100)" },
+          "Description": { "type": "string", "description": "Opportunity description" }
+        },
+        "required": ["Name", "CloseDate", "StageName"]
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Opportunity"
+    },
+    {
+      "id": "get-opportunity",
+      "name": "Get Opportunity",
+      "description": "Get opportunity details by ID",
+      "method": "GET",
+      "path": "/sobjects/Opportunity/{id}",
+      "queryParams": {
+        "fields": "Id,Name,Amount,CloseDate,StageName,Probability"
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Opportunity/{id}"
+    },
+    {
+      "id": "query-opportunities",
+      "name": "Query Opportunities (SOQL)",
+      "description": "Query opportunities using SOQL",
+      "method": "GET",
+      "path": "/query",
+      "queryParams": {
+        "q": "SELECT Id, Name, Amount, CloseDate, StageName FROM Opportunity WHERE StageName != 'Closed Won' AND StageName != 'Closed Lost' LIMIT 200"
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/query?q=SELECT Id, Name, Amount, CloseDate, StageName FROM Opportunity WHERE StageName != 'Closed Won' AND StageName != 'Closed Lost' LIMIT 200"
+    },
+    {
+      "id": "update-opportunity",
+      "name": "Update Opportunity",
+      "description": "Update an existing opportunity",
+      "method": "PATCH",
+      "path": "/sobjects/Opportunity/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Name": { "type": "string", "description": "Opportunity name" },
+          "Amount": { "type": "number", "description": "Opportunity amount" },
+          "CloseDate": { "type": "string", "format": "date", "description": "Expected close date (YYYY-MM-DD)" },
+          "StageName": { "type": "string", "description": "Sales stage" },
+          "Probability": { "type": "number", "description": "Probability percentage" }
+        }
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Opportunity/{id}"
+    },
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new task in Salesforce",
+      "method": "POST",
+      "path": "/sobjects/Task",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Subject": { "type": "string", "required": true, "description": "Task subject" },
+          "Status": { "type": "string", "description": "Task status (Not Started, In Progress, Completed, Waiting, Deferred)" },
+          "Priority": { "type": "string", "description": "Task priority (Low, Normal, High)" },
+          "ActivityDate": { "type": "string", "format": "date", "description": "Due date (YYYY-MM-DD)" },
+          "Description": { "type": "string", "description": "Task description" },
+          "WhoId": { "type": "string", "description": "Related contact or lead ID" },
+          "WhatId": { "type": "string", "description": "Related account, opportunity, or case ID" }
+        },
+        "required": ["Subject"]
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Task"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get task details by ID",
+      "method": "GET",
+      "path": "/sobjects/Task/{id}",
+      "queryParams": {
+        "fields": "Id,Subject,Status,Priority,ActivityDate,Description"
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Task/{id}"
+    },
+    {
+      "id": "query-tasks",
+      "name": "Query Tasks (SOQL)",
+      "description": "Query tasks using SOQL",
+      "method": "GET",
+      "path": "/query",
+      "queryParams": {
+        "q": "SELECT Id, Subject, Status, Priority, ActivityDate FROM Task WHERE Status != 'Completed' LIMIT 200"
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/query?q=SELECT Id, Subject, Status, Priority, ActivityDate FROM Task WHERE Status != 'Completed' LIMIT 200"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update an existing task",
+      "method": "PATCH",
+      "path": "/sobjects/Task/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Subject": { "type": "string", "description": "Task subject" },
+          "Status": { "type": "string", "description": "Task status" },
+          "Priority": { "type": "string", "description": "Task priority" },
+          "ActivityDate": { "type": "string", "format": "date", "description": "Due date (YYYY-MM-DD)" },
+          "Description": { "type": "string", "description": "Task description" }
+        }
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/Task/{id}"
+    },
+    {
+      "id": "query-soql",
+      "name": "Query (SOQL)",
+      "description": "Execute a SOQL query",
+      "method": "GET",
+      "path": "/query",
+      "queryParams": {
+        "q": "{soqlQuery}"
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/query?q={soqlQuery}"
+    },
+    {
+      "id": "upload-document",
+      "name": "Upload Document",
+      "description": "Upload a document to Salesforce",
+      "method": "POST",
+      "path": "/sobjects/ContentVersion",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "Title": { "type": "string", "required": true, "description": "Document title" },
+          "PathOnClient": { "type": "string", "required": true, "description": "File path/name" },
+          "VersionData": { "type": "string", "format": "base64", "required": true, "description": "File content as base64" },
+          "FirstPublishLocationId": { "type": "string", "description": "Library or folder ID" }
+        },
+        "required": ["Title", "PathOnClient", "VersionData"]
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/sobjects/ContentVersion"
+    },
+    {
+      "id": "invoke-flow",
+      "name": "Invoke Flow",
+      "description": "Invoke a Salesforce Flow",
+      "method": "POST",
+      "path": "/actions/custom/flow/{flowApiName}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Flow input variables"
+            },
+            "description": "Array of input variables for the flow"
+          }
+        }
+      },
+      "urlTemplate": "https://{instance}.salesforce.com/services/data/v{version}/actions/custom/flow/{flowApiName}"
+    }
+  ]
+}

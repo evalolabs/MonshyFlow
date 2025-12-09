@@ -1,0 +1,334 @@
+{
+  "id": "kitemaker",
+  "name": "Kitemaker",
+  "icon": "📋",
+  "logoUrl": "https://cdn.simpleicons.org/kitemaker/000000",
+  "description": "Product management platform with GraphQL API",
+  "baseUrl": "https://toil.kitemaker.co/developers",
+  "color": {
+    "bg": "from-indigo-100 to-violet-100",
+    "border": "border-indigo-500",
+    "icon": "text-indigo-700",
+    "handle": "bg-indigo-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "KITEMAKER_API_TOKEN",
+    "note": "Uses GraphQL instead of REST API. All requests are POST to /graphql endpoint with GraphQL query/mutation in the body."
+  },
+  "endpoints": [
+    {
+      "id": "graphql-query",
+      "name": "GraphQL Query",
+      "description": "Execute a GraphQL query or mutation",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "required": true,
+            "description": "GraphQL query or mutation string"
+          },
+          "variables": {
+            "type": "object",
+            "description": "GraphQL variables",
+            "additionalProperties": true
+          },
+          "operationName": {
+            "type": "string",
+            "description": "Operation name (for queries with multiple operations)"
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://toil.kitemaker.co/developers/graphql"
+    },
+    {
+      "id": "create-work-item",
+      "name": "Create Work Item",
+      "description": "Create a new work item (GraphQL mutation: createWorkItem)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "mutation CreateWorkItem($input: CreateWorkItemInput!) { createWorkItem(input: $input) { id title } }",
+            "description": "GraphQL mutation for createWorkItem"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "input": {
+                "type": "object",
+                "description": "CreateWorkItemInput",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://toil.kitemaker.co/developers/graphql"
+    },
+    {
+      "id": "get-work-item",
+      "name": "Get Work Item",
+      "description": "Get work item by ID (GraphQL query: workItem)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "query GetWorkItem($id: ID!) { workItem(id: $id) { id title } }",
+            "description": "GraphQL query for workItem"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Work item ID"
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://toil.kitemaker.co/developers/graphql"
+    },
+    {
+      "id": "list-work-items",
+      "name": "List Work Items",
+      "description": "List all work items (GraphQL query: workItems)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "query ListWorkItems { workItems { id title } }",
+            "description": "GraphQL query for workItems"
+          },
+          "variables": {
+            "type": "object",
+            "description": "GraphQL variables",
+            "additionalProperties": true
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://toil.kitemaker.co/developers/graphql"
+    },
+    {
+      "id": "update-work-item",
+      "name": "Update Work Item",
+      "description": "Update a work item (GraphQL mutation: editWorkItem)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "mutation EditWorkItem($id: ID!, $input: EditWorkItemInput!) { editWorkItem(id: $id, input: $input) { id title } }",
+            "description": "GraphQL mutation for editWorkItem"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Work item ID"
+              },
+              "input": {
+                "type": "object",
+                "description": "EditWorkItemInput",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://toil.kitemaker.co/developers/graphql"
+    },
+    {
+      "id": "get-space",
+      "name": "Get Space",
+      "description": "Get space by ID (GraphQL query: space)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "query GetSpace($id: ID!) { space(id: $id) { id name } }",
+            "description": "GraphQL query for space"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Space ID"
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://toil.kitemaker.co/developers/graphql"
+    },
+    {
+      "id": "list-spaces",
+      "name": "List Spaces",
+      "description": "List all spaces (GraphQL query: spaces)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "query ListSpaces { spaces { id name } }",
+            "description": "GraphQL query for spaces"
+          },
+          "variables": {
+            "type": "object",
+            "description": "GraphQL variables",
+            "additionalProperties": true
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://toil.kitemaker.co/developers/graphql"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user by ID (GraphQL query: user)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "query GetUser($id: ID!) { user(id: $id) { id name } }",
+            "description": "GraphQL query for user"
+          },
+          "variables": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "User ID"
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://toil.kitemaker.co/developers/graphql"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users (GraphQL query: users)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "query ListUsers { users { id name } }",
+            "description": "GraphQL query for users"
+          },
+          "variables": {
+            "type": "object",
+            "description": "GraphQL variables",
+            "additionalProperties": true
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://toil.kitemaker.co/developers/graphql"
+    },
+    {
+      "id": "get-organization",
+      "name": "Get Organization",
+      "description": "Get organization (GraphQL query: organization)",
+      "method": "POST",
+      "path": "/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "default": "query GetOrganization { organization { id name } }",
+            "description": "GraphQL query for organization"
+          },
+          "variables": {
+            "type": "object",
+            "description": "GraphQL variables",
+            "additionalProperties": true
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://toil.kitemaker.co/developers/graphql"
+    }
+  ]
+}
+

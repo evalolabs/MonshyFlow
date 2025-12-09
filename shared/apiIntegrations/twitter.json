@@ -1,0 +1,323 @@
+{
+  "id": "twitter",
+  "name": "Twitter (X)",
+  "icon": "🐦",
+  "logoUrl": "https://cdn.simpleicons.org/x/000000",
+  "description": "Social media and microblogging platform",
+  "baseUrl": "https://api.twitter.com/2",
+  "color": {
+    "bg": "from-gray-100 to-zinc-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "oauth2",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {accessToken}",
+    "secretKey": "TWITTER_ACCESS_TOKEN",
+    "tokenUrl": "https://api.twitter.com/2/oauth2/token",
+    "clientIdSecretKey": "TWITTER_CLIENT_ID",
+    "clientSecretSecretKey": "TWITTER_CLIENT_SECRET"
+  },
+  "endpoints": [
+    {
+      "id": "create-tweet",
+      "name": "Create Tweet",
+      "description": "Post a new tweet",
+      "method": "POST",
+      "path": "/tweets",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string", "required": true, "description": "Tweet text (up to 280 characters)" },
+          "reply": {
+            "type": "object",
+            "properties": {
+              "in_reply_to_tweet_id": { "type": "string", "required": true, "description": "Tweet ID to reply to" },
+              "exclude_reply_user_ids": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "User IDs to exclude from reply"
+              }
+            },
+            "description": "Reply settings"
+          },
+          "media": {
+            "type": "object",
+            "properties": {
+              "media_ids": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Media IDs (uploaded separately)"
+              },
+              "tagged_user_ids": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "User IDs to tag in media"
+              }
+            },
+            "description": "Media attachments"
+          },
+          "poll": {
+            "type": "object",
+            "properties": {
+              "options": {
+                "type": "array",
+                "items": { "type": "string" },
+                "required": true,
+                "description": "Poll options (2-4 options)"
+              },
+              "duration_minutes": { "type": "number", "required": true, "description": "Poll duration in minutes (5-10080)" }
+            },
+            "required": true,
+            "description": "Poll settings"
+          },
+          "quote_tweet_id": { "type": "string", "description": "Tweet ID to quote" },
+          "direct_message_deep_link": { "type": "string", "description": "Deep link for direct message" },
+          "for_super_followers_only": { "type": "boolean", "default": false, "description": "Super followers only" },
+          "geo": {
+            "type": "object",
+            "properties": {
+              "place_id": { "type": "string", "description": "Place ID" }
+            },
+            "description": "Geographic location"
+          }
+        },
+        "required": ["text"]
+      },
+      "urlTemplate": "https://api.twitter.com/2/tweets"
+    },
+    {
+      "id": "get-tweet",
+      "name": "Get Tweet",
+      "description": "Get tweet details by ID",
+      "method": "GET",
+      "path": "/tweets/{id}",
+      "headers": {},
+      "queryParams": {
+        "tweet.fields": "created_at,author_id,public_metrics,context_annotations",
+        "expansions": "author_id",
+        "user.fields": "name,username"
+      },
+      "urlTemplate": "https://api.twitter.com/2/tweets/{id}"
+    },
+    {
+      "id": "delete-tweet",
+      "name": "Delete Tweet",
+      "description": "Delete a tweet",
+      "method": "DELETE",
+      "path": "/tweets/{id}",
+      "headers": {},
+      "urlTemplate": "https://api.twitter.com/2/tweets/{id}"
+    },
+    {
+      "id": "search-tweets",
+      "name": "Search Tweets",
+      "description": "Search for tweets",
+      "method": "GET",
+      "path": "/tweets/search/recent",
+      "headers": {},
+      "queryParams": {
+        "query": "{searchQuery}",
+        "max_results": "10",
+        "tweet.fields": "created_at,author_id,public_metrics",
+        "expansions": "author_id",
+        "user.fields": "name,username",
+        "next_token": "{nextToken}"
+      },
+      "urlTemplate": "https://api.twitter.com/2/tweets/search/recent"
+    },
+    {
+      "id": "get-user-tweets",
+      "name": "Get User Tweets",
+      "description": "Get tweets by a specific user",
+      "method": "GET",
+      "path": "/users/{id}/tweets",
+      "headers": {},
+      "queryParams": {
+        "max_results": "10",
+        "tweet.fields": "created_at,public_metrics",
+        "expansions": "author_id",
+        "pagination_token": "{paginationToken}"
+      },
+      "urlTemplate": "https://api.twitter.com/2/users/{id}/tweets"
+    },
+    {
+      "id": "get-user-mentions",
+      "name": "Get User Mentions",
+      "description": "Get tweets mentioning a user",
+      "method": "GET",
+      "path": "/users/{id}/mentions",
+      "headers": {},
+      "queryParams": {
+        "max_results": "10",
+        "tweet.fields": "created_at,author_id",
+        "expansions": "author_id",
+        "pagination_token": "{paginationToken}"
+      },
+      "urlTemplate": "https://api.twitter.com/2/users/{id}/mentions"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user details by ID or username",
+      "method": "GET",
+      "path": "/users/{id}",
+      "headers": {},
+      "queryParams": {
+        "user.fields": "name,username,description,public_metrics,verified"
+      },
+      "urlTemplate": "https://api.twitter.com/2/users/{id}"
+    },
+    {
+      "id": "get-me",
+      "name": "Get Me",
+      "description": "Get authenticated user details",
+      "method": "GET",
+      "path": "/users/me",
+      "headers": {},
+      "queryParams": {
+        "user.fields": "name,username,description,public_metrics,verified"
+      },
+      "urlTemplate": "https://api.twitter.com/2/users/me"
+    },
+    {
+      "id": "upload-media",
+      "name": "Upload Media",
+      "description": "Upload media (image, video) for tweets",
+      "method": "POST",
+      "path": "/1.1/media/upload",
+      "headers": {
+        "Content-Type": "multipart/form-data"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "media": { "type": "string", "required": true, "description": "Base64 encoded media or file path" },
+          "media_category": { "type": "string", "enum": ["tweet_image", "tweet_video", "tweet_gif", "amplify_video"], "description": "Media category" },
+          "additional_owners": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Additional owner user IDs"
+          }
+        },
+        "required": ["media"]
+      },
+      "urlTemplate": "https://upload.twitter.com/1.1/media/upload.json"
+    },
+    {
+      "id": "like-tweet",
+      "name": "Like Tweet",
+      "description": "Like a tweet",
+      "method": "POST",
+      "path": "/users/{id}/likes",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "tweet_id": { "type": "string", "required": true, "description": "Tweet ID to like" }
+        },
+        "required": ["tweet_id"]
+      },
+      "urlTemplate": "https://api.twitter.com/2/users/{id}/likes"
+    },
+    {
+      "id": "unlike-tweet",
+      "name": "Unlike Tweet",
+      "description": "Unlike a tweet",
+      "method": "DELETE",
+      "path": "/users/{id}/likes/{tweetId}",
+      "headers": {},
+      "urlTemplate": "https://api.twitter.com/2/users/{id}/likes/{tweetId}"
+    },
+    {
+      "id": "retweet",
+      "name": "Retweet",
+      "description": "Retweet a tweet",
+      "method": "POST",
+      "path": "/users/{id}/retweets",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "tweet_id": { "type": "string", "required": true, "description": "Tweet ID to retweet" }
+        },
+        "required": ["tweet_id"]
+      },
+      "urlTemplate": "https://api.twitter.com/2/users/{id}/retweets"
+    },
+    {
+      "id": "unretweet",
+      "name": "Unretweet",
+      "description": "Unretweet a tweet",
+      "method": "DELETE",
+      "path": "/users/{id}/retweets/{sourceTweetId}",
+      "headers": {},
+      "urlTemplate": "https://api.twitter.com/2/users/{id}/retweets/{sourceTweetId}"
+    },
+    {
+      "id": "get-followers",
+      "name": "Get Followers",
+      "description": "Get followers of a user",
+      "method": "GET",
+      "path": "/users/{id}/followers",
+      "headers": {},
+      "queryParams": {
+        "max_results": "100",
+        "user.fields": "name,username,description",
+        "pagination_token": "{paginationToken}"
+      },
+      "urlTemplate": "https://api.twitter.com/2/users/{id}/followers"
+    },
+    {
+      "id": "get-following",
+      "name": "Get Following",
+      "description": "Get users a user is following",
+      "method": "GET",
+      "path": "/users/{id}/following",
+      "headers": {},
+      "queryParams": {
+        "max_results": "100",
+        "user.fields": "name,username,description",
+        "pagination_token": "{paginationToken}"
+      },
+      "urlTemplate": "https://api.twitter.com/2/users/{id}/following"
+    },
+    {
+      "id": "follow-user",
+      "name": "Follow User",
+      "description": "Follow a user",
+      "method": "POST",
+      "path": "/users/{id}/following",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "target_user_id": { "type": "string", "required": true, "description": "User ID to follow" }
+        },
+        "required": ["target_user_id"]
+      },
+      "urlTemplate": "https://api.twitter.com/2/users/{id}/following"
+    },
+    {
+      "id": "unfollow-user",
+      "name": "Unfollow User",
+      "description": "Unfollow a user",
+      "method": "DELETE",
+      "path": "/users/{sourceUserId}/following/{targetUserId}",
+      "headers": {},
+      "urlTemplate": "https://api.twitter.com/2/users/{sourceUserId}/following/{targetUserId}"
+    }
+  ]
+}
+

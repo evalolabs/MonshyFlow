@@ -1,0 +1,985 @@
+{
+  "id": "freshservice",
+  "name": "Freshservice",
+  "icon": "🎫",
+  "logoUrl": "https://cdn.simpleicons.org/freshservice/25B24A",
+  "description": "IT service management and help desk software",
+  "baseUrl": "https://{domain}.freshservice.com/api/v2",
+  "color": {
+    "bg": "from-green-100 to-cyan-100",
+    "border": "border-green-500",
+    "icon": "text-green-700",
+    "handle": "bg-green-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {base64(apiKey:X)}",
+    "secretKey": "FRESHSERVICE_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-agent",
+      "name": "Create Agent",
+      "description": "Create a new agent",
+      "method": "POST",
+      "path": "/agents",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "first_name": { "type": "string", "required": true, "description": "First name" },
+          "last_name": { "type": "string", "required": true, "description": "Last name" },
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "mobile_phone_number": { "type": "string", "description": "Mobile phone number" },
+          "work_phone_number": { "type": "string", "description": "Work phone number" },
+          "department_ids": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "Department IDs"
+          },
+          "location_id": { "type": "number", "description": "Location ID" },
+          "role_id": { "type": "number", "required": true, "description": "Agent role ID" },
+          "time_zone": { "type": "string", "description": "Time zone" },
+          "language": { "type": "string", "description": "Language code" },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["first_name", "last_name", "email", "role_id"]
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/agents"
+    },
+    {
+      "id": "get-agent",
+      "name": "Get Agent",
+      "description": "Get agent details by ID",
+      "method": "GET",
+      "path": "/agents/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/agents/{id}"
+    },
+    {
+      "id": "list-agents",
+      "name": "List Agents",
+      "description": "List all agents",
+      "method": "GET",
+      "path": "/agents",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/agents"
+    },
+    {
+      "id": "update-agent",
+      "name": "Update Agent",
+      "description": "Update an existing agent",
+      "method": "PUT",
+      "path": "/agents/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "first_name": { "type": "string", "description": "First name" },
+          "last_name": { "type": "string", "description": "Last name" },
+          "mobile_phone_number": { "type": "string", "description": "Mobile phone number" },
+          "work_phone_number": { "type": "string", "description": "Work phone number" },
+          "department_ids": {
+            "type": "array",
+            "items": { "type": "number" }
+          },
+          "location_id": { "type": "number", "description": "Location ID" },
+          "role_id": { "type": "number", "description": "Agent role ID" },
+          "time_zone": { "type": "string", "description": "Time zone" },
+          "language": { "type": "string", "description": "Language code" },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/agents/{id}"
+    },
+    {
+      "id": "create-agent-group",
+      "name": "Create Agent Group",
+      "description": "Create a new agent group",
+      "method": "POST",
+      "path": "/agent_groups",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Group name" },
+          "description": { "type": "string", "description": "Group description" },
+          "agent_ids": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "Agent IDs"
+          },
+          "auto_assign": { "type": "boolean", "default": false, "description": "Auto assign tickets" },
+          "escalate_to": { "type": "number", "description": "Escalate to agent ID" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/agent_groups"
+    },
+    {
+      "id": "get-agent-group",
+      "name": "Get Agent Group",
+      "description": "Get agent group details by ID",
+      "method": "GET",
+      "path": "/agent_groups/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/agent_groups/{id}"
+    },
+    {
+      "id": "list-agent-groups",
+      "name": "List Agent Groups",
+      "description": "List all agent groups",
+      "method": "GET",
+      "path": "/agent_groups",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/agent_groups"
+    },
+    {
+      "id": "update-agent-group",
+      "name": "Update Agent Group",
+      "description": "Update an existing agent group",
+      "method": "PUT",
+      "path": "/agent_groups/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Group name" },
+          "description": { "type": "string", "description": "Group description" },
+          "agent_ids": {
+            "type": "array",
+            "items": { "type": "number" }
+          },
+          "auto_assign": { "type": "boolean", "description": "Auto assign tickets" },
+          "escalate_to": { "type": "number", "description": "Escalate to agent ID" }
+        }
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/agent_groups/{id}"
+    },
+    {
+      "id": "get-agent-role",
+      "name": "Get Agent Role",
+      "description": "Get agent role details by ID",
+      "method": "GET",
+      "path": "/agent_roles/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/agent_roles/{id}"
+    },
+    {
+      "id": "list-agent-roles",
+      "name": "List Agent Roles",
+      "description": "List all agent roles",
+      "method": "GET",
+      "path": "/agent_roles",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/agent_roles"
+    },
+    {
+      "id": "create-announcement",
+      "name": "Create Announcement",
+      "description": "Create a new announcement",
+      "method": "POST",
+      "path": "/announcements",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Announcement title" },
+          "description": { "type": "string", "required": true, "description": "Announcement description" },
+          "visibility": { "type": "number", "enum": [1, 2], "default": 1, "description": "Visibility (1=Agents, 2=Agents and Requesters)" },
+          "status": { "type": "number", "enum": [1, 2], "default": 1, "description": "Status (1=Published, 2=Draft)" }
+        },
+        "required": ["title", "description"]
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/announcements"
+    },
+    {
+      "id": "get-announcement",
+      "name": "Get Announcement",
+      "description": "Get announcement details by ID",
+      "method": "GET",
+      "path": "/announcements/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/announcements/{id}"
+    },
+    {
+      "id": "list-announcements",
+      "name": "List Announcements",
+      "description": "List all announcements",
+      "method": "GET",
+      "path": "/announcements",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/announcements"
+    },
+    {
+      "id": "update-announcement",
+      "name": "Update Announcement",
+      "description": "Update an existing announcement",
+      "method": "PUT",
+      "path": "/announcements/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Announcement title" },
+          "description": { "type": "string", "description": "Announcement description" },
+          "visibility": { "type": "number", "enum": [1, 2], "description": "Visibility" },
+          "status": { "type": "number", "enum": [1, 2], "description": "Status" }
+        }
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/announcements/{id}"
+    },
+    {
+      "id": "get-asset-type",
+      "name": "Get Asset Type",
+      "description": "Get asset type details by ID",
+      "method": "GET",
+      "path": "/asset_types/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/asset_types/{id}"
+    },
+    {
+      "id": "list-asset-types",
+      "name": "List Asset Types",
+      "description": "List all asset types",
+      "method": "GET",
+      "path": "/asset_types",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/asset_types"
+    },
+    {
+      "id": "create-change",
+      "name": "Create Change",
+      "description": "Create a new change request",
+      "method": "POST",
+      "path": "/changes",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "required": true, "description": "Change subject" },
+          "description": { "type": "string", "required": true, "description": "Change description" },
+          "priority": { "type": "number", "enum": [1, 2, 3, 4], "default": 1, "description": "Priority (1=Low, 2=Medium, 3=High, 4=Urgent)" },
+          "impact": { "type": "number", "enum": [1, 2, 3], "default": 1, "description": "Impact (1=Low, 2=Medium, 3=High)" },
+          "status": { "type": "number", "enum": [1, 2, 3, 4, 5, 6, 7], "default": 1, "description": "Status (1=Open, 2=Planning, 3=Approval, 4=Implement, 5=Review, 6=Completed, 7=Cancelled)" },
+          "risk": { "type": "number", "enum": [1, 2, 3, 4], "default": 1, "description": "Risk (1=Low, 2=Medium, 3=High, 4=Very High)" },
+          "change_type": { "type": "number", "enum": [1, 2, 3, 4], "default": 1, "description": "Change type (1=Minor, 2=Standard, 3=Major, 4=Emergency)" },
+          "requester_id": { "type": "number", "description": "Requester ID" },
+          "agent_id": { "type": "number", "description": "Assigned agent ID" },
+          "department_id": { "type": "number", "description": "Department ID" },
+          "group_id": { "type": "number", "description": "Group ID" },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["subject", "description"]
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/changes"
+    },
+    {
+      "id": "get-change",
+      "name": "Get Change",
+      "description": "Get change request details by ID",
+      "method": "GET",
+      "path": "/changes/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/changes/{id}"
+    },
+    {
+      "id": "list-changes",
+      "name": "List Changes",
+      "description": "List all change requests",
+      "method": "GET",
+      "path": "/changes",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/changes"
+    },
+    {
+      "id": "update-change",
+      "name": "Update Change",
+      "description": "Update an existing change request",
+      "method": "PUT",
+      "path": "/changes/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "description": "Change subject" },
+          "description": { "type": "string", "description": "Change description" },
+          "priority": { "type": "number", "enum": [1, 2, 3, 4], "description": "Priority" },
+          "impact": { "type": "number", "enum": [1, 2, 3], "description": "Impact" },
+          "status": { "type": "number", "enum": [1, 2, 3, 4, 5, 6, 7], "description": "Status" },
+          "risk": { "type": "number", "enum": [1, 2, 3, 4], "description": "Risk" },
+          "change_type": { "type": "number", "enum": [1, 2, 3, 4], "description": "Change type" },
+          "agent_id": { "type": "number", "description": "Assigned agent ID" },
+          "department_id": { "type": "number", "description": "Department ID" },
+          "group_id": { "type": "number", "description": "Group ID" },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/changes/{id}"
+    },
+    {
+      "id": "create-department",
+      "name": "Create Department",
+      "description": "Create a new department",
+      "method": "POST",
+      "path": "/departments",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Department name" },
+          "description": { "type": "string", "description": "Department description" },
+          "head_user_id": { "type": "number", "description": "Head user ID" },
+          "prime_user_id": { "type": "number", "description": "Prime user ID" },
+          "domains": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Email domains"
+          },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/departments"
+    },
+    {
+      "id": "get-department",
+      "name": "Get Department",
+      "description": "Get department details by ID",
+      "method": "GET",
+      "path": "/departments/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/departments/{id}"
+    },
+    {
+      "id": "list-departments",
+      "name": "List Departments",
+      "description": "List all departments",
+      "method": "GET",
+      "path": "/departments",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/departments"
+    },
+    {
+      "id": "update-department",
+      "name": "Update Department",
+      "description": "Update an existing department",
+      "method": "PUT",
+      "path": "/departments/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Department name" },
+          "description": { "type": "string", "description": "Department description" },
+          "head_user_id": { "type": "number", "description": "Head user ID" },
+          "prime_user_id": { "type": "number", "description": "Prime user ID" },
+          "domains": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/departments/{id}"
+    },
+    {
+      "id": "create-location",
+      "name": "Create Location",
+      "description": "Create a new location",
+      "method": "POST",
+      "path": "/locations",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Location name" },
+          "address": { "type": "string", "description": "Address" },
+          "city": { "type": "string", "description": "City" },
+          "state": { "type": "string", "description": "State" },
+          "zipcode": { "type": "string", "description": "Zip code" },
+          "country": { "type": "string", "description": "Country" },
+          "time_zone": { "type": "string", "description": "Time zone" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/locations"
+    },
+    {
+      "id": "get-location",
+      "name": "Get Location",
+      "description": "Get location details by ID",
+      "method": "GET",
+      "path": "/locations/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/locations/{id}"
+    },
+    {
+      "id": "list-locations",
+      "name": "List Locations",
+      "description": "List all locations",
+      "method": "GET",
+      "path": "/locations",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/locations"
+    },
+    {
+      "id": "update-location",
+      "name": "Update Location",
+      "description": "Update an existing location",
+      "method": "PUT",
+      "path": "/locations/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Location name" },
+          "address": { "type": "string", "description": "Address" },
+          "city": { "type": "string", "description": "City" },
+          "state": { "type": "string", "description": "State" },
+          "zipcode": { "type": "string", "description": "Zip code" },
+          "country": { "type": "string", "description": "Country" },
+          "time_zone": { "type": "string", "description": "Time zone" }
+        }
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/locations/{id}"
+    },
+    {
+      "id": "create-problem",
+      "name": "Create Problem",
+      "description": "Create a new problem",
+      "method": "POST",
+      "path": "/problems",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "required": true, "description": "Problem subject" },
+          "description": { "type": "string", "required": true, "description": "Problem description" },
+          "priority": { "type": "number", "enum": [1, 2, 3, 4], "default": 1, "description": "Priority (1=Low, 2=Medium, 3=High, 4=Urgent)" },
+          "impact": { "type": "number", "enum": [1, 2, 3], "default": 1, "description": "Impact (1=Low, 2=Medium, 3=High)" },
+          "status": { "type": "number", "enum": [1, 2, 3, 4, 5], "default": 1, "description": "Status (1=Open, 2=Change Requested, 3=Closed, 4=Known Error, 5=Resolved)" },
+          "agent_id": { "type": "number", "description": "Assigned agent ID" },
+          "department_id": { "type": "number", "description": "Department ID" },
+          "group_id": { "type": "number", "description": "Group ID" },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["subject", "description"]
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/problems"
+    },
+    {
+      "id": "get-problem",
+      "name": "Get Problem",
+      "description": "Get problem details by ID",
+      "method": "GET",
+      "path": "/problems/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/problems/{id}"
+    },
+    {
+      "id": "list-problems",
+      "name": "List Problems",
+      "description": "List all problems",
+      "method": "GET",
+      "path": "/problems",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/problems"
+    },
+    {
+      "id": "update-problem",
+      "name": "Update Problem",
+      "description": "Update an existing problem",
+      "method": "PUT",
+      "path": "/problems/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "description": "Problem subject" },
+          "description": { "type": "string", "description": "Problem description" },
+          "priority": { "type": "number", "enum": [1, 2, 3, 4], "description": "Priority" },
+          "impact": { "type": "number", "enum": [1, 2, 3], "description": "Impact" },
+          "status": { "type": "number", "enum": [1, 2, 3, 4, 5], "description": "Status" },
+          "agent_id": { "type": "number", "description": "Assigned agent ID" },
+          "department_id": { "type": "number", "description": "Department ID" },
+          "group_id": { "type": "number", "description": "Group ID" },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/problems/{id}"
+    },
+    {
+      "id": "get-product",
+      "name": "Get Product",
+      "description": "Get product details by ID",
+      "method": "GET",
+      "path": "/products/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/products/{id}"
+    },
+    {
+      "id": "list-products",
+      "name": "List Products",
+      "description": "List all products",
+      "method": "GET",
+      "path": "/products",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/products"
+    },
+    {
+      "id": "create-release",
+      "name": "Create Release",
+      "description": "Create a new release",
+      "method": "POST",
+      "path": "/releases",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "required": true, "description": "Release subject" },
+          "description": { "type": "string", "required": true, "description": "Release description" },
+          "priority": { "type": "number", "enum": [1, 2, 3, 4], "default": 1, "description": "Priority (1=Low, 2=Medium, 3=High, 4=Urgent)" },
+          "status": { "type": "number", "enum": [1, 2, 3, 4, 5], "default": 1, "description": "Status (1=Open, 2=On Hold, 3=In Progress, 4=Completed, 5=Cancelled)" },
+          "release_type": { "type": "number", "enum": [1, 2, 3], "default": 1, "description": "Release type (1=Minor, 2=Standard, 3=Major)" },
+          "planned_start_date": { "type": "string", "format": "date-time", "description": "Planned start date" },
+          "planned_end_date": { "type": "string", "format": "date-time", "description": "Planned end date" },
+          "agent_id": { "type": "number", "description": "Assigned agent ID" },
+          "department_id": { "type": "number", "description": "Department ID" },
+          "group_id": { "type": "number", "description": "Group ID" },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["subject", "description"]
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/releases"
+    },
+    {
+      "id": "get-release",
+      "name": "Get Release",
+      "description": "Get release details by ID",
+      "method": "GET",
+      "path": "/releases/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/releases/{id}"
+    },
+    {
+      "id": "list-releases",
+      "name": "List Releases",
+      "description": "List all releases",
+      "method": "GET",
+      "path": "/releases",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/releases"
+    },
+    {
+      "id": "update-release",
+      "name": "Update Release",
+      "description": "Update an existing release",
+      "method": "PUT",
+      "path": "/releases/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "description": "Release subject" },
+          "description": { "type": "string", "description": "Release description" },
+          "priority": { "type": "number", "enum": [1, 2, 3, 4], "description": "Priority" },
+          "status": { "type": "number", "enum": [1, 2, 3, 4, 5], "description": "Status" },
+          "release_type": { "type": "number", "enum": [1, 2, 3], "description": "Release type" },
+          "planned_start_date": { "type": "string", "format": "date-time", "description": "Planned start date" },
+          "planned_end_date": { "type": "string", "format": "date-time", "description": "Planned end date" },
+          "agent_id": { "type": "number", "description": "Assigned agent ID" },
+          "department_id": { "type": "number", "description": "Department ID" },
+          "group_id": { "type": "number", "description": "Group ID" },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/releases/{id}"
+    },
+    {
+      "id": "create-requester",
+      "name": "Create Requester",
+      "description": "Create a new requester",
+      "method": "POST",
+      "path": "/requesters",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "first_name": { "type": "string", "required": true, "description": "First name" },
+          "last_name": { "type": "string", "required": true, "description": "Last name" },
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "mobile_phone_number": { "type": "string", "description": "Mobile phone number" },
+          "work_phone_number": { "type": "string", "description": "Work phone number" },
+          "department_ids": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "Department IDs"
+          },
+          "location_id": { "type": "number", "description": "Location ID" },
+          "time_zone": { "type": "string", "description": "Time zone" },
+          "language": { "type": "string", "description": "Language code" },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["first_name", "last_name", "email"]
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/requesters"
+    },
+    {
+      "id": "get-requester",
+      "name": "Get Requester",
+      "description": "Get requester details by ID",
+      "method": "GET",
+      "path": "/requesters/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/requesters/{id}"
+    },
+    {
+      "id": "list-requesters",
+      "name": "List Requesters",
+      "description": "List all requesters",
+      "method": "GET",
+      "path": "/requesters",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/requesters"
+    },
+    {
+      "id": "update-requester",
+      "name": "Update Requester",
+      "description": "Update an existing requester",
+      "method": "PUT",
+      "path": "/requesters/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "first_name": { "type": "string", "description": "First name" },
+          "last_name": { "type": "string", "description": "Last name" },
+          "mobile_phone_number": { "type": "string", "description": "Mobile phone number" },
+          "work_phone_number": { "type": "string", "description": "Work phone number" },
+          "department_ids": {
+            "type": "array",
+            "items": { "type": "number" }
+          },
+          "location_id": { "type": "number", "description": "Location ID" },
+          "time_zone": { "type": "string", "description": "Time zone" },
+          "language": { "type": "string", "description": "Language code" },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/requesters/{id}"
+    },
+    {
+      "id": "create-requester-group",
+      "name": "Create Requester Group",
+      "description": "Create a new requester group",
+      "method": "POST",
+      "path": "/requester_groups",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Group name" },
+          "description": { "type": "string", "description": "Group description" },
+          "requester_ids": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "Requester IDs"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/requester_groups"
+    },
+    {
+      "id": "get-requester-group",
+      "name": "Get Requester Group",
+      "description": "Get requester group details by ID",
+      "method": "GET",
+      "path": "/requester_groups/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/requester_groups/{id}"
+    },
+    {
+      "id": "list-requester-groups",
+      "name": "List Requester Groups",
+      "description": "List all requester groups",
+      "method": "GET",
+      "path": "/requester_groups",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/requester_groups"
+    },
+    {
+      "id": "update-requester-group",
+      "name": "Update Requester Group",
+      "description": "Update an existing requester group",
+      "method": "PUT",
+      "path": "/requester_groups/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Group name" },
+          "description": { "type": "string", "description": "Group description" },
+          "requester_ids": {
+            "type": "array",
+            "items": { "type": "number" }
+          }
+        }
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/requester_groups/{id}"
+    },
+    {
+      "id": "get-software",
+      "name": "Get Software",
+      "description": "Get software details by ID",
+      "method": "GET",
+      "path": "/software/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/software/{id}"
+    },
+    {
+      "id": "list-software",
+      "name": "List Software",
+      "description": "List all software",
+      "method": "GET",
+      "path": "/software",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/software"
+    },
+    {
+      "id": "create-ticket",
+      "name": "Create Ticket",
+      "description": "Create a new ticket",
+      "method": "POST",
+      "path": "/tickets",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "required": true, "description": "Ticket subject" },
+          "description": { "type": "string", "required": true, "description": "Ticket description" },
+          "email": { "type": "string", "format": "email", "description": "Requester email" },
+          "requester_id": { "type": "number", "description": "Requester ID" },
+          "status": { "type": "number", "enum": [2, 3, 4, 5, 6], "default": 2, "description": "Status (2=Open, 3=Pending, 4=Resolved, 5=Closed, 6=Waiting on Customer)" },
+          "priority": { "type": "number", "enum": [1, 2, 3, 4], "default": 1, "description": "Priority (1=Low, 2=Medium, 3=High, 4=Urgent)" },
+          "source": { "type": "number", "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "default": 2, "description": "Source (1=Email, 2=Portal, 3=Phone, 4=Chat, 5=Feedback Widget, 6=Outbound Email, 7=E-commerce, 8=Facebook, 9=Twitter, 10=Walk-up)" },
+          "type": { "type": "number", "enum": [1, 2, 3, 4], "default": 1, "description": "Type (1=Incident, 2=Service Request, 3=Problem, 4=Change)" },
+          "agent_id": { "type": "number", "description": "Assigned agent ID" },
+          "department_id": { "type": "number", "description": "Department ID" },
+          "group_id": { "type": "number", "description": "Group ID" },
+          "cc_emails": {
+            "type": "array",
+            "items": { "type": "string", "format": "email" },
+            "description": "CC email addresses"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "content_type": { "type": "string", "required": true },
+                "content": { "type": "string", "required": true, "description": "Base64 encoded file content" },
+                "name": { "type": "string", "required": true }
+              },
+              "required": ["content_type", "content", "name"]
+            }
+          }
+        },
+        "required": ["subject", "description"]
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/tickets"
+    },
+    {
+      "id": "get-ticket",
+      "name": "Get Ticket",
+      "description": "Get ticket details by ID",
+      "method": "GET",
+      "path": "/tickets/{id}",
+      "headers": {},
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/tickets/{id}"
+    },
+    {
+      "id": "list-tickets",
+      "name": "List Tickets",
+      "description": "List all tickets",
+      "method": "GET",
+      "path": "/tickets",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "30"
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/tickets"
+    },
+    {
+      "id": "update-ticket",
+      "name": "Update Ticket",
+      "description": "Update an existing ticket",
+      "method": "PUT",
+      "path": "/tickets/{id}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string", "description": "Ticket subject" },
+          "description": { "type": "string", "description": "Ticket description" },
+          "status": { "type": "number", "enum": [2, 3, 4, 5, 6], "description": "Status" },
+          "priority": { "type": "number", "enum": [1, 2, 3, 4], "description": "Priority" },
+          "type": { "type": "number", "enum": [1, 2, 3, 4], "description": "Type" },
+          "agent_id": { "type": "number", "description": "Assigned agent ID" },
+          "department_id": { "type": "number", "description": "Department ID" },
+          "group_id": { "type": "number", "description": "Group ID" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "custom_fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://{domain}.freshservice.com/api/v2/tickets/{id}"
+    }
+  ]
+}
+

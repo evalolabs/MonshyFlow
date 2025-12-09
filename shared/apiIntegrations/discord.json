@@ -1,0 +1,418 @@
+{
+  "id": "discord",
+  "name": "Discord",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/discord/5865F2",
+  "description": "Voice, video, and text communication platform",
+  "baseUrl": "https://discord.com/api/v10",
+  "color": {
+    "bg": "from-indigo-100 to-purple-100",
+    "border": "border-indigo-500",
+    "icon": "text-indigo-700",
+    "handle": "bg-indigo-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bot {apiKey}",
+    "secretKey": "DISCORD_BOT_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "send-message",
+      "name": "Send Message",
+      "description": "Send a message to a channel",
+      "method": "POST",
+      "path": "/channels/{channelId}/messages",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "content": { "type": "string", "description": "Message content (up to 2000 characters)" },
+          "tts": { "type": "boolean", "default": false, "description": "Text-to-speech" },
+          "embeds": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string" },
+                "description": { "type": "string" },
+                "url": { "type": "string", "format": "uri" },
+                "color": { "type": "number", "description": "Color as integer" },
+                "footer": {
+                  "type": "object",
+                  "properties": {
+                    "text": { "type": "string" },
+                    "icon_url": { "type": "string", "format": "uri" }
+                  }
+                },
+                "image": {
+                  "type": "object",
+                  "properties": {
+                    "url": { "type": "string", "format": "uri" }
+                  }
+                },
+                "thumbnail": {
+                  "type": "object",
+                  "properties": {
+                    "url": { "type": "string", "format": "uri" }
+                  }
+                },
+                "author": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "url": { "type": "string", "format": "uri" },
+                    "icon_url": { "type": "string", "format": "uri" }
+                  }
+                },
+                "fields": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string", "required": true },
+                      "value": { "type": "string", "required": true },
+                      "inline": { "type": "boolean", "default": false }
+                    },
+                    "required": ["name", "value"]
+                  }
+                },
+                "timestamp": { "type": "string", "format": "date-time" }
+              }
+            },
+            "description": "Rich embeds"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Message components (buttons, select menus)"
+            },
+            "description": "Message components"
+          },
+          "allowed_mentions": {
+            "type": "object",
+            "properties": {
+              "parse": {
+                "type": "array",
+                "items": { "type": "string", "enum": ["roles", "users", "everyone"] }
+              },
+              "roles": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "users": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "replied_user": { "type": "boolean", "default": true }
+            },
+            "description": "Allowed mentions configuration"
+          },
+          "message_reference": {
+            "type": "object",
+            "properties": {
+              "message_id": { "type": "string" },
+              "channel_id": { "type": "string" },
+              "guild_id": { "type": "string" },
+              "fail_if_not_exists": { "type": "boolean", "default": true }
+            },
+            "description": "Reply to a message"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string", "required": true },
+                "data": { "type": "string", "required": true, "description": "Base64 encoded file data" },
+                "content_type": { "type": "string", "description": "MIME type" }
+              },
+              "required": ["name", "data"]
+            },
+            "description": "File attachments (multipart/form-data)"
+          }
+        },
+        "required": ["content"]
+      },
+      "urlTemplate": "https://discord.com/api/v10/channels/{channelId}/messages"
+    },
+    {
+      "id": "get-message",
+      "name": "Get Message",
+      "description": "Get a message by ID",
+      "method": "GET",
+      "path": "/channels/{channelId}/messages/{messageId}",
+      "headers": {},
+      "urlTemplate": "https://discord.com/api/v10/channels/{channelId}/messages/{messageId}"
+    },
+    {
+      "id": "list-messages",
+      "name": "List Messages",
+      "description": "List messages in a channel",
+      "method": "GET",
+      "path": "/channels/{channelId}/messages",
+      "headers": {},
+      "queryParams": {
+        "around": "{messageId}",
+        "before": "{messageId}",
+        "after": "{messageId}",
+        "limit": "50"
+      },
+      "urlTemplate": "https://discord.com/api/v10/channels/{channelId}/messages"
+    },
+    {
+      "id": "edit-message",
+      "name": "Edit Message",
+      "description": "Edit a message",
+      "method": "PATCH",
+      "path": "/channels/{channelId}/messages/{messageId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "content": { "type": "string", "description": "New message content" },
+          "embeds": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Embed objects"
+            }
+          },
+          "flags": { "type": "number", "description": "Message flags" },
+          "allowed_mentions": {
+            "type": "object",
+            "properties": {
+              "parse": {
+                "type": "array",
+                "items": { "type": "string", "enum": ["roles", "users", "everyone"] }
+              },
+              "roles": { "type": "array", "items": { "type": "string" } },
+              "users": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://discord.com/api/v10/channels/{channelId}/messages/{messageId}"
+    },
+    {
+      "id": "delete-message",
+      "name": "Delete Message",
+      "description": "Delete a message",
+      "method": "DELETE",
+      "path": "/channels/{channelId}/messages/{messageId}",
+      "headers": {},
+      "urlTemplate": "https://discord.com/api/v10/channels/{channelId}/messages/{messageId}"
+    },
+    {
+      "id": "bulk-delete-messages",
+      "name": "Bulk Delete Messages",
+      "description": "Delete multiple messages",
+      "method": "POST",
+      "path": "/channels/{channelId}/messages/bulk-delete",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": { "type": "string" },
+            "required": true,
+            "description": "Array of message IDs (2-100 messages)"
+          }
+        },
+        "required": ["messages"]
+      },
+      "urlTemplate": "https://discord.com/api/v10/channels/{channelId}/messages/bulk-delete"
+    },
+    {
+      "id": "create-reaction",
+      "name": "Create Reaction",
+      "description": "Add a reaction to a message",
+      "method": "PUT",
+      "path": "/channels/{channelId}/messages/{messageId}/reactions/{emoji}/@me",
+      "headers": {},
+      "urlTemplate": "https://discord.com/api/v10/channels/{channelId}/messages/{messageId}/reactions/{emoji}/@me"
+    },
+    {
+      "id": "delete-reaction",
+      "name": "Delete Reaction",
+      "description": "Remove a reaction from a message",
+      "method": "DELETE",
+      "path": "/channels/{channelId}/messages/{messageId}/reactions/{emoji}/@me",
+      "headers": {},
+      "urlTemplate": "https://discord.com/api/v10/channels/{channelId}/messages/{messageId}/reactions/{emoji}/@me"
+    },
+    {
+      "id": "get-reactions",
+      "name": "Get Reactions",
+      "description": "Get users who reacted with a specific emoji",
+      "method": "GET",
+      "path": "/channels/{channelId}/messages/{messageId}/reactions/{emoji}",
+      "headers": {},
+      "queryParams": {
+        "after": "{userId}",
+        "limit": "25"
+      },
+      "urlTemplate": "https://discord.com/api/v10/channels/{channelId}/messages/{messageId}/reactions/{emoji}"
+    },
+    {
+      "id": "get-channel",
+      "name": "Get Channel",
+      "description": "Get channel details by ID",
+      "method": "GET",
+      "path": "/channels/{channelId}",
+      "headers": {},
+      "urlTemplate": "https://discord.com/api/v10/channels/{channelId}"
+    },
+    {
+      "id": "list-channels",
+      "name": "List Channels",
+      "description": "List channels in a guild",
+      "method": "GET",
+      "path": "/guilds/{guildId}/channels",
+      "headers": {},
+      "urlTemplate": "https://discord.com/api/v10/guilds/{guildId}/channels"
+    },
+    {
+      "id": "create-channel",
+      "name": "Create Channel",
+      "description": "Create a new channel in a guild",
+      "method": "POST",
+      "path": "/guilds/{guildId}/channels",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Channel name" },
+          "type": { "type": "number", "enum": [0, 2, 4, 5, 10, 11, 12, 13, 15], "description": "Channel type (0=Text, 2=Voice, 4=Category, etc.)", "default": 0 },
+          "topic": { "type": "string", "description": "Channel topic" },
+          "bitrate": { "type": "number", "description": "Bitrate for voice channels" },
+          "user_limit": { "type": "number", "description": "User limit for voice channels" },
+          "rate_limit_per_user": { "type": "number", "description": "Slowmode in seconds" },
+          "position": { "type": "number", "description": "Channel position" },
+          "permission_overwrites": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "required": true },
+                "type": { "type": "number", "enum": [0, 1], "required": true, "description": "0=Role, 1=Member" },
+                "allow": { "type": "string", "description": "Permission bit set" },
+                "deny": { "type": "string", "description": "Permission bit set" }
+              },
+              "required": ["id", "type"]
+            }
+          },
+          "parent_id": { "type": "string", "description": "Parent category ID" },
+          "nsfw": { "type": "boolean", "default": false, "description": "NSFW channel" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://discord.com/api/v10/guilds/{guildId}/channels"
+    },
+    {
+      "id": "update-channel",
+      "name": "Update Channel",
+      "description": "Update a channel",
+      "method": "PATCH",
+      "path": "/channels/{channelId}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Channel name" },
+          "type": { "type": "number", "description": "Channel type" },
+          "topic": { "type": "string", "description": "Channel topic" },
+          "bitrate": { "type": "number", "description": "Bitrate for voice channels" },
+          "user_limit": { "type": "number", "description": "User limit for voice channels" },
+          "rate_limit_per_user": { "type": "number", "description": "Slowmode in seconds" },
+          "position": { "type": "number", "description": "Channel position" },
+          "permission_overwrites": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Permission overwrite objects"
+            }
+          },
+          "parent_id": { "type": "string", "description": "Parent category ID" },
+          "nsfw": { "type": "boolean", "description": "NSFW channel" }
+        }
+      },
+      "urlTemplate": "https://discord.com/api/v10/channels/{channelId}"
+    },
+    {
+      "id": "delete-channel",
+      "name": "Delete Channel",
+      "description": "Delete a channel",
+      "method": "DELETE",
+      "path": "/channels/{channelId}",
+      "headers": {},
+      "urlTemplate": "https://discord.com/api/v10/channels/{channelId}"
+    },
+    {
+      "id": "get-guild",
+      "name": "Get Guild",
+      "description": "Get guild (server) details by ID",
+      "method": "GET",
+      "path": "/guilds/{guildId}",
+      "headers": {},
+      "queryParams": {
+        "with_counts": "true"
+      },
+      "urlTemplate": "https://discord.com/api/v10/guilds/{guildId}"
+    },
+    {
+      "id": "get-guild-member",
+      "name": "Get Guild Member",
+      "description": "Get a guild member by user ID",
+      "method": "GET",
+      "path": "/guilds/{guildId}/members/{userId}",
+      "headers": {},
+      "urlTemplate": "https://discord.com/api/v10/guilds/{guildId}/members/{userId}"
+    },
+    {
+      "id": "list-guild-members",
+      "name": "List Guild Members",
+      "description": "List members in a guild",
+      "method": "GET",
+      "path": "/guilds/{guildId}/members",
+      "headers": {},
+      "queryParams": {
+        "limit": "1000",
+        "after": "{userId}"
+      },
+      "urlTemplate": "https://discord.com/api/v10/guilds/{guildId}/members"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user details by ID",
+      "method": "GET",
+      "path": "/users/{userId}",
+      "headers": {},
+      "urlTemplate": "https://discord.com/api/v10/users/{userId}"
+    },
+    {
+      "id": "get-current-user",
+      "name": "Get Current User",
+      "description": "Get the current bot user",
+      "method": "GET",
+      "path": "/users/@me",
+      "headers": {},
+      "urlTemplate": "https://discord.com/api/v10/users/@me"
+    }
+  ]
+}
+

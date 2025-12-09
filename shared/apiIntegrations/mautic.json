@@ -1,0 +1,478 @@
+{
+  "id": "mautic",
+  "name": "Mautic",
+  "icon": "📊",
+  "logoUrl": "https://cdn.simpleicons.org/mautic/000000",
+  "description": "Open-source marketing automation platform",
+  "baseUrl": "https://{your-mautic-instance}/api",
+  "color": {
+    "bg": "from-gray-100 to-neutral-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "MAUTIC_OAUTH2_ACCESS_TOKEN",
+    "usernameSecretKey": "MAUTIC_USERNAME",
+    "note": "Base URL should be provided in baseUrl placeholder {your-mautic-instance} or as MAUTIC_BASE_URL secret key. Supports Basic Auth (username/password) or OAuth2 (access token). Use MAUTIC_OAUTH2_ACCESS_TOKEN for OAuth2 authentication."
+  },
+  "endpoints": [
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/contacts/new",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstname": {
+            "type": "string",
+            "description": "First name"
+          },
+          "lastname": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "company": {
+            "type": "string",
+            "description": "Company name"
+          },
+          "position": {
+            "type": "string",
+            "description": "Job position"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title"
+          },
+          "address1": {
+            "type": "string",
+            "description": "Address line 1"
+          },
+          "address2": {
+            "type": "string",
+            "description": "Address line 2"
+          },
+          "city": {
+            "type": "string",
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "description": "State"
+          },
+          "zipcode": {
+            "type": "string",
+            "description": "ZIP code"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country"
+          },
+          "website": {
+            "type": "string",
+            "format": "uri",
+            "description": "Website URL"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Custom fields",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/contacts/new"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact by ID",
+      "method": "GET",
+      "path": "/contacts/{contactId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/contacts/{contactId}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/contacts",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "start": {
+          "type": "integer",
+          "default": 0,
+          "description": "Start index"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 100,
+          "description": "Number of results"
+        },
+        "orderBy": {
+          "type": "string",
+          "description": "Order by field"
+        },
+        "orderByDir": {
+          "type": "string",
+          "enum": ["ASC", "DESC"],
+          "default": "ASC",
+          "description": "Order direction"
+        },
+        "where": {
+          "type": "array",
+          "description": "Where clauses (JSON array)"
+        },
+        "search": {
+          "type": "string",
+          "description": "Search query"
+        }
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update a contact",
+      "method": "PATCH",
+      "path": "/contacts/{contactId}/edit",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstname": { "type": "string" },
+          "lastname": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "phone": { "type": "string" },
+          "company": { "type": "string" },
+          "position": { "type": "string" },
+          "title": { "type": "string" },
+          "address1": { "type": "string" },
+          "address2": { "type": "string" },
+          "city": { "type": "string" },
+          "state": { "type": "string" },
+          "zipcode": { "type": "string" },
+          "country": { "type": "string" },
+          "website": { "type": "string", "format": "uri" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "customFields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/contacts/{contactId}/edit"
+    },
+    {
+      "id": "delete-contact",
+      "name": "Delete Contact",
+      "description": "Delete a contact",
+      "method": "DELETE",
+      "path": "/contacts/{contactId}/delete",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/contacts/{contactId}/delete"
+    },
+    {
+      "id": "create-company",
+      "name": "Create Company",
+      "description": "Create a new company",
+      "method": "POST",
+      "path": "/companies/new",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "companyname": {
+            "type": "string",
+            "required": true,
+            "description": "Company name"
+          },
+          "companyemail": {
+            "type": "string",
+            "format": "email",
+            "description": "Company email"
+          },
+          "companyphone": {
+            "type": "string",
+            "description": "Company phone"
+          },
+          "companywebsite": {
+            "type": "string",
+            "format": "uri",
+            "description": "Company website"
+          },
+          "companyaddress1": {
+            "type": "string",
+            "description": "Address line 1"
+          },
+          "companyaddress2": {
+            "type": "string",
+            "description": "Address line 2"
+          },
+          "companycity": {
+            "type": "string",
+            "description": "City"
+          },
+          "companystate": {
+            "type": "string",
+            "description": "State"
+          },
+          "companyzipcode": {
+            "type": "string",
+            "description": "ZIP code"
+          },
+          "companycountry": {
+            "type": "string",
+            "description": "Country"
+          },
+          "companydescription": {
+            "type": "string",
+            "description": "Company description"
+          },
+          "companynumber_of_employees": {
+            "type": "integer",
+            "description": "Number of employees"
+          },
+          "companyannual_revenue": {
+            "type": "number",
+            "description": "Annual revenue"
+          },
+          "companyindustry": {
+            "type": "string",
+            "description": "Industry"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Custom fields",
+            "additionalProperties": true
+          }
+        },
+        "required": ["companyname"]
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/companies/new"
+    },
+    {
+      "id": "get-company",
+      "name": "Get Company",
+      "description": "Get company by ID",
+      "method": "GET",
+      "path": "/companies/{companyId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/companies/{companyId}"
+    },
+    {
+      "id": "list-companies",
+      "name": "List Companies",
+      "description": "List all companies",
+      "method": "GET",
+      "path": "/companies",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "start": {
+          "type": "integer",
+          "default": 0,
+          "description": "Start index"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 100,
+          "description": "Number of results"
+        },
+        "orderBy": {
+          "type": "string",
+          "description": "Order by field"
+        },
+        "orderByDir": {
+          "type": "string",
+          "enum": ["ASC", "DESC"],
+          "default": "ASC",
+          "description": "Order direction"
+        },
+        "where": {
+          "type": "array",
+          "description": "Where clauses (JSON array)"
+        },
+        "search": {
+          "type": "string",
+          "description": "Search query"
+        }
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/companies"
+    },
+    {
+      "id": "update-company",
+      "name": "Update Company",
+      "description": "Update a company",
+      "method": "PATCH",
+      "path": "/companies/{companyId}/edit",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "companyname": { "type": "string" },
+          "companyemail": { "type": "string", "format": "email" },
+          "companyphone": { "type": "string" },
+          "companywebsite": { "type": "string", "format": "uri" },
+          "companyaddress1": { "type": "string" },
+          "companyaddress2": { "type": "string" },
+          "companycity": { "type": "string" },
+          "companystate": { "type": "string" },
+          "companyzipcode": { "type": "string" },
+          "companycountry": { "type": "string" },
+          "companydescription": { "type": "string" },
+          "companynumber_of_employees": { "type": "integer" },
+          "companyannual_revenue": { "type": "number" },
+          "companyindustry": { "type": "string" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "customFields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/companies/{companyId}/edit"
+    },
+    {
+      "id": "delete-company",
+      "name": "Delete Company",
+      "description": "Delete a company",
+      "method": "DELETE",
+      "path": "/companies/{companyId}/delete",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/companies/{companyId}/delete"
+    },
+    {
+      "id": "add-contact-to-company",
+      "name": "Add Contact to Company",
+      "description": "Add a contact to a company",
+      "method": "POST",
+      "path": "/companies/{companyId}/contact/{contactId}/add",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/companies/{companyId}/contact/{contactId}/add"
+    },
+    {
+      "id": "remove-contact-from-company",
+      "name": "Remove Contact from Company",
+      "description": "Remove a contact from a company",
+      "method": "DELETE",
+      "path": "/companies/{companyId}/contact/{contactId}/remove",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/companies/{companyId}/contact/{contactId}/remove"
+    },
+    {
+      "id": "add-contact-to-campaign",
+      "name": "Add Contact to Campaign",
+      "description": "Add a contact to a campaign",
+      "method": "POST",
+      "path": "/campaigns/{campaignId}/contact/{contactId}/add",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/campaigns/{campaignId}/contact/{contactId}/add"
+    },
+    {
+      "id": "remove-contact-from-campaign",
+      "name": "Remove Contact from Campaign",
+      "description": "Remove a contact from a campaign",
+      "method": "DELETE",
+      "path": "/campaigns/{campaignId}/contact/{contactId}/remove",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/campaigns/{campaignId}/contact/{contactId}/remove"
+    },
+    {
+      "id": "add-contact-to-segment",
+      "name": "Add Contact to Segment",
+      "description": "Add a contact to a segment",
+      "method": "POST",
+      "path": "/segments/{segmentId}/contact/{contactId}/add",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/segments/{segmentId}/contact/{contactId}/add"
+    },
+    {
+      "id": "remove-contact-from-segment",
+      "name": "Remove Contact from Segment",
+      "description": "Remove a contact from a segment",
+      "method": "DELETE",
+      "path": "/segments/{segmentId}/contact/{contactId}/remove",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/segments/{segmentId}/contact/{contactId}/remove"
+    },
+    {
+      "id": "send-email-to-segment",
+      "name": "Send Email to Segment",
+      "description": "Send an email to a segment",
+      "method": "POST",
+      "path": "/emails/{emailId}/send/segment/{segmentId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-mautic-instance}/api/emails/{emailId}/send/segment/{segmentId}"
+    }
+  ]
+}
+

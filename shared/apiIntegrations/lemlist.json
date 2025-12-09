@@ -1,0 +1,192 @@
+{
+  "id": "lemlist",
+  "name": "Lemlist",
+  "icon": "📬",
+  "logoUrl": "https://cdn.simpleicons.org/lemlist/000000",
+  "description": "Cold email outreach and automation platform",
+  "baseUrl": "https://api.lemlist.com/api",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "basic",
+    "headerName": "Authorization",
+    "headerFormat": "Basic {apiKey}",
+    "secretKey": "LEMLIST_API_KEY",
+    "note": "Basic Auth uses API Key as both username and password. Format: Basic base64(apiKey:apiKey)"
+  },
+  "endpoints": [
+    {
+      "id": "get-campaign",
+      "name": "Get Campaign",
+      "description": "Get campaign by ID",
+      "method": "GET",
+      "path": "/campaigns/{campaignId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.lemlist.com/api/campaigns/{campaignId}"
+    },
+    {
+      "id": "list-campaigns",
+      "name": "List Campaigns",
+      "description": "List all campaigns",
+      "method": "GET",
+      "path": "/campaigns",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.lemlist.com/api/campaigns"
+    },
+    {
+      "id": "add-lead",
+      "name": "Add Lead",
+      "description": "Add a lead to a campaign",
+      "method": "POST",
+      "path": "/campaigns/{campaignId}/leads",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Basic {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Email address"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "First name"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "companyName": {
+            "type": "string",
+            "description": "Company name"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "website": {
+            "type": "string",
+            "format": "uri",
+            "description": "Website URL"
+          },
+          "linkedinUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "LinkedIn URL"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Custom fields",
+            "additionalProperties": true
+          }
+        },
+        "required": ["email"]
+      },
+      "urlTemplate": "https://api.lemlist.com/api/campaigns/{campaignId}/leads"
+    },
+    {
+      "id": "get-lead",
+      "name": "Get Lead",
+      "description": "Get lead by ID",
+      "method": "GET",
+      "path": "/leads/{leadId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.lemlist.com/api/leads/{leadId}"
+    },
+    {
+      "id": "list-leads",
+      "name": "List Leads",
+      "description": "List all leads",
+      "method": "GET",
+      "path": "/leads",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "campaignId": {
+          "type": "string",
+          "description": "Filter by campaign ID"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 100,
+          "description": "Number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0,
+          "description": "Offset for pagination"
+        }
+      },
+      "urlTemplate": "https://api.lemlist.com/api/leads"
+    },
+    {
+      "id": "unsubscribe-lead",
+      "name": "Unsubscribe Lead",
+      "description": "Unsubscribe a lead",
+      "method": "POST",
+      "path": "/leads/{leadId}/unsubscribe",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.lemlist.com/api/leads/{leadId}/unsubscribe"
+    },
+    {
+      "id": "get-email",
+      "name": "Get Email",
+      "description": "Get email by ID",
+      "method": "GET",
+      "path": "/emails/{emailId}",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "urlTemplate": "https://api.lemlist.com/api/emails/{emailId}"
+    },
+    {
+      "id": "list-emails",
+      "name": "List Emails",
+      "description": "List all emails",
+      "method": "GET",
+      "path": "/emails",
+      "headers": {
+        "Authorization": "Basic {apiKey}"
+      },
+      "queryParams": {
+        "leadId": {
+          "type": "string",
+          "description": "Filter by lead ID"
+        },
+        "campaignId": {
+          "type": "string",
+          "description": "Filter by campaign ID"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 100,
+          "description": "Number of results"
+        },
+        "offset": {
+          "type": "integer",
+          "default": 0,
+          "description": "Offset for pagination"
+        }
+      },
+      "urlTemplate": "https://api.lemlist.com/api/emails"
+    }
+  ]
+}
+

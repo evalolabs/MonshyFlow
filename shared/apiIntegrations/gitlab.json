@@ -1,0 +1,320 @@
+{
+  "id": "gitlab",
+  "name": "GitLab",
+  "icon": "🦊",
+  "logoUrl": "https://cdn.simpleicons.org/gitlab/FC6D26",
+  "description": "Git repository hosting and DevOps platform",
+  "baseUrl": "{server}/api/v4",
+  "color": {
+    "bg": "from-orange-100 to-red-100",
+    "border": "border-orange-500",
+    "icon": "text-orange-700",
+    "handle": "bg-orange-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GITLAB_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-file",
+      "name": "Create File",
+      "description": "Create a new file in repository",
+      "method": "POST",
+      "path": "/projects/{projectId}/repository/files/{filePath}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "branch": { "type": "string", "required": true, "description": "Branch name" },
+          "content": { "type": "string", "required": true, "description": "File content" },
+          "commit_message": { "type": "string", "required": true, "description": "Commit message" },
+          "encoding": { "type": "string", "enum": ["text", "base64"], "default": "text", "description": "Content encoding" },
+          "author_email": { "type": "string", "format": "email", "description": "Author email" },
+          "author_name": { "type": "string", "description": "Author name" }
+        },
+        "required": ["branch", "content", "commit_message"]
+      },
+      "urlTemplate": "{server}/api/v4/projects/{projectId}/repository/files/{filePath}"
+    },
+    {
+      "id": "get-file",
+      "name": "Get File",
+      "description": "Get file content from repository",
+      "method": "GET",
+      "path": "/projects/{projectId}/repository/files/{filePath}",
+      "headers": {},
+      "queryParams": {
+        "ref": "{ref}",
+        "ref_type": "{refType}"
+      },
+      "urlTemplate": "{server}/api/v4/projects/{projectId}/repository/files/{filePath}"
+    },
+    {
+      "id": "delete-file",
+      "name": "Delete File",
+      "description": "Delete a file from repository",
+      "method": "DELETE",
+      "path": "/projects/{projectId}/repository/files/{filePath}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "branch": { "type": "string", "required": true, "description": "Branch name" },
+          "commit_message": { "type": "string", "required": true, "description": "Commit message" },
+          "author_email": { "type": "string", "format": "email", "description": "Author email" },
+          "author_name": { "type": "string", "description": "Author name" }
+        },
+        "required": ["branch", "commit_message"]
+      },
+      "urlTemplate": "{server}/api/v4/projects/{projectId}/repository/files/{filePath}"
+    },
+    {
+      "id": "create-issue",
+      "name": "Create Issue",
+      "description": "Create a new issue",
+      "method": "POST",
+      "path": "/projects/{projectId}/issues",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Issue title" },
+          "description": { "type": "string", "description": "Issue description" },
+          "confidential": { "type": "boolean", "default": false, "description": "Confidential issue" },
+          "assignee_ids": {
+            "type": "array",
+            "items": { "type": "number" },
+            "description": "Assignee user IDs"
+          },
+          "milestone_id": { "type": "number", "description": "Milestone ID" },
+          "labels": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Labels"
+          },
+          "created_at": { "type": "string", "format": "date-time", "description": "Creation date" },
+          "due_date": { "type": "string", "format": "date", "description": "Due date" },
+          "merge_request_to_resolve_discussions_of": { "type": "number", "description": "Merge request ID" },
+          "discussion_to_resolve": { "type": "string", "description": "Discussion ID" },
+          "weight": { "type": "number", "description": "Issue weight" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "{server}/api/v4/projects/{projectId}/issues"
+    },
+    {
+      "id": "get-issue",
+      "name": "Get Issue",
+      "description": "Get issue details by IID",
+      "method": "GET",
+      "path": "/projects/{projectId}/issues/{issueIid}",
+      "headers": {},
+      "urlTemplate": "{server}/api/v4/projects/{projectId}/issues/{issueIid}"
+    },
+    {
+      "id": "list-issues",
+      "name": "List Issues",
+      "description": "List all issues in project",
+      "method": "GET",
+      "path": "/projects/{projectId}/issues",
+      "headers": {},
+      "queryParams": {
+        "iids": "{iids}",
+        "state": "{state}",
+        "labels": "{labels}",
+        "milestone": "{milestone}",
+        "order_by": "created_at",
+        "sort": "desc",
+        "page": "1",
+        "per_page": "20"
+      },
+      "urlTemplate": "{server}/api/v4/projects/{projectId}/issues"
+    },
+    {
+      "id": "update-issue",
+      "name": "Update Issue",
+      "description": "Update an existing issue",
+      "method": "PUT",
+      "path": "/projects/{projectId}/issues/{issueIid}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Issue title" },
+          "description": { "type": "string", "description": "Issue description" },
+          "confidential": { "type": "boolean", "description": "Confidential issue" },
+          "assignee_ids": {
+            "type": "array",
+            "items": { "type": "number" }
+          },
+          "milestone_id": { "type": "number", "description": "Milestone ID" },
+          "labels": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "state_event": { "type": "string", "enum": ["close", "reopen"], "description": "State event" },
+          "due_date": { "type": "string", "format": "date", "description": "Due date" },
+          "weight": { "type": "number", "description": "Issue weight" }
+        }
+      },
+      "urlTemplate": "{server}/api/v4/projects/{projectId}/issues/{issueIid}"
+    },
+    {
+      "id": "create-release",
+      "name": "Create Release",
+      "description": "Create a new release",
+      "method": "POST",
+      "path": "/projects/{projectId}/releases",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Release name" },
+          "tag_name": { "type": "string", "required": true, "description": "Tag name" },
+          "description": { "type": "string", "description": "Release description" },
+          "ref": { "type": "string", "description": "Branch or tag reference" },
+          "milestones": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Milestone tags"
+          },
+          "assets": {
+            "type": "object",
+            "properties": {
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string", "required": true },
+                    "url": { "type": "string", "format": "uri", "required": true },
+                    "filepath": { "type": "string" },
+                    "link_type": { "type": "string", "enum": ["other", "runbook", "image", "package"] }
+                  },
+                  "required": ["name", "url"]
+                }
+              }
+            }
+          },
+          "released_at": { "type": "string", "format": "date-time", "description": "Release date" }
+        },
+        "required": ["name", "tag_name"]
+      },
+      "urlTemplate": "{server}/api/v4/projects/{projectId}/releases"
+    },
+    {
+      "id": "get-release",
+      "name": "Get Release",
+      "description": "Get release details by tag name",
+      "method": "GET",
+      "path": "/projects/{projectId}/releases/{tagName}",
+      "headers": {},
+      "urlTemplate": "{server}/api/v4/projects/{projectId}/releases/{tagName}"
+    },
+    {
+      "id": "list-releases",
+      "name": "List Releases",
+      "description": "List all releases",
+      "method": "GET",
+      "path": "/projects/{projectId}/releases",
+      "headers": {},
+      "queryParams": {
+        "page": "1",
+        "per_page": "20"
+      },
+      "urlTemplate": "{server}/api/v4/projects/{projectId}/releases"
+    },
+    {
+      "id": "update-release",
+      "name": "Update Release",
+      "description": "Update an existing release",
+      "method": "PUT",
+      "path": "/projects/{projectId}/releases/{tagName}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Release name" },
+          "description": { "type": "string", "description": "Release description" },
+          "milestones": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "released_at": { "type": "string", "format": "date-time", "description": "Release date" }
+        }
+      },
+      "urlTemplate": "{server}/api/v4/projects/{projectId}/releases/{tagName}"
+    },
+    {
+      "id": "get-repository",
+      "name": "Get Repository",
+      "description": "Get project/repository details by ID",
+      "method": "GET",
+      "path": "/projects/{projectId}",
+      "headers": {},
+      "queryParams": {
+        "statistics": "true",
+        "with_custom_attributes": "false"
+      },
+      "urlTemplate": "{server}/api/v4/projects/{projectId}"
+    },
+    {
+      "id": "list-repositories",
+      "name": "List Repositories",
+      "description": "List all projects/repositories",
+      "method": "GET",
+      "path": "/projects",
+      "headers": {},
+      "queryParams": {
+        "archived": "false",
+        "visibility": "{visibility}",
+        "order_by": "created_at",
+        "sort": "desc",
+        "page": "1",
+        "per_page": "20"
+      },
+      "urlTemplate": "{server}/api/v4/projects"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user details by ID",
+      "method": "GET",
+      "path": "/users/{userId}",
+      "headers": {},
+      "urlTemplate": "{server}/api/v4/users/{userId}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/users",
+      "headers": {},
+      "queryParams": {
+        "username": "{username}",
+        "active": "true",
+        "blocked": "false",
+        "page": "1",
+        "per_page": "20"
+      },
+      "urlTemplate": "{server}/api/v4/users"
+    }
+  ]
+}
+

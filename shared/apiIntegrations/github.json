@@ -1,0 +1,517 @@
+{
+  "id": "github",
+  "name": "GitHub",
+  "icon": "🐙",
+  "logoUrl": "https://cdn.simpleicons.org/github/181717",
+  "description": "Code hosting and version control platform",
+  "baseUrl": "https://api.github.com",
+  "color": {
+    "bg": "from-slate-100 to-gray-100",
+    "border": "border-slate-500",
+    "icon": "text-slate-700",
+    "handle": "bg-slate-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "GITHUB_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "create-repository",
+      "name": "Create Repository",
+      "description": "Create a new repository",
+      "method": "POST",
+      "path": "/user/repos",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Repository name" },
+          "description": { "type": "string", "description": "Repository description" },
+          "private": { "type": "boolean", "description": "Make repository private", "default": false },
+          "auto_init": { "type": "boolean", "description": "Initialize with README", "default": false },
+          "gitignore_template": { "type": "string", "description": "Gitignore template name" },
+          "license_template": { "type": "string", "description": "License template name" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.github.com/user/repos"
+    },
+    {
+      "id": "create-org-repository",
+      "name": "Create Organization Repository",
+      "description": "Create a new repository in an organization",
+      "method": "POST",
+      "path": "/orgs/{org}/repos",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Repository name" },
+          "description": { "type": "string", "description": "Repository description" },
+          "private": { "type": "boolean", "description": "Make repository private", "default": false },
+          "auto_init": { "type": "boolean", "description": "Initialize with README", "default": false }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://api.github.com/orgs/{org}/repos"
+    },
+    {
+      "id": "get-repository",
+      "name": "Get Repository",
+      "description": "Get repository details",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}"
+    },
+    {
+      "id": "list-user-repositories",
+      "name": "List User Repositories",
+      "description": "List repositories for the authenticated user",
+      "method": "GET",
+      "path": "/user/repos",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "queryParams": {
+        "type": "all",
+        "sort": "updated",
+        "direction": "desc",
+        "per_page": "100",
+        "page": "1"
+      },
+      "urlTemplate": "https://api.github.com/user/repos"
+    },
+    {
+      "id": "list-org-repositories",
+      "name": "List Organization Repositories",
+      "description": "List repositories for an organization",
+      "method": "GET",
+      "path": "/orgs/{org}/repos",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "queryParams": {
+        "type": "all",
+        "sort": "updated",
+        "per_page": "100",
+        "page": "1"
+      },
+      "urlTemplate": "https://api.github.com/orgs/{org}/repos"
+    },
+    {
+      "id": "update-repository",
+      "name": "Update Repository",
+      "description": "Update repository settings",
+      "method": "PATCH",
+      "path": "/repos/{owner}/{repo}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Repository name" },
+          "description": { "type": "string", "description": "Repository description" },
+          "private": { "type": "boolean", "description": "Make repository private" },
+          "has_issues": { "type": "boolean", "description": "Enable issues" },
+          "has_projects": { "type": "boolean", "description": "Enable projects" },
+          "has_wiki": { "type": "boolean", "description": "Enable wiki" }
+        }
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}"
+    },
+    {
+      "id": "create-issue",
+      "name": "Create Issue",
+      "description": "Create a new issue",
+      "method": "POST",
+      "path": "/repos/{owner}/{repo}/issues",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Issue title" },
+          "body": { "type": "string", "description": "Issue body (Markdown)" },
+          "labels": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Issue labels"
+          },
+          "assignees": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Assignee usernames"
+          },
+          "milestone": { "type": "number", "description": "Milestone number" }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/issues"
+    },
+    {
+      "id": "get-issue",
+      "name": "Get Issue",
+      "description": "Get issue details by number",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/issues/{issueNumber}",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/issues/{issueNumber}"
+    },
+    {
+      "id": "list-issues",
+      "name": "List Issues",
+      "description": "List issues for a repository",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/issues",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "queryParams": {
+        "state": "open",
+        "labels": "{labels}",
+        "sort": "created",
+        "direction": "desc",
+        "per_page": "100",
+        "page": "1"
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/issues"
+    },
+    {
+      "id": "update-issue",
+      "name": "Update Issue",
+      "description": "Update an issue",
+      "method": "PATCH",
+      "path": "/repos/{owner}/{repo}/issues/{issueNumber}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Issue title" },
+          "body": { "type": "string", "description": "Issue body (Markdown)" },
+          "state": { "type": "string", "enum": ["open", "closed"], "description": "Issue state" },
+          "labels": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Issue labels"
+          },
+          "assignees": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Assignee usernames"
+          }
+        }
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/issues/{issueNumber}"
+    },
+    {
+      "id": "create-file",
+      "name": "Create File",
+      "description": "Create or update a file in repository",
+      "method": "PUT",
+      "path": "/repos/{owner}/{repo}/contents/{path}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "required": true, "description": "Commit message" },
+          "content": { "type": "string", "format": "base64", "required": true, "description": "File content as base64" },
+          "branch": { "type": "string", "description": "Branch name (default: main/master)" },
+          "committer": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "email": { "type": "string" }
+            },
+            "description": "Committer information"
+          }
+        },
+        "required": ["message", "content"]
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/contents/{path}"
+    },
+    {
+      "id": "get-file",
+      "name": "Get File",
+      "description": "Get file contents from repository",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/contents/{path}",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "queryParams": {
+        "ref": "{branch}"
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/contents/{path}"
+    },
+    {
+      "id": "delete-file",
+      "name": "Delete File",
+      "description": "Delete a file from repository",
+      "method": "DELETE",
+      "path": "/repos/{owner}/{repo}/contents/{path}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "required": true, "description": "Commit message" },
+          "sha": { "type": "string", "required": true, "description": "File SHA (from get-file response)" },
+          "branch": { "type": "string", "description": "Branch name" },
+          "committer": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "email": { "type": "string" }
+            }
+          }
+        },
+        "required": ["message", "sha"]
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/contents/{path}"
+    },
+    {
+      "id": "create-release",
+      "name": "Create Release",
+      "description": "Create a new release",
+      "method": "POST",
+      "path": "/repos/{owner}/{repo}/releases",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "tag_name": { "type": "string", "required": true, "description": "Release tag name" },
+          "target_commitish": { "type": "string", "description": "Target branch or commit SHA", "default": "main" },
+          "name": { "type": "string", "description": "Release name" },
+          "body": { "type": "string", "description": "Release notes (Markdown)" },
+          "draft": { "type": "boolean", "description": "Create as draft", "default": false },
+          "prerelease": { "type": "boolean", "description": "Mark as prerelease", "default": false }
+        },
+        "required": ["tag_name"]
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/releases"
+    },
+    {
+      "id": "get-release",
+      "name": "Get Release",
+      "description": "Get release details by ID",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/releases/{id}",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/releases/{id}"
+    },
+    {
+      "id": "list-releases",
+      "name": "List Releases",
+      "description": "List all releases",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/releases",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "queryParams": {
+        "per_page": "100",
+        "page": "1"
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/releases"
+    },
+    {
+      "id": "update-release",
+      "name": "Update Release",
+      "description": "Update a release",
+      "method": "PATCH",
+      "path": "/repos/{owner}/{repo}/releases/{id}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "tag_name": { "type": "string", "description": "Release tag name" },
+          "target_commitish": { "type": "string", "description": "Target branch or commit SHA" },
+          "name": { "type": "string", "description": "Release name" },
+          "body": { "type": "string", "description": "Release notes (Markdown)" },
+          "draft": { "type": "boolean", "description": "Create as draft" },
+          "prerelease": { "type": "boolean", "description": "Mark as prerelease" }
+        }
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/releases/{id}"
+    },
+    {
+      "id": "get-organization",
+      "name": "Get Organization",
+      "description": "Get organization details",
+      "method": "GET",
+      "path": "/orgs/{org}",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "urlTemplate": "https://api.github.com/orgs/{org}"
+    },
+    {
+      "id": "list-organizations",
+      "name": "List Organizations",
+      "description": "List organizations for authenticated user",
+      "method": "GET",
+      "path": "/user/orgs",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "queryParams": {
+        "per_page": "100",
+        "page": "1"
+      },
+      "urlTemplate": "https://api.github.com/user/orgs"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user details by username",
+      "method": "GET",
+      "path": "/users/{username}",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "urlTemplate": "https://api.github.com/users/{username}"
+    },
+    {
+      "id": "get-authenticated-user",
+      "name": "Get Authenticated User",
+      "description": "Get authenticated user details",
+      "method": "GET",
+      "path": "/user",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "urlTemplate": "https://api.github.com/user"
+    },
+    {
+      "id": "create-pull-request-review",
+      "name": "Create Pull Request Review",
+      "description": "Create a review for a pull request",
+      "method": "POST",
+      "path": "/repos/{owner}/{repo}/pulls/{pullNumber}/reviews",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "body": { "type": "string", "description": "Review comment body" },
+          "event": { "type": "string", "enum": ["APPROVE", "REQUEST_CHANGES", "COMMENT"], "description": "Review event" },
+          "comments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": { "type": "string" },
+                "position": { "type": "number" },
+                "body": { "type": "string" }
+              }
+            },
+            "description": "Review comments"
+          }
+        }
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/pulls/{pullNumber}/reviews"
+    },
+    {
+      "id": "list-pull-request-reviews",
+      "name": "List Pull Request Reviews",
+      "description": "List reviews for a pull request",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/pulls/{pullNumber}/reviews",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "queryParams": {
+        "per_page": "100",
+        "page": "1"
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/pulls/{pullNumber}/reviews"
+    },
+    {
+      "id": "dispatch-workflow",
+      "name": "Dispatch Workflow",
+      "description": "Trigger a GitHub Actions workflow",
+      "method": "POST",
+      "path": "/repos/{owner}/{repo}/actions/workflows/{workflowId}/dispatches",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "ref": { "type": "string", "required": true, "description": "Branch or tag name" },
+          "inputs": {
+            "type": "object",
+            "description": "Input parameters for the workflow",
+            "additionalProperties": true
+          }
+        },
+        "required": ["ref"]
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflowId}/dispatches"
+    },
+    {
+      "id": "get-workflow",
+      "name": "Get Workflow",
+      "description": "Get workflow details by ID",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/actions/workflows/{workflowId}",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflowId}"
+    },
+    {
+      "id": "list-workflows",
+      "name": "List Workflows",
+      "description": "List all workflows for a repository",
+      "method": "GET",
+      "path": "/repos/{owner}/{repo}/actions/workflows",
+      "headers": {
+        "Accept": "application/vnd.github.v3+json"
+      },
+      "queryParams": {
+        "per_page": "100",
+        "page": "1"
+      },
+      "urlTemplate": "https://api.github.com/repos/{owner}/{repo}/actions/workflows"
+    }
+  ]
+}
+

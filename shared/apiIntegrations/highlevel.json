@@ -1,0 +1,624 @@
+{
+  "id": "highlevel",
+  "name": "HighLevel",
+  "icon": "📈",
+  "logoUrl": "https://cdn.simpleicons.org/highlevel/000000",
+  "description": "All-in-one marketing platform for agencies",
+  "baseUrl": "https://rest.gohighlevel.com/v1",
+  "color": {
+    "bg": "from-indigo-100 to-blue-100",
+    "border": "border-indigo-500",
+    "icon": "text-indigo-700",
+    "handle": "bg-indigo-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "HIGHLEVEL_API_KEY"
+  },
+  "endpoints": [
+    {
+      "id": "create-contact",
+      "name": "Create Contact",
+      "description": "Create a new contact",
+      "method": "POST",
+      "path": "/contacts",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "First name"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "companyName": {
+            "type": "string",
+            "description": "Company name"
+          },
+          "source": {
+            "type": "string",
+            "description": "Source"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          },
+          "customField": {
+            "type": "object",
+            "description": "Custom fields",
+            "additionalProperties": true
+          },
+          "address1": { "type": "string" },
+          "address2": { "type": "string" },
+          "city": { "type": "string" },
+          "state": { "type": "string" },
+          "country": { "type": "string" },
+          "postalCode": { "type": "string" },
+          "website": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/contacts"
+    },
+    {
+      "id": "get-contact",
+      "name": "Get Contact",
+      "description": "Get contact by ID",
+      "method": "GET",
+      "path": "/contacts/{contactId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/contacts/{contactId}"
+    },
+    {
+      "id": "list-contacts",
+      "name": "List Contacts",
+      "description": "List all contacts",
+      "method": "GET",
+      "path": "/contacts",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum number of results"
+        },
+        "skip": {
+          "type": "integer",
+          "default": 0,
+          "description": "Skip for pagination"
+        },
+        "query": {
+          "type": "string",
+          "description": "Search query"
+        },
+        "locationId": {
+          "type": "string",
+          "description": "Filter by location ID"
+        },
+        "tags": {
+          "type": "string",
+          "description": "Comma-separated tags"
+        }
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/contacts"
+    },
+    {
+      "id": "update-contact",
+      "name": "Update Contact",
+      "description": "Update a contact",
+      "method": "PUT",
+      "path": "/contacts/{contactId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Contact data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/contacts/{contactId}"
+    },
+    {
+      "id": "delete-contact",
+      "name": "Delete Contact",
+      "description": "Delete a contact",
+      "method": "DELETE",
+      "path": "/contacts/{contactId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/contacts/{contactId}"
+    },
+    {
+      "id": "get-conversation",
+      "name": "Get Conversation",
+      "description": "Get conversation by ID",
+      "method": "GET",
+      "path": "/conversations/{conversationId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/conversations/{conversationId}"
+    },
+    {
+      "id": "list-conversations",
+      "name": "List Conversations",
+      "description": "List all conversations",
+      "method": "GET",
+      "path": "/conversations",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 100
+        },
+        "skip": {
+          "type": "integer",
+          "default": 0
+        },
+        "locationId": {
+          "type": "string",
+          "description": "Filter by location ID"
+        },
+        "contactId": {
+          "type": "string",
+          "description": "Filter by contact ID"
+        }
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/conversations"
+    },
+    {
+      "id": "create-conversation",
+      "name": "Create Conversation",
+      "description": "Create a new conversation",
+      "method": "POST",
+      "path": "/conversations",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "contactId": {
+            "type": "string",
+            "required": true,
+            "description": "Contact ID"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "assignedTo": {
+            "type": "string",
+            "description": "Assigned user ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["open", "closed"],
+            "default": "open",
+            "description": "Conversation status"
+          }
+        },
+        "required": ["contactId"]
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/conversations"
+    },
+    {
+      "id": "create-message",
+      "name": "Create Message",
+      "description": "Send a message in a conversation",
+      "method": "POST",
+      "path": "/conversations/{conversationId}/messages",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "required": true,
+            "description": "Message content"
+          },
+          "mediaUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Media URL"
+          },
+          "assignedTo": {
+            "type": "string",
+            "description": "Assigned user ID"
+          }
+        },
+        "required": ["content"]
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/conversations/{conversationId}/messages"
+    },
+    {
+      "id": "list-messages",
+      "name": "List Messages",
+      "description": "List all messages in a conversation",
+      "method": "GET",
+      "path": "/conversations/{conversationId}/messages",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 100
+        },
+        "skip": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/conversations/{conversationId}/messages"
+    },
+    {
+      "id": "create-campaign",
+      "name": "Create Campaign",
+      "description": "Create a new campaign",
+      "method": "POST",
+      "path": "/campaigns",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Campaign name"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["EMAIL", "SMS", "VOICE", "POSTCARD"],
+            "description": "Campaign type"
+          },
+          "description": {
+            "type": "string",
+            "description": "Campaign description"
+          }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/campaigns"
+    },
+    {
+      "id": "get-campaign",
+      "name": "Get Campaign",
+      "description": "Get campaign by ID",
+      "method": "GET",
+      "path": "/campaigns/{campaignId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/campaigns/{campaignId}"
+    },
+    {
+      "id": "list-campaigns",
+      "name": "List Campaigns",
+      "description": "List all campaigns",
+      "method": "GET",
+      "path": "/campaigns",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 100
+        },
+        "skip": {
+          "type": "integer",
+          "default": 0
+        },
+        "locationId": {
+          "type": "string",
+          "description": "Filter by location ID"
+        }
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/campaigns"
+    },
+    {
+      "id": "update-campaign",
+      "name": "Update Campaign",
+      "description": "Update a campaign",
+      "method": "PUT",
+      "path": "/campaigns/{campaignId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Campaign data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/campaigns/{campaignId}"
+    },
+    {
+      "id": "create-opportunity",
+      "name": "Create Opportunity",
+      "description": "Create a new opportunity",
+      "method": "POST",
+      "path": "/opportunities",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "required": true,
+            "description": "Opportunity title"
+          },
+          "contactId": {
+            "type": "string",
+            "required": true,
+            "description": "Contact ID"
+          },
+          "monetaryValue": {
+            "type": "number",
+            "description": "Monetary value"
+          },
+          "pipelineId": {
+            "type": "string",
+            "description": "Pipeline ID"
+          },
+          "pipelineStageId": {
+            "type": "string",
+            "description": "Pipeline stage ID"
+          },
+          "assignedTo": {
+            "type": "string",
+            "description": "Assigned user ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["open", "won", "lost"],
+            "default": "open",
+            "description": "Opportunity status"
+          }
+        },
+        "required": ["title", "contactId"]
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/opportunities"
+    },
+    {
+      "id": "get-opportunity",
+      "name": "Get Opportunity",
+      "description": "Get opportunity by ID",
+      "method": "GET",
+      "path": "/opportunities/{opportunityId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/opportunities/{opportunityId}"
+    },
+    {
+      "id": "list-opportunities",
+      "name": "List Opportunities",
+      "description": "List all opportunities",
+      "method": "GET",
+      "path": "/opportunities",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 100
+        },
+        "skip": {
+          "type": "integer",
+          "default": 0
+        },
+        "locationId": {
+          "type": "string",
+          "description": "Filter by location ID"
+        },
+        "contactId": {
+          "type": "string",
+          "description": "Filter by contact ID"
+        },
+        "assignedTo": {
+          "type": "string",
+          "description": "Filter by assigned user ID"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["open", "won", "lost"],
+          "description": "Filter by status"
+        }
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/opportunities"
+    },
+    {
+      "id": "update-opportunity",
+      "name": "Update Opportunity",
+      "description": "Update an opportunity",
+      "method": "PUT",
+      "path": "/opportunities/{opportunityId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Opportunity data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/opportunities/{opportunityId}"
+    },
+    {
+      "id": "delete-opportunity",
+      "name": "Delete Opportunity",
+      "description": "Delete an opportunity",
+      "method": "DELETE",
+      "path": "/opportunities/{opportunityId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/opportunities/{opportunityId}"
+    },
+    {
+      "id": "create-task",
+      "name": "Create Task",
+      "description": "Create a new task",
+      "method": "POST",
+      "path": "/tasks",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "required": true,
+            "description": "Task title"
+          },
+          "body": {
+            "type": "string",
+            "description": "Task description"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Due date (ISO 8601)"
+          },
+          "assignedTo": {
+            "type": "string",
+            "description": "Assigned user ID"
+          },
+          "contactId": {
+            "type": "string",
+            "description": "Contact ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["open", "completed"],
+            "default": "open",
+            "description": "Task status"
+          }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/tasks"
+    },
+    {
+      "id": "get-task",
+      "name": "Get Task",
+      "description": "Get task by ID",
+      "method": "GET",
+      "path": "/tasks/{taskId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/tasks/{taskId}"
+    },
+    {
+      "id": "list-tasks",
+      "name": "List Tasks",
+      "description": "List all tasks",
+      "method": "GET",
+      "path": "/tasks",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "limit": {
+          "type": "integer",
+          "default": 100
+        },
+        "skip": {
+          "type": "integer",
+          "default": 0
+        },
+        "locationId": {
+          "type": "string",
+          "description": "Filter by location ID"
+        },
+        "contactId": {
+          "type": "string",
+          "description": "Filter by contact ID"
+        },
+        "assignedTo": {
+          "type": "string",
+          "description": "Filter by assigned user ID"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["open", "completed"],
+          "description": "Filter by status"
+        }
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/tasks"
+    },
+    {
+      "id": "update-task",
+      "name": "Update Task",
+      "description": "Update a task",
+      "method": "PUT",
+      "path": "/tasks/{taskId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "Task data to update",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/tasks/{taskId}"
+    },
+    {
+      "id": "delete-task",
+      "name": "Delete Task",
+      "description": "Delete a task",
+      "method": "DELETE",
+      "path": "/tasks/{taskId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://rest.gohighlevel.com/v1/tasks/{taskId}"
+    }
+  ]
+}
+

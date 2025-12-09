@@ -1,0 +1,431 @@
+{
+  "id": "sentry",
+  "name": "Sentry.io",
+  "icon": "🐛",
+  "logoUrl": "https://cdn.simpleicons.org/sentry/362D20",
+  "description": "Error tracking and performance monitoring",
+  "baseUrl": "https://sentry.io",
+  "color": {
+    "bg": "from-rose-100 to-pink-100",
+    "border": "border-rose-500",
+    "icon": "text-rose-700",
+    "handle": "bg-rose-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "SENTRY_ACCESS_TOKEN",
+    "note": "For self-hosted instances, use baseUrl: https://{host}. Access token can be used as Bearer token or OAuth2 token."
+  },
+  "endpoints": [
+    {
+      "id": "get-organization",
+      "name": "Get Organization",
+      "description": "Get organization details",
+      "method": "GET",
+      "path": "/api/0/organizations/{organizationSlug}/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://sentry.io/api/0/organizations/{organizationSlug}/"
+    },
+    {
+      "id": "list-organizations",
+      "name": "List Organizations",
+      "description": "List all organizations",
+      "method": "GET",
+      "path": "/api/0/organizations/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "owner": { "type": "boolean", "description": "Show only owned organizations" },
+        "cursor": { "type": "string", "description": "Cursor for pagination" }
+      },
+      "urlTemplate": "https://sentry.io/api/0/organizations/"
+    },
+    {
+      "id": "create-team",
+      "name": "Create Team",
+      "description": "Create a new team",
+      "method": "POST",
+      "path": "/api/0/organizations/{organizationSlug}/teams/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Team name" },
+          "slug": { "type": "string", "description": "Team slug" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://sentry.io/api/0/organizations/{organizationSlug}/teams/"
+    },
+    {
+      "id": "get-team",
+      "name": "Get Team",
+      "description": "Get team details",
+      "method": "GET",
+      "path": "/api/0/teams/{organizationSlug}/{teamSlug}/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://sentry.io/api/0/teams/{organizationSlug}/{teamSlug}/"
+    },
+    {
+      "id": "list-teams",
+      "name": "List Teams",
+      "description": "List all teams in an organization",
+      "method": "GET",
+      "path": "/api/0/organizations/{organizationSlug}/teams/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "cursor": { "type": "string", "description": "Cursor for pagination" }
+      },
+      "urlTemplate": "https://sentry.io/api/0/organizations/{organizationSlug}/teams/"
+    },
+    {
+      "id": "update-team",
+      "name": "Update Team",
+      "description": "Update a team",
+      "method": "PUT",
+      "path": "/api/0/teams/{organizationSlug}/{teamSlug}/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Team name" },
+          "slug": { "type": "string", "description": "Team slug" }
+        }
+      },
+      "urlTemplate": "https://sentry.io/api/0/teams/{organizationSlug}/{teamSlug}/"
+    },
+    {
+      "id": "delete-team",
+      "name": "Delete Team",
+      "description": "Delete a team",
+      "method": "DELETE",
+      "path": "/api/0/teams/{organizationSlug}/{teamSlug}/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://sentry.io/api/0/teams/{organizationSlug}/{teamSlug}/"
+    },
+    {
+      "id": "create-project",
+      "name": "Create Project",
+      "description": "Create a new project",
+      "method": "POST",
+      "path": "/api/0/teams/{organizationSlug}/{teamSlug}/projects/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Project name" },
+          "slug": { "type": "string", "description": "Project slug" },
+          "platform": { "type": "string", "description": "Platform (e.g., python, javascript, node)" },
+          "defaultRules": { "type": "boolean", "default": true, "description": "Use default alert rules" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://sentry.io/api/0/teams/{organizationSlug}/{teamSlug}/projects/"
+    },
+    {
+      "id": "get-project",
+      "name": "Get Project",
+      "description": "Get project details",
+      "method": "GET",
+      "path": "/api/0/projects/{organizationSlug}/{projectSlug}/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://sentry.io/api/0/projects/{organizationSlug}/{projectSlug}/"
+    },
+    {
+      "id": "list-projects",
+      "name": "List Projects",
+      "description": "List all projects in an organization",
+      "method": "GET",
+      "path": "/api/0/organizations/{organizationSlug}/projects/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "cursor": { "type": "string", "description": "Cursor for pagination" },
+        "query": { "type": "string", "description": "Search query" }
+      },
+      "urlTemplate": "https://sentry.io/api/0/organizations/{organizationSlug}/projects/"
+    },
+    {
+      "id": "update-project",
+      "name": "Update Project",
+      "description": "Update a project",
+      "method": "PUT",
+      "path": "/api/0/projects/{organizationSlug}/{projectSlug}/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Project name" },
+          "slug": { "type": "string", "description": "Project slug" },
+          "platform": { "type": "string", "description": "Platform" },
+          "isBookmarked": { "type": "boolean", "description": "Is bookmarked" },
+          "digestsMinDelay": { "type": "integer", "description": "Digests minimum delay" },
+          "digestsMaxDelay": { "type": "integer", "description": "Digests maximum delay" },
+          "options": {
+            "type": "object",
+            "description": "Project options",
+            "additionalProperties": true
+          }
+        }
+      },
+      "urlTemplate": "https://sentry.io/api/0/projects/{organizationSlug}/{projectSlug}/"
+    },
+    {
+      "id": "delete-project",
+      "name": "Delete Project",
+      "description": "Delete a project",
+      "method": "DELETE",
+      "path": "/api/0/projects/{organizationSlug}/{projectSlug}/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://sentry.io/api/0/projects/{organizationSlug}/{projectSlug}/"
+    },
+    {
+      "id": "get-issue",
+      "name": "Get Issue",
+      "description": "Get issue details",
+      "method": "GET",
+      "path": "/api/0/projects/{organizationSlug}/{projectSlug}/issues/{issueId}/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://sentry.io/api/0/projects/{organizationSlug}/{projectSlug}/issues/{issueId}/"
+    },
+    {
+      "id": "list-issues",
+      "name": "List Issues",
+      "description": "List all issues in a project",
+      "method": "GET",
+      "path": "/api/0/projects/{organizationSlug}/{projectSlug}/issues/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "query": { "type": "string", "description": "Search query" },
+        "statsPeriod": { "type": "string", "description": "Stats period (e.g., 14d, 24h)" },
+        "shortIdLookup": { "type": "boolean", "description": "Lookup by short ID" },
+        "status": { "type": "string", "enum": ["resolved", "unresolved", "ignored"], "description": "Filter by status" },
+        "assignedTo": { "type": "string", "description": "Filter by assigned user" },
+        "bookmarkedBy": { "type": "string", "description": "Filter by bookmarked user" },
+        "firstRelease": { "type": "string", "description": "Filter by first release" },
+        "cursor": { "type": "string", "description": "Cursor for pagination" },
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" }
+      },
+      "urlTemplate": "https://sentry.io/api/0/projects/{organizationSlug}/{projectSlug}/issues/"
+    },
+    {
+      "id": "update-issue",
+      "name": "Update Issue",
+      "description": "Update an issue",
+      "method": "PUT",
+      "path": "/api/0/projects/{organizationSlug}/{projectSlug}/issues/{issueId}/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["resolved", "unresolved", "ignored"], "description": "Issue status" },
+          "assignedTo": { "type": "string", "description": "Assigned user ID or email" },
+          "hasSeen": { "type": "boolean", "description": "Has been seen" },
+          "isBookmarked": { "type": "boolean", "description": "Is bookmarked" },
+          "isPublic": { "type": "boolean", "description": "Is public" },
+          "isSubscribed": { "type": "boolean", "description": "Is subscribed" }
+        }
+      },
+      "urlTemplate": "https://sentry.io/api/0/projects/{organizationSlug}/{projectSlug}/issues/{issueId}/"
+    },
+    {
+      "id": "get-event",
+      "name": "Get Event",
+      "description": "Get event details",
+      "method": "GET",
+      "path": "/api/0/projects/{organizationSlug}/{projectSlug}/events/{eventId}/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://sentry.io/api/0/projects/{organizationSlug}/{projectSlug}/events/{eventId}/"
+    },
+    {
+      "id": "list-events",
+      "name": "List Events",
+      "description": "List all events in a project",
+      "method": "GET",
+      "path": "/api/0/projects/{organizationSlug}/{projectSlug}/events/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "query": { "type": "string", "description": "Search query" },
+        "cursor": { "type": "string", "description": "Cursor for pagination" },
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" }
+      },
+      "urlTemplate": "https://sentry.io/api/0/projects/{organizationSlug}/{projectSlug}/events/"
+    },
+    {
+      "id": "create-release",
+      "name": "Create Release",
+      "description": "Create a new release",
+      "method": "POST",
+      "path": "/api/0/organizations/{organizationSlug}/releases/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "version": { "type": "string", "required": true, "description": "Release version" },
+          "projects": {
+            "type": "array",
+            "items": { "type": "string" },
+            "required": true,
+            "description": "Project slugs"
+          },
+          "dateReleased": { "type": "string", "format": "date-time", "description": "Release date" },
+          "ref": { "type": "string", "description": "Git reference" },
+          "url": { "type": "string", "format": "uri", "description": "Release URL" },
+          "commits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "description": "Commit ID" },
+                "message": { "type": "string", "description": "Commit message" },
+                "author_name": { "type": "string", "description": "Author name" },
+                "author_email": { "type": "string", "format": "email", "description": "Author email" },
+                "timestamp": { "type": "string", "format": "date-time", "description": "Commit timestamp" }
+              }
+            },
+            "description": "Commits in release"
+          },
+          "refs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "repository": { "type": "string", "description": "Repository name" },
+                "commit": { "type": "string", "description": "Commit ID" },
+                "previousCommit": { "type": "string", "description": "Previous commit ID" }
+              }
+            },
+            "description": "Repository references"
+          }
+        },
+        "required": ["version", "projects"]
+      },
+      "urlTemplate": "https://sentry.io/api/0/organizations/{organizationSlug}/releases/"
+    },
+    {
+      "id": "get-release",
+      "name": "Get Release",
+      "description": "Get release details",
+      "method": "GET",
+      "path": "/api/0/organizations/{organizationSlug}/releases/{version}/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://sentry.io/api/0/organizations/{organizationSlug}/releases/{version}/"
+    },
+    {
+      "id": "list-releases",
+      "name": "List Releases",
+      "description": "List all releases in an organization",
+      "method": "GET",
+      "path": "/api/0/organizations/{organizationSlug}/releases/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "query": { "type": "string", "description": "Search query" },
+        "cursor": { "type": "string", "description": "Cursor for pagination" },
+        "limit": { "type": "integer", "default": 100, "description": "Number of results" }
+      },
+      "urlTemplate": "https://sentry.io/api/0/organizations/{organizationSlug}/releases/"
+    },
+    {
+      "id": "update-release",
+      "name": "Update Release",
+      "description": "Update a release",
+      "method": "PUT",
+      "path": "/api/0/organizations/{organizationSlug}/releases/{version}/",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "dateReleased": { "type": "string", "format": "date-time", "description": "Release date" },
+          "ref": { "type": "string", "description": "Git reference" },
+          "url": { "type": "string", "format": "uri", "description": "Release URL" },
+          "commits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "message": { "type": "string" },
+                "author_name": { "type": "string" },
+                "author_email": { "type": "string", "format": "email" },
+                "timestamp": { "type": "string", "format": "date-time" }
+              }
+            }
+          },
+          "refs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "repository": { "type": "string" },
+                "commit": { "type": "string" },
+                "previousCommit": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "urlTemplate": "https://sentry.io/api/0/organizations/{organizationSlug}/releases/{version}/"
+    },
+    {
+      "id": "delete-release",
+      "name": "Delete Release",
+      "description": "Delete a release",
+      "method": "DELETE",
+      "path": "/api/0/organizations/{organizationSlug}/releases/{version}/",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://sentry.io/api/0/organizations/{organizationSlug}/releases/{version}/"
+    }
+  ]
+}
+

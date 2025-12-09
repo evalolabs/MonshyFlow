@@ -1,0 +1,253 @@
+{
+  "id": "matrix",
+  "name": "Matrix",
+  "icon": "💬",
+  "logoUrl": "https://cdn.simpleicons.org/matrix/000000",
+  "description": "Decentralized chat protocol",
+  "baseUrl": "https://{your-matrix-server}/_matrix/client/r0",
+  "color": {
+    "bg": "from-gray-100 to-neutral-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "MATRIX_ACCESS_TOKEN",
+    "note": "Base URL should be provided in baseUrl placeholder {your-matrix-server} or as MATRIX_BASE_URL secret key. Matrix is a decentralized protocol, each server has its own base URL."
+  },
+  "endpoints": [
+    {
+      "id": "send-message",
+      "name": "Send Message",
+      "description": "Send a message to a room",
+      "method": "POST",
+      "path": "/rooms/{roomId}/send/{eventType}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string",
+            "required": true,
+            "description": "Message body"
+          },
+          "msgtype": {
+            "type": "string",
+            "enum": ["m.text", "m.emote", "m.notice", "m.image", "m.file", "m.audio", "m.video"],
+            "default": "m.text",
+            "description": "Message type"
+          },
+          "format": {
+            "type": "string",
+            "enum": ["org.matrix.custom.html"],
+            "description": "Message format (for HTML)"
+          },
+          "formatted_body": {
+            "type": "string",
+            "description": "Formatted message body (HTML)"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Media URL (for image/file/audio/video types)"
+          },
+          "info": {
+            "type": "object",
+            "description": "Media info (mimetype, size, etc.)",
+            "additionalProperties": true
+          }
+        },
+        "required": ["body"]
+      },
+      "urlTemplate": "https://{your-matrix-server}/_matrix/client/r0/rooms/{roomId}/send/{eventType}"
+    },
+    {
+      "id": "create-room",
+      "name": "Create Room",
+      "description": "Create a new room",
+      "method": "POST",
+      "path": "/createRoom",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Room name"
+          },
+          "topic": {
+            "type": "string",
+            "description": "Room topic"
+          },
+          "preset": {
+            "type": "string",
+            "enum": ["private_chat", "trusted_private_chat", "public_chat"],
+            "default": "private_chat",
+            "description": "Room preset"
+          },
+          "invite": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "User IDs to invite"
+          },
+          "room_version": {
+            "type": "string",
+            "description": "Room version"
+          },
+          "creation_content": {
+            "type": "object",
+            "description": "Creation content",
+            "additionalProperties": true
+          },
+          "initial_state": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string" },
+                "state_key": { "type": "string" },
+                "content": { "type": "object", "additionalProperties": true }
+              },
+              "required": ["type", "state_key", "content"]
+            },
+            "description": "Initial state events"
+          },
+          "is_direct": {
+            "type": "boolean",
+            "default": false,
+            "description": "Is direct message room"
+          }
+        }
+      },
+      "urlTemplate": "https://{your-matrix-server}/_matrix/client/r0/createRoom"
+    },
+    {
+      "id": "get-room-state",
+      "name": "Get Room State",
+      "description": "Get room state",
+      "method": "GET",
+      "path": "/rooms/{roomId}/state",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-matrix-server}/_matrix/client/r0/rooms/{roomId}/state"
+    },
+    {
+      "id": "list-joined-rooms",
+      "name": "List Joined Rooms",
+      "description": "List all joined rooms",
+      "method": "GET",
+      "path": "/joined_rooms",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-matrix-server}/_matrix/client/r0/joined_rooms"
+    },
+    {
+      "id": "update-room-state",
+      "name": "Update Room State",
+      "description": "Update room state",
+      "method": "PUT",
+      "path": "/rooms/{roomId}/state/{eventType}/{stateKey}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "description": "State content",
+        "additionalProperties": true
+      },
+      "urlTemplate": "https://{your-matrix-server}/_matrix/client/r0/rooms/{roomId}/state/{eventType}/{stateKey}"
+    },
+    {
+      "id": "invite-user",
+      "name": "Invite User",
+      "description": "Invite a user to a room",
+      "method": "POST",
+      "path": "/rooms/{roomId}/invite",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "required": true,
+            "description": "User ID to invite"
+          }
+        },
+        "required": ["user_id"]
+      },
+      "urlTemplate": "https://{your-matrix-server}/_matrix/client/r0/rooms/{roomId}/invite"
+    },
+    {
+      "id": "list-room-members",
+      "name": "List Room Members",
+      "description": "List all members of a room",
+      "method": "GET",
+      "path": "/rooms/{roomId}/members",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-matrix-server}/_matrix/client/r0/rooms/{roomId}/members"
+    },
+    {
+      "id": "upload-media",
+      "name": "Upload Media",
+      "description": "Upload media file",
+      "method": "POST",
+      "path": "/upload",
+      "headers": {
+        "Content-Type": "application/octet-stream",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "string",
+        "format": "binary",
+        "description": "Media file to upload"
+      },
+      "queryParams": {
+        "filename": {
+          "type": "string",
+          "description": "File name"
+        }
+      },
+      "urlTemplate": "https://{your-matrix-server}/_matrix/media/r0/upload"
+    },
+    {
+      "id": "get-event",
+      "name": "Get Event",
+      "description": "Get event by ID",
+      "method": "GET",
+      "path": "/rooms/{roomId}/event/{eventId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-matrix-server}/_matrix/client/r0/rooms/{roomId}/event/{eventId}"
+    },
+    {
+      "id": "get-account",
+      "name": "Get Account",
+      "description": "Get account information",
+      "method": "GET",
+      "path": "/account/whoami",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-matrix-server}/_matrix/client/r0/account/whoami"
+    }
+  ]
+}
+

@@ -1,0 +1,265 @@
+{
+  "id": "dropbox",
+  "name": "Dropbox",
+  "icon": "📦",
+  "logoUrl": "https://cdn.simpleicons.org/dropbox/0061FF",
+  "description": "Cloud storage and file sharing service",
+  "baseUrl": "https://api.dropboxapi.com/2",
+  "color": {
+    "bg": "from-blue-100 to-cyan-100",
+    "border": "border-blue-500",
+    "icon": "text-blue-700",
+    "handle": "bg-blue-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "DROPBOX_ACCESS_TOKEN"
+  },
+  "endpoints": [
+    {
+      "id": "copy-file",
+      "name": "Copy File",
+      "description": "Copy a file or folder",
+      "method": "POST",
+      "path": "/files/copy_v2",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "from_path": { "type": "string", "required": true, "description": "Source path" },
+          "to_path": { "type": "string", "required": true, "description": "Destination path" },
+          "allow_shared_folder": { "type": "boolean", "default": false, "description": "Allow copying to shared folder" },
+          "autorename": { "type": "boolean", "default": false, "description": "Auto-rename if destination exists" },
+          "allow_ownership_transfer": { "type": "boolean", "default": false, "description": "Allow ownership transfer" }
+        },
+        "required": ["from_path", "to_path"]
+      },
+      "urlTemplate": "https://api.dropboxapi.com/2/files/copy_v2"
+    },
+    {
+      "id": "delete-file",
+      "name": "Delete File",
+      "description": "Delete a file or folder",
+      "method": "POST",
+      "path": "/files/delete_v2",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "required": true, "description": "Path to delete" },
+          "parent_rev": { "type": "string", "description": "Parent revision for conflict resolution" }
+        },
+        "required": ["path"]
+      },
+      "urlTemplate": "https://api.dropboxapi.com/2/files/delete_v2"
+    },
+    {
+      "id": "download-file",
+      "name": "Download File",
+      "description": "Download a file",
+      "method": "POST",
+      "path": "/files/download",
+      "headers": {
+        "Content-Type": "application/json",
+        "Dropbox-API-Arg": "{dropboxApiArg}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "required": true, "description": "File path" }
+        },
+        "required": ["path"]
+      },
+      "urlTemplate": "https://content.dropboxapi.com/2/files/download"
+    },
+    {
+      "id": "get-file-metadata",
+      "name": "Get File Metadata",
+      "description": "Get file or folder metadata",
+      "method": "POST",
+      "path": "/files/get_metadata",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "required": true, "description": "File or folder path" },
+          "include_media_info": { "type": "boolean", "default": false, "description": "Include media info" },
+          "include_deleted": { "type": "boolean", "default": false, "description": "Include deleted files" },
+          "include_has_explicit_shared_members": { "type": "boolean", "default": false, "description": "Include explicit shared members" },
+          "include_property_groups": {
+            "type": "object",
+            "properties": {
+              "template_ids": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
+        "required": ["path"]
+      },
+      "urlTemplate": "https://api.dropboxapi.com/2/files/get_metadata"
+    },
+    {
+      "id": "list-folder",
+      "name": "List Folder",
+      "description": "List folder contents",
+      "method": "POST",
+      "path": "/files/list_folder",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "default": "", "description": "Folder path (empty for root)" },
+          "recursive": { "type": "boolean", "default": false, "description": "Recursive listing" },
+          "include_media_info": { "type": "boolean", "default": false, "description": "Include media info" },
+          "include_deleted": { "type": "boolean", "default": false, "description": "Include deleted files" },
+          "include_has_explicit_shared_members": { "type": "boolean", "default": false, "description": "Include explicit shared members" },
+          "include_mounted_folders": { "type": "boolean", "default": true, "description": "Include mounted folders" },
+          "limit": { "type": "number", "default": 2000, "description": "Maximum number of results" },
+          "include_non_downloadable_files": { "type": "boolean", "default": true, "description": "Include non-downloadable files" }
+        }
+      },
+      "urlTemplate": "https://api.dropboxapi.com/2/files/list_folder"
+    },
+    {
+      "id": "search-files",
+      "name": "Search Files",
+      "description": "Search for files and folders",
+      "method": "POST",
+      "path": "/files/search_v2",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "required": true, "description": "Search query" },
+          "options": {
+            "type": "object",
+            "properties": {
+              "path": { "type": "string", "description": "Search path" },
+              "max_results": { "type": "number", "default": 100, "description": "Maximum results" },
+              "order_by": {
+                "type": "object",
+                "properties": {
+                  "sort_order": { "type": "string", "enum": ["asc", "desc"], "default": "asc" }
+                }
+              },
+              "file_status": { "type": "string", "enum": ["active", "deleted"], "default": "active" },
+              "filename_only": { "type": "boolean", "default": false, "description": "Search filename only" }
+            }
+          },
+          "match_field_options": {
+            "type": "object",
+            "properties": {
+              "include_highlights": { "type": "boolean", "default": false, "description": "Include highlights" }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "urlTemplate": "https://api.dropboxapi.com/2/files/search_v2"
+    },
+    {
+      "id": "upload-file",
+      "name": "Upload File",
+      "description": "Upload a file",
+      "method": "POST",
+      "path": "/files/upload",
+      "headers": {
+        "Content-Type": "application/octet-stream",
+        "Dropbox-API-Arg": "{dropboxApiArg}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "required": true, "description": "Destination path" },
+          "mode": { "type": "string", "enum": ["add", "overwrite", "update"], "default": "add", "description": "Upload mode" },
+          "autorename": { "type": "boolean", "default": false, "description": "Auto-rename if file exists" },
+          "mute": { "type": "boolean", "default": false, "description": "Mute notifications" },
+          "strict_conflict": { "type": "boolean", "default": false, "description": "Strict conflict check" },
+          "content_hash": { "type": "string", "description": "Content hash for verification" },
+          "content": { "type": "string", "format": "binary", "required": true, "description": "File content (binary data)" }
+        },
+        "required": ["path", "content"]
+      },
+      "urlTemplate": "https://content.dropboxapi.com/2/files/upload"
+    },
+    {
+      "id": "create-folder",
+      "name": "Create Folder",
+      "description": "Create a new folder",
+      "method": "POST",
+      "path": "/files/create_folder_v2",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "required": true, "description": "Folder path" },
+          "autorename": { "type": "boolean", "default": false, "description": "Auto-rename if folder exists" }
+        },
+        "required": ["path"]
+      },
+      "urlTemplate": "https://api.dropboxapi.com/2/files/create_folder_v2"
+    },
+    {
+      "id": "get-folder-metadata",
+      "name": "Get Folder Metadata",
+      "description": "Get folder metadata",
+      "method": "POST",
+      "path": "/files/get_metadata",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "required": true, "description": "Folder path" },
+          "include_media_info": { "type": "boolean", "default": false, "description": "Include media info" },
+          "include_deleted": { "type": "boolean", "default": false, "description": "Include deleted files" },
+          "include_has_explicit_shared_members": { "type": "boolean", "default": false, "description": "Include explicit shared members" }
+        },
+        "required": ["path"]
+      },
+      "urlTemplate": "https://api.dropboxapi.com/2/files/get_metadata"
+    },
+    {
+      "id": "list-folder-contents",
+      "name": "List Folder Contents",
+      "description": "List folder contents (same as list-folder but for folders)",
+      "method": "POST",
+      "path": "/files/list_folder",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "default": "", "description": "Folder path (empty for root)" },
+          "recursive": { "type": "boolean", "default": false, "description": "Recursive listing" },
+          "include_media_info": { "type": "boolean", "default": false, "description": "Include media info" },
+          "include_deleted": { "type": "boolean", "default": false, "description": "Include deleted files" },
+          "include_has_explicit_shared_members": { "type": "boolean", "default": false, "description": "Include explicit shared members" },
+          "include_mounted_folders": { "type": "boolean", "default": true, "description": "Include mounted folders" },
+          "limit": { "type": "number", "default": 2000, "description": "Maximum number of results" },
+          "include_non_downloadable_files": { "type": "boolean", "default": true, "description": "Include non-downloadable files" }
+        }
+      },
+      "urlTemplate": "https://api.dropboxapi.com/2/files/list_folder"
+    }
+  ]
+}
+

@@ -1,0 +1,332 @@
+{
+  "id": "zammad",
+  "name": "Zammad",
+  "icon": "🎫",
+  "logoUrl": "https://cdn.simpleicons.org/zammad/000000",
+  "description": "Open-source helpdesk and customer support platform",
+  "baseUrl": "https://{your-zammad-instance}/api/v1",
+  "color": {
+    "bg": "from-zinc-100 to-slate-100",
+    "border": "border-zinc-500",
+    "icon": "text-zinc-700",
+    "handle": "bg-zinc-600"
+  },
+  "authentication": {
+    "type": "bearer",
+    "headerName": "Authorization",
+    "headerFormat": "Bearer {apiKey}",
+    "secretKey": "ZAMMAD_API_TOKEN",
+    "usernameSecretKey": "ZAMMAD_USERNAME",
+    "note": "Base URL should be provided in baseUrl placeholder {your-zammad-instance} or as ZAMMAD_BASE_URL secret key. Supports Basic Auth (username/password) or Token Auth (API token). Use ZAMMAD_API_TOKEN for token authentication."
+  },
+  "endpoints": [
+    {
+      "id": "create-ticket",
+      "name": "Create Ticket",
+      "description": "Create a new ticket",
+      "method": "POST",
+      "path": "/tickets",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true, "description": "Ticket title" },
+          "group_id": { "type": "integer", "description": "Group ID" },
+          "priority_id": { "type": "integer", "description": "Priority ID (1=low, 2=normal, 3=high, 4=urgent)" },
+          "state_id": { "type": "integer", "description": "State ID (1=new, 2=open, 3=closed, etc.)" },
+          "owner_id": { "type": "integer", "description": "Owner user ID" },
+          "customer_id": { "type": "integer", "description": "Customer user ID" },
+          "organization_id": { "type": "integer", "description": "Organization ID" },
+          "article": {
+            "type": "object",
+            "properties": {
+              "subject": { "type": "string", "description": "Article subject" },
+              "body": { "type": "string", "description": "Article body" },
+              "type_id": { "type": "integer", "description": "Article type ID (1=email, 2=phone, 3=web, etc.)" },
+              "internal": { "type": "boolean", "default": false, "description": "Internal article" },
+              "sender_id": { "type": "integer", "description": "Sender ID (1=Customer, 2=Agent, 3=System)" },
+              "from": { "type": "string", "description": "From address" },
+              "to": { "type": "string", "description": "To address" },
+              "cc": { "type": "string", "description": "CC address" },
+              "content_type": { "type": "string", "default": "text/plain", "description": "Content type" }
+            },
+            "description": "Initial article"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags"
+          }
+        },
+        "required": ["title"]
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/tickets"
+    },
+    {
+      "id": "get-ticket",
+      "name": "Get Ticket",
+      "description": "Get ticket by ID",
+      "method": "GET",
+      "path": "/tickets/{ticketId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/tickets/{ticketId}"
+    },
+    {
+      "id": "list-tickets",
+      "name": "List Tickets",
+      "description": "List all tickets",
+      "method": "GET",
+      "path": "/tickets",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 50, "description": "Results per page" },
+        "sort_by": { "type": "string", "default": "created_at", "description": "Sort field" },
+        "order_by": { "type": "string", "enum": ["asc", "desc"], "default": "desc", "description": "Sort order" },
+        "state": { "type": "string", "description": "Filter by state (e.g., 'new', 'open', 'closed')" },
+        "priority": { "type": "string", "description": "Filter by priority (e.g., 'low', 'normal', 'high', 'urgent')" },
+        "group_id": { "type": "integer", "description": "Filter by group ID" },
+        "owner_id": { "type": "integer", "description": "Filter by owner ID" },
+        "customer_id": { "type": "integer", "description": "Filter by customer ID" },
+        "organization_id": { "type": "integer", "description": "Filter by organization ID" }
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/tickets"
+    },
+    {
+      "id": "update-ticket",
+      "name": "Update Ticket",
+      "description": "Update a ticket",
+      "method": "PUT",
+      "path": "/tickets/{ticketId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Ticket title" },
+          "group_id": { "type": "integer", "description": "Group ID" },
+          "priority_id": { "type": "integer", "description": "Priority ID" },
+          "state_id": { "type": "integer", "description": "State ID" },
+          "owner_id": { "type": "integer", "description": "Owner user ID" },
+          "customer_id": { "type": "integer", "description": "Customer user ID" },
+          "organization_id": { "type": "integer", "description": "Organization ID" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/tickets/{ticketId}"
+    },
+    {
+      "id": "create-user",
+      "name": "Create User",
+      "description": "Create a new user",
+      "method": "POST",
+      "path": "/users",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstname": { "type": "string", "required": true, "description": "First name" },
+          "lastname": { "type": "string", "required": true, "description": "Last name" },
+          "email": { "type": "string", "format": "email", "required": true, "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "mobile": { "type": "string", "description": "Mobile number" },
+          "login": { "type": "string", "description": "Login username" },
+          "password": { "type": "string", "description": "Password" },
+          "role_ids": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Role IDs (1=Customer, 2=Agent, 3=Admin)"
+          },
+          "organization_id": { "type": "integer", "description": "Organization ID" },
+          "active": { "type": "boolean", "default": true, "description": "User is active" },
+          "note": { "type": "string", "description": "User note" }
+        },
+        "required": ["firstname", "lastname", "email"]
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/users"
+    },
+    {
+      "id": "get-user",
+      "name": "Get User",
+      "description": "Get user by ID",
+      "method": "GET",
+      "path": "/users/{userId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/users/{userId}"
+    },
+    {
+      "id": "list-users",
+      "name": "List Users",
+      "description": "List all users",
+      "method": "GET",
+      "path": "/users",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 50, "description": "Results per page" },
+        "sort_by": { "type": "string", "default": "created_at", "description": "Sort field" },
+        "order_by": { "type": "string", "enum": ["asc", "desc"], "default": "desc", "description": "Sort order" },
+        "role_ids": { "type": "string", "description": "Filter by role IDs (comma-separated)" },
+        "organization_id": { "type": "integer", "description": "Filter by organization ID" },
+        "active": { "type": "boolean", "description": "Filter by active status" }
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/users"
+    },
+    {
+      "id": "update-user",
+      "name": "Update User",
+      "description": "Update a user",
+      "method": "PUT",
+      "path": "/users/{userId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "firstname": { "type": "string", "description": "First name" },
+          "lastname": { "type": "string", "description": "Last name" },
+          "email": { "type": "string", "format": "email", "description": "Email address" },
+          "phone": { "type": "string", "description": "Phone number" },
+          "mobile": { "type": "string", "description": "Mobile number" },
+          "login": { "type": "string", "description": "Login username" },
+          "password": { "type": "string", "description": "Password" },
+          "role_ids": {
+            "type": "array",
+            "items": { "type": "integer" }
+          },
+          "organization_id": { "type": "integer", "description": "Organization ID" },
+          "active": { "type": "boolean", "description": "User is active" },
+          "note": { "type": "string", "description": "User note" }
+        }
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/users/{userId}"
+    },
+    {
+      "id": "create-organization",
+      "name": "Create Organization",
+      "description": "Create a new organization",
+      "method": "POST",
+      "path": "/organizations",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "required": true, "description": "Organization name" },
+          "shared": { "type": "boolean", "default": false, "description": "Shared organization" },
+          "domain": { "type": "string", "description": "Domain" },
+          "domain_assignment": { "type": "boolean", "default": false, "description": "Domain assignment" },
+          "active": { "type": "boolean", "default": true, "description": "Organization is active" },
+          "note": { "type": "string", "description": "Organization note" }
+        },
+        "required": ["name"]
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/organizations"
+    },
+    {
+      "id": "get-organization",
+      "name": "Get Organization",
+      "description": "Get organization by ID",
+      "method": "GET",
+      "path": "/organizations/{organizationId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/organizations/{organizationId}"
+    },
+    {
+      "id": "list-organizations",
+      "name": "List Organizations",
+      "description": "List all organizations",
+      "method": "GET",
+      "path": "/organizations",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 50, "description": "Results per page" },
+        "sort_by": { "type": "string", "default": "name", "description": "Sort field" },
+        "order_by": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort order" },
+        "active": { "type": "boolean", "description": "Filter by active status" }
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/organizations"
+    },
+    {
+      "id": "update-organization",
+      "name": "Update Organization",
+      "description": "Update an organization",
+      "method": "PUT",
+      "path": "/organizations/{organizationId}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {apiKey}"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Organization name" },
+          "shared": { "type": "boolean", "description": "Shared organization" },
+          "domain": { "type": "string", "description": "Domain" },
+          "domain_assignment": { "type": "boolean", "description": "Domain assignment" },
+          "active": { "type": "boolean", "description": "Organization is active" },
+          "note": { "type": "string", "description": "Organization note" }
+        }
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/organizations/{organizationId}"
+    },
+    {
+      "id": "get-group",
+      "name": "Get Group",
+      "description": "Get group by ID",
+      "method": "GET",
+      "path": "/groups/{groupId}",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/groups/{groupId}"
+    },
+    {
+      "id": "list-groups",
+      "name": "List Groups",
+      "description": "List all groups",
+      "method": "GET",
+      "path": "/groups",
+      "headers": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "queryParams": {
+        "page": { "type": "integer", "default": 1, "description": "Page number" },
+        "per_page": { "type": "integer", "default": 50, "description": "Results per page" },
+        "sort_by": { "type": "string", "default": "name", "description": "Sort field" },
+        "order_by": { "type": "string", "enum": ["asc", "desc"], "default": "asc", "description": "Sort order" },
+        "active": { "type": "boolean", "description": "Filter by active status" }
+      },
+      "urlTemplate": "https://{your-zammad-instance}/api/v1/groups"
+    }
+  ]
+}
+

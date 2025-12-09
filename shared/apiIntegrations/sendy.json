@@ -1,0 +1,264 @@
+{
+  "id": "sendy",
+  "name": "Sendy",
+  "icon": "📧",
+  "logoUrl": "https://cdn.simpleicons.org/sendy/000000",
+  "description": "Self-hosted email marketing tool",
+  "baseUrl": "https://{your-sendy-instance}",
+  "color": {
+    "bg": "from-gray-100 to-slate-100",
+    "border": "border-gray-500",
+    "icon": "text-gray-700",
+    "handle": "bg-gray-600"
+  },
+  "authentication": {
+    "type": "apiKey",
+    "secretKey": "SENDY_API_KEY",
+    "note": "Base URL should be provided in baseUrl placeholder {your-sendy-instance} or as SENDY_BASE_URL secret key. API Key is sent as body parameter 'api_key'."
+  },
+  "endpoints": [
+    {
+      "id": "subscribe",
+      "name": "Subscribe",
+      "description": "Subscribe a new subscriber",
+      "method": "POST",
+      "path": "/api/subscribers/subscribe.php",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": {
+            "type": "string",
+            "required": true,
+            "description": "API key"
+          },
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": "Subscriber name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Email address"
+          },
+          "list": {
+            "type": "string",
+            "required": true,
+            "description": "List ID"
+          },
+          "boolean": {
+            "type": "string",
+            "enum": ["true", "false"],
+            "default": "true",
+            "description": "Return JSON response (true/false)"
+          },
+          "gdpr": {
+            "type": "string",
+            "enum": ["true", "false"],
+            "default": "false",
+            "description": "GDPR compliant (true/false)"
+          }
+        },
+        "required": ["api_key", "name", "email", "list"]
+      },
+      "urlTemplate": "https://{your-sendy-instance}/api/subscribers/subscribe.php"
+    },
+    {
+      "id": "unsubscribe",
+      "name": "Unsubscribe",
+      "description": "Unsubscribe a subscriber",
+      "method": "POST",
+      "path": "/api/subscribers/unsubscribe.php",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": {
+            "type": "string",
+            "required": true,
+            "description": "API key"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Email address"
+          },
+          "list": {
+            "type": "string",
+            "required": true,
+            "description": "List ID"
+          },
+          "boolean": {
+            "type": "string",
+            "enum": ["true", "false"],
+            "default": "true",
+            "description": "Return JSON response (true/false)"
+          }
+        },
+        "required": ["api_key", "email", "list"]
+      },
+      "urlTemplate": "https://{your-sendy-instance}/api/subscribers/unsubscribe.php"
+    },
+    {
+      "id": "get-subscription-status",
+      "name": "Get Subscription Status",
+      "description": "Get subscription status of a subscriber",
+      "method": "POST",
+      "path": "/api/subscribers/subscription-status.php",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": {
+            "type": "string",
+            "required": true,
+            "description": "API key"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Email address"
+          },
+          "list_id": {
+            "type": "string",
+            "required": true,
+            "description": "List ID"
+          },
+          "boolean": {
+            "type": "string",
+            "enum": ["true", "false"],
+            "default": "true",
+            "description": "Return JSON response (true/false)"
+          }
+        },
+        "required": ["api_key", "email", "list_id"]
+      },
+      "urlTemplate": "https://{your-sendy-instance}/api/subscribers/subscription-status.php"
+    },
+    {
+      "id": "update-subscriber",
+      "name": "Update Subscriber",
+      "description": "Update a subscriber",
+      "method": "POST",
+      "path": "/api/subscribers/update.php",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": {
+            "type": "string",
+            "required": true,
+            "description": "API key"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Email address"
+          },
+          "list": {
+            "type": "string",
+            "required": true,
+            "description": "List ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Subscriber name"
+          },
+          "boolean": {
+            "type": "string",
+            "enum": ["true", "false"],
+            "default": "true",
+            "description": "Return JSON response (true/false)"
+          }
+        },
+        "required": ["api_key", "email", "list"]
+      },
+      "urlTemplate": "https://{your-sendy-instance}/api/subscribers/update.php"
+    },
+    {
+      "id": "create-campaign",
+      "name": "Create Campaign",
+      "description": "Create a new campaign",
+      "method": "POST",
+      "path": "/api/campaigns/create.php",
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "bodySchema": {
+        "type": "object",
+        "properties": {
+          "api_key": {
+            "type": "string",
+            "required": true,
+            "description": "API key"
+          },
+          "from_name": {
+            "type": "string",
+            "required": true,
+            "description": "From name"
+          },
+          "from_email": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "From email address"
+          },
+          "reply_to": {
+            "type": "string",
+            "format": "email",
+            "required": true,
+            "description": "Reply-to email address"
+          },
+          "subject": {
+            "type": "string",
+            "required": true,
+            "description": "Email subject"
+          },
+          "plain_text": {
+            "type": "string",
+            "description": "Plain text version"
+          },
+          "html_text": {
+            "type": "string",
+            "description": "HTML version"
+          },
+          "list_ids": {
+            "type": "string",
+            "required": true,
+            "description": "List IDs (comma-separated)"
+          },
+          "brand_id": {
+            "type": "string",
+            "description": "Brand ID"
+          },
+          "query_string": {
+            "type": "string",
+            "description": "Query string for tracking"
+          },
+          "boolean": {
+            "type": "string",
+            "enum": ["true", "false"],
+            "default": "true",
+            "description": "Return JSON response (true/false)"
+          }
+        },
+        "required": ["api_key", "from_name", "from_email", "reply_to", "subject", "list_ids"]
+      },
+      "urlTemplate": "https://{your-sendy-instance}/api/campaigns/create.php"
+    }
+  ]
+}
+
