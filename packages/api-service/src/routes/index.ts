@@ -53,6 +53,23 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
   // ============================================
   // Alle Workflow Routes benötigen Authentication
   // Diese werden über Kong Gateway (Port 5000) erreichbar sein
+  
+  // WICHTIG: Spezifische Routes MÜSSEN vor generischen Routes stehen!
+  // Sonst interpretiert Express "node", "start-node", "publish" als :id Parameter
+  
+  // Start Node Update (spezifisch, vor :id)
+  app.put('/api/workflows/start-node', authMiddleware, (req, res) => workflowController.updateStartNode(req, res));
+  
+  // Node Update (spezifisch, vor :id)
+  app.put('/api/workflows/node', authMiddleware, (req, res) => workflowController.updateNode(req, res));
+  
+  // Publish Workflow (spezifisch, vor :id)
+  app.post('/api/workflows/publish', authMiddleware, (req, res) => workflowController.publish(req, res));
+  
+  // Get Published Workflows (spezifisch, vor :id)
+  app.get('/api/workflows/published', authMiddleware, (req, res) => workflowController.getPublished(req, res));
+  
+  // Generische Routes (nach spezifischen Routes)
   app.get('/api/workflows', authMiddleware, (req, res) => workflowController.getAll(req, res));
   app.get('/api/workflows/:id', authMiddleware, (req, res) => workflowController.getById(req, res));
   app.post('/api/workflows', authMiddleware, (req, res) => workflowController.create(req, res));
@@ -60,10 +77,48 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
   app.delete('/api/workflows/:id', authMiddleware, (req, res) => workflowController.delete(req, res));
   
   // Workflow Node Testing Route (proxies to execution-service)
+  // TEST ENDPOINT: Check if body parsing works at all
+  app.post('/api/test-body', async (req: Request, res: Response) => {
+    console.log('=== TEST BODY ENDPOINT ===');
+    console.log('req.body:', req.body);
+    console.log('req.body type:', typeof req.body);
+    console.log('req.body keys:', req.body ? Object.keys(req.body) : 'NO_BODY');
+    console.log('Content-Type:', req.headers['content-type']);
+    console.log('Content-Length:', req.headers['content-length']);
+    res.json({ 
+      received: req.body,
+      bodyType: typeof req.body,
+      bodyKeys: req.body ? Object.keys(req.body) : [],
+      contentType: req.headers['content-type'],
+      contentLength: req.headers['content-length']
+    });
+  });
+
   app.post('/api/workflows/:workflowId/nodes/:nodeId/test-with-context', authMiddleware, async (req: Request, res: Response) => {
     try {
       const { workflowId, nodeId } = req.params;
       const user = (req as any).user;
+      
+      // CRITICAL: Log req.body IMMEDIATELY to see if it's empty
+      // This will help us understand if Kong Gateway or body-parser is the issue
+      console.log('\n🔴🔴🔴 TEST-WITH-CONTEXT - req.body check');
+      console.log('🔴 req.body exists:', !!req.body);
+      console.log('🔴 req.body type:', typeof req.body);
+      console.log('🔴 req.body keys:', req.body ? Object.keys(req.body) : 'NO_BODY');
+      console.log('🔴 req.body content:', JSON.stringify(req.body || {}).substring(0, 300));
+      console.log('🔴 req.headers[content-type]:', req.headers['content-type']);
+      console.log('🔴 req.headers[content-length]:', req.headers['content-length']);
+      console.log('🔴 req.rawBody exists:', !!(req as any).rawBody);
+      console.log('');
+      
+      // Also log to stderr for Docker logs
+      process.stderr.write(`\n🔴🔴🔴 TEST-WITH-CONTEXT - req.body check\n`);
+      process.stderr.write(`🔴 req.body exists: ${!!req.body}\n`);
+      process.stderr.write(`🔴 req.body type: ${typeof req.body}\n`);
+      process.stderr.write(`🔴 req.body keys: ${req.body ? Object.keys(req.body).join(', ') : 'NO_BODY'}\n`);
+      process.stderr.write(`🔴 req.body content: ${JSON.stringify(req.body || {}).substring(0, 300)}\n`);
+      process.stderr.write(`🔴 req.headers[content-type]: ${req.headers['content-type']}\n`);
+      process.stderr.write(`🔴 req.headers[content-length]: ${req.headers['content-length']}\n\n`);
       
       // Get workflow directly from service (not through controller)
       const workflowService = container.resolve('WorkflowService') as any;
@@ -109,6 +164,20 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
       }
       
       // Prepare request body for execution-service
+      // Frontend sends input data directly as req.body (e.g., { userPrompt: "..." })
+      // Use req.body directly as input (not req.body.input)
+      const inputData = req.body || {};
+      
+      logger.info({ 
+        workflowId, 
+        nodeId,
+        bodyType: typeof req.body,
+        bodyKeys: req.body ? Object.keys(req.body) : [],
+        bodySample: JSON.stringify(req.body).substring(0, 500),
+        inputKeys: Object.keys(inputData),
+        inputSample: JSON.stringify(inputData).substring(0, 200)
+      }, '📥 Received test-node-with-context request - using req.body directly as input');
+      
       const executionRequestBody = {
         workflow: {
           ...workflow,
@@ -117,7 +186,7 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
           edges: workflow.edges || [],
         },
         nodeId,
-        input: req.body.input || {},
+        input: inputData, // Use req.body directly, not req.body.input
         secrets: secrets, // Use loaded secrets instead of req.body.secrets
       };
       
@@ -137,8 +206,28 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
         }
       );
       
-      // Return response from execution-service
-      res.json({ success: true, data: response.data });
+      // DEBUG: Include body info in response to see what was received
+      // This helps diagnose why req.body might be empty
+      const debugInfo = {
+        receivedBody: req.body,
+        bodyType: typeof req.body,
+        bodyKeys: req.body ? Object.keys(req.body) : [],
+        bodyString: JSON.stringify(req.body || {}),
+        inputData: inputData,
+        inputKeys: Object.keys(inputData),
+        inputString: JSON.stringify(inputData),
+        headersContentType: req.headers['content-type'],
+        headersContentLength: req.headers['content-length'],
+        executionRequestBodyInput: executionRequestBody.input,
+        executionRequestBodyInputKeys: Object.keys(executionRequestBody.input || {}),
+      };
+      
+      // Return response from execution-service with debug info
+      res.json({ 
+        success: true, 
+        data: response.data,
+        _debug: debugInfo  // Temporär für Debugging - später entfernen
+      });
     } catch (error: any) {
       logger.error({ err: error, workflowId: req.params.workflowId, nodeId: req.params.nodeId }, 'Failed to test node');
       

@@ -57,7 +57,7 @@ function generateNodeFieldConfigFromMetadata(): Record<string, NodeFieldConfig> 
   
   // Then process manual registry (manual entries override generated ones)
   Object.entries(NODE_METADATA_REGISTRY).forEach(([nodeType, metadata]) => {
-    const generatedMetadata = GENERATED_NODE_METADATA[nodeType];
+    const generatedMetadata = (GENERATED_NODE_METADATA as Record<string, any>)[nodeType];
     const hasGeneratedFields = generatedMetadata?.fields && Object.keys(generatedMetadata.fields).length > 0;
     
     // Process if:

@@ -20,8 +20,34 @@ app.set('trust proxy', 1);
 // Security Middleware (früh in der Pipeline)
 app.use(securityHeaders);
 app.use(requestIdMiddleware); // Request ID für Tracing
+
+// Body parsing - MUST be before routes
+// Note: express.json() should parse the body, but if Kong Gateway consumes the stream,
+// we need to ensure the body is available
 app.use(express.json({ limit: '10mb' })); // Request Size Limit
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Debug middleware to log body parsing issues
+app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+  // Only log for POST/PUT/PATCH requests with JSON content type
+  if (['POST', 'PUT', 'PATCH'].includes(req.method) && 
+      req.headers['content-type']?.includes('application/json') &&
+      req.path.includes('test-with-context')) {
+    // Use INFO level so logs are always visible
+    logger.info({
+      path: req.path,
+      method: req.method,
+      contentType: req.headers['content-type'],
+      contentLength: req.headers['content-length'],
+      bodyExists: !!req.body,
+      bodyType: typeof req.body,
+      bodyKeys: req.body ? Object.keys(req.body) : [],
+      bodySample: req.body ? JSON.stringify(req.body).substring(0, 200) : 'NO_BODY',
+      bodyIsEmpty: !req.body || Object.keys(req.body).length === 0
+    }, '🔍 Body parsing check - test-with-context');
+  }
+  next();
+});
 app.use(cors({
   origin: process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? [] : true), // In Development: alle Origins erlauben (für Postman, Swagger, etc.)
   credentials: true,

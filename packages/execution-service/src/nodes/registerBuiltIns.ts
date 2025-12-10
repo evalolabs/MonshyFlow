@@ -73,16 +73,16 @@ registerNodeProcessor({
                 console.log(`[End Node] 🔍 Available steps for expression resolution:`, Object.keys(steps));
                 
                 // Resolve expressions
-                resultMessage = expressionResolutionService.resolveExpressions(
+                const result = expressionResolutionService.resolveExpressions(
                     resultMessage,
                     { 
                         input: input?.json || context.input || {}, 
                         steps, 
                         secrets 
                     },
-                    context.execution,
-                    node.id
+                    { execution: context.execution, currentNodeId: node.id }
                 );
+                resultMessage = typeof result === 'string' ? result : result.result;
                 
                 console.log(`[End Node] ✅ Resolved result message: ${resultMessage.substring(0, 200)}...`);
             }
@@ -131,12 +131,12 @@ registerNodeProcessor({
                 if (context?.workflow?.secrets) {
                     Object.assign(secrets, context.workflow.secrets);
                 }
-                resultMessage = expressionResolutionService.resolveExpressions(
+                const result = expressionResolutionService.resolveExpressions(
                     resultMessage,
                     { input: input?.json || input || {}, steps, secrets },
-                    context?.execution,
-                    node.id
+                    { execution: context?.execution, currentNodeId: node.id }
                 );
+                resultMessage = typeof result === 'string' ? result : result.result;
             }
             return resultMessage;
         }
@@ -504,12 +504,12 @@ registerNodeProcessor({
         console.log(`[HTTP Request Node] Original body: ${nodeData.body || '(none)'}`);
 
         // Use ExpressionResolutionService to resolve expressions (supports secrets, steps, input)
-        url = expressionResolutionService.resolveExpressions(
+        const urlResult = expressionResolutionService.resolveExpressions(
             url,
             { input, steps, secrets },
-            context.execution,
-            node.id
+            { execution: context.execution, currentNodeId: node.id }
         );
+        url = typeof urlResult === 'string' ? urlResult : urlResult.result;
         console.log(`[HTTP Request Node] Resolved URL: ${url}`);
 
         const method = (nodeData.method || 'POST').toUpperCase();
@@ -533,12 +533,12 @@ registerNodeProcessor({
         const resolvedHeaders: Record<string, string> = {};
         for (const [key, value] of Object.entries(headers)) {
             if (typeof value === 'string') {
-                resolvedHeaders[key] = expressionResolutionService.resolveExpressions(
+                const headerResult = expressionResolutionService.resolveExpressions(
                     value,
                     { input, steps, secrets },
-                    context.execution,
-                    node.id
+                    { execution: context.execution, currentNodeId: node.id }
                 );
+                resolvedHeaders[key] = typeof headerResult === 'string' ? headerResult : headerResult.result;
             } else {
                 resolvedHeaders[key] = String(value);
             }
@@ -551,12 +551,12 @@ registerNodeProcessor({
         } else if (nodeData.body) {
             // Resolve expressions in custom body (e.g., {{steps.agent-1.response}}, {{secrets.API_KEY}})
             const originalBody = nodeData.body;
-            body = expressionResolutionService.resolveExpressions(
+            const bodyResult = expressionResolutionService.resolveExpressions(
                 nodeData.body,
                 { input, steps, secrets },
-                context.execution,
-                node.id
+                { execution: context.execution, currentNodeId: node.id }
             );
+            body = typeof bodyResult === 'string' ? bodyResult : bodyResult.result;
             console.log(`[HTTP Request Node] Original body expression: ${originalBody}`);
             console.log(`[HTTP Request Node] Resolved body (first 500 chars): ${body.substring(0, 500)}`);
         }
@@ -662,12 +662,12 @@ registerNodeProcessor({
         console.log(`[HTTP Request Node] Original body: ${nodeData.body || '(none)'}`);
 
         // Use ExpressionResolutionService to resolve expressions (supports secrets, steps, input)
-        url = expressionResolutionService.resolveExpressions(
+        const urlResult = expressionResolutionService.resolveExpressions(
             url,
             { input, steps, secrets },
-            context.execution,
-            node.id
+            { execution: context.execution, currentNodeId: node.id }
         );
+        url = typeof urlResult === 'string' ? urlResult : urlResult.result;
         console.log(`[HTTP Request Node] Resolved URL: ${url}`);
 
         const method = (nodeData.method || 'POST').toUpperCase();
@@ -691,12 +691,12 @@ registerNodeProcessor({
         const resolvedHeaders: Record<string, string> = {};
         for (const [key, value] of Object.entries(headers)) {
             if (typeof value === 'string') {
-                resolvedHeaders[key] = expressionResolutionService.resolveExpressions(
+                const headerResult = expressionResolutionService.resolveExpressions(
                     value,
                     { input, steps, secrets },
-                    context.execution,
-                    node.id
+                    { execution: context.execution, currentNodeId: node.id }
                 );
+                resolvedHeaders[key] = typeof headerResult === 'string' ? headerResult : headerResult.result;
             } else {
                 resolvedHeaders[key] = String(value);
             }
@@ -709,12 +709,12 @@ registerNodeProcessor({
         } else if (nodeData.body) {
             // Resolve expressions in custom body (e.g., {{steps.agent-1.response}}, {{secrets.API_KEY}})
             const originalBody = nodeData.body;
-            body = expressionResolutionService.resolveExpressions(
+            const bodyResult = expressionResolutionService.resolveExpressions(
                 nodeData.body,
                 { input, steps, secrets },
-                context.execution,
-                node.id
+                { execution: context.execution, currentNodeId: node.id }
             );
+            body = typeof bodyResult === 'string' ? bodyResult : bodyResult.result;
             console.log(`[HTTP Request Node] Original body expression: ${originalBody}`);
             console.log(`[HTTP Request Node] Resolved body (first 500 chars): ${body.substring(0, 500)}`);
         }
@@ -832,54 +832,61 @@ registerNodeProcessor({
             const execution = context.execution;
             const currentNodeId = node.id;
             
-            const fromEmail = expressionResolutionService.resolveExpressions(
+            const fromEmailResult = expressionResolutionService.resolveExpressions(
                 nodeData.fromEmail || '', 
                 expressionContext,
-                execution,
-                currentNodeId
+                { execution, currentNodeId }
             );
-            const to = expressionResolutionService.resolveExpressions(
+            const fromEmail = typeof fromEmailResult === 'string' ? fromEmailResult : fromEmailResult.result;
+            
+            const toResult = expressionResolutionService.resolveExpressions(
                 nodeData.to || '', 
                 expressionContext,
-                execution,
-                currentNodeId
+                { execution, currentNodeId }
             );
-            const cc = expressionResolutionService.resolveExpressions(
+            const to = typeof toResult === 'string' ? toResult : toResult.result;
+            
+            const ccResult = expressionResolutionService.resolveExpressions(
                 nodeData.cc || '', 
                 expressionContext,
-                execution,
-                currentNodeId
+                { execution, currentNodeId }
             );
-            const bcc = expressionResolutionService.resolveExpressions(
+            const cc = typeof ccResult === 'string' ? ccResult : ccResult.result;
+            
+            const bccResult = expressionResolutionService.resolveExpressions(
                 nodeData.bcc || '', 
                 expressionContext,
-                execution,
-                currentNodeId
+                { execution, currentNodeId }
             );
-            const subject = expressionResolutionService.resolveExpressions(
+            const bcc = typeof bccResult === 'string' ? bccResult : bccResult.result;
+            
+            const subjectResult = expressionResolutionService.resolveExpressions(
                 nodeData.subject || '', 
                 expressionContext,
-                execution,
-                currentNodeId
+                { execution, currentNodeId }
             );
-            const text = expressionResolutionService.resolveExpressions(
+            const subject = typeof subjectResult === 'string' ? subjectResult : subjectResult.result;
+            
+            const textResult = expressionResolutionService.resolveExpressions(
                 nodeData.text || '', 
                 expressionContext,
-                execution,
-                currentNodeId
+                { execution, currentNodeId }
             );
-            const html = expressionResolutionService.resolveExpressions(
+            const text = typeof textResult === 'string' ? textResult : textResult.result;
+            
+            const htmlResult = expressionResolutionService.resolveExpressions(
                 nodeData.html || '', 
                 expressionContext,
-                execution,
-                currentNodeId
+                { execution, currentNodeId }
             );
-            const body = expressionResolutionService.resolveExpressions(
+            const html = typeof htmlResult === 'string' ? htmlResult : htmlResult.result;
+            
+            const bodyResult = expressionResolutionService.resolveExpressions(
                 nodeData.body || '', 
                 expressionContext,
-                execution,
-                currentNodeId
+                { execution, currentNodeId }
             );
+            const body = typeof bodyResult === 'string' ? bodyResult : bodyResult.result;
 
             const emailFormat = nodeData.emailFormat || 'html';
 
@@ -914,24 +921,30 @@ registerNodeProcessor({
                 smtpUsernameSecretName: nodeData.smtpUsernameSecret,
                 smtpPasswordSecretName: nodeData.smtpPasswordSecret,
                 fromNameSecretName: nodeData.fromNameSecret,
-                smtpHost: expressionResolutionService.resolveExpressions(
-                    nodeData.smtpHost || '', 
-                    expressionContext,
-                    execution,
-                    currentNodeId
-                ),
-                smtpUsername: expressionResolutionService.resolveExpressions(
-                    nodeData.smtpUsername || '', 
-                    expressionContext,
-                    execution,
-                    currentNodeId
-                ),
-                smtpPassword: expressionResolutionService.resolveExpressions(
-                    nodeData.smtpPassword || '', 
-                    expressionContext,
-                    execution,
-                    currentNodeId
-                ),
+                smtpHost: (() => {
+                    const result = expressionResolutionService.resolveExpressions(
+                        nodeData.smtpHost || '', 
+                        expressionContext,
+                        { execution, currentNodeId }
+                    );
+                    return typeof result === 'string' ? result : result.result;
+                })(),
+                smtpUsername: (() => {
+                    const result = expressionResolutionService.resolveExpressions(
+                        nodeData.smtpUsername || '', 
+                        expressionContext,
+                        { execution, currentNodeId }
+                    );
+                    return typeof result === 'string' ? result : result.result;
+                })(),
+                smtpPassword: (() => {
+                    const result = expressionResolutionService.resolveExpressions(
+                        nodeData.smtpPassword || '', 
+                        expressionContext,
+                        { execution, currentNodeId }
+                    );
+                    return typeof result === 'string' ? result : result.result;
+                })(),
                 smtpPort: nodeData.smtpPort,
                 fromEmail: fromEmail,
                 fromName: nodeData.fromName,

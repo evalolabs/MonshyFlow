@@ -41,6 +41,7 @@ export function extractFieldPaths(schema: JsonSchema | undefined, prefix = ''): 
 /**
  * Get field suggestions from output schema of a node
  * Used for auto-complete in Expression Editor
+ * Updated to use json field instead of data field
  */
 export function getFieldSuggestionsFromSchema(
   schema: JsonSchema | undefined,
@@ -52,7 +53,7 @@ export function getFieldSuggestionsFromSchema(
 
   if (schema.properties) {
     Object.entries(schema.properties).forEach(([key, value]: [string, any]) => {
-      const fullPath = `{{steps.${nodeId}.data.${key}}}`;
+      const fullPath = `{{steps.${nodeId}.json.${key}}}`;
       suggestions.push({
         value: fullPath,
         label: key,
@@ -62,7 +63,7 @@ export function getFieldSuggestionsFromSchema(
       // Add nested fields
       if (value.properties) {
         Object.entries(value.properties).forEach(([nestedKey, nestedValue]: [string, any]) => {
-          const nestedPath = `{{steps.${nodeId}.data.${key}.${nestedKey}}}`;
+          const nestedPath = `{{steps.${nodeId}.json.${key}.${nestedKey}}}`;
           suggestions.push({
             value: nestedPath,
             label: `${key}.${nestedKey}`,

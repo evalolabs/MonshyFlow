@@ -70,6 +70,7 @@ export class WorkflowRepository {
     isPublished: boolean;
     isActive: boolean;
     scheduleConfig: any;
+    publishedAt: Date;
   }>): Promise<IWorkflow> {
     try {
       const workflow = await Workflow.findByIdAndUpdate(

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiKeysService, type ApiKeyResponse, type CreateApiKeyRequest } from '../services/apiKeysService';
 import { PageHeader } from '../components/Layout/PageHeader';
-import { Plus, Trash2, Copy, Check, Key, AlertCircle, Calendar, Clock, Eye, EyeOff } from 'lucide-react';
+import { Plus, Trash2, Copy, Check, Key, AlertCircle, Calendar, Clock, EyeOff } from 'lucide-react';
 
 export function ApiKeysManagementPage() {
   const [apiKeys, setApiKeys] = useState<ApiKeyResponse[]>([]);

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { getNodeMetadata } from './nodeRegistry/nodeMetadata';
-import { getFieldSuggestionsFromSchema } from './utils/schemaHelpers';
+// Removed schema imports - we only show what's in debugStep.output
 
 interface VariableTreePopoverProps {
   anchorEl: HTMLElement | null;
@@ -573,22 +572,8 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
   const guaranteed = useMemo(() => upstreamNodes.filter(n => guaranteedIds.has(n.id) && n.type !== 'start'), [upstreamNodes, guaranteedIds]);
   const conditional = useMemo(() => upstreamNodes.filter(n => !guaranteedIds.has(n.id) && n.type !== 'start'), [upstreamNodes, guaranteedIds]);
 
-  // Get schema-based suggestions for upstream nodes
-  const schemaSuggestions = useMemo(() => {
-    const suggestions: Array<{ nodeId: string; suggestions: Array<{ value: string; label: string; description?: string }> }> = [];
-    
-    [...startNodes, ...guaranteed, ...conditional].forEach(node => {
-      const metadata = getNodeMetadata(node.type || '');
-      if (metadata?.outputSchema) {
-        const nodeSuggestions = getFieldSuggestionsFromSchema(metadata.outputSchema, node.id);
-        if (nodeSuggestions.length > 0) {
-          suggestions.push({ nodeId: node.id, suggestions: nodeSuggestions });
-        }
-      }
-    });
-    
-    return suggestions;
-  }, [startNodes, guaranteed, conditional]);
+  // No schema suggestions - we only show what's actually in debugStep.output
+  // This ensures the Variable Popup matches exactly what's shown in the Debug Console
 
   // Initialize expanded sections on mount (all expanded by default)
   useEffect(() => {
@@ -733,10 +718,15 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
               <div className="p-2 bg-white space-y-2 transition-all duration-200 ease-out">
                 {startNodes.map(n => {
                   const debugStep = debugSteps.find(s => s.nodeId === n.id);
-                  // Extract output data: prefer json, fallback to data (backward compatibility)
+                  // Use exactly what's in debugStep.output - no fallbacks, no special logic
                   const nodeOutput = debugStep?.output;
-                  const outputData = nodeOutput?.json ?? nodeOutput?.data ?? (typeof nodeOutput === 'object' && nodeOutput !== null ? nodeOutput : {}) ?? n.data ?? {};
-                  const hasData = Object.keys(outputData).length > 0;
+                  // Check if output has any meaningful data (json, data, metadata, error)
+                  const hasOutput = nodeOutput && (
+                    (nodeOutput.json !== undefined && nodeOutput.json !== null) ||
+                    (nodeOutput.data !== undefined && nodeOutput.data !== null) ||
+                    nodeOutput.metadata ||
+                    nodeOutput.error
+                  );
                   const isNodeExpanded = expandedNodes.has(n.id);
                   
                   return (
@@ -744,10 +734,10 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
                       <button
                         onClick={() => toggleNode(n.id)}
                         className="w-full text-left flex items-center gap-2 mb-1 hover:bg-gray-50 rounded px-1 py-1 transition-colors"
-                        disabled={!hasData}
+                        disabled={!hasOutput}
                       >
                         <svg 
-                          className={`w-3 h-3 text-gray-600 transition-transform flex-shrink-0 ${isNodeExpanded ? 'rotate-90' : ''} ${!hasData ? 'opacity-30' : ''}`}
+                          className={`w-3 h-3 text-gray-600 transition-transform flex-shrink-0 ${isNodeExpanded ? 'rotate-90' : ''} ${!hasOutput ? 'opacity-30' : ''}`}
                           fill="none" 
                           stroke="currentColor" 
                           viewBox="0 0 24 24"
@@ -758,58 +748,38 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
                         <span className="text-xs font-semibold text-gray-800 truncate flex-1">
                           {n.data?.label || 'Start'}
                         </span>
-                        {hasData && (
+                        {hasOutput && (
                           <span className="text-xs text-gray-400">
-                            {Object.keys(outputData).length} {Object.keys(outputData).length === 1 ? 'field' : 'fields'}
+                            {(() => {
+                              let count = 0;
+                              if (nodeOutput?.json !== undefined && nodeOutput.json !== null) count++;
+                              if (nodeOutput?.data !== undefined && nodeOutput.data !== null && nodeOutput.data !== nodeOutput.json) count++;
+                              if (nodeOutput?.metadata) count++;
+                              if (nodeOutput?.error) count++;
+                              return `${count} ${count === 1 ? 'field' : 'fields'}`;
+                            })()}
                           </span>
                         )}
                       </button>
-                      {isNodeExpanded && hasData && (
+                      {isNodeExpanded && hasOutput && (
                         <div className="space-y-0.5 ml-6 mt-1 border-l-2 border-blue-200 pl-2">
-                          {/* Show json field if available */}
+                          {/* Show exactly what's in output - no special handling */}
                           {nodeOutput?.json !== undefined && (
                             <TreeNode key="json" path="input" keyName="json" value={nodeOutput.json} onPick={onPick} />
                           )}
-                          {/* Show data field if available and different from json (backward compatibility) */}
                           {nodeOutput?.data !== undefined && nodeOutput.data !== nodeOutput.json && (
                             <TreeNode key="data" path="input" keyName="data" value={nodeOutput.data} onPick={onPick} />
                           )}
-                          {/* Show other fields from outputData */}
-                          {Object.entries(outputData).filter(([k]) => k !== 'json' && k !== 'data').map(([k, v]) => (
-                            <TreeNode key={k} path="input" keyName={k} value={v} onPick={onPick} />
-                          ))}
-                          {/* Show schema-based suggestions if available */}
-                          {(() => {
-                            const schemaSuggestion = schemaSuggestions.find(s => s.nodeId === n.id);
-                            if (schemaSuggestion && schemaSuggestion.suggestions.length > 0) {
-                              return (
-                                <div className="mt-2 pt-2 border-t border-blue-200">
-                                  <div className="text-[10px] text-blue-600 font-medium mb-1">Schema Fields:</div>
-                                  {schemaSuggestion.suggestions.map((suggestion, idx) => (
-                                    <button
-                                      key={idx}
-                                      type="button"
-                                      onClick={() => onPick(suggestion.value.replace(/[{}]/g, ''))}
-                                      className="w-full text-left px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 rounded border border-blue-200 hover:border-blue-300 transition-colors mb-1"
-                                      title={suggestion.description}
-                                    >
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-mono font-semibold truncate">{suggestion.label}</span>
-                                        {suggestion.description && (
-                                          <span className="text-[10px] text-blue-500 truncate">{suggestion.description}</span>
-                                        )}
-                                      </div>
-                                    </button>
-                                  ))}
-                                </div>
-                              );
-                            }
-                            return null;
-                          })()}
+                          {nodeOutput?.metadata && (
+                            <TreeNode key="metadata" path="input" keyName="metadata" value={nodeOutput.metadata} onPick={onPick} />
+                          )}
+                          {nodeOutput?.error && (
+                            <TreeNode key="error" path="input" keyName="error" value={nodeOutput.error} onPick={onPick} />
+                          )}
                         </div>
                       )}
-                      {isNodeExpanded && !hasData && (
-                        <div className="text-xs text-gray-400 italic ml-6">No data available</div>
+                      {isNodeExpanded && !hasOutput && (
+                        <div className="text-xs text-gray-400 italic ml-6">No output data. Test the node to see output.</div>
                       )}
                     </div>
                   );
@@ -844,27 +814,15 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
               <div className="p-2 bg-white space-y-2 transition-all duration-200 ease-out">
                 {guaranteed.map(n => {
                   const debugStep = debugSteps.find(s => s.nodeId === n.id);
-                  // Extract output data: prefer json, fallback to data (backward compatibility)
+                  // Use exactly what's in debugStep.output - no fallbacks, no special logic
                   const nodeOutput = debugStep?.output;
-                  const jsonValue = nodeOutput?.json;
-                  const dataValue = nodeOutput?.data;
-                  
-                  // If json/data is a primitive (string, number, etc.), outputData should be empty object
-                  // We'll show json/data directly as TreeNode, not as part of outputData
-                  let outputData: any = {};
-                  if (typeof nodeOutput === 'object' && nodeOutput !== null && !Array.isArray(nodeOutput)) {
-                    // Only include non-primitive fields
-                    Object.keys(nodeOutput).forEach(key => {
-                      if (key !== 'json' && key !== 'data') {
-                        outputData[key] = (nodeOutput as any)[key];
-                      }
-                    });
-                  }
-                  if (Object.keys(outputData).length === 0) {
-                    outputData = upstreamPreview[n.id] ?? n.data ?? {};
-                  }
-                  
-                  const hasData = (typeof outputData === 'object' && outputData !== null && Object.keys(outputData).length > 0) || jsonValue !== undefined || dataValue !== undefined;
+                  // Check if output has any meaningful data (json, data, metadata, error)
+                  const hasOutput = nodeOutput && (
+                    (nodeOutput.json !== undefined && nodeOutput.json !== null) ||
+                    (nodeOutput.data !== undefined && nodeOutput.data !== null) ||
+                    nodeOutput.metadata ||
+                    nodeOutput.error
+                  );
                   const isNodeExpanded = expandedNodes.has(n.id);
                   
                   return (
@@ -872,10 +830,10 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
                       <button
                         onClick={() => toggleNode(n.id)}
                         className="w-full text-left flex items-center gap-2 mb-1 hover:bg-gray-50 rounded px-1 py-1 transition-colors"
-                        disabled={!hasData}
+                        disabled={!hasOutput}
                       >
                         <svg 
-                          className={`w-3 h-3 text-green-600 transition-transform flex-shrink-0 ${isNodeExpanded ? 'rotate-90' : ''} ${!hasData ? 'opacity-30' : ''}`}
+                          className={`w-3 h-3 text-green-600 transition-transform flex-shrink-0 ${isNodeExpanded ? 'rotate-90' : ''} ${!hasOutput ? 'opacity-30' : ''}`}
                           fill="none" 
                           stroke="currentColor" 
                           viewBox="0 0 24 24"
@@ -886,64 +844,38 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
                         <span className="text-xs font-semibold text-gray-800 truncate flex-1">
                           {n.data?.label || n.type}
                         </span>
-                        {hasData && (
+                        {hasOutput && (
                           <span className="text-xs text-green-600">
                             {(() => {
-                              // Count actual fields:
-                              // 1. json field (if exists)
-                              // 2. data field (if exists and different from json)
-                              // 3. nested fields from json (if json is an object)
-                              // 4. other fields from outputData (metadata, etc.)
-                              let fieldCount = 0;
-                              
-                              if (jsonValue !== undefined) {
-                                fieldCount += 1; // json field itself
-                                // If json is an object, count its nested fields
-                                if (typeof jsonValue === 'object' && jsonValue !== null && !Array.isArray(jsonValue)) {
-                                  fieldCount += Object.keys(jsonValue).length;
-                                }
-                              }
-                              
-                              if (dataValue !== undefined && dataValue !== jsonValue) {
-                                fieldCount += 1; // data field (if different from json)
-                              }
-                              
-                              // Count other fields from outputData (excluding json, data, metadata)
-                              if (typeof outputData === 'object' && outputData !== null && !Array.isArray(outputData)) {
-                                fieldCount += Object.keys(outputData).filter(k => k !== 'json' && k !== 'data' && k !== 'metadata').length;
-                              }
-                              
-                              return `${fieldCount} ${fieldCount === 1 ? 'field' : 'fields'}`;
+                              let count = 0;
+                              if (nodeOutput?.json !== undefined && nodeOutput.json !== null) count++;
+                              if (nodeOutput?.data !== undefined && nodeOutput.data !== null && nodeOutput.data !== nodeOutput.json) count++;
+                              if (nodeOutput?.metadata) count++;
+                              if (nodeOutput?.error) count++;
+                              return `${count} ${count === 1 ? 'field' : 'fields'}`;
                             })()}
                           </span>
                         )}
                       </button>
-                      {isNodeExpanded && hasData && (
+                      {isNodeExpanded && hasOutput && (
                         <div className="space-y-0.5 ml-6 mt-1 border-l-2 border-green-200 pl-2">
-                          {/* Show json field dynamically based on actual output */}
-                          {jsonValue !== undefined && (
-                            // Always show only ONE json entry (simpler UX)
-                            // Path should be steps.nodeId, keyName is "json" -> results in steps.nodeId.json
-                            <TreeNode key="json" path={`steps.${n.id}`} keyName="json" value={jsonValue} onPick={onPick} />
+                          {/* Show exactly what's in output - no special handling */}
+                          {nodeOutput?.json !== undefined && (
+                            <TreeNode key="json" path={`steps.${n.id}`} keyName="json" value={nodeOutput.json} onPick={onPick} />
                           )}
-                          {/* Show data field if available and different from json (backward compatibility) */}
-                          {dataValue !== undefined && dataValue !== jsonValue && (
-                            <TreeNode key="data" path={`steps.${n.id}.data`} keyName="data" value={dataValue} onPick={onPick} />
+                          {nodeOutput?.data !== undefined && nodeOutput.data !== nodeOutput.json && (
+                            <TreeNode key="data" path={`steps.${n.id}`} keyName="data" value={nodeOutput.data} onPick={onPick} />
                           )}
-                          {/* Show nested fields from json - only if json is an object, not a string */}
-                          {jsonValue && typeof jsonValue === 'object' && jsonValue !== null && !Array.isArray(jsonValue) && (
-                            Object.entries(jsonValue).map(([k, v]) => (
-                              <TreeNode key={`json-${k}`} path={`steps.${n.id}.json`} keyName={k} value={v} onPick={onPick} />
-                            ))
+                          {nodeOutput?.metadata && (
+                            <TreeNode key="metadata" path={`steps.${n.id}`} keyName="metadata" value={nodeOutput.metadata} onPick={onPick} />
                           )}
-                          {/* Show other fields from outputData (metadata, etc.) - only if outputData is an object */}
-                          {typeof outputData === 'object' && outputData !== null && !Array.isArray(outputData) && Object.entries(outputData).filter(([k]) => k !== 'json' && k !== 'data' && k !== 'metadata').map(([k, v]) => (
-                            <TreeNode key={k} path={`steps.${n.id}`} keyName={k} value={v} onPick={onPick} />
-                          ))}
+                          {nodeOutput?.error && (
+                            <TreeNode key="error" path={`steps.${n.id}`} keyName="error" value={nodeOutput.error} onPick={onPick} />
+                          )}
                         </div>
                       )}
-                      {isNodeExpanded && !hasData && (
-                        <div className="text-xs text-gray-400 italic ml-6">No data available</div>
+                      {isNodeExpanded && !hasOutput && (
+                        <div className="text-xs text-gray-400 italic ml-6">No output data. Test the node to see output.</div>
                       )}
                     </div>
                   );
@@ -978,30 +910,15 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
               <div className="p-2 bg-white space-y-2 transition-all duration-200 ease-out">
                 {conditional.map(n => {
                   const debugStep = debugSteps.find(s => s.nodeId === n.id);
-                  // Extract output data: prefer json, fallback to data (backward compatibility)
+                  // Use exactly what's in debugStep.output - no fallbacks, no special logic
                   const nodeOutput = debugStep?.output;
-                  const jsonValue = nodeOutput?.json;
-                  const dataValue = nodeOutput?.data;
-                  
-                  // If json/data is a primitive (string, number, etc.), outputData should be empty object
-                  // We'll show json/data directly as TreeNode, not as part of outputData
-                  // Note: dataValue is kept for backward compatibility but is no longer used (data field removed)
-                  
-                  // outputData should only contain object properties, not primitives
-                  let outputData: any = {};
-                  if (typeof nodeOutput === 'object' && nodeOutput !== null && !Array.isArray(nodeOutput)) {
-                    // Only include non-primitive fields
-                    Object.keys(nodeOutput).forEach(key => {
-                      if (key !== 'json' && key !== 'data') {
-                        outputData[key] = (nodeOutput as any)[key];
-                      }
-                    });
-                  }
-                  if (Object.keys(outputData).length === 0) {
-                    outputData = upstreamPreview[n.id] ?? n.data ?? {};
-                  }
-                  
-                  const hasData = (typeof outputData === 'object' && outputData !== null && Object.keys(outputData).length > 0) || jsonValue !== undefined || dataValue !== undefined;
+                  // Check if output has any meaningful data (json, data, metadata, error)
+                  const hasOutput = nodeOutput && (
+                    (nodeOutput.json !== undefined && nodeOutput.json !== null) ||
+                    (nodeOutput.data !== undefined && nodeOutput.data !== null) ||
+                    nodeOutput.metadata ||
+                    nodeOutput.error
+                  );
                   const isNodeExpanded = expandedNodes.has(n.id);
                   
                   return (
@@ -1009,10 +926,10 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
                       <button
                         onClick={() => toggleNode(n.id)}
                         className="w-full text-left flex items-center gap-2 mb-1 hover:bg-gray-50 rounded px-1 py-1 transition-colors"
-                        disabled={!hasData}
+                        disabled={!hasOutput}
                       >
                         <svg 
-                          className={`w-3 h-3 text-amber-600 transition-transform flex-shrink-0 ${isNodeExpanded ? 'rotate-90' : ''} ${!hasData ? 'opacity-30' : ''}`}
+                          className={`w-3 h-3 text-amber-600 transition-transform flex-shrink-0 ${isNodeExpanded ? 'rotate-90' : ''} ${!hasOutput ? 'opacity-30' : ''}`}
                           fill="none" 
                           stroke="currentColor" 
                           viewBox="0 0 24 24"
@@ -1023,96 +940,38 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
                         <span className="text-xs font-semibold text-gray-800 truncate flex-1">
                           {n.data?.label || n.type}
                         </span>
-                        {hasData && (
+                        {hasOutput && (
                           <span className="text-xs text-amber-600">
                             {(() => {
-                              // Count actual fields:
-                              // 1. json field (if exists)
-                              // 2. data field (if exists and different from json)
-                              // 3. nested fields from json (if json is an object)
-                              // 4. other fields from outputData (metadata, etc.)
-                              let fieldCount = 0;
-                              
-                              if (jsonValue !== undefined) {
-                                fieldCount += 1; // json field itself
-                                // If json is an object, count its nested fields
-                                if (typeof jsonValue === 'object' && jsonValue !== null && !Array.isArray(jsonValue)) {
-                                  fieldCount += Object.keys(jsonValue).length;
-                                }
-                              }
-                              
-                              if (dataValue !== undefined && dataValue !== jsonValue) {
-                                fieldCount += 1; // data field (if different from json)
-                              }
-                              
-                              // Count other fields from outputData (excluding json, data, metadata)
-                              if (typeof outputData === 'object' && outputData !== null && !Array.isArray(outputData)) {
-                                fieldCount += Object.keys(outputData).filter(k => k !== 'json' && k !== 'data' && k !== 'metadata').length;
-                              }
-                              
-                              return `${fieldCount} ${fieldCount === 1 ? 'field' : 'fields'}`;
+                              let count = 0;
+                              if (nodeOutput?.json !== undefined && nodeOutput.json !== null) count++;
+                              if (nodeOutput?.data !== undefined && nodeOutput.data !== null && nodeOutput.data !== nodeOutput.json) count++;
+                              if (nodeOutput?.metadata) count++;
+                              if (nodeOutput?.error) count++;
+                              return `${count} ${count === 1 ? 'field' : 'fields'}`;
                             })()}
                           </span>
                         )}
                       </button>
-                      {isNodeExpanded && hasData && (
+                      {isNodeExpanded && hasOutput && (
                         <div className="space-y-0.5 ml-6 mt-1 border-l-2 border-amber-200 pl-2">
-                          {/* Show json field dynamically based on actual output */}
-                          {jsonValue !== undefined && (
-                            // Always show only ONE json entry (simpler UX)
-                            // Path should be steps.nodeId, keyName is "json" -> results in steps.nodeId.json
-                            <TreeNode key="json" path={`steps.${n.id}`} keyName="json" value={jsonValue} onPick={onPick} />
+                          {/* Show exactly what's in output - no special handling */}
+                          {nodeOutput?.json !== undefined && (
+                            <TreeNode key="json" path={`steps.${n.id}`} keyName="json" value={nodeOutput.json} onPick={onPick} />
                           )}
-                          {/* Show data field if available and different from json (backward compatibility) */}
-                          {dataValue !== undefined && dataValue !== jsonValue && (
-                            <TreeNode key="data" path={`steps.${n.id}.data`} keyName="data" value={dataValue} onPick={onPick} />
+                          {nodeOutput?.data !== undefined && nodeOutput.data !== nodeOutput.json && (
+                            <TreeNode key="data" path={`steps.${n.id}`} keyName="data" value={nodeOutput.data} onPick={onPick} />
                           )}
-                          {/* Show nested fields from json - only if json is an object, not a string */}
-                          {jsonValue && typeof jsonValue === 'object' && jsonValue !== null && !Array.isArray(jsonValue) && (
-                            Object.entries(jsonValue).map(([k, v]) => (
-                              <TreeNode key={`json-${k}`} path={`steps.${n.id}.json`} keyName={k} value={v} onPick={onPick} />
-                            ))
+                          {nodeOutput?.metadata && (
+                            <TreeNode key="metadata" path={`steps.${n.id}`} keyName="metadata" value={nodeOutput.metadata} onPick={onPick} />
                           )}
-                          {/* Show other fields from outputData (metadata, etc.) - only if outputData is an object */}
-                          {typeof outputData === 'object' && outputData !== null && !Array.isArray(outputData) && Object.entries(outputData).filter(([k]) => k !== 'json' && k !== 'data' && k !== 'metadata').map(([k, v]) => (
-                            <TreeNode key={k} path={`steps.${n.id}`} keyName={k} value={v} onPick={onPick} />
-                          ))}
-                          {/* Show schema-based suggestions ONLY if json is an object (not a string) */}
-                          {(() => {
-                            // Only show schema fields if the actual data is an object, not a primitive
-                            const isJsonObject = jsonValue && typeof jsonValue === 'object' && jsonValue !== null && !Array.isArray(jsonValue);
-                            if (!isJsonObject) return null;
-                            
-                            const schemaSuggestion = schemaSuggestions.find(s => s.nodeId === n.id);
-                            if (schemaSuggestion && schemaSuggestion.suggestions.length > 0) {
-                              return (
-                                <div className="mt-2 pt-2 border-t border-amber-200">
-                                  <div className="text-[10px] text-amber-600 font-medium mb-1">Schema Fields:</div>
-                                  {schemaSuggestion.suggestions.map((suggestion, idx) => (
-                                    <button
-                                      key={idx}
-                                      type="button"
-                                      onClick={() => onPick(suggestion.value.replace(/[{}]/g, ''))}
-                                      className="w-full text-left px-2 py-1 text-xs text-amber-700 hover:bg-amber-50 rounded border border-amber-200 hover:border-amber-300 transition-colors mb-1"
-                                      title={suggestion.description}
-                                    >
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-mono font-semibold truncate">{suggestion.label}</span>
-                                        {suggestion.description && (
-                                          <span className="text-[10px] text-amber-500 truncate">{suggestion.description}</span>
-                                        )}
-                                      </div>
-                                    </button>
-                                  ))}
-                                </div>
-                              );
-                            }
-                            return null;
-                          })()}
+                          {nodeOutput?.error && (
+                            <TreeNode key="error" path={`steps.${n.id}`} keyName="error" value={nodeOutput.error} onPick={onPick} />
+                          )}
                         </div>
                       )}
-                      {isNodeExpanded && !hasData && (
-                        <div className="text-xs text-gray-400 italic ml-6">No data available</div>
+                      {isNodeExpanded && !hasOutput && (
+                        <div className="text-xs text-gray-400 italic ml-6">No output data. Test the node to see output.</div>
                       )}
                     </div>
                   );

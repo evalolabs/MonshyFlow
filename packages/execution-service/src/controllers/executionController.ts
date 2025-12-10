@@ -73,6 +73,9 @@ export class ExecutionController {
             console.log('   nodeId:', nodeId);
             console.log('   workflow present:', !!workflow);
             console.log('   workflow.nodes length:', workflow?.nodes?.length || 0);
+            console.log('   input received:', JSON.stringify(input || {}));
+            console.log('   input keys:', input ? Object.keys(input) : []);
+            console.log('   input type:', typeof input);
 
             if (!workflow || !nodeId) {
                 res.status(400).json({ error: 'workflow and nodeId are required' });

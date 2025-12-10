@@ -28,6 +28,7 @@ interface RenderFieldProps {
   min?: number;
   max?: number;
   step?: number;
+  placeholder?: string;
   // For secret fields
   secretType?: 'ApiKey' | 'Password' | 'Token' | 'Generic' | 'Smtp';
   secrets?: SecretResponse[];

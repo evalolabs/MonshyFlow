@@ -1310,12 +1310,12 @@ class ExecutionService {
             
             // Resolve systemPrompt if it contains expressions
             if (typeof resolvedSystemPrompt === 'string' && resolvedSystemPrompt.includes('{{')) {
-                resolvedSystemPrompt = expressionResolver.resolveExpressions(
+                const result = expressionResolver.resolveExpressions(
                     resolvedSystemPrompt,
                     expressionContext,
-                    execution,
-                    node.id
+                    { execution, currentNodeId: node.id }
                 );
+                resolvedSystemPrompt = typeof result === 'string' ? result : result.result;
             }
             
             // Resolve userPrompt if it contains expressions
@@ -1327,12 +1327,12 @@ class ExecutionService {
                     return acc;
                 }, {}), null, 2));
                 
-                resolvedUserPrompt = expressionResolver.resolveExpressions(
+                const result = expressionResolver.resolveExpressions(
                     resolvedUserPrompt,
                     expressionContext,
-                    execution,
-                    node.id
+                    { execution, currentNodeId: node.id }
                 );
+                resolvedUserPrompt = typeof result === 'string' ? result : result.result;
                 console.log(`[Agent ${node.id}] ✅ Resolved userPrompt: ${resolvedUserPrompt.substring(0, 200)}...`);
             }
         }

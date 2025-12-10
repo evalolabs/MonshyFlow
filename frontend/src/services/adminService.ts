@@ -98,7 +98,7 @@ export const adminService = {
     }
     // Fallback für direkte Object-Response
     if (response.data && !response.data.success) {
-      return response.data as User;
+      return response.data as unknown as User;
     }
     throw new Error('Invalid response format');
   },
@@ -111,7 +111,7 @@ export const adminService = {
     }
     // Fallback für direkte Object-Response
     if (response.data && !response.data.success) {
-      return response.data as User;
+      return response.data as unknown as User;
     }
     throw new Error('Invalid response format');
   },
@@ -124,7 +124,7 @@ export const adminService = {
     }
     // Fallback für direkte Object-Response
     if (response.data && !response.data.success) {
-      return response.data as User;
+      return response.data as unknown as User;
     }
     throw new Error('Invalid response format');
   },
@@ -155,7 +155,7 @@ export const adminService = {
     }
     // Fallback für direkte Object-Response
     if (response.data && !response.data.success) {
-      return response.data as Tenant;
+      return response.data as unknown as Tenant;
     }
     throw new Error('Invalid response format');
   },
@@ -168,7 +168,7 @@ export const adminService = {
     }
     // Fallback für direkte Object-Response
     if (response.data && !response.data.success) {
-      return response.data as Tenant;
+      return response.data as unknown as Tenant;
     }
     throw new Error('Invalid response format');
   },
@@ -181,7 +181,7 @@ export const adminService = {
     }
     // Fallback für direkte Object-Response
     if (response.data && !response.data.success) {
-      return response.data as Tenant;
+      return response.data as unknown as Tenant;
     }
     throw new Error('Invalid response format');
   },
@@ -213,7 +213,7 @@ export const adminService = {
     }
     // Fallback für direkte Object-Response
     if (response.data && !response.data.success) {
-      return response.data as Statistics;
+      return response.data as unknown as Statistics;
     }
     throw new Error('Invalid response format');
   },

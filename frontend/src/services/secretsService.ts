@@ -88,7 +88,7 @@ export const secretsService = {
     }
     // Fallback für direkte Object-Response
     if (response.data && !response.data.success) {
-      return response.data as SecretResponse;
+      return response.data as unknown as SecretResponse;
     }
     throw new Error('Invalid response format');
   },
@@ -101,7 +101,7 @@ export const secretsService = {
     }
     // Fallback für direkte Object-Response
     if (response.data && !response.data.success) {
-      return response.data as SecretResponse;
+      return response.data as unknown as SecretResponse;
     }
     throw new Error('Invalid response format');
   },
@@ -114,7 +114,7 @@ export const secretsService = {
     }
     // Fallback für direkte Object-Response
     if (response.data && !response.data.success) {
-      return response.data as SecretResponse;
+      return response.data as unknown as SecretResponse;
     }
     throw new Error('Invalid response format');
   },
@@ -132,7 +132,7 @@ export const secretsService = {
     }
     // Fallback für direkte Object-Response
     if (response.data && !response.data.success) {
-      return response.data as DecryptedSecretResponse;
+      return response.data as unknown as DecryptedSecretResponse;
     }
     throw new Error('Invalid response format');
   },

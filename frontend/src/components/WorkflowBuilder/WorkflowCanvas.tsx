@@ -550,23 +550,29 @@ export function WorkflowCanvas({
       });
     }, 500); // Small delay to allow final animation states
     
+    // Extract data from response structure: { success: true, data: { output: {...}, execution: {...} } }
+    const responseData = result.data || result;
+    const execution = responseData.execution || result.execution;
+    
     // Update debug steps with test result
     setDebugSteps(prevSteps => {
       return prevSteps.map(step => {
         if (step.nodeId === originalStep.nodeId) {
+          // Get output from responseData.output (NodeData format: { json, metadata })
+          const outputPayload = responseData.output || result.output;
           return {
             ...step,
-            status: result.success ? 'completed' : 'failed',
-            input: result.input || step.input,
-            output: result.output || result,
-            error: result.error || step.error,
-            duration: result.duration || step.duration,
-            startedAt: result.timestamp || new Date().toISOString(),
-            completedAt: result.timestamp || new Date().toISOString(),
+            status: responseData.success !== false ? 'completed' : 'failed',
+            input: execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.input || responseData.input || result.input || step.input,
+            output: outputPayload, // NodeData: { json, metadata }
+            error: responseData.error || result.error || step.error,
+            duration: execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.duration || responseData.duration || result.duration || step.duration,
+            startedAt: execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.timestamp || responseData.timestamp || result.timestamp || new Date().toISOString(),
+            completedAt: execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.timestamp || responseData.timestamp || result.timestamp || new Date().toISOString(),
             debugInfo: {
               ...step.debugInfo,
-              outputPreview: JSON.stringify(result.output || result, null, 2),
-              size: JSON.stringify(result.output || result).length,
+              outputPreview: JSON.stringify(outputPayload || {}, null, 2),
+              size: JSON.stringify(outputPayload || {}).length,
             },
           };
         }
@@ -575,7 +581,7 @@ export function WorkflowCanvas({
     });
     
     // Process the trace from the backend and update all relevant steps
-    if (result?.execution?.trace && Array.isArray(result.execution.trace)) {
+    if (execution?.trace && Array.isArray(execution.trace)) {
       setDebugSteps(prevSteps => {
         const newStepsMap = new Map<string, any>();
         
@@ -583,7 +589,7 @@ export function WorkflowCanvas({
         const existingStepsMap = new Map(prevSteps.map(step => [step.nodeId, step]));
         
         // Process each trace entry
-        result.execution.trace.forEach((traceEntry: any) => {
+        execution.trace.forEach((traceEntry: any) => {
           const existingStep = existingStepsMap.get(traceEntry.nodeId);
           const outputPayload = traceEntry.output;
           const outputPreview = outputPayload !== undefined 
@@ -623,19 +629,20 @@ export function WorkflowCanvas({
       });
     } else {
       // Fallback: update single step
+      const outputPayload = responseData.output || result.output;
       handleDebugStepUpdate(originalStep.nodeId, {
         ...originalStep,
-        status: result.success ? 'completed' : 'failed',
-        input: result.input || originalStep.input,
-        output: result.output || result,
-        error: result.error || originalStep.error,
-        duration: result.duration || originalStep.duration,
-        startedAt: result.timestamp || new Date().toISOString(),
-        completedAt: result.timestamp || new Date().toISOString(),
+        status: responseData.success !== false ? 'completed' : 'failed',
+        input: responseData.input || result.input || originalStep.input,
+        output: outputPayload, // NodeData: { json, metadata }
+        error: responseData.error || result.error || originalStep.error,
+        duration: responseData.duration || result.duration || originalStep.duration,
+        startedAt: responseData.timestamp || result.timestamp || new Date().toISOString(),
+        completedAt: responseData.timestamp || result.timestamp || new Date().toISOString(),
         debugInfo: {
           ...originalStep.debugInfo,
-          outputPreview: JSON.stringify(result.output || result, null, 2),
-          size: JSON.stringify(result.output || result, null, 2).length,
+          outputPreview: JSON.stringify(outputPayload || {}, null, 2),
+          size: JSON.stringify(outputPayload || {}, null, 2).length,
         },
       });
     }

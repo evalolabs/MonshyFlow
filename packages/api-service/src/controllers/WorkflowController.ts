@@ -118,5 +118,108 @@ export class WorkflowController {
       }
     }
   }
+
+  async updateStartNode(req: Request, res: Response): Promise<void> {
+    try {
+      const { workflowId, nodeId } = req.body;
+      if (!workflowId || !nodeId) {
+        res.status(400).json({ success: false, error: 'workflowId and nodeId are required' });
+        return;
+      }
+
+      const config = {
+        label: req.body.label,
+        entryType: req.body.entryType,
+        endpoint: req.body.endpoint,
+        baseUrl: req.body.baseUrl,
+        method: req.body.method,
+        description: req.body.description,
+        executionMode: req.body.executionMode,
+        timeout: req.body.timeout,
+        webhookUrl: req.body.webhookUrl,
+        inputSchema: req.body.inputSchema,
+        scheduleConfig: req.body.scheduleConfig,
+      };
+
+      // Remove undefined values
+      Object.keys(config).forEach(key => {
+        if ((config as any)[key] === undefined) {
+          delete (config as any)[key];
+        }
+      });
+
+      await this.workflowService.updateStartNode(workflowId, nodeId, config);
+      logger.info({ workflowId, nodeId }, 'Start node updated');
+      res.json({ success: true });
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to update start node');
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+
+  async updateNode(req: Request, res: Response): Promise<void> {
+    try {
+      const { workflowId, nodeId } = req.body;
+      if (!workflowId || !nodeId) {
+        res.status(400).json({ success: false, error: 'workflowId and nodeId are required' });
+        return;
+      }
+
+      const config = {
+        type: req.body.type,
+        data: req.body.data,
+      };
+
+      // Remove undefined values
+      Object.keys(config).forEach(key => {
+        if ((config as any)[key] === undefined) {
+          delete (config as any)[key];
+        }
+      });
+
+      await this.workflowService.updateNode(workflowId, nodeId, config);
+      logger.info({ workflowId, nodeId }, 'Node updated');
+      res.json({ success: true });
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to update node');
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+
+  async publish(req: Request, res: Response): Promise<void> {
+    try {
+      const { workflowId, description } = req.body;
+      if (!workflowId) {
+        res.status(400).json({ success: false, error: 'workflowId is required' });
+        return;
+      }
+
+      await this.workflowService.publish(workflowId, description);
+      logger.info({ workflowId }, 'Workflow published');
+      res.json({ success: true });
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        res.status(404).json({ success: false, error: error.message });
+      } else {
+        logger.error({ err: error }, 'Failed to publish workflow');
+        res.status(500).json({ success: false, error: (error as Error).message });
+      }
+    }
+  }
+
+  async getPublished(req: Request, res: Response): Promise<void> {
+    try {
+      const user = (req as any).user;
+      const tenantId = (req.query.tenantId as string) || user?.tenantId;
+      const workflows = await this.workflowService.getPublished(tenantId);
+      res.json({ 
+        success: true, 
+        data: workflows.map(w => this.toJSON(w))
+      });
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to get published workflows');
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
 }
 

@@ -40,7 +40,7 @@ export const apiKeysService = {
     }
     // Fallback für direkte Object-Response
     if (response.data && !response.data.success) {
-      return response.data as ApiKeyResponse;
+      return response.data as unknown as ApiKeyResponse;
     }
     throw new Error('Invalid response format');
   },

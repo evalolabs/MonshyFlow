@@ -366,17 +366,23 @@ function DebugNode({ step, isExpanded, onToggle, workflowId, onStepUpdate, onTes
         if (onTestResult) {
           onTestResult(result, step);
         } else if (onStepUpdate) {
-          const outputPayload = result.output || result;
-          const outputPreview = JSON.stringify(outputPayload, null, 2);
+          // Handle execution-service response structure
+          // result.data contains: { success, nodeId, output, previousOutputs, execution }
+          const responseData = result.data || result;
+          const execution = responseData.execution || result.execution;
+          // Get output from responseData.output (NodeData format: { json, metadata })
+          // Do NOT use result directly as fallback - it contains the full response structure
+          const outputPayload = responseData.output || execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.output;
+          const outputPreview = outputPayload !== undefined ? JSON.stringify(outputPayload, null, 2) : 'undefined';
           const updatedStep: ExecutionStep = {
             ...step,
-            status: result.success ? 'completed' : 'failed',
-            input: result.input || step.input,
-            output: outputPayload,
-            error: result.error || step.error,
-            duration: result.duration || step.duration,
-            startedAt: result.timestamp || new Date().toISOString(),
-            completedAt: result.timestamp || new Date().toISOString(),
+            status: responseData.success !== false ? 'completed' : 'failed',
+            input: execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.input || responseData.input || result.input || step.input,
+            output: outputPayload, // NodeData: { json, metadata }
+            error: responseData.error || result.error || step.error,
+            duration: execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.duration || responseData.duration || result.duration || step.duration,
+            startedAt: execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.timestamp || responseData.timestamp || result.timestamp || new Date().toISOString(),
+            completedAt: execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.timestamp || responseData.timestamp || result.timestamp || new Date().toISOString(),
             debugInfo: {
               ...step.debugInfo,
               outputPreview,
@@ -475,17 +481,23 @@ function DebugNode({ step, isExpanded, onToggle, workflowId, onStepUpdate, onTes
       if (onTestResult) {
         onTestResult(result, step);
       } else if (onStepUpdate) {
-        const outputPayload = result.output || result;
-        const outputPreview = JSON.stringify(outputPayload, null, 2);
+        // Handle execution-service response structure
+        // result.data contains: { success, nodeId, output, previousOutputs, execution }
+        const responseData = result.data || result;
+        const execution = responseData.execution || result.execution;
+        // Get output from responseData.output (NodeData format: { json, metadata })
+        // Do NOT use result directly as fallback - it contains the full response structure
+        const outputPayload = responseData.output || execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.output || responseData.previousOutputs?.find((p: any) => p.nodeId === step.nodeId)?.output;
+        const outputPreview = outputPayload !== undefined ? JSON.stringify(outputPayload, null, 2) : 'undefined';
         const updatedStep: ExecutionStep = {
           ...step,
-          status: result.success ? 'completed' : 'failed',
-          input: result.input || step.input,
-          output: outputPayload,
-          error: result.error || step.error,
-          duration: result.duration || step.duration,
-          startedAt: result.timestamp || new Date().toISOString(),
-          completedAt: result.timestamp || new Date().toISOString(),
+          status: responseData.success !== false ? 'completed' : 'failed',
+          input: execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.input || responseData.input || result.input || step.input,
+          output: outputPayload, // NodeData: { json, metadata }
+          error: responseData.error || result.error || step.error,
+          duration: execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.duration || responseData.duration || result.duration || step.duration,
+          startedAt: execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.timestamp || responseData.timestamp || result.timestamp || new Date().toISOString(),
+          completedAt: execution?.trace?.find((t: any) => t.nodeId === step.nodeId)?.timestamp || responseData.timestamp || result.timestamp || new Date().toISOString(),
           debugInfo: {
             ...step.debugInfo,
             outputPreview,
@@ -493,6 +505,29 @@ function DebugNode({ step, isExpanded, onToggle, workflowId, onStepUpdate, onTes
           },
         };
         onStepUpdate(step.nodeId, updatedStep);
+        
+        // Also update previousOutputs if available
+        if (responseData.previousOutputs && Array.isArray(responseData.previousOutputs)) {
+          responseData.previousOutputs.forEach((prevOutput: any) => {
+            if (prevOutput.nodeId !== step.nodeId) {
+              const prevStep: ExecutionStep = {
+                nodeId: prevOutput.nodeId,
+                nodeType: prevOutput.nodeType,
+                nodeLabel: prevOutput.label,
+                status: 'completed',
+                output: prevOutput.output, // NodeData: { json, metadata }
+                startedAt: new Date().toISOString(),
+                completedAt: new Date().toISOString(),
+                duration: 0,
+                debugInfo: {
+                  outputPreview: JSON.stringify(prevOutput.output, null, 2),
+                  size: JSON.stringify(prevOutput.output).length,
+                },
+              };
+              onStepUpdate(prevOutput.nodeId, prevStep);
+            }
+          });
+        }
       }
     } catch (error: any) {
       console.error('Error testing node:', error);
@@ -768,8 +803,12 @@ export function DebugPanel({ executionSteps, isVisible, onClose, workflowId, onS
   const handleTestResult = React.useCallback((result: any, currentStep: ExecutionStep) => {
     let updatedFromTrace = false;
 
-    if (Array.isArray(result?.execution?.trace) && result.execution.trace.length > 0) {
-      result.execution.trace.forEach((traceEntry: any) => {
+    // Extract data from response structure: { success: true, data: { output: {...}, execution: {...} } }
+    const responseData = result.data || result;
+    const execution = responseData.execution || result.execution;
+
+    if (Array.isArray(execution?.trace) && execution.trace.length > 0) {
+      execution.trace.forEach((traceEntry: any) => {
         const existingStep = localSteps.find(step => step.nodeId === traceEntry.nodeId);
         const outputPayload = traceEntry.output;
         const outputPreview =
@@ -802,17 +841,19 @@ export function DebugPanel({ executionSteps, isVisible, onClose, workflowId, onS
     }
 
     if (!updatedFromTrace) {
-      const outputPayload = result.output ?? result;
+      // Get output from responseData.output (NodeData format: { json, metadata })
+      // Do NOT use result directly as fallback - it contains the full response structure
+      const outputPayload = responseData.output || execution?.trace?.find((t: any) => t.nodeId === currentStep.nodeId)?.output;
       const outputPreview = outputPayload !== undefined ? JSON.stringify(outputPayload, null, 2) : 'undefined';
       handleStepUpdate(currentStep.nodeId, {
         ...currentStep,
-        status: result.success ? 'completed' : 'failed',
-        input: result.input || currentStep.input,
-        output: outputPayload,
-        error: result.error || currentStep.error,
-        duration: result.duration || currentStep.duration,
-        startedAt: result.timestamp || new Date().toISOString(),
-        completedAt: result.timestamp || new Date().toISOString(),
+        status: responseData.success !== false ? 'completed' : 'failed',
+        input: execution?.trace?.find((t: any) => t.nodeId === currentStep.nodeId)?.input || responseData.input || result.input || currentStep.input,
+        output: outputPayload, // NodeData: { json, metadata }
+        error: responseData.error || result.error || currentStep.error,
+        duration: execution?.trace?.find((t: any) => t.nodeId === currentStep.nodeId)?.duration || responseData.duration || result.duration || currentStep.duration,
+        startedAt: execution?.trace?.find((t: any) => t.nodeId === currentStep.nodeId)?.timestamp || responseData.timestamp || result.timestamp || new Date().toISOString(),
+        completedAt: execution?.trace?.find((t: any) => t.nodeId === currentStep.nodeId)?.timestamp || responseData.timestamp || result.timestamp || new Date().toISOString(),
         debugInfo: {
           ...currentStep.debugInfo,
           outputPreview,

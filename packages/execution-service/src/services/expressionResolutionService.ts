@@ -8,22 +8,117 @@
 import type { NodeData, NodeMetadata } from '../models/nodeData';
 import { WorkflowDataProxy } from '../utils/workflowDataProxy';
 import type { Execution } from '../models/execution';
+import { expressionValidator } from './expressionValidator';
 
+/**
+ * Expression Result Type
+ */
+export type ExpressionResult = string | number | boolean | object | null;
+
+/**
+ * Expression Context - strict types for better type safety
+ */
 export interface ExpressionContext {
     /**
-     * Steps from previous nodes: key = nodeId, value = NodeData or object
+     * Steps from previous nodes: key = nodeId, value = NodeData
      */
-    steps: Record<string, any>;
+    steps: Record<string, NodeData>;
 
     /**
-     * Input data (from start node): NodeData or object
+     * Input data (from start node): NodeData or null
      */
-    input?: any;
+    input: NodeData | null;
 
     /**
      * Secrets: key = secret name, value = secret value
      */
     secrets: Record<string, string>;
+}
+
+/**
+ * Options for expression resolution
+ */
+export interface ExpressionResolutionOptions {
+    /**
+     * Execution context for workflow-style expressions
+     */
+    execution?: Execution;
+
+    /**
+     * Current node ID for workflow-style expressions
+     */
+    currentNodeId?: string;
+
+    /**
+     * Item index for workflow-style expressions
+     */
+    itemIndex?: number;
+
+    /**
+     * Enable debug mode to return trace information
+     */
+    debug?: boolean;
+
+    /**
+     * Error handling strategy
+     */
+    onError?: 'throw' | 'warn' | 'fallback';
+
+    /**
+     * Fallback value when onError is 'fallback'
+     */
+    fallbackValue?: string;
+
+    /**
+     * Validate expressions before resolution (default: true)
+     */
+    validate?: boolean;
+}
+
+/**
+ * Resolution Trace for debug mode
+ */
+export interface ResolutionTrace {
+    expression: string;
+    resolvedValue: ExpressionResult;
+    duration: number;
+    errors?: string[];
+}
+
+/**
+ * Expression Resolution Error
+ */
+export class ExpressionResolutionError extends Error {
+    constructor(
+        public expression: string,
+        public reason: 'not_found' | 'invalid_path' | 'type_mismatch' | 'missing_node',
+        public details?: {
+            nodeId?: string;
+            availableNodes?: string[];
+            path?: string;
+            availablePaths?: string[];
+        }
+    ) {
+        let message = `Failed to resolve expression: ${expression} (${reason})`;
+        
+        if (details?.path) {
+            message += `. Path: ${details.path}`;
+        }
+        
+        if (details?.availablePaths && details.availablePaths.length > 0) {
+            const pathsList = details.availablePaths.slice(0, 10).join(', ');
+            const more = details.availablePaths.length > 10 ? ` (and ${details.availablePaths.length - 10} more)` : '';
+            message += `. Available paths: ${pathsList}${more}`;
+        }
+        
+        if (details?.availableNodes && details.availableNodes.length > 0) {
+            message += `. Available nodes: ${details.availableNodes.join(', ')}`;
+        }
+        
+        super(message);
+        this.name = 'ExpressionResolutionError';
+        Object.setPrototypeOf(this, ExpressionResolutionError.prototype);
+    }
 }
 
 export class ExpressionResolutionService {
@@ -47,28 +142,67 @@ export class ExpressionResolutionService {
      * - {{steps.nodeId.metadata.field}} - Metadata access
      * - {{input.data.field}} -> {{input.json.field}}
      * - {{secret:secretName}} - Secret access
+     * 
+     * @param text - Text containing expressions to resolve
+     * @param context - Expression context with steps, input, and secrets
+     * @param options - Optional configuration for resolution
+     * @returns Resolved text, or object with result and trace if debug mode is enabled
      */
     resolveExpressions(
         text: string, 
         context: ExpressionContext,
-        execution?: Execution,
-        currentNodeId?: string,
-        itemIndex: number = 0
-    ): string {
+        options?: ExpressionResolutionOptions
+    ): string | { result: string; trace: ResolutionTrace[] } {
         if (!text || text.trim() === '') {
-            return text;
+            return options?.debug ? { result: text, trace: [] } : text;
+        }
+
+        const traces: ResolutionTrace[] = [];
+        const startTime = Date.now();
+
+        // Optional: Validate expressions if validate option is enabled (default: true)
+        if (options?.validate !== false && text.includes('{{')) {
+            const availableNodes = Object.keys(context.steps);
+            const expressions = expressionValidator.extractExpressions(text);
+            for (const expression of expressions) {
+                const validation = expressionValidator.validate(expression, availableNodes);
+                if (!validation.valid && validation.error) {
+                    this.logger?.warn(`[ExpressionResolution] Validation warning: ${validation.error}`);
+                    if (options?.debug) {
+                        traces.push({
+                            expression,
+                            resolvedValue: null,
+                            duration: Date.now() - startTime,
+                            errors: [validation.error]
+                        });
+                    }
+                }
+            }
         }
 
         // Try workflow-style syntax first (if execution and currentNodeId are provided)
-        if (execution && currentNodeId) {
+        if (options?.execution && options?.currentNodeId) {
             try {
-                const proxy = new WorkflowDataProxy(execution, currentNodeId, itemIndex);
+                const proxy = new WorkflowDataProxy(
+                    options.execution, 
+                    options.currentNodeId, 
+                    options.itemIndex || 0
+                );
                 const dataProxy = proxy.getDataProxy();
                 
                 // Replace workflow-style expressions: {{$json.field}}, {{$node["NodeName"].json.field}}, etc.
                 text = this.resolveWorkflowExpressions(text, dataProxy);
-            } catch (error: any) {
-                this.logger?.warn(`[ExpressionResolution] Failed to use workflow-style resolution, falling back to legacy: ${error.message}`);
+            } catch (error: unknown) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                this.logger?.warn(`[ExpressionResolution] Failed to use workflow-style resolution, falling back to legacy: ${errorMessage}`);
+                if (options?.debug) {
+                    traces.push({
+                        expression: 'workflow-style',
+                        resolvedValue: null,
+                        duration: Date.now() - startTime,
+                        errors: [errorMessage]
+                    });
+                }
             }
         }
 
@@ -106,11 +240,9 @@ export class ExpressionResolutionService {
 
             if (parts.length > 0) {
                 const nodeId = parts[0];
-                this.logger?.log(`[ExpressionResolution] Resolving: ${fullMatch}, nodeId: ${nodeId}, path: ${path}`);
 
                 if (normalizedContext.steps[nodeId] !== undefined) {
                     const nodeDataValue = normalizedContext.steps[nodeId];
-                    this.logger?.log(`[ExpressionResolution] Found step ${nodeId}, type: ${typeof nodeDataValue}, isNodeData: ${this.isNodeData(nodeDataValue)}`);
 
                     let replacement: string | null = null;
 
@@ -118,13 +250,11 @@ export class ExpressionResolutionService {
                     if (this.isNodeData(nodeDataValue)) {
                         // Remove nodeId from parts (parts[0] is nodeId, parts[1+] is the path)
                         const pathParts = parts.slice(1);
-                        this.logger?.log(`[ExpressionResolution] Resolving NodeData path: ${pathParts.join('.')}`);
                         replacement = this.resolveNodeDataPath(nodeDataValue as NodeData, pathParts);
                     } else if (typeof nodeDataValue === 'object' && nodeDataValue !== null) {
                         // Handle plain objects/dictionaries
                         // Remove nodeId from parts
                         const pathParts = parts.slice(1);
-                        this.logger?.log(`[ExpressionResolution] Resolving object path: ${pathParts.join('.')}`);
                         replacement = this.resolveObjectPath(nodeDataValue, pathParts);
                     } else {
                         // Fallback: convert to string
@@ -132,14 +262,59 @@ export class ExpressionResolutionService {
                     }
 
                     if (replacement !== null) {
-                        this.logger?.log(`[ExpressionResolution] Replacing ${fullMatch} with: ${replacement.substring(0, 100)}...`);
                         // Replace from end to beginning to maintain correct indices
                         text = text.substring(0, matches[i].index) + replacement + text.substring(matches[i].index + fullMatch.length);
+                        if (options?.debug) {
+                            traces.push({
+                                expression: fullMatch,
+                                resolvedValue: replacement,
+                                duration: Date.now() - startTime
+                            });
+                        }
                     } else {
-                        this.logger?.warn(`[ExpressionResolution] Could not resolve expression: ${fullMatch} for nodeId: ${nodeId}`);
+                        // Get available paths for better error messages (only for small objects)
+                        const availablePaths = this.getAvailablePaths(
+                            this.isNodeData(nodeDataValue) ? nodeDataValue.json : nodeDataValue,
+                            'json'
+                        );
+                        const error = new ExpressionResolutionError(
+                            fullMatch,
+                            'not_found',
+                            { 
+                                nodeId, 
+                                availableNodes: Object.keys(normalizedContext.steps),
+                                path: parts.slice(1).join('.'),
+                                availablePaths: availablePaths.slice(0, 20) // Limit to 20 paths
+                            }
+                        );
+                        this.handleError(error, options);
+                        if (options?.debug) {
+                            traces.push({
+                                expression: fullMatch,
+                                resolvedValue: null,
+                                duration: Date.now() - startTime,
+                                errors: [error.message]
+                            });
+                        }
                     }
                 } else {
-                    this.logger?.warn(`[ExpressionResolution] Step ${nodeId} not found. Available steps: ${Object.keys(normalizedContext.steps).join(', ')}`);
+                    const error = new ExpressionResolutionError(
+                        fullMatch,
+                        'missing_node',
+                        { 
+                            nodeId, 
+                            availableNodes: Object.keys(normalizedContext.steps)
+                        }
+                    );
+                    this.handleError(error, options);
+                    if (options?.debug) {
+                        traces.push({
+                            expression: fullMatch,
+                            resolvedValue: null,
+                            duration: Date.now() - startTime,
+                            errors: [error.message]
+                        });
+                    }
                 }
             }
         }
@@ -158,7 +333,8 @@ export class ExpressionResolutionService {
                     // Handle {{input.json.field}} or {{input.data.field}}
                     if (this.isNodeData(normalizedContext.input)) {
                         const nodeData = normalizedContext.input as NodeData;
-                        const mainData = nodeData.json;
+                        // Use json with fallback to data for backward compatibility
+                        const mainData = nodeData.json ?? (nodeData as any).data;
                         replacement = this.resolveObjectPath(mainData, path.slice(1));
                     } else if (typeof normalizedContext.input === 'object') {
                         replacement = this.resolveObjectPath(normalizedContext.input, path.slice(1));
@@ -173,7 +349,8 @@ export class ExpressionResolutionService {
                     // Handle direct field access: {{input.field}} - shortcut for {{input.json.field}}
                     if (this.isNodeData(normalizedContext.input)) {
                         const nodeData = normalizedContext.input as NodeData;
-                        const mainData = nodeData.json;
+                        // Use json with fallback to data for backward compatibility
+                        const mainData = nodeData.json ?? (nodeData as any).data;
                         replacement = this.resolveObjectPath(mainData, path);
                     } else if (typeof normalizedContext.input === 'object' && normalizedContext.input !== null) {
                         // Direct access to plain object fields
@@ -183,8 +360,41 @@ export class ExpressionResolutionService {
 
                 if (replacement !== null) {
                     text = text.replace(fullMatch, replacement);
+                    if (options?.debug) {
+                        traces.push({
+                            expression: fullMatch,
+                            resolvedValue: replacement,
+                            duration: Date.now() - startTime
+                        });
+                    }
                 } else {
-                    this.logger?.warn(`[ExpressionResolution] Could not resolve input expression: ${fullMatch}`);
+                    // Get available paths for better error messages (only for small objects)
+                    let availablePaths: string[] = [];
+                    if (this.isNodeData(normalizedContext.input)) {
+                        const nodeData = normalizedContext.input as NodeData;
+                        const mainData = nodeData.json ?? (nodeData as any).data;
+                        availablePaths = this.getAvailablePaths(mainData, 'json');
+                    } else if (typeof normalizedContext.input === 'object' && normalizedContext.input !== null) {
+                        availablePaths = this.getAvailablePaths(normalizedContext.input, '');
+                    }
+                    
+                    const error = new ExpressionResolutionError(
+                        fullMatch,
+                        'invalid_path',
+                        { 
+                            path: path.join('.'),
+                            availablePaths: availablePaths.slice(0, 20) // Limit to 20 paths
+                        }
+                    );
+                    this.handleError(error, options);
+                    if (options?.debug) {
+                        traces.push({
+                            expression: fullMatch,
+                            resolvedValue: null,
+                            duration: Date.now() - startTime,
+                            errors: [error.message]
+                        });
+                    }
                 }
             }
 
@@ -193,7 +403,8 @@ export class ExpressionResolutionService {
                 let inputReplacement: string | null = null;
                 if (this.isNodeData(normalizedContext.input)) {
                     const nodeData = normalizedContext.input as NodeData;
-                    const mainData = nodeData.json;
+                    // Use json with fallback to data for backward compatibility
+                    const mainData = nodeData.json ?? (nodeData as any).data;
                     inputReplacement = JSON.stringify(mainData || {});
                 } else if (typeof normalizedContext.input === 'object') {
                     inputReplacement = JSON.stringify(normalizedContext.input);
@@ -202,12 +413,9 @@ export class ExpressionResolutionService {
                 }
 
                 if (inputReplacement !== null) {
-                    this.logger?.log(`[ExpressionResolution] Replacing {{input}} with: ${inputReplacement.substring(0, 100)}...`);
                     text = text.replace('{{input}}', inputReplacement);
                 }
             }
-        } else {
-            this.logger?.log('[ExpressionResolution] No input context available.');
         }
 
         // Replace {{secret:name}} patterns
@@ -218,8 +426,28 @@ export class ExpressionResolutionService {
 
             if (normalizedContext.secrets[secretName]) {
                 text = text.replace(fullMatch, normalizedContext.secrets[secretName]);
+                if (options?.debug) {
+                    traces.push({
+                        expression: fullMatch,
+                        resolvedValue: normalizedContext.secrets[secretName],
+                        duration: Date.now() - startTime
+                    });
+                }
             } else {
-                this.logger?.warn(`[ExpressionResolution] Secret '${secretName}' not found in context.`);
+                const error = new ExpressionResolutionError(
+                    fullMatch,
+                    'not_found',
+                    { path: secretName }
+                );
+                this.handleError(error, options);
+                if (options?.debug) {
+                    traces.push({
+                        expression: fullMatch,
+                        resolvedValue: null,
+                        duration: Date.now() - startTime,
+                        errors: [error.message]
+                    });
+                }
             }
         }
 
@@ -231,27 +459,77 @@ export class ExpressionResolutionService {
 
             if (normalizedContext.secrets[secretName]) {
                 text = text.replace(fullMatch, normalizedContext.secrets[secretName]);
+                if (options?.debug) {
+                    traces.push({
+                        expression: fullMatch,
+                        resolvedValue: normalizedContext.secrets[secretName],
+                        duration: Date.now() - startTime
+                    });
+                }
             } else {
-                this.logger?.warn(`[ExpressionResolution] Secret '${secretName}' not found in context (secrets. syntax).`);
+                const error = new ExpressionResolutionError(
+                    fullMatch,
+                    'not_found',
+                    { path: secretName }
+                );
+                this.handleError(error, options);
+                if (options?.debug) {
+                    traces.push({
+                        expression: fullMatch,
+                        resolvedValue: null,
+                        duration: Date.now() - startTime,
+                        errors: [error.message]
+                    });
+                }
             }
         }
 
+        if (options?.debug) {
+            return { result: text, trace: traces };
+        }
         return text;
+    }
+
+    /**
+     * Handle errors based on error strategy
+     */
+    private handleError(error: ExpressionResolutionError, options?: ExpressionResolutionOptions): void {
+        switch (options?.onError) {
+            case 'throw':
+                throw error;
+            case 'warn':
+                this.logger?.warn(error.message);
+                break;
+            case 'fallback':
+                // Fallback is handled at call site
+                this.logger?.warn(error.message);
+                break;
+            default:
+                // Default: warn
+                this.logger?.warn(error.message);
+        }
     }
 
     /**
      * STANDARDIZED: Normalize context to NodeData format
      * Converts all Steps and Input to NodeData if they aren't already
+     * Accepts flexible input (any) but returns strict types
      */
-    private normalizeContext(context: ExpressionContext): ExpressionContext {
+    private normalizeContext(context: ExpressionContext | {
+        steps?: Record<string, any>;
+        input?: any;
+        secrets: Record<string, string>;
+    }): ExpressionContext {
         const normalized: ExpressionContext = {
             secrets: context.secrets, // Secrets don't need normalization
             steps: {},
-            input: this.normalizeToNodeData(context.input, 'input', 'input')
+            input: context.input 
+                ? this.normalizeToNodeData(context.input, 'input', 'input') 
+                : null
         };
 
         // Normalize all steps
-        for (const [key, value] of Object.entries(context.steps)) {
+        for (const [key, value] of Object.entries(context.steps || {})) {
             // Extract nodeId from step key (could be "nodeId" or "steps.nodeId")
             const nodeId = key.includes('.') ? key.split('.').pop()! : key;
             normalized.steps[nodeId] = this.normalizeToNodeData(value, nodeId, 'node');
@@ -262,26 +540,42 @@ export class ExpressionResolutionService {
 
     /**
      * Normalize any value to NodeData format
+     * Migrates legacy 'data' field to 'json' if needed
      */
-    private normalizeToNodeData(value: any, nodeId: string, nodeType: string): any {
+    private normalizeToNodeData(value: unknown, nodeId: string, nodeType: string): NodeData {
         if (value === null || value === undefined) {
             return this.createNodeData(null, nodeId, nodeType);
         }
 
-        // Already NodeData
+        // Already NodeData - check if migration from 'data' to 'json' is needed
         if (this.isNodeData(value)) {
+            // Migrate 'data' to 'json' if 'data' exists but 'json' doesn't
+            if ('data' in value && !('json' in value) && value.data !== undefined) {
+                return {
+                    ...value,
+                    json: value.data,
+                };
+            }
             return value;
         }
 
         // Check if it's a plain object that might represent NodeData
         if (typeof value === 'object' && value !== null) {
-            if ('data' in value && 'metadata' in value) {
-                // Try to convert to NodeData
-                try {
-                    return value as NodeData;
-                } catch {
-                    // Fall through to create new NodeData
+            const valueObj = value as Record<string, unknown>;
+            if ('data' in valueObj && 'metadata' in valueObj) {
+                // Migrate 'data' to 'json' for legacy format
+                const migrated: NodeData = {
+                    json: valueObj.data,
+                    metadata: valueObj.metadata as NodeMetadata,
+                };
+                // Preserve other fields if present
+                if ('error' in valueObj) {
+                    migrated.error = valueObj.error as NodeData['error'];
                 }
+                if ('schema' in valueObj) {
+                    migrated.schema = valueObj.schema as NodeData['schema'];
+                }
+                return migrated;
             }
         }
 
@@ -309,7 +603,7 @@ export class ExpressionResolutionService {
      * Resolve workflow-style expressions using WorkflowDataProxy
      * Supports: {{$json.field}}, {{$node["NodeName"].json.field}}, {{$input.first().json.field}}
      */
-    private resolveWorkflowExpressions(text: string, dataProxy: any): string {
+    private resolveWorkflowExpressions(text: string, dataProxy: Record<string, unknown>): string {
         // Pattern for workflow-style expressions: {{$...}}
         const workflowPattern = /\{\{\$([^}]+)\}\}/g;
         let match: RegExpExecArray | null;
@@ -345,20 +639,20 @@ export class ExpressionResolutionService {
      * Evaluate workflow-style expression using dataProxy
      * Supports: $json.field, $node["NodeName"].json.field, $input.first().json.field
      */
-    private evaluateWorkflowExpression(expression: string, dataProxy: any): any {
+    private evaluateWorkflowExpression(expression: string, dataProxy: Record<string, unknown>): ExpressionResult {
         // Simple path resolution (e.g., "json.field" -> dataProxy.$json.field)
         // For complex expressions, we'd need a proper parser, but for now we handle common cases
         
         // Handle $json.field
         if (expression.startsWith('json.')) {
             const path = expression.substring(5);
-            return this.resolvePath(dataProxy.$json, path);
+            return this.resolvePath(dataProxy.$json as unknown, path);
         }
         
         // Handle $data.field (alias for $json)
         if (expression.startsWith('data.')) {
             const path = expression.substring(5);
-            return this.resolvePath(dataProxy.$data, path);
+            return this.resolvePath(dataProxy.$data as unknown, path);
         }
         
         // Handle $node["NodeName"].json.field
@@ -366,7 +660,8 @@ export class ExpressionResolutionService {
         if (nodeMatch) {
             const nodeId = nodeMatch[1];
             const path = nodeMatch[2];
-            const nodeData = dataProxy.$node[nodeId];
+            const nodeMap = dataProxy.$node as Record<string, { json: unknown }>;
+            const nodeData = nodeMap[nodeId];
             if (nodeData) {
                 return this.resolvePath(nodeData.json, path);
             }
@@ -376,7 +671,8 @@ export class ExpressionResolutionService {
         const inputFirstMatch = expression.match(/^input\.first\(\)\.json\.(.+)$/);
         if (inputFirstMatch) {
             const path = inputFirstMatch[1];
-            const inputData = dataProxy.$input.first();
+            const inputProxy = dataProxy.$input as { first: () => unknown };
+            const inputData = inputProxy.first();
             return this.resolvePath(inputData, path);
         }
         
@@ -384,19 +680,21 @@ export class ExpressionResolutionService {
         const inputLastMatch = expression.match(/^input\.last\(\)\.json\.(.+)$/);
         if (inputLastMatch) {
             const path = inputLastMatch[1];
-            const inputData = dataProxy.$input.last();
+            const inputProxy = dataProxy.$input as { last: () => unknown };
+            const inputData = inputProxy.last();
             return this.resolvePath(inputData, path);
         }
         
         // Handle direct access: $json, $data, $input
         if (expression === 'json' || expression === '$json') {
-            return dataProxy.$json;
+            return dataProxy.$json as ExpressionResult;
         }
         if (expression === 'data' || expression === '$data') {
-            return dataProxy.$data;
+            return dataProxy.$data as ExpressionResult;
         }
         if (expression === 'input' || expression === '$input') {
-            return dataProxy.$input.first();
+            const inputProxy = dataProxy.$input as { first: () => unknown };
+            return inputProxy.first() as ExpressionResult;
         }
         
         // Fallback: try to resolve as path from root
@@ -406,7 +704,7 @@ export class ExpressionResolutionService {
     /**
      * Resolve path in an object (e.g., "field.subfield" -> obj.field.subfield)
      */
-    private resolvePath(obj: any, path: string): any {
+    private resolvePath(obj: unknown, path: string): ExpressionResult {
         if (!obj || !path) return null;
         
         const parts = path.split('.');
@@ -445,33 +743,25 @@ export class ExpressionResolutionService {
 
     /**
      * Resolve path within NodeData
-     * Uses json field only
+     * Uses json field with fallback to data (for backward compatibility)
      * Legacy .data paths are redirected to .json before this method is called
      */
     private resolveNodeDataPath(nodeData: NodeData, parts: string[]): string | null {
-        this.logger?.log(`[ExpressionResolution] resolveNodeDataPath called with parts: ${parts.join('.')}, nodeData keys: ${Object.keys(nodeData).join(', ')}`);
-        
-        // Get main data value (json only)
-        const mainData = nodeData.json;
-        this.logger?.log(`[ExpressionResolution] mainData type: ${typeof mainData}, value preview: ${typeof mainData === 'string' ? mainData.substring(0, 50) : JSON.stringify(mainData).substring(0, 50)}`);
+        // Get main data value (json with fallback to data for backward compatibility)
+        const mainData = nodeData.json ?? (nodeData as any).data;
         
         // Handle empty path or just "json" - return the entire json field
         if (parts.length === 0 || (parts.length === 1 && parts[0] === 'json')) {
             // If mainData is a primitive (string, number, boolean), return it directly
             // Otherwise, stringify it
             if (mainData === null || mainData === undefined) {
-                this.logger?.log(`[ExpressionResolution] mainData is null/undefined, returning empty string`);
                 return '';
             }
             if (typeof mainData === 'string' || typeof mainData === 'number' || typeof mainData === 'boolean') {
-                const result = String(mainData);
-                this.logger?.log(`[ExpressionResolution] Returning primitive: ${result.substring(0, 50)}`);
-                return result;
+                return String(mainData);
             }
             // For objects/arrays, use JSON.stringify
-            const result = JSON.stringify(mainData);
-            this.logger?.log(`[ExpressionResolution] Returning stringified object: ${result.substring(0, 50)}`);
-            return result;
+            return JSON.stringify(mainData);
         }
 
         // Handle metadata access
@@ -486,7 +776,6 @@ export class ExpressionResolutionService {
             // Navigate into json: {{steps.nodeId.json.field1.field2}}
             // Skip the "json" part and navigate directly into mainData
             const remainingPath = parts.slice(1);
-            this.logger?.log(`[ExpressionResolution] Navigating into json with remaining path: ${remainingPath.join('.')}`);
             return this.resolveObjectPath(mainData, remainingPath);
         }
 
@@ -517,7 +806,7 @@ export class ExpressionResolutionService {
      * If an array is encountered and the next part is not an index, automatically access the first element
      * Also supports array properties like length
      */
-    private resolveObjectPath(obj: any, pathParts: string[]): string | null {
+    private resolveObjectPath(obj: unknown, pathParts: string[]): string | null {
         if (!obj || pathParts.length === 0) {
             return obj ? JSON.stringify(obj) : null;
         }
@@ -611,6 +900,65 @@ export class ExpressionResolutionService {
         }
 
         return current !== null && current !== undefined ? String(current) : null;
+    }
+
+    /**
+     * Get available paths in an object (for error messages)
+     * Limited to small objects (< 100 keys) for performance
+     */
+    private getAvailablePaths(data: unknown, prefix: string = '', maxDepth: number = 3): string[] {
+        // Only for small objects (Performance)
+        if (this.getObjectSize(data) > 100) {
+            return ['(object too large to list all paths)'];
+        }
+        
+        const paths: string[] = [];
+        if (typeof data === 'object' && data !== null) {
+            if (Array.isArray(data)) {
+                // For arrays: show only [0], [1], [2] and length
+                for (let i = 0; i < Math.min(data.length, 5); i++) {
+                    paths.push(`${prefix}[${i}]`);
+                }
+                if (data.length > 0) {
+                    paths.push(`${prefix}.length`);
+                }
+            } else {
+                const dataObj = data as Record<string, unknown>;
+                for (const key in dataObj) {
+                    if (Object.prototype.hasOwnProperty.call(dataObj, key)) {
+                        const newPath = prefix ? `${prefix}.${key}` : key;
+                        paths.push(newPath);
+                        
+                        // Recursively, but limited to maxDepth
+                        if (maxDepth > 0 && typeof dataObj[key] === 'object' && dataObj[key] !== null) {
+                            paths.push(...this.getAvailablePaths(dataObj[key], newPath, maxDepth - 1));
+                        }
+                    }
+                }
+            }
+        }
+        return paths;
+    }
+
+    /**
+     * Calculate object size (count all keys recursively)
+     */
+    private getObjectSize(obj: unknown): number {
+        // Count all keys recursively
+        if (typeof obj !== 'object' || obj === null) return 0;
+        if (Array.isArray(obj)) {
+            return obj.length;
+        }
+        let size = Object.keys(obj).length;
+        const objRecord = obj as Record<string, unknown>;
+        for (const key in objRecord) {
+            if (Object.prototype.hasOwnProperty.call(objRecord, key)) {
+                if (typeof objRecord[key] === 'object' && objRecord[key] !== null) {
+                    size += this.getObjectSize(objRecord[key]);
+                }
+            }
+        }
+        return size;
     }
 }
 
