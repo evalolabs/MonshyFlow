@@ -24,7 +24,10 @@ const TreeNode: React.FC<TreeNodeProps> = ({ path, keyName, value, onPick }) => 
   // Default: collapsed (closed)
   const [open, setOpen] = useState(false);
   // Build full path: handle both workflow-style ($node["NodeName"].json.field) and legacy (steps.nodeId.json.field)
-  const fullPath = path ? `${path}.${keyName}` : keyName;
+  // For array indices like [0], [1], append directly without a dot
+  const fullPath = path 
+    ? (keyName.startsWith('[') ? `${path}${keyName}` : `${path}.${keyName}`)
+    : keyName;
   
   // IMPORTANT: Strings should NOT be treated as objects/arrays
   // Check if value is a primitive first (string, number, boolean, null, undefined)
@@ -100,14 +103,20 @@ const TreeNode: React.FC<TreeNodeProps> = ({ path, keyName, value, onPick }) => 
       {open && hasChildren && !isString && (
         <div className="mt-0.5 ml-3 border-l-2 border-blue-200 pl-2 transition-all duration-150 ease-out">
           {isArray ? (
-            // For arrays, show first item's structure if it's an object
-            value[0] && typeof value[0] === 'object' ? (
-              Object.entries(value[0]).map(([k, v]) => (
-                <TreeNode key={k} path={fullPath} keyName={k} value={v} onPick={onPick} />
+            // For arrays, show all items with index notation [0], [1], etc.
+            value.length > 0 ? (
+              value.map((item: any, index: number) => (
+                <TreeNode 
+                  key={index} 
+                  path={fullPath} 
+                  keyName={`[${index}]`} 
+                  value={item} 
+                  onPick={onPick} 
+                />
               ))
             ) : (
-              // For primitive arrays, show array length
-              <div className="text-xs text-gray-400 italic">Array with {value.length} items</div>
+              // Empty array
+              <div className="text-xs text-gray-400 italic">Empty array</div>
             )
           ) : (
             // For objects, show all keys
