@@ -60,9 +60,6 @@ export const NODE_TYPE_START = 'start';
 /** Node type representing workflow end */
 export const NODE_TYPE_END = 'end';
 
-/** While loop node type */
-export const NODE_TYPE_WHILE = 'while';
-
 /** If-else conditional node type */
 export const NODE_TYPE_IFELSE = 'ifelse';
 
@@ -114,7 +111,6 @@ export const VALIDATION_MESSAGES = {
 export const NODE_COLORS = {
   start: '#3b82f6',
   end: '#ef4444',
-  while: '#a855f7',
   ifelse: '#eab308',
   merge: '#06b6d4',
   parallel: '#a855f7',

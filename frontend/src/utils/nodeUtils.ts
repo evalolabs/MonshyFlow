@@ -5,7 +5,7 @@
  */
 
 import type { Node } from '@xyflow/react';
-import { NODE_TYPE_START, NODE_TYPE_END, NODE_TYPE_WHILE, RANDOM_POSITION_RANGE } from '../components/WorkflowBuilder/constants';
+import { NODE_TYPE_START, NODE_TYPE_END, RANDOM_POSITION_RANGE } from '../components/WorkflowBuilder/constants';
 
 /**
  * Check if a node type can have multiple instances
@@ -26,13 +26,6 @@ export function canBeDuplicated(nodeType: string): boolean {
  */
 export function needsOutputHandles(nodeType: string): boolean {
   return nodeType !== NODE_TYPE_END;
-}
-
-/**
- * Check if a node is a While node
- */
-export function isWhileNode(node: Node | undefined): boolean {
-  return node?.type === NODE_TYPE_WHILE;
 }
 
 /**
@@ -138,9 +131,6 @@ export function calculateMidpoint(sourceNode: Node, targetNode: Node): { x: numb
  * Get the appropriate source handle for a node type
  */
 export function getSourceHandle(nodeType: string | undefined): string | undefined {
-  if (nodeType === NODE_TYPE_WHILE) {
-    return 'loop-exit';
-  }
   return undefined;
 }
 
@@ -148,9 +138,6 @@ export function getSourceHandle(nodeType: string | undefined): string | undefine
  * Get the appropriate target handle for a node type
  */
 export function getTargetHandle(nodeType: string | undefined): string | undefined {
-  if (nodeType === NODE_TYPE_WHILE) {
-    return 'input';
-  }
   return undefined;
 }
 
