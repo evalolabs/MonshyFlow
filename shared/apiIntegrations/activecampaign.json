@@ -2,7 +2,6 @@
   "id": "activecampaign",
   "name": "ActiveCampaign",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/activecampaign/0064FF",
   "description": "Marketing automation and email marketing platform",
   "baseUrl": "{apiUrl}",
   "color": {

@@ -2,7 +2,6 @@
   "id": "thehive5",
   "name": "TheHive 5 (TheHiveProject)",
   "icon": "🛡️",
-  "logoUrl": "https://cdn.simpleicons.org/thehive/000000",
   "description": "Security incident response platform (version 5)",
   "baseUrl": "https://{your-thehive5-instance}/api/v1",
   "color": {

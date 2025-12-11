@@ -38,15 +38,15 @@ function DefaultNodeComponent({ data }: any) {
  */
 export async function initializeAutoDiscovery(): Promise<void> {
   try {
-    console.log('[AutoDiscovery] Starting node discovery...');
+    // console.log('[AutoDiscovery] Starting node discovery...');
     
     const discoveredNodes = await discoverNodes();
-    console.log(`[AutoDiscovery] Discovered ${discoveredNodes.length} nodes from backend`);
+    // console.log(`[AutoDiscovery] Discovered ${discoveredNodes.length} nodes from backend`);
     
     for (const node of discoveredNodes) {
       // Skip if already manually registered (manual takes priority)
       if (isNodeTypeRegistered(node.type)) {
-        console.log(`[AutoDiscovery] Skipping ${node.type} - already manually registered`);
+        // console.log(`[AutoDiscovery] Skipping ${node.type} - already manually registered`);
         continue;
       }
       
@@ -62,13 +62,13 @@ export async function initializeAutoDiscovery(): Promise<void> {
       // Register default component if not already registered
       if (!hasNodeComponent(node.type)) {
         registerNodeComponent(node.type, DefaultNodeComponent);
-        console.log(`[AutoDiscovery] Registered default component for ${node.type}`);
+        // console.log(`[AutoDiscovery] Registered default component for ${node.type}`);
       }
       
-      console.log(`[AutoDiscovery] Registered node: ${node.type} (${node.name})`);
+      // console.log(`[AutoDiscovery] Registered node: ${node.type} (${node.name})`);
     }
     
-    console.log('[AutoDiscovery] Auto-discovery completed');
+    // console.log('[AutoDiscovery] Auto-discovery completed');
   } catch (error: any) {
     console.error('[AutoDiscovery] Failed to initialize auto-discovery:', error);
     // Don't throw - app should still work without auto-discovery

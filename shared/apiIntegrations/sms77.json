@@ -2,7 +2,6 @@
   "id": "sms77",
   "name": "Sms77 (seven)",
   "icon": "📱",
-  "logoUrl": "https://cdn.simpleicons.org/seven/000000",
   "description": "SMS and voice messaging service",
   "baseUrl": "https://gateway.seven.io/api",
   "color": {

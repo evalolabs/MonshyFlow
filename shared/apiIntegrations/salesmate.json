@@ -2,7 +2,6 @@
   "id": "salesmate",
   "name": "Salesmate",
   "icon": "💼",
-  "logoUrl": "https://cdn.simpleicons.org/salesmate/00A9E0",
   "description": "CRM and sales pipeline management",
   "baseUrl": "https://apis.salesmate.io",
   "color": {

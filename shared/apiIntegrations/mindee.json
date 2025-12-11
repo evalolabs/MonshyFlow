@@ -2,7 +2,6 @@
   "id": "mindee",
   "name": "Mindee",
   "icon": "📄",
-  "logoUrl": "https://cdn.simpleicons.org/mindee/1C6EFC",
   "description": "OCR and document parsing API",
   "baseUrl": "https://api.mindee.net/v1/products/mindee",
   "color": {

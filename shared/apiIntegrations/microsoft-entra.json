@@ -2,7 +2,6 @@
   "id": "microsoft-entra",
   "name": "Microsoft Entra (Azure AD)",
   "icon": "🔐",
-  "logoUrl": "https://cdn.simpleicons.org/microsoftazure/0078D4",
   "description": "Identity and access management via Microsoft Graph API",
   "baseUrl": "https://graph.microsoft.com/v1.0",
   "color": {

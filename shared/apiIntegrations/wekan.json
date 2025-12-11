@@ -2,7 +2,6 @@
   "id": "wekan",
   "name": "Wekan",
   "icon": "📋",
-  "logoUrl": "https://cdn.simpleicons.org/wekan/0080FF",
   "description": "Open-source kanban board",
   "baseUrl": "https://{host}/api",
   "color": {

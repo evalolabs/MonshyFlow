@@ -2,7 +2,6 @@
   "id": "zammad",
   "name": "Zammad",
   "icon": "🎫",
-  "logoUrl": "https://cdn.simpleicons.org/zammad/000000",
   "description": "Open-source helpdesk and customer support platform",
   "baseUrl": "https://{your-zammad-instance}/api/v1",
   "color": {

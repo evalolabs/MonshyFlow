@@ -2,7 +2,6 @@
   "id": "autopilot",
   "name": "Autopilot",
   "icon": "✈️",
-  "logoUrl": "https://cdn.simpleicons.org/autopilot/000000",
   "description": "Marketing automation platform",
   "baseUrl": "https://api2.autopilothq.com/v1",
   "color": {

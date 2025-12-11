@@ -2,7 +2,6 @@
   "id": "timescaledb",
   "name": "TimescaleDB",
   "icon": "🗄️",
-  "logoUrl": "https://cdn.simpleicons.org/timescaledb/000000",
   "description": "PostgreSQL extension for time-series data",
   "baseUrl": "postgresql://{host}:{port}/{database}",
   "color": {

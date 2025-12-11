@@ -2,7 +2,6 @@
   "id": "workable",
   "name": "Workable",
   "icon": "💼",
-  "logoUrl": "https://cdn.simpleicons.org/workable/000000",
   "description": "Recruiting and applicant tracking system",
   "baseUrl": "https://{subdomain}.workable.com/spi/v3",
   "color": {

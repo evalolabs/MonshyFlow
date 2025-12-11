@@ -2,7 +2,6 @@
   "id": "cortex",
   "name": "Cortex",
   "icon": "🔍",
-  "logoUrl": "https://cdn.simpleicons.org/cortex/000000",
   "description": "Threat intelligence platform for security analysis",
   "baseUrl": "https://{your-cortex-instance}/api",
   "color": {

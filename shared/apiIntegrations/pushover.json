@@ -2,7 +2,6 @@
   "id": "pushover",
   "name": "Pushover",
   "icon": "📢",
-  "logoUrl": "https://cdn.simpleicons.org/pushover/000000",
   "description": "Push notification service for mobile and desktop",
   "baseUrl": "https://api.pushover.net/1",
   "color": {

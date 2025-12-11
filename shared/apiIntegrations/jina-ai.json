@@ -2,7 +2,6 @@
   "id": "jina-ai",
   "name": "Jina AI",
   "icon": "🤖",
-  "logoUrl": "https://cdn.simpleicons.org/jinaai/000000",
   "description": "AI-powered reader, search, and research platform",
   "baseUrl": "https://r.jina.ai",
   "color": {

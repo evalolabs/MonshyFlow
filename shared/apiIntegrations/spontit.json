@@ -2,7 +2,6 @@
   "id": "spontit",
   "name": "Spontit",
   "icon": "📢",
-  "logoUrl": "https://cdn.simpleicons.org/spontit/000000",
   "description": "Push notification service",
   "baseUrl": "https://api.spontit.com/v3",
   "color": {

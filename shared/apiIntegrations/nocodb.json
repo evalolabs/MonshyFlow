@@ -2,7 +2,6 @@
   "id": "nocodb",
   "name": "NocoDB",
   "icon": "📊",
-  "logoUrl": "https://cdn.simpleicons.org/nocodb/000000",
   "description": "Open-source Airtable alternative",
   "baseUrl": "https://{host}",
   "color": {

@@ -2,7 +2,6 @@
   "id": "convertkit",
   "name": "ConvertKit",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/convertkit/FF6B6B",
   "description": "Email marketing platform for creators",
   "baseUrl": "https://api.convertkit.com/v3",
   "color": {

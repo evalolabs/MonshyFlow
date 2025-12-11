@@ -2,7 +2,6 @@
   "id": "tapfiliate",
   "name": "Tapfiliate",
   "icon": "🎯",
-  "logoUrl": "https://cdn.simpleicons.org/tapfiliate/000000",
   "description": "Affiliate marketing and referral tracking platform",
   "baseUrl": "https://api.tapfiliate.com/1.6",
   "color": {

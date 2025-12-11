@@ -2,7 +2,6 @@
   "id": "mailerlite",
   "name": "MailerLite",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/mailerlite/000000",
   "description": "Email marketing and automation platform",
   "baseUrl": "https://api.mailerlite.com/api/v2",
   "color": {

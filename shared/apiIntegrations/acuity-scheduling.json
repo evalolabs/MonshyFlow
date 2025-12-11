@@ -2,7 +2,6 @@
   "id": "acuity-scheduling",
   "name": "Acuity Scheduling",
   "icon": "📅",
-  "logoUrl": "https://cdn.simpleicons.org/acuityscheduling/000000",
   "description": "Online appointment scheduling software",
   "baseUrl": "https://acuityscheduling.com/api/v1",
   "color": {

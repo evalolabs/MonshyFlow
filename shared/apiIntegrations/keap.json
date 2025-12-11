@@ -2,7 +2,6 @@
   "id": "keap",
   "name": "Keap (Infusionsoft)",
   "icon": "💼",
-  "logoUrl": "https://cdn.simpleicons.org/keap/00A9E0",
   "description": "CRM and marketing automation platform",
   "baseUrl": "https://api.infusionsoft.com/crm/rest/v1",
   "color": {

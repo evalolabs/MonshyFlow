@@ -2,7 +2,6 @@
   "id": "wufoo",
   "name": "Wufoo",
   "icon": "📝",
-  "logoUrl": "https://cdn.simpleicons.org/wufoo/000000",
   "description": "Online form builder",
   "baseUrl": "https://{subdomain}.wufoo.com/api/v3",
   "color": {

@@ -2,7 +2,6 @@
   "id": "monday",
   "name": "Monday.com",
   "icon": "📅",
-  "logoUrl": "https://cdn.simpleicons.org/monday/FF0080",
   "description": "Work management and collaboration platform",
   "baseUrl": "https://api.monday.com/v2",
   "color": {

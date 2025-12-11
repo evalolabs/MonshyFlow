@@ -2,7 +2,6 @@
   "id": "microsoft-teams",
   "name": "Microsoft Teams",
   "icon": "👥",
-  "logoUrl": "https://cdn.simpleicons.org/microsoftteams/6264A7",
   "description": "Team collaboration and communication platform",
   "baseUrl": "https://graph.microsoft.com/v1.0",
   "color": {

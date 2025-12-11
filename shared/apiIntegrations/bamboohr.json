@@ -2,7 +2,6 @@
   "id": "bamboohr",
   "name": "BambooHR",
   "icon": "👔",
-  "logoUrl": "https://cdn.simpleicons.org/bamboohr/000000",
   "description": "HR management system for employee and time off management",
   "baseUrl": "https://api.bamboohr.com/api/gateway.php/{subdomain}/v1",
   "color": {

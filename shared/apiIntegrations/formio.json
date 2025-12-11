@@ -2,7 +2,6 @@
   "id": "formio",
   "name": "Form.io",
   "icon": "📋",
-  "logoUrl": "https://cdn.simpleicons.org/formio/000000",
   "description": "Form builder and data management platform",
   "baseUrl": "https://api.form.io",
   "color": {

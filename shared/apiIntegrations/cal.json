@@ -2,7 +2,6 @@
   "id": "cal",
   "name": "Cal",
   "icon": "📅",
-  "logoUrl": "https://cdn.simpleicons.org/cal/000000",
   "description": "Open-source scheduling tool",
   "baseUrl": "https://{your-cal-instance}",
   "color": {

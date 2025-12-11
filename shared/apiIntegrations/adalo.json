@@ -2,7 +2,6 @@
   "id": "adalo",
   "name": "Adalo",
   "icon": "📱",
-  "logoUrl": "https://cdn.simpleicons.org/adalo/000000",
   "description": "No-code platform for mobile apps",
   "baseUrl": "https://api.adalo.com/v0/apps/{appId}",
   "color": {

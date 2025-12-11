@@ -2,7 +2,6 @@
   "id": "jotform",
   "name": "JotForm",
   "icon": "📋",
-  "logoUrl": "https://cdn.simpleicons.org/jotform/FF7100",
   "description": "Online form builder and data collection platform",
   "baseUrl": "https://{apiDomain || 'api.jotform.com'}",
   "color": {

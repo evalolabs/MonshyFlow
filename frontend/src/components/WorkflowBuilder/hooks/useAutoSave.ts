@@ -72,7 +72,7 @@ export function useAutoSave({ workflowId, nodes, edges, onSave, enabled = true }
       // Mark as saved after successful save
       lastSavedRef.current = JSON.stringify({ nodes: nodesToSave, edges: edgesToSave });
       
-      logger.info('Auto-saved workflow');
+      // logger.info('Auto-saved workflow');
     } catch (error) {
       logger.error('Auto-save failed', error);
     } finally {

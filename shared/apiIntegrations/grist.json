@@ -2,7 +2,6 @@
   "id": "grist",
   "name": "Grist",
   "icon": "📊",
-  "logoUrl": "https://cdn.simpleicons.org/grist/000000",
   "description": "Spreadsheet-database hybrid platform",
   "baseUrl": "https://docs.getgrist.com/api",
   "color": {

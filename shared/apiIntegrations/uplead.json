@@ -2,7 +2,6 @@
   "id": "uplead",
   "name": "Uplead",
   "icon": "🔍",
-  "logoUrl": "https://cdn.simpleicons.org/uplead/000000",
   "description": "B2B data enrichment platform for company and person data",
   "baseUrl": "https://api.uplead.com/v2",
   "color": {

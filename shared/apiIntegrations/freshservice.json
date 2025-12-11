@@ -2,7 +2,6 @@
   "id": "freshservice",
   "name": "Freshservice",
   "icon": "🎫",
-  "logoUrl": "https://cdn.simpleicons.org/freshservice/25B24A",
   "description": "IT service management and help desk software",
   "baseUrl": "https://{domain}.freshservice.com/api/v2",
   "color": {

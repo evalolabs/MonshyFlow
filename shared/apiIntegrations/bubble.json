@@ -2,7 +2,6 @@
   "id": "bubble",
   "name": "Bubble",
   "icon": "🫧",
-  "logoUrl": "https://cdn.simpleicons.org/bubble/000000",
   "description": "No-code platform for web apps",
   "baseUrl": "https://{appName}.bubbleapps.io/api/1.1",
   "color": {

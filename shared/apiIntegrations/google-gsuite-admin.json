@@ -2,7 +2,6 @@
   "id": "google-gsuite-admin",
   "name": "Google G Suite Admin",
   "icon": "👥",
-  "logoUrl": "https://cdn.simpleicons.org/googleworkspace/4285F4",
   "description": "Google Workspace (formerly G Suite) Admin API for managing users, groups, and devices",
   "baseUrl": "https://www.googleapis.com/admin",
   "color": {

@@ -2,7 +2,6 @@
   "id": "kobotoolbox",
   "name": "KoBoToolbox",
   "icon": "📦",
-  "logoUrl": "https://cdn.simpleicons.org/kobotoolbox/000000",
   "description": "Data collection platform for humanitarian and development contexts",
   "baseUrl": "https://{your-kobotoolbox-instance}",
   "color": {

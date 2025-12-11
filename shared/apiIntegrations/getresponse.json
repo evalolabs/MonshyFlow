@@ -2,7 +2,6 @@
   "id": "getresponse",
   "name": "GetResponse",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/getresponse/000000",
   "description": "Email marketing and automation platform",
   "baseUrl": "https://api.getresponse.com/v3",
   "color": {

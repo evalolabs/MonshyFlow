@@ -658,12 +658,12 @@ let cachedApiIntegrations: ApiIntegration[] | null = null;
  */
 export async function loadApiIntegrations(): Promise<ApiIntegration[]> {
   if (cachedApiIntegrations) {
-    console.log('[API Integrations] Using cached integrations', { count: cachedApiIntegrations.length });
+    // console.log('[API Integrations] Using cached integrations', { count: cachedApiIntegrations.length });
     return cachedApiIntegrations;
   }
 
   try {
-    console.log('[API Integrations] Loading API integrations from separate files...');
+    // console.log('[API Integrations] Loading API integrations from separate files...');
     
     const index = indexData as { integrations: Array<{ id: string; file: string; category: string; status?: string }> };
     const integrations: ApiIntegration[] = [];
@@ -673,7 +673,7 @@ export async function loadApiIntegrations(): Promise<ApiIntegration[]> {
     for (const integrationInfo of index.integrations) {
       // Skip if we've already seen this ID
       if (seenIds.has(integrationInfo.id)) {
-        console.warn(`[API Integrations] Duplicate entry found for ${integrationInfo.id}, skipping`);
+        // console.warn(`[API Integrations] Duplicate entry found for ${integrationInfo.id}, skipping`);
         continue;
       }
       
@@ -681,17 +681,17 @@ export async function loadApiIntegrations(): Promise<ApiIntegration[]> {
       const apiData = apiDataMap[integrationInfo.id];
       if (apiData) {
         integrations.push(apiData);
-        console.log(`[API Integrations] Loaded ${integrationInfo.id} from ${integrationInfo.file}`);
+        // console.log(`[API Integrations] Loaded ${integrationInfo.id} from ${integrationInfo.file}`);
       } else {
-        console.warn(`[API Integrations] Missing data for ${integrationInfo.id} (file: ${integrationInfo.file})`);
+        // console.warn(`[API Integrations] Missing data for ${integrationInfo.id} (file: ${integrationInfo.file})`);
       }
     }
 
     cachedApiIntegrations = integrations;
-    console.log('[API Integrations] Loaded API integrations', { 
-      count: integrations.length,
-      apis: integrations.map(api => api.name)
-    });
+    // console.log('[API Integrations] Loaded API integrations', { 
+    //   count: integrations.length,
+    //   apis: integrations.map(api => api.name)
+    // });
     
     if (integrations.length === 0) {
       console.warn('[API Integrations] No integrations found');

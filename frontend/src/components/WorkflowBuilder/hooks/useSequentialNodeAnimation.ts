@@ -116,7 +116,7 @@ export function useSequentialNodeAnimation({
 
   // 1. Berechne Execution-Reihenfolge wenn Execution startet
   useEffect(() => {
-    console.log('[Animation] Effect triggered:', { isExecuting, nodesCount: nodes.length, edgesCount: edges.length, testingNodeId, calculatedOrderLength: calculatedExecutionOrder.length });
+    // console.log('[Animation] Effect triggered:', { isExecuting, nodesCount: nodes.length, edgesCount: edges.length, testingNodeId, calculatedOrderLength: calculatedExecutionOrder.length });
     
     // Detect if execution just started (transition from false to true)
     const executionJustStarted = !prevIsExecutingRef.current && isExecuting;
@@ -124,7 +124,7 @@ export function useSequentialNodeAnimation({
     
     // CRITICAL: If testingNodeId changed, immediately reset everything to prevent race conditions
     if (testingNodeChanged && prevTestingNodeIdRef.current !== null) {
-      console.log('[Animation] ⚠️ testingNodeId changed - immediately resetting animation state to prevent race conditions');
+      // console.log('[Animation] ⚠️ testingNodeId changed - immediately resetting animation state to prevent race conditions');
       // Clear all timeouts immediately
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -160,14 +160,14 @@ export function useSequentialNodeAnimation({
         if (!orderChanged && !executionJustStarted && !testingNodeChanged) {
           // Execution order hasn't changed AND execution didn't just start AND testing node didn't change
           // This means we're in the middle of an execution, don't reset
-          console.log('[Animation] Execution order unchanged and execution already in progress, keeping current animation state');
+          // console.log('[Animation] Execution order unchanged and execution already in progress, keeping current animation state');
           return prev;
         }
         
         if (testingNodeId) {
-          console.log('[Animation] Node test detected - animating path from Start to:', testingNodeId, 'Nodes:', calculatedExecutionOrder.map(n => `${n.id} (${n.type})`));
+          // console.log('[Animation] Node test detected - animating path from Start to:', testingNodeId, 'Nodes:', calculatedExecutionOrder.map(n => `${n.id} (${n.type})`));
         } else {
-          console.log('[Animation] Full workflow execution, ordered nodes:', calculatedExecutionOrder.map(n => `${n.id} (${n.type})`));
+          // console.log('[Animation] Full workflow execution, ordered nodes:', calculatedExecutionOrder.map(n => `${n.id} (${n.type})`));
         }
         
         return {
@@ -190,7 +190,7 @@ export function useSequentialNodeAnimation({
       }
     } else if (!isExecuting) {
       // Reset when execution stops
-      console.log('[Animation] Execution stopped, resetting animation');
+      // console.log('[Animation] Execution stopped, resetting animation');
       setAnimationState({
         currentAnimatedNodeId: null,
         executionOrder: [],
@@ -213,7 +213,7 @@ export function useSequentialNodeAnimation({
         // Alle Nodes animiert → fertig
         // If this was a node test, stop here (don't continue to next nodes)
         if (testingNodeId) {
-          console.log('[Animation] Node test completed - stopping at tested node');
+          // console.log('[Animation] Node test completed - stopping at tested node');
           return {
             ...prev,
             currentAnimatedNodeId: null,
@@ -233,7 +233,7 @@ export function useSequentialNodeAnimation({
 
       // If we're already animating this node, don't process it again
       if (prev.currentAnimatedNodeId === nextNode.id && (waitingForEventRef.current || waitingForStartEventRef.current)) {
-        console.log('[Animation] Already animating this node, skipping:', nextNode.id);
+        // console.log('[Animation] Already animating this node, skipping:', nextNode.id);
         return prev;
       }
 
@@ -266,21 +266,21 @@ export function useSequentialNodeAnimation({
           
           if (alreadyWaitingForThisNode) {
             // Already waiting for this node - don't change the flags
-            console.log('[Animation] Slow node detected but already waiting for this node, keeping current state:', nextNode.id, 'waitingForEvent:', waitingForEventRef.current, 'waitingForStart:', waitingForStartEventRef.current);
+            // console.log('[Animation] Slow node detected but already waiting for this node, keeping current state:', nextNode.id, 'waitingForEvent:', waitingForEventRef.current, 'waitingForStart:', waitingForStartEventRef.current);
           } else if (isAboutToWaitForEvent) {
             // We're about to wait for an event for this node - don't change the flags
             // This happens when moveToNextNode() is called multiple times before the state is updated
-            console.log('[Animation] Slow node detected - already waiting for event, keeping waitingForEvent = true:', nextNode.id);
+            // console.log('[Animation] Slow node detected - already waiting for event, keeping waitingForEvent = true:', nextNode.id);
           } else if (receivedNodeStartEventsRef.current.has(nextNode.id)) {
             // Check if node.start event already arrived (buffered)
-            console.log('[Animation] Slow node detected - node.start event already received, proceeding directly to node.end wait:', nextNode.id, isTestedNode ? '(tested node)' : '');
+            // console.log('[Animation] Slow node detected - node.start event already received, proceeding directly to node.end wait:', nextNode.id, isTestedNode ? '(tested node)' : '');
             // Event already received - skip waiting for start, go directly to waiting for end
             waitingForStartEventRef.current = false;
             waitingForEventRef.current = true;
             receivedNodeStartEventsRef.current.delete(nextNode.id); // Remove from buffer
           } else {
             // No buffered event and not already waiting - set up to wait for node.start
-            console.log('[Animation] Slow node detected - waiting for node.start event before animating:', nextNode.id, isTestedNode ? '(tested node)' : '');
+            // console.log('[Animation] Slow node detected - waiting for node.start event before animating:', nextNode.id, isTestedNode ? '(tested node)' : '');
             waitingForStartEventRef.current = true; // Wait for node.start first
             waitingForEventRef.current = false; // Will be set to true after node.start
           }
@@ -305,7 +305,7 @@ export function useSequentialNodeAnimation({
       }
 
       // Set current animated node
-      console.log('[Animation] Animating node:', nextNode.id, 'type:', nextNode.type, 'duration:', animationDuration);
+      // console.log('[Animation] Animating node:', nextNode.id, 'type:', nextNode.type, 'duration:', animationDuration);
       const newState = {
         ...prev,
         currentAnimatedNodeId: nextNode.id,
@@ -320,7 +320,7 @@ export function useSequentialNodeAnimation({
         timeoutRef.current = setTimeout(() => {
           // CRITICAL: Check if testingNodeId changed - if so, don't continue animation
           if (timeoutTestingNodeId !== testingNodeId) {
-            console.log('[Animation] ⚠️ testingNodeId changed during timeout, canceling animation continuation');
+            // console.log('[Animation] ⚠️ testingNodeId changed during timeout, canceling animation continuation');
             return;
           }
           
@@ -328,7 +328,7 @@ export function useSequentialNodeAnimation({
           // BUT: For slow nodes (animationDuration === null), we wait for node.end event
           // which is handled in handleNodeEnd, so we don't stop here for slow nodes
           if (isTestedNode) {
-            console.log('[Animation] Node test completed - stopping at tested node (fast node)');
+            // console.log('[Animation] Node test completed - stopping at tested node (fast node)');
             setAnimationState(finalPrev => ({
               ...finalPrev,
               currentAnimatedNodeId: null,
@@ -350,14 +350,14 @@ export function useSequentialNodeAnimation({
   // Always register handlers when SSE connection is available
   useEffect(() => {
     if (!sseConnection) {
-      console.log('[Animation] No SSE connection available for SSE event handlers');
+      // console.log('[Animation] No SSE connection available for SSE event handlers');
       return;
     }
 
-    console.log('[Animation] Setting up SSE event handlers for node.start and node.end');
+    // console.log('[Animation] Setting up SSE event handlers for node.start and node.end');
 
     const handleNodeEnd = (event: any) => {
-      console.log('[Animation] 📥 Received node.end SSE event:', event);
+      // console.log('[Animation] 📥 Received node.end SSE event:', event);
       const nodeId = event.data?.node_id || event.data?.nodeId;
       
       // CRITICAL: Check if this event is still relevant for the current test
@@ -372,23 +372,23 @@ export function useSequentialNodeAnimation({
             prev.executionOrder.findIndex(n2 => n2.id === nodeId)));
         
         if (!isRelevantForCurrentTest) {
-          console.log('[Animation] ⚠️ Ignoring node.end event - not relevant for current test:', nodeId, 'currentTestingNodeId:', currentTestingNodeId);
+          // console.log('[Animation] ⚠️ Ignoring node.end event - not relevant for current test:', nodeId, 'currentTestingNodeId:', currentTestingNodeId);
           return prev;
         }
         
-        console.log('[Animation] 📥 Node ID from event:', nodeId, 'Current animated node:', prev.currentAnimatedNodeId, 'waitingForEvent:', waitingForEventRef.current, 'testingNodeId:', currentTestingNodeId);
+        // console.log('[Animation] 📥 Node ID from event:', nodeId, 'Current animated node:', prev.currentAnimatedNodeId, 'waitingForEvent:', waitingForEventRef.current, 'testingNodeId:', currentTestingNodeId);
         
         // Double-check: if testingNodeId changed since we started processing, ignore this event
         if (currentTestingNodeId !== testingNodeId) {
-          console.log('[Animation] ⚠️ testingNodeId changed during event processing, ignoring event');
+          // console.log('[Animation] ⚠️ testingNodeId changed during event processing, ignoring event');
           return prev;
         }
         
         if (nodeId === prev.currentAnimatedNodeId && waitingForEventRef.current) {
-          console.log('[Animation] ✅ Node matches current animated node and waiting for end event');
+          // console.log('[Animation] ✅ Node matches current animated node and waiting for end event');
           // Check if this is the tested node - if so, stop animation instead of moving to next
           if (currentTestingNodeId && nodeId === currentTestingNodeId) {
-            console.log('[Animation] 🛑 Tested node completed - stopping animation');
+            // console.log('[Animation] 🛑 Tested node completed - stopping animation');
             waitingForEventRef.current = false;
             return {
               ...prev,
@@ -396,7 +396,7 @@ export function useSequentialNodeAnimation({
               waitingForEvent: false,
             };
           } else {
-            console.log('[Animation] 🚀 Node completed, will move to next after state update');
+            // console.log('[Animation] 🚀 Node completed, will move to next after state update');
             waitingForEventRef.current = false;
             // Schedule moveToNextNode after state update
             setTimeout(() => moveToNextNode(), 0);
@@ -406,7 +406,7 @@ export function useSequentialNodeAnimation({
             };
           }
         } else {
-          console.log('[Animation] ⚠️ Node ID does not match current animated node or not waiting for event, ignoring');
+          // console.log('[Animation] ⚠️ Node ID does not match current animated node or not waiting for event, ignoring');
         }
         return prev;
       });
@@ -414,9 +414,9 @@ export function useSequentialNodeAnimation({
 
     // Listen for node.start to start animation for slow nodes
     const handleNodeStart = (event: any) => {
-      console.log('[Animation] 📥 Received node.start SSE event:', event);
+      // console.log('[Animation] 📥 Received node.start SSE event:', event);
       const nodeId = event.data?.node_id || event.data?.nodeId;
-      console.log('[Animation] 📥 node.start - nodeId:', nodeId, 'waitingForStartEvent:', waitingForStartEventRef.current, 'currentAnimatedNodeId:', animationState.currentAnimatedNodeId);
+      // console.log('[Animation] 📥 node.start - nodeId:', nodeId, 'waitingForStartEvent:', waitingForStartEventRef.current, 'currentAnimatedNodeId:', animationState.currentAnimatedNodeId);
       
       // CRITICAL: Check if this event is still relevant for the current test
       const currentTestingNodeId = testingNodeId;
@@ -426,7 +426,7 @@ export function useSequentialNodeAnimation({
           calculatedExecutionOrder.findIndex(n2 => n2.id === nodeId));
       
       if (!isRelevantForCurrentTest) {
-        console.log('[Animation] ⚠️ Ignoring node.start event - not relevant for current test:', nodeId, 'currentTestingNodeId:', currentTestingNodeId);
+        // console.log('[Animation] ⚠️ Ignoring node.start event - not relevant for current test:', nodeId, 'currentTestingNodeId:', currentTestingNodeId);
         return;
       }
       
@@ -438,18 +438,18 @@ export function useSequentialNodeAnimation({
       // If we're waiting for a node.start event for a slow node, start animating it
       if (waitingForStartEventRef.current) {
         setAnimationState(prev => {
-          console.log('[Animation] 📥 node.start - checking match: event nodeId:', nodeId, 'currentAnimatedNodeId:', prev.currentAnimatedNodeId, 'waitingForStartEvent:', waitingForStartEventRef.current, 'testingNodeId:', currentTestingNodeId);
+          // console.log('[Animation] 📥 node.start - checking match: event nodeId:', nodeId, 'currentAnimatedNodeId:', prev.currentAnimatedNodeId, 'waitingForStartEvent:', waitingForStartEventRef.current, 'testingNodeId:', currentTestingNodeId);
           
           // Double-check: if testingNodeId changed since we started processing, ignore this event
           if (currentTestingNodeId !== testingNodeId) {
-            console.log('[Animation] ⚠️ testingNodeId changed during event processing, ignoring event');
+            // console.log('[Animation] ⚠️ testingNodeId changed during event processing, ignoring event');
             return prev;
           }
           
           // Check if this is the current node we're waiting for
           // OR if currentAnimatedNodeId matches this node (even if we're waiting for start)
           if (prev.currentAnimatedNodeId === nodeId) {
-            console.log('[Animation] ✅ node.start received for slow node, now waiting for node.end:', nodeId);
+            // console.log('[Animation] ✅ node.start received for slow node, now waiting for node.end:', nodeId);
             waitingForStartEventRef.current = false;
             waitingForEventRef.current = true; // Now wait for node.end
             
@@ -463,7 +463,7 @@ export function useSequentialNodeAnimation({
             const nodeInOrder = calculatedExecutionOrder.find(n => n.id === nodeId);
             if (nodeInOrder) {
               const nodeIndex = calculatedExecutionOrder.findIndex(n => n.id === nodeId);
-              console.log('[Animation] ✅ node.start received for slow node (currentAnimatedNodeId was null), now waiting for node.end:', nodeId);
+              // console.log('[Animation] ✅ node.start received for slow node (currentAnimatedNodeId was null), now waiting for node.end:', nodeId);
               waitingForStartEventRef.current = false;
               waitingForEventRef.current = true; // Now wait for node.end
               
@@ -476,28 +476,28 @@ export function useSequentialNodeAnimation({
               };
             }
           } else {
-            console.log('[Animation] ⚠️ node.start received but node ID does not match current animated node:', nodeId, 'vs', prev.currentAnimatedNodeId);
+            // console.log('[Animation] ⚠️ node.start received but node ID does not match current animated node:', nodeId, 'vs', prev.currentAnimatedNodeId);
           }
           return prev;
         });
       } else if (isSlowNodeInOrder) {
         // Event arrived early - buffer it for when we reach this node
-        console.log('[Animation] 📦 node.start event arrived early, buffering for node:', nodeId);
+        // console.log('[Animation] 📦 node.start event arrived early, buffering for node:', nodeId);
         receivedNodeStartEventsRef.current.add(nodeId);
       } else {
-        console.log('[Animation] ⚠️ node.start received but not waiting for start event and not a slow node in execution order');
+        // console.log('[Animation] ⚠️ node.start received but not waiting for start event and not a slow node in execution order');
       }
     };
     
     sseConnection.on('node.end', handleNodeEnd);
     sseConnection.on('node.start', handleNodeStart);
     
-    console.log('[Animation] ✅ SSE event handlers registered for node.start and node.end');
+    // console.log('[Animation] ✅ SSE event handlers registered for node.start and node.end');
     
     return () => {
       // SSEConnection handlers are cleaned up on disconnect
       // No explicit off method needed
-      console.log('[Animation] Cleaning up SSE event handlers');
+      // console.log('[Animation] Cleaning up SSE event handlers');
     };
   }, [sseConnection, animationState.currentAnimatedNodeId, moveToNextNode, calculatedExecutionOrder, isSlowNode]);
 
@@ -510,13 +510,13 @@ export function useSequentialNodeAnimation({
       animationState.executionOrder.length > 0 &&
       !hasStartedRef.current
     ) {
-      console.log('[Animation] Starting full workflow animation with', animationState.executionOrder.length, 'nodes');
+      // console.log('[Animation] Starting full workflow animation with', animationState.executionOrder.length, 'nodes');
       hasStartedRef.current = true;
       // Start with first node immediately
       moveToNextNode();
     } else if (!isExecuting) {
       // Reset when execution stops
-      console.log('[Animation] Execution stopped, resetting animation');
+      // console.log('[Animation] Execution stopped, resetting animation');
       hasStartedRef.current = false;
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);

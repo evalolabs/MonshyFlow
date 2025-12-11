@@ -2,7 +2,6 @@
   "id": "affinity",
   "name": "Affinity",
   "icon": "🤝",
-  "logoUrl": "https://cdn.simpleicons.org/affinity/000000",
   "description": "Relationship intelligence and CRM platform",
   "baseUrl": "https://api.affinity.co",
   "color": {

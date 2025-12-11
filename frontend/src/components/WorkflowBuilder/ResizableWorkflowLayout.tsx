@@ -191,8 +191,8 @@ export function ResizableWorkflowLayout({
     }));
   }, []);
 
-  console.log('🎨 Collapsed panels:', collapsedPanels);
-  console.log('🎨 Active left tab:', activeLeftTab);
+  // console.log('🎨 Collapsed panels:', collapsedPanels);
+  // console.log('🎨 Active left tab:', activeLeftTab);
 
   return (
     <div className="w-full h-full relative">

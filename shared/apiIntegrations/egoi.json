@@ -2,7 +2,6 @@
   "id": "egoi",
   "name": "E-goi (Egoi)",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/egoi/000000",
   "description": "Email marketing and automation platform",
   "baseUrl": "https://api.egoiapp.com",
   "color": {

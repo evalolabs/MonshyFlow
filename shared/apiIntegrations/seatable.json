@@ -2,7 +2,6 @@
   "id": "seatable",
   "name": "SeaTable",
   "icon": "🌊",
-  "logoUrl": "https://cdn.simpleicons.org/seatable/000000",
   "description": "Collaborative database platform",
   "baseUrl": "https://cloud.seatable.io",
   "color": {

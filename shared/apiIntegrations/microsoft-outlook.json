@@ -2,7 +2,6 @@
   "id": "microsoft-outlook",
   "name": "Microsoft Outlook",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/microsoftoutlook/0078D4",
   "description": "Email and calendar management",
   "baseUrl": "https://graph.microsoft.com/v1.0",
   "color": {

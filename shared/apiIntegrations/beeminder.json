@@ -2,7 +2,6 @@
   "id": "beeminder",
   "name": "Beeminder",
   "icon": "📊",
-  "logoUrl": "https://cdn.simpleicons.org/beeminder/000000",
   "description": "Goal tracking and data visualization platform",
   "baseUrl": "https://www.beeminder.com/api/v1",
   "color": {

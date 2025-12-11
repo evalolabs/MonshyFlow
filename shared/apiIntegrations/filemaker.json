@@ -2,7 +2,6 @@
   "id": "filemaker",
   "name": "FileMaker",
   "icon": "📁",
-  "logoUrl": "https://cdn.simpleicons.org/filemaker/000000",
   "description": "Database and application development platform",
   "baseUrl": "https://{your-filemaker-host}/fmi/data/v1/databases/{database}",
   "color": {

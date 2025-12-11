@@ -2,7 +2,6 @@
   "id": "emelia",
   "name": "Emelia",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/emelia/000000",
   "description": "Cold email marketing platform with GraphQL API",
   "baseUrl": "https://graphql.emelia.io",
   "color": {

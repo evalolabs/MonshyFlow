@@ -2,7 +2,6 @@
   "id": "aws-s3",
   "name": "AWS S3",
   "icon": "☁️",
-  "logoUrl": "https://cdn.simpleicons.org/amazons3/569A31",
   "description": "Amazon Simple Storage Service for object storage",
   "baseUrl": "https://{bucket}.s3.{region}.amazonaws.com",
   "color": {

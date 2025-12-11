@@ -2,7 +2,6 @@
   "id": "humantic-ai",
   "name": "Humantic AI",
   "icon": "🧠",
-  "logoUrl": "https://cdn.simpleicons.org/humanticai/000000",
   "description": "Personality profiling based on text data",
   "baseUrl": "https://api.humantic.ai/v1",
   "color": {

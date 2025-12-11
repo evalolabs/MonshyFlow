@@ -2,7 +2,6 @@
   "id": "onfleet",
   "name": "Onfleet",
   "icon": "🚚",
-  "logoUrl": "https://cdn.simpleicons.org/onfleet/000000",
   "description": "Delivery management platform for last-mile deliveries",
   "baseUrl": "https://onfleet.com/api/v2",
   "color": {

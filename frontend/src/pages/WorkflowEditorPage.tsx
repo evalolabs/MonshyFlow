@@ -48,15 +48,15 @@ export function WorkflowEditorPage() {
         data.nodes = cleanedNodes.map((node: any) => {
           const { _id, type, position, label, entryType, endpoint, baseUrl, method, description, data: nodeData, ...otherProps } = node;
           
-          console.log('[WorkflowEditorPage] Transforming node:', {
-            nodeId: _id || node.id,
-            type,
-            rawNodeData: nodeData,
-            rawNodeData_url: nodeData?.url,
-            label,
-            otherProps,
-            fullNode: JSON.parse(JSON.stringify(node))
-          });
+          // console.log('[WorkflowEditorPage] Transforming node:', {
+          //   nodeId: _id || node.id,
+          //   type,
+          //   rawNodeData: nodeData,
+          //   rawNodeData_url: nodeData?.url,
+          //   label,
+          //   otherProps,
+          //   fullNode: JSON.parse(JSON.stringify(node))
+          // });
           
           // Merge nodeData (from DB) with top-level properties
           // Priority: nodeData (from DB) > top-level properties > defaults
@@ -90,21 +90,21 @@ export function WorkflowEditorPage() {
             const effectiveType = computeEffectiveNodeType({ type, data: mergedData } as Node, mergedData);
             if (effectiveType && effectiveType.startsWith('tool-')) {
               mergedData = sanitizeToolNodeData(mergedData, effectiveType);
-              console.log('[WorkflowEditorPage] Sanitized tool node on load', {
-                nodeId: _id || node.id,
-                effectiveType,
-                originalKeys: Object.keys(extractedNodeData),
-                sanitizedKeys: Object.keys(mergedData)
-              });
+              // console.log('[WorkflowEditorPage] Sanitized tool node on load', {
+              //   nodeId: _id || node.id,
+              //   effectiveType,
+              //   originalKeys: Object.keys(extractedNodeData),
+              //   sanitizedKeys: Object.keys(mergedData)
+              // });
             }
           }
           
-          console.log('[WorkflowEditorPage] Merged data for node:', {
-            nodeId: _id || node.id,
-            mergedData,
-            mergedData_url: mergedData.url,
-            mergedDataKeys: Object.keys(mergedData)
-          });
+          // console.log('[WorkflowEditorPage] Merged data for node:', {
+          //   nodeId: _id || node.id,
+          //   mergedData,
+          //   mergedData_url: mergedData.url,
+          //   mergedDataKeys: Object.keys(mergedData)
+          // });
           
           return {
             id: _id || node.id,

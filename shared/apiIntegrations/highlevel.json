@@ -2,7 +2,6 @@
   "id": "highlevel",
   "name": "HighLevel",
   "icon": "📈",
-  "logoUrl": "https://cdn.simpleicons.org/highlevel/000000",
   "description": "All-in-one marketing platform for agencies",
   "baseUrl": "https://rest.gohighlevel.com/v1",
   "color": {

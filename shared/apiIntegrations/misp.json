@@ -2,7 +2,6 @@
   "id": "misp",
   "name": "MISP",
   "icon": "🔒",
-  "logoUrl": "https://cdn.simpleicons.org/misp/000000",
   "description": "Open-source threat intelligence platform",
   "baseUrl": "https://{your-misp-instance}",
   "color": {

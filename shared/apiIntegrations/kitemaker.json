@@ -2,7 +2,6 @@
   "id": "kitemaker",
   "name": "Kitemaker",
   "icon": "📋",
-  "logoUrl": "https://cdn.simpleicons.org/kitemaker/000000",
   "description": "Product management platform with GraphQL API",
   "baseUrl": "https://toil.kitemaker.co/developers",
   "color": {

@@ -2,7 +2,6 @@
   "id": "postmark",
   "name": "Postmark",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/postmark/FFD700",
   "description": "Transactional email delivery service",
   "baseUrl": "https://api.postmarkapp.com",
   "color": {

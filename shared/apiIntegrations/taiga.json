@@ -2,7 +2,6 @@
   "id": "taiga",
   "name": "Taiga",
   "icon": "🎯",
-  "logoUrl": "https://cdn.simpleicons.org/taiga/444444",
   "description": "Project management platform for agile teams",
   "baseUrl": "https://api.taiga.io/api/v1",
   "color": {

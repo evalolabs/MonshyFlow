@@ -2,7 +2,6 @@
   "id": "drift",
   "name": "Drift",
   "icon": "💬",
-  "logoUrl": "https://cdn.simpleicons.org/drift/4F46E5",
   "description": "Conversational marketing platform for sales and marketing",
   "baseUrl": "https://driftapi.com",
   "color": {

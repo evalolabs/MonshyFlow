@@ -2,7 +2,6 @@
   "id": "gong",
   "name": "Gong",
   "icon": "📞",
-  "logoUrl": "https://cdn.simpleicons.org/gong/000000",
   "description": "Revenue intelligence platform for sales teams",
   "baseUrl": "https://{your-gong-instance}",
   "color": {

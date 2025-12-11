@@ -2,7 +2,6 @@
   "id": "quickbase",
   "name": "QuickBase",
   "icon": "🗄️",
-  "logoUrl": "https://cdn.simpleicons.org/quickbase/000000",
   "description": "Low-code application development platform",
   "baseUrl": "https://api.quickbase.com/v1",
   "color": {

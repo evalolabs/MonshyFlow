@@ -2,7 +2,6 @@
   "id": "eventbrite",
   "name": "Eventbrite",
   "icon": "🎫",
-  "logoUrl": "https://cdn.simpleicons.org/eventbrite/F05537",
   "description": "Event management and ticketing platform",
   "baseUrl": "https://www.eventbriteapi.com/v3",
   "color": {

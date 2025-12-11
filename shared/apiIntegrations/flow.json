@@ -2,7 +2,6 @@
   "id": "flow",
   "name": "Flow",
   "icon": "✅",
-  "logoUrl": "https://cdn.simpleicons.org/flow/000000",
   "description": "Task management and collaboration platform",
   "baseUrl": "https://api.getflow.com/v2",
   "color": {

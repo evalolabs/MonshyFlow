@@ -2,7 +2,6 @@
   "id": "profitwell",
   "name": "ProfitWell",
   "icon": "💰",
-  "logoUrl": "https://cdn.simpleicons.org/profitwell/000000",
   "description": "Subscription analytics and revenue recognition platform",
   "baseUrl": "https://api.profitwell.com/v2",
   "color": {

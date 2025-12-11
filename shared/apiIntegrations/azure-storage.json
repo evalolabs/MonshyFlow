@@ -2,7 +2,6 @@
   "id": "azure-storage",
   "name": "Azure Storage",
   "icon": "☁️",
-  "logoUrl": "https://cdn.simpleicons.org/microsoftazure/0078D4",
   "description": "Cloud storage service (Blob Storage)",
   "baseUrl": "https://{storageAccount}.blob.core.windows.net",
   "color": {

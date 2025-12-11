@@ -2,7 +2,6 @@
   "id": "uproc",
   "name": "uProc",
   "icon": "⚙️",
-  "logoUrl": "https://cdn.simpleicons.org/uproc/000000",
   "description": "API toolbox with various tools for data processing",
   "baseUrl": "https://api.uproc.io/api/v2",
   "color": {

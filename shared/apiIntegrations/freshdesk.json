@@ -2,7 +2,6 @@
   "id": "freshdesk",
   "name": "Freshdesk",
   "icon": "🎫",
-  "logoUrl": "https://cdn.simpleicons.org/freshdesk/25B24A",
   "description": "Customer support and help desk software",
   "baseUrl": "https://{domain}.freshdesk.com/api/v2",
   "color": {

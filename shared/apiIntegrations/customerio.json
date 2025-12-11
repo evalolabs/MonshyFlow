@@ -2,7 +2,6 @@
   "id": "customerio",
   "name": "Customer.io",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/customerio/000000",
   "description": "Customer engagement and messaging platform",
   "baseUrl": "https://api.customer.io/v1",
   "color": {

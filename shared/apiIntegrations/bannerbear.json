@@ -2,7 +2,6 @@
   "id": "bannerbear",
   "name": "Bannerbear",
   "icon": "🖼️",
-  "logoUrl": "https://cdn.simpleicons.org/bannerbear/FF6B6B",
   "description": "Automated image generation API",
   "baseUrl": "https://api.bannerbear.com/v2",
   "color": {

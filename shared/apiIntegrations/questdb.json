@@ -2,7 +2,6 @@
   "id": "questdb",
   "name": "QuestDB",
   "icon": "🗄️",
-  "logoUrl": "https://cdn.simpleicons.org/questdb/000000",
   "description": "High-performance time-series database",
   "baseUrl": "postgresql://{host}:{port}/{database}",
   "color": {

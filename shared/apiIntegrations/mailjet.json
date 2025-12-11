@@ -2,7 +2,6 @@
   "id": "mailjet",
   "name": "Mailjet",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/mailjet/FF8900",
   "description": "Email and SMS delivery service",
   "baseUrl": "https://api.mailjet.com",
   "color": {

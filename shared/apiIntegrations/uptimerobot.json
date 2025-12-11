@@ -2,7 +2,6 @@
   "id": "uptimerobot",
   "name": "UptimeRobot",
   "icon": "📊",
-  "logoUrl": "https://cdn.simpleicons.org/uptimerobot/00C100",
   "description": "Website monitoring and uptime tracking",
   "baseUrl": "https://api.uptimerobot.com/v2",
   "color": {

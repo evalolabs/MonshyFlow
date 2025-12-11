@@ -2,7 +2,6 @@
   "id": "microsoft-excel",
   "name": "Microsoft Excel",
   "icon": "📊",
-  "logoUrl": "https://cdn.simpleicons.org/microsoftexcel/217346",
   "description": "Excel spreadsheet management via Microsoft Graph API",
   "baseUrl": "https://graph.microsoft.com/v1.0/me",
   "color": {

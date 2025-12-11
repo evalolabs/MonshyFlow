@@ -2,7 +2,6 @@
   "id": "microsoft-dynamics-crm",
   "name": "Microsoft Dynamics CRM",
   "icon": "📊",
-  "logoUrl": "https://cdn.simpleicons.org/microsoft/0078D4",
   "description": "Customer relationship management via Dynamics 365 API",
   "baseUrl": "https://{subdomain}.{region}/api/data/v9.2",
   "color": {

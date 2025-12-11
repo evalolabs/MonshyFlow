@@ -2,7 +2,6 @@
   "id": "sendy",
   "name": "Sendy",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/sendy/000000",
   "description": "Self-hosted email marketing tool",
   "baseUrl": "https://{your-sendy-instance}",
   "color": {

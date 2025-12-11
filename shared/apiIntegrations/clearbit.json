@@ -2,7 +2,6 @@
   "id": "clearbit",
   "name": "Clearbit",
   "icon": "🔍",
-  "logoUrl": "https://cdn.simpleicons.org/clearbit/000000",
   "description": "Data enrichment platform for company and person data",
   "baseUrl": "https://{api}.clearbit.com",
   "color": {

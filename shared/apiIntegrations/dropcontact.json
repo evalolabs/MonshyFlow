@@ -2,7 +2,6 @@
   "id": "dropcontact",
   "name": "Dropcontact",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/dropcontact/000000",
   "description": "B2B email finder and contact enrichment platform",
   "baseUrl": "https://api.dropcontact.io",
   "color": {

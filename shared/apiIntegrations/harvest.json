@@ -2,7 +2,6 @@
   "id": "harvest",
   "name": "Harvest",
   "icon": "⏱️",
-  "logoUrl": "https://cdn.simpleicons.org/harvest/FF6B35",
   "description": "Time tracking and invoicing software",
   "baseUrl": "https://api.harvestapp.com/v2",
   "color": {

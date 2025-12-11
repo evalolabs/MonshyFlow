@@ -2,7 +2,6 @@
   "id": "microsoft-onedrive",
   "name": "Microsoft OneDrive",
   "icon": "☁️",
-  "logoUrl": "https://cdn.simpleicons.org/microsoftonedrive/0078D4",
   "description": "Cloud storage and file sharing",
   "baseUrl": "https://graph.microsoft.com/v1.0",
   "color": {

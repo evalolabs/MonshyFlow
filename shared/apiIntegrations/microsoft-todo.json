@@ -2,7 +2,6 @@
   "id": "microsoft-todo",
   "name": "Microsoft ToDo",
   "icon": "✅",
-  "logoUrl": "https://cdn.simpleicons.org/microsofttodo/0078D4",
   "description": "Task management via Microsoft Graph API",
   "baseUrl": "https://graph.microsoft.com/v1.0/me",
   "color": {

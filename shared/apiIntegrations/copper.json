@@ -2,7 +2,6 @@
   "id": "copper",
   "name": "Copper",
   "icon": "💼",
-  "logoUrl": "https://cdn.simpleicons.org/copper/BC7B3B",
   "description": "CRM and sales pipeline management",
   "baseUrl": "https://api.copper.com/developer_api/v1",
   "color": {

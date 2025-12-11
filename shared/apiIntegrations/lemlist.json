@@ -2,7 +2,6 @@
   "id": "lemlist",
   "name": "Lemlist",
   "icon": "📬",
-  "logoUrl": "https://cdn.simpleicons.org/lemlist/000000",
   "description": "Cold email outreach and automation platform",
   "baseUrl": "https://api.lemlist.com/api",
   "color": {

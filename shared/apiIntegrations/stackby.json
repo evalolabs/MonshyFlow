@@ -2,7 +2,6 @@
   "id": "stackby",
   "name": "Stackby",
   "icon": "📊",
-  "logoUrl": "https://cdn.simpleicons.org/stackby/000000",
   "description": "Database and spreadsheet platform similar to Airtable",
   "baseUrl": "https://stackby.com/api/betav1",
   "color": {

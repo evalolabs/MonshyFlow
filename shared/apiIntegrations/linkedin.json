@@ -2,7 +2,6 @@
   "id": "linkedin",
   "name": "LinkedIn",
   "icon": "💼",
-  "logoUrl": "https://cdn.simpleicons.org/linkedin/0A66C2",
   "description": "Professional networking and career platform",
   "baseUrl": "https://api.linkedin.com/v2",
   "color": {

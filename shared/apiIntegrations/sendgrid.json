@@ -2,7 +2,6 @@
   "id": "sendgrid",
   "name": "SendGrid",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/sendgrid/1A82E2",
   "description": "Email delivery and marketing platform",
   "baseUrl": "https://api.sendgrid.com/v3",
   "color": {

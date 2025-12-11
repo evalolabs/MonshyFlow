@@ -2,7 +2,6 @@
   "id": "one-simple-api",
   "name": "One Simple API",
   "icon": "🔧",
-  "logoUrl": "https://cdn.simpleicons.org/onesimpleapi/000000",
   "description": "No-code utilities toolbox for web operations",
   "baseUrl": "https://onesimpleapi.com/api",
   "color": {

@@ -2,7 +2,6 @@
   "id": "azure-cosmos-db",
   "name": "Azure Cosmos DB",
   "icon": "🗄️",
-  "logoUrl": "https://cdn.simpleicons.org/microsoftazure/0078D4",
   "description": "NoSQL database service",
   "baseUrl": "https://{account}.documents.azure.com/dbs/{database}",
   "color": {

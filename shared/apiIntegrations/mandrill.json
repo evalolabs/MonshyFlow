@@ -2,7 +2,6 @@
   "id": "mandrill",
   "name": "Mandrill",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/mandrill/000000",
   "description": "Transactional email service by Mailchimp",
   "baseUrl": "https://mandrillapp.com/api/1.0",
   "color": {

@@ -2,7 +2,6 @@
   "id": "twilio",
   "name": "Twilio",
   "icon": "📱",
-  "logoUrl": "https://cdn.simpleicons.org/twilio/F22F46",
   "description": "Cloud communications platform for SMS, voice, and messaging",
   "baseUrl": "https://api.twilio.com/2010-04-01/Accounts/{AccountSid}",
   "color": {

@@ -2,7 +2,6 @@
   "id": "servicenow",
   "name": "ServiceNow",
   "icon": "🔧",
-  "logoUrl": "https://cdn.simpleicons.org/servicenow/81B5A1",
   "description": "IT service management and workflow automation platform",
   "baseUrl": "https://{subdomain}.service-now.com/api",
   "color": {

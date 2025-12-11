@@ -2,7 +2,6 @@
   "id": "rocketchat",
   "name": "RocketChat",
   "icon": "💬",
-  "logoUrl": "https://cdn.simpleicons.org/rocketchat/FF6D5A",
   "description": "Open-source team communication platform",
   "baseUrl": "https://{host}/api/v1",
   "color": {

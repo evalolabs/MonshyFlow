@@ -2,7 +2,6 @@
   "id": "microsoft-sharepoint",
   "name": "Microsoft SharePoint",
   "icon": "📄",
-  "logoUrl": "https://cdn.simpleicons.org/microsoftsharepoint/0078D4",
   "description": "Collaboration and document management platform",
   "baseUrl": "https://graph.microsoft.com/v1.0",
   "color": {

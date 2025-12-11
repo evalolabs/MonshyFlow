@@ -2,7 +2,6 @@
   "id": "pipedrive",
   "name": "Pipedrive",
   "icon": "📊",
-  "logoUrl": "https://cdn.simpleicons.org/pipedrive/1a7598",
   "description": "CRM and sales pipeline management",
   "baseUrl": "https://api.pipedrive.com/v1",
   "color": {

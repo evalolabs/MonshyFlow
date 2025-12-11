@@ -2,7 +2,6 @@
   "id": "segment",
   "name": "Segment",
   "icon": "📊",
-  "logoUrl": "https://cdn.simpleicons.org/segment/43AF79",
   "description": "Customer data platform and analytics",
   "baseUrl": "https://api.segment.io/v1",
   "color": {

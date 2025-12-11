@@ -2,7 +2,6 @@
   "id": "orbit",
   "name": "Orbit",
   "icon": "🌍",
-  "logoUrl": "https://cdn.simpleicons.org/orbit/000000",
   "description": "Community relationship management platform",
   "baseUrl": "https://app.orbit.love/api/v1",
   "color": {

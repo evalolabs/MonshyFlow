@@ -2,7 +2,6 @@
   "id": "unleashed-software",
   "name": "Unleashed Software",
   "icon": "📦",
-  "logoUrl": "https://cdn.simpleicons.org/unleashedsoftware/000000",
   "description": "Inventory management and ERP system",
   "baseUrl": "https://api.unleashedsoftware.com",
   "color": {

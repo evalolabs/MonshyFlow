@@ -2,7 +2,6 @@
   "id": "messagebird",
   "name": "MessageBird",
   "icon": "📱",
-  "logoUrl": "https://cdn.simpleicons.org/messagebird/2481FF",
   "description": "SMS, voice, and messaging platform",
   "baseUrl": "https://rest.messagebird.com",
   "color": {

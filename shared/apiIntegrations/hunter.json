@@ -2,7 +2,6 @@
   "id": "hunter",
   "name": "Hunter.io",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/hunter/FF0A00",
   "description": "Email finder and email verification service",
   "baseUrl": "https://api.hunter.io/v2",
   "color": {

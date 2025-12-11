@@ -2,7 +2,6 @@
   "id": "iterable",
   "name": "Iterable",
   "icon": "📧",
-  "logoUrl": "https://cdn.simpleicons.org/iterable/000000",
   "description": "Marketing automation platform for customer engagement",
   "baseUrl": "https://api.iterable.com/api",
   "color": {

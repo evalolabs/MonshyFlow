@@ -169,16 +169,16 @@ export function WorkflowCanvas({
 
   // Update nodes when initialNodes changes (e.g., workflow loaded from backend)
   React.useEffect(() => {
-    console.log('[WorkflowCanvas] initialNodes changed:', {
-      count: initialNodes?.length || 0,
-      nodes: initialNodes?.map(n => ({
-        id: n.id,
-        type: n.type,
-        dataKeys: Object.keys(n.data || {}),
-        data: n.data,
-        data_url: n.data?.url
-      }))
-    });
+    // console.log('[WorkflowCanvas] initialNodes changed:', {
+    //   count: initialNodes?.length || 0,
+    //   nodes: initialNodes?.map(n => ({
+    //     id: n.id,
+    //     type: n.type,
+    //     dataKeys: Object.keys(n.data || {}),
+    //     data: n.data,
+    //     data_url: n.data?.url
+    //   }))
+    // });
     if (initialNodes && initialNodes.length > 0) {
       // CRITICAL: Ensure node.data is always an object, not a stringified JSON.
       // This is a safeguard against data corruption from various sources.
@@ -194,7 +194,7 @@ export function WorkflowCanvas({
         return node;
       });
       setNodes(sanitizedNodes as Node[]);
-      console.log('[WorkflowCanvas] Updated nodes state with sanitized data');
+      // console.log('[WorkflowCanvas] Updated nodes state with sanitized data');
     }
   }, [initialNodes, setNodes]);
 
@@ -266,7 +266,7 @@ export function WorkflowCanvas({
             };
           });
 
-          console.log('[WorkflowCanvas] Updating debug steps:', initialSteps.length, 'nodes, preserving', testedStepsMap.size, 'tested steps');
+          // console.log('[WorkflowCanvas] Updating debug steps:', initialSteps.length, 'nodes, preserving', testedStepsMap.size, 'tested steps');
           return initialSteps;
         });
       } else {
@@ -460,7 +460,7 @@ export function WorkflowCanvas({
   // Handler to start animation immediately when Play button is clicked
   const handleDebugTestStart = useCallback((nodeId: string, _step: any) => {
     // Start animation IMMEDIATELY when Play button is clicked (before backend call)
-    console.log('[WorkflowCanvas] Node test started - triggering animation immediately:', nodeId);
+    // console.log('[WorkflowCanvas] Node test started - triggering animation immediately:', nodeId);
     
     // Set testing state to trigger animation
     // This will trigger animation for all nodes from Start to this node
@@ -471,7 +471,7 @@ export function WorkflowCanvas({
       // Use Gateway (Port 5000) instead of direct service (Port 5002)
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const eventsStreamUrl = `${API_URL}/api/events/stream`;
-      console.log('[WorkflowCanvas] Creating SSE connection for node test:', eventsStreamUrl);
+      // console.log('[WorkflowCanvas] Creating SSE connection for node test:', eventsStreamUrl);
       const sse = createSSEConnection(eventsStreamUrl);
       sse.connect();
       setSseConnection(sse);
@@ -506,7 +506,7 @@ export function WorkflowCanvas({
     // Use fallback duration (will be overridden by real SSE events for slow nodes)
     const estimatedDuration = (fastCount * 200) + (slowCount * 1500) + 2000; // Fast nodes + slow nodes (fallback) + buffer
     
-    console.log('[WorkflowCanvas] Animation duration for node test path (fallback):', estimatedDuration, 'ms', 'nodes in path:', nodesInPath);
+    // console.log('[WorkflowCanvas] Animation duration for node test path (fallback):', estimatedDuration, 'ms', 'nodes in path:', nodesInPath);
     
     // Note: SSE connection cleanup is handled in useEffect below
     // We don't disconnect here because the connection might be reused for multiple tests
@@ -516,7 +516,7 @@ export function WorkflowCanvas({
   useEffect(() => {
     if (!testingNodeId && sseConnection) {
       // Testing completed - disconnect SSE connection
-      console.log('[WorkflowCanvas] Testing completed, disconnecting SSE connection');
+      // console.log('[WorkflowCanvas] Testing completed, disconnecting SSE connection');
       sseConnection.disconnect();
       setSseConnection(null);
     }
@@ -526,7 +526,7 @@ export function WorkflowCanvas({
   useEffect(() => {
     return () => {
       if (sseConnection) {
-        console.log('[WorkflowCanvas] Component unmounting, cleaning up SSE connection');
+        // console.log('[WorkflowCanvas] Component unmounting, cleaning up SSE connection');
         sseConnection.disconnect();
         setSseConnection(null);
       }
@@ -536,14 +536,14 @@ export function WorkflowCanvas({
   const handleDebugTestResult = useCallback((result: any, originalStep: any) => {
     // This is called AFTER the backend test completes
     // Animation should already be running from handleDebugTestStart
-    console.log('[WorkflowCanvas] Node test result:', result, 'nodeId:', originalStep.nodeId);
+    // console.log('[WorkflowCanvas] Node test result:', result, 'nodeId:', originalStep.nodeId);
     
     // Reset testingNodeId after a short delay to allow animation to complete
     // This ensures the animation finishes before we reset the state
     setTimeout(() => {
       setTestingNodeId(prevTestingNodeId => {
         if (prevTestingNodeId === originalStep.nodeId) {
-          console.log('[WorkflowCanvas] Resetting testingNodeId after test completion');
+          // console.log('[WorkflowCanvas] Resetting testingNodeId after test completion');
           return null;
         }
         return prevTestingNodeId; // Keep current value if it changed (new test started)
@@ -750,7 +750,7 @@ export function WorkflowCanvas({
   
   // Debug: Log when executing changes
   useEffect(() => {
-    console.log('[WorkflowCanvas] executing state changed:', executing, 'testingNodeId:', testingNodeId, 'isExecuting:', isExecuting);
+    // console.log('[WorkflowCanvas] executing state changed:', executing, 'testingNodeId:', testingNodeId, 'isExecuting:', isExecuting);
   }, [executing, testingNodeId, isExecuting]);
   
   const executionSteps = useMemo(() => {
@@ -810,14 +810,14 @@ export function WorkflowCanvas({
 
   // Debug log for animation state
   useEffect(() => {
-    console.log('[WorkflowCanvas] Animation state:', {
-      isExecuting,
-      executing, // Also log the original executing state
-      currentAnimatedNodeId,
-      executionStepsCount: executionSteps.length,
-      nodesCount: nodes.length,
-      debugStepsCount: debugSteps.length,
-    });
+    // console.log('[WorkflowCanvas] Animation state:', {
+    //   isExecuting,
+    //   executing, // Also log the original executing state
+    //   currentAnimatedNodeId,
+    //   executionStepsCount: executionSteps.length,
+    //   nodesCount: nodes.length,
+    //   debugStepsCount: debugSteps.length,
+    // });
   }, [isExecuting, executing, currentAnimatedNodeId, executionSteps.length, nodes.length, debugSteps.length]);
 
   // Get node types from registry (automatically includes all registered nodes)
@@ -884,17 +884,17 @@ export function WorkflowCanvas({
   const handleNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
     // Always get the latest node from the nodes state to ensure we have the latest data
     const latestNode = nodes.find(n => n.id === node.id) || node;
-    console.log('[WorkflowCanvas] Node clicked:', {
-      clickedNodeId: node.id,
-      clickedNodeData: node.data,
-      clickedNodeData_url: node.data?.url,
-      foundInState: !!nodes.find(n => n.id === node.id),
-      latestNodeData: latestNode.data,
-      latestNodeData_url: latestNode.data?.url,
-      allNodesInState: nodes.map(n => ({ id: n.id, type: n.type, dataKeys: Object.keys(n.data || {}), url: n.data?.url }))
-    });
-    console.log('[WorkflowCanvas] Full clicked node:', JSON.stringify(node, null, 2));
-    console.log('[WorkflowCanvas] Full latest node:', JSON.stringify(latestNode, null, 2));
+    // console.log('[WorkflowCanvas] Node clicked:', {
+    //   clickedNodeId: node.id,
+    //   clickedNodeData: node.data,
+    //   clickedNodeData_url: node.data?.url,
+    //   foundInState: !!nodes.find(n => n.id === node.id),
+    //   latestNodeData: latestNode.data,
+    //   latestNodeData_url: latestNode.data?.url,
+    //   allNodesInState: nodes.map(n => ({ id: n.id, type: n.type, dataKeys: Object.keys(n.data || {}), url: n.data?.url }))
+    // });
+    // console.log('[WorkflowCanvas] Full clicked node:', JSON.stringify(node, null, 2));
+    // console.log('[WorkflowCanvas] Full latest node:', JSON.stringify(latestNode, null, 2));
     setSelectedNode(latestNode);
     setShowConfigPanel(true);
     setContextMenu(null);
