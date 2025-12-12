@@ -27,7 +27,6 @@ import { DeleteNodeModal } from './DeleteNodeModal';
 import { ExecutionMonitor } from '../ExecutionMonitor/ExecutionMonitor';
 import { NodeSelectorPopup } from './NodeSelectorPopup';
 import { ButtonEdge } from './EdgeTypes/ButtonEdge';
-import { LoopEdge } from './EdgeTypes/LoopEdge';
 import { PhantomAddButtonEdge } from './EdgeTypes/PhantomAddButtonEdge';
 import { workflowService } from '../../services/workflowService';
 import type { WorkflowNode, WorkflowEdge } from '../../types/workflow';
@@ -60,7 +59,6 @@ const nodeTypes = {
 
 const edgeTypes = {
   buttonEdge: ButtonEdge,
-  loopEdge: LoopEdge,
   phantomAddButton: PhantomAddButtonEdge,
 };
 
@@ -246,7 +244,7 @@ export function WorkflowCanvas({
   const phantomEdges: Edge[] = nodesWithoutOutput.map(node => ({
     id: `phantom-exit-${node.id}`,
     source: node.id,
-    sourceHandle: 'loop-exit', // Explicitly from loop-exit handle
+    sourceHandle: 'output', // Output handle
     target: node.id,
     // No targetHandle - phantom edge points to itself
     type: 'phantomAddButton',
@@ -271,33 +269,13 @@ export function WorkflowCanvas({
       console.log('   Source:', connection.source, 'sourceHandle:', connection.sourceHandle);
       console.log('   Target:', connection.target, 'targetHandle:', connection.targetHandle);
       
-      // 🔄 AUTO-DETECT LOOP-BACK EDGES
-      const sourceNode = nodes.find(n => n.id === connection.source);
-      const targetNode = nodes.find(n => n.id === connection.target);
-      
-      // OR: If target is ABOVE source (going backwards in workflow) → LoopEdge
-      const isGoingBackwards = sourceNode && targetNode && targetNode.position.y < sourceNode.position.y;
-      
-      const edgeType = isGoingBackwards ? 'loopEdge' : 'buttonEdge';
-      
-      let targetHandle = connection.targetHandle;
-      
-      console.log('   🔍 Loop detection:', {
-        isLoopBack,
-        isGoingBackwards,
-        edgeType,
-        targetHandle,
-        sourceY: sourceNode?.position.y,
-        targetY: targetNode?.position.y,
-      });
-      
       const newEdge = {
         ...connection,
         id: `${connection.source}-${connection.target}`,
-        type: edgeType,
+        type: 'buttonEdge',
         // EXPLICITLY preserve the handles (spread might not always work)
         sourceHandle: connection.sourceHandle || undefined,
-        targetHandle: targetHandle || undefined,
+        targetHandle: connection.targetHandle || undefined,
         data: { 
           onAddNode: (edgeId: string, source: string, target: string) => 
             handleAddNodeBetweenRef.current(edgeId, source, target) 
@@ -305,7 +283,7 @@ export function WorkflowCanvas({
       } as Edge;
       
       console.log('   Created edge:', newEdge);
-      console.log('   Edge type:', edgeType);
+      console.log('   Edge type:', newEdge.type);
       console.log('   Edge sourceHandle:', newEdge.sourceHandle);
       console.log('   Edge targetHandle:', newEdge.targetHandle);
       console.log('   Edge has onAddNode?', !!newEdge.data?.onAddNode);

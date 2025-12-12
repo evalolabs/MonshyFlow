@@ -75,7 +75,6 @@ WorkflowBuilder/
 │
 └── 📁 EdgeTypes/
     ├── ButtonEdge.tsx
-    ├── LoopEdge.tsx
     └── PhantomAddButtonEdge.tsx
 
 ../../utils/                           # 🆕 Shared Utilities

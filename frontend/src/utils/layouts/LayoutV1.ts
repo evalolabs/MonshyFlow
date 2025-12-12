@@ -55,7 +55,7 @@ export const LayoutV1: LayoutStrategy = {
       ranker: 'network-simplex',  // Better algorithm for complex graphs
       marginx: 40,                // Increased margins for better spacing
       marginy: 40,
-      acyclicer: 'greedy',        // Handle cycles in graphs (for loops)
+      acyclicer: 'greedy',        // Handle cycles in graphs
       edgesep: 10,                // Space between edges
     });
 

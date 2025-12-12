@@ -22,7 +22,7 @@ function isAgentBottomInputEdge(edge: Edge): boolean {
 
 /**
  * Applies automatic layout to nodes using Dagre algorithm
- * Improved to handle loops and branches better
+ * Improved to handle branches better
  */
 export function getLayoutedElements(
   nodes: Node[],
@@ -50,7 +50,7 @@ export function getLayoutedElements(
     ranker: 'network-simplex',  // Better algorithm for complex graphs (was 'tight-tree')
     marginx: 40,                // Increased margins for better spacing (was 20)
     marginy: 40,
-    acyclicer: 'greedy',        // Handle cycles in graphs (for loops)
+    acyclicer: 'greedy',        // Handle cycles in graphs
     edgesep: 10,                // Space between edges
   });
 
@@ -151,7 +151,7 @@ export function applyHorizontalLayout(nodes: Node[], edges: Edge[]) {
 
 /**
  * Applies vertical layout (Top to Bottom) - Optimized spacing
- * Professional layout for loops and complex workflows
+ * Professional layout for complex workflows
  */
 export function applyVerticalLayout(nodes: Node[], edges: Edge[]) {
   return getLayoutedElements(nodes, edges, {

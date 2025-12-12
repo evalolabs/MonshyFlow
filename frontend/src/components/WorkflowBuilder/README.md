@@ -46,7 +46,7 @@ WorkflowCanvas (Haupt-Komponente)
 ├── Toolbar (Aktionen: Save, Execute, etc.)
 ├── ReactFlow (Canvas)
 │   ├── NodeTypes (Start, End, Agent, LLM, etc.)
-│   ├── EdgeTypes (ButtonEdge, LoopEdge, PhantomEdge)
+│   ├── EdgeTypes (ButtonEdge, PhantomEdge)
 │   ├── Controls (Zoom, Pan)
 │   ├── MiniMap
 │   └── Background
@@ -235,7 +235,6 @@ const { handleConnect } = useEdgeHandling({
 ```
 
 **Features:**
-- Auto-Erkennung von Loop-Edges
 - Smart Handle-Management
 - Button-Funktionalität für alle Edges
 

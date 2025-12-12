@@ -209,6 +209,36 @@ export const NODE_METADATA_REGISTRY: Record<string, NodeMetadata> = {
       body: { type: 'expression', multiline: true, rows: 4, placeholder: 'Custom request body (JSON or text) or {{steps.agent-1.output}}' },
     },
   },
+  
+  // Logic Nodes
+  while: {
+    id: 'while',
+    name: 'While Loop',
+    icon: '🔄',
+    description: 'Execute a block of nodes repeatedly while a condition is true',
+    category: 'logic',
+    component: () => null, // Will be lazy-loaded
+    hasConfigForm: true,
+    useAutoConfigForm: true,
+    hasInput: true,
+    hasOutput: true,
+    fields: {
+      label: { type: 'text', placeholder: 'While Loop Name' },
+      condition: { 
+        type: 'expression', 
+        placeholder: 'Enter condition (e.g., {{steps.nodeId.count}} < 10)',
+        required: true
+      },
+      maxIterations: { 
+        type: 'number', 
+        placeholder: 'Maximum iterations (safety limit)',
+        default: 100,
+        min: 1,
+        max: 10000,
+        required: true
+      },
+    },
+  },
 };
 
 /**
