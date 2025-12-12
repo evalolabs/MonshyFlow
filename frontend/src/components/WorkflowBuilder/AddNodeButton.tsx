@@ -56,6 +56,11 @@ export const AddNodeButton: React.FC<AddNodeButtonProps> = ({ nodeId, sourceHand
     nodeRelativeX = sourceNode.position.x + nodeWidth / 2;
     nodeRelativeY = sourceNode.position.y + nodeHeight + 25; // Below node
   }
+  // While Node - loop and back handles (bottom)
+  else if (sourceHandle === 'loop' || sourceHandle === 'back') {
+    nodeRelativeX = sourceNode.position.x + nodeWidth * (sourceHandle === 'loop' ? 0.35 : 0.65);
+    nodeRelativeY = sourceNode.position.y + nodeHeight + 25; // Below node
+  }
   // Normal nodes - default center position
   else {
     nodeRelativeX = sourceNode.position.x + nodeWidth + 25;
@@ -71,6 +76,26 @@ export const AddNodeButton: React.FC<AddNodeButtonProps> = ({ nodeId, sourceHand
     onClick();
   };
   
+  // Determine button styling based on handle type
+  const isLoopHandle = sourceHandle === 'loop' || sourceHandle === 'back';
+  const buttonClasses = isLoopHandle
+    ? sourceHandle === 'back'
+      ? 'flex items-center justify-center w-8 h-8 bg-white border-2 border-red-500 rounded-full shadow-lg hover:shadow-xl hover:bg-red-500 hover:border-red-600 transition-all duration-200 hover:scale-125 cursor-pointer group'
+      : 'flex items-center justify-center w-8 h-8 bg-white border-2 border-purple-500 rounded-full shadow-lg hover:shadow-xl hover:bg-purple-500 hover:border-purple-600 transition-all duration-200 hover:scale-125 cursor-pointer group'
+    : 'flex items-center justify-center w-8 h-8 bg-white border-2 border-blue-500 rounded-full shadow-lg hover:shadow-xl hover:bg-blue-500 hover:border-blue-600 transition-all duration-200 hover:scale-125 cursor-pointer group';
+  
+  const iconClasses = isLoopHandle
+    ? sourceHandle === 'back'
+      ? 'w-4 h-4 text-red-600 group-hover:text-white transition-colors'
+      : 'w-4 h-4 text-purple-600 group-hover:text-white transition-colors'
+    : 'w-4 h-4 text-blue-600 group-hover:text-white transition-colors';
+  
+  const buttonTitle = isLoopHandle
+    ? sourceHandle === 'back'
+      ? 'Add node in loop (back)'
+      : 'Add node in loop (continue)'
+    : 'Add next node';
+  
   return (
     <div
       style={{
@@ -85,15 +110,15 @@ export const AddNodeButton: React.FC<AddNodeButtonProps> = ({ nodeId, sourceHand
     >
       <button
         onClick={handleClick}
-        className="flex items-center justify-center w-8 h-8 bg-white border-2 border-blue-500 rounded-full shadow-lg hover:shadow-xl hover:bg-blue-500 hover:border-blue-600 transition-all duration-200 hover:scale-125 cursor-pointer group"
-        title="Add next node"
+        className={buttonClasses}
+        title={buttonTitle}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          className="w-4 h-4 text-blue-600 group-hover:text-white transition-colors"
+          className={iconClasses}
           strokeWidth={3}
         >
           <line x1="12" y1="5" x2="12" y2="19" />

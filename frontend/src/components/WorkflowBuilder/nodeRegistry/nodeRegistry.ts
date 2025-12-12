@@ -22,6 +22,7 @@ import { LLMNode } from '../NodeTypes/OptimizedNodes';
 import { HttpRequestNode } from '../NodeTypes/OptimizedNodes';
 import { TransformNode } from '../NodeTypes/OptimizedNodes';
 import { EmailNode } from '../NodeTypes/OptimizedNodes';
+import { WhileNode } from '../NodeTypes/WhileNode';
 import { ToolNodeComponent } from '../ToolNodes/ToolNodeComponent';
 import { BaseNode } from '../NodeTypes/BaseNode';
 import { getNodeMetadata } from './nodeMetadata';
@@ -38,6 +39,7 @@ const NODE_COMPONENTS: Record<string, ComponentType<any>> = {
   llm: LLMNode,
   'http-request': HttpRequestNode,
   email: EmailNode,
+  while: WhileNode,
   
   // Tool nodes use special component
   tool: ToolNodeComponent,

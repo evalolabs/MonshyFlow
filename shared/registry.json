@@ -412,6 +412,55 @@
           }
         }
       }
+    },
+    {
+      "type": "while",
+      "name": "While Loop",
+      "icon": "🔄",
+      "description": "Execute a block of nodes repeatedly while a condition is true",
+      "category": "logic",
+      "animationSpeed": "slow",
+      "csharpProcessor": "WhileNodeProcessor",
+      "typescriptProcessor": "./nodes/registerBuiltIns#while",
+      "inputSchema": {
+        "type": "object",
+        "description": "Accepts any input. The condition is evaluated on each iteration.",
+        "additionalProperties": true
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "iterations": { "type": "number", "description": "Number of loop iterations executed" },
+          "finalOutput": { "description": "Output from the last iteration" },
+          "exitedEarly": { "type": "boolean", "description": "Whether loop exited due to max iterations" }
+        }
+      },
+      "frontend": {
+        "hasConfigForm": true,
+        "useAutoConfigForm": true,
+        "hasInput": true,
+        "hasOutput": true,
+        "fields": {
+          "label": {
+            "type": "text",
+            "placeholder": "While Loop Name"
+          },
+          "condition": {
+            "type": "expression",
+            "multiline": false,
+            "placeholder": "Enter condition (e.g., {{steps.nodeId.count}} < 10)",
+            "required": true
+          },
+          "maxIterations": {
+            "type": "number",
+            "placeholder": "Maximum iterations (safety limit)",
+            "default": 100,
+            "min": 1,
+            "max": 10000,
+            "required": true
+          }
+        }
+      }
     }
   ],
   "tools": [

@@ -50,6 +50,9 @@ export const EDGE_TYPE_BUTTON = 'buttonEdge';
 /** Phantom edge type for nodes without outputs */
 export const EDGE_TYPE_PHANTOM = 'phantomAddButton';
 
+/** Loop edge type for while loop connections */
+export const EDGE_TYPE_LOOP = 'loopEdge';
+
 // ============================================================================
 // NODE TYPES
 // ============================================================================
@@ -62,6 +65,31 @@ export const NODE_TYPE_END = 'end';
 
 /** If-else conditional node type */
 export const NODE_TYPE_IFELSE = 'ifelse';
+
+/** While loop node type */
+export const NODE_TYPE_WHILE = 'while';
+
+// ============================================================================
+// LOOP HANDLE IDs (for robust edge type detection)
+// ============================================================================
+
+/** Handle IDs that indicate loop connections */
+export const LOOP_HANDLE_IDS = {
+  LOOP: 'loop',           // Source handle: continues loop
+  BACK: 'back',            // Source handle: loops back
+  LOOP_BACK: 'loop-back', // Target handle: receives loop-back
+} as const;
+
+/**
+ * Check if a handle ID indicates a loop connection
+ * This is handle-based, not node-type-based, so it works with any node
+ */
+export function isLoopHandle(handleId?: string | null): boolean {
+  if (!handleId) return false;
+  return handleId === LOOP_HANDLE_IDS.LOOP || 
+         handleId === LOOP_HANDLE_IDS.BACK || 
+         handleId === LOOP_HANDLE_IDS.LOOP_BACK;
+}
 
 // ============================================================================
 // HANDLE IDS
@@ -112,6 +140,7 @@ export const NODE_COLORS = {
   start: '#3b82f6',
   end: '#ef4444',
   ifelse: '#eab308',
+  while: '#a855f7', // Purple for loops
   merge: '#06b6d4',
   parallel: '#a855f7',
   agent: '#06b6d4',

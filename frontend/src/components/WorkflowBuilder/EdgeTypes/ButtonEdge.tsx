@@ -2,6 +2,7 @@ import React from 'react';
 import { getSmoothStepPath, EdgeLabelRenderer, BaseEdge, useReactFlow } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
 import { isToolNodeType } from '../../../types/toolCatalog';
+import { EDGE_TYPE_LOOP, isLoopHandle } from '../constants';
 
 interface ButtonEdgeData {
   onAddNode?: (edgeId: string, sourceNode: string, targetNode: string) => void;
@@ -43,12 +44,34 @@ export const ButtonEdge: React.FC<ButtonEdgeProps> = ({
   // ReactFlow may not always pass targetHandle as a prop, so we get it from the edge object
   const edge = getEdge(id);
   const targetHandle = targetHandleProp || edge?.targetHandle;
+  const sourceHandle = edge?.sourceHandle;
   const edgeType = edge?.type;
   
   // CRITICAL: Also check if source node is a tool node
   // This is a fallback in case the edge type is not correctly set
   const sourceNode = source ? getNode(source) : null;
   const isSourceTool = sourceNode?.type === 'tool' || (sourceNode?.type && isToolNodeType(sourceNode.type));
+
+  // CRITICAL: Check if this is a loop edge (handle-based detection)
+  // If it's a loopEdge type, it should NEVER be rendered as ButtonEdge
+  // ReactFlow should use LoopEdge instead
+  const isLoopEdgeConnection = 
+    edgeType === EDGE_TYPE_LOOP || 
+    isLoopHandle(sourceHandle) || 
+    isLoopHandle(targetHandle);
+  
+  if (isLoopEdgeConnection) {
+    // This edge should be rendered by LoopEdge, not ButtonEdge
+    if (edgeType === EDGE_TYPE_LOOP) {
+      console.warn('[ButtonEdge] ERROR: ButtonEdge was called for a loopEdge! ReactFlow should use LoopEdge instead.', { 
+        id, 
+        edgeType, 
+        sourceHandle, 
+        targetHandle 
+      });
+    }
+    return null;
+  }
 
   // CRITICAL: Check if this is a tool edge (by type OR by target handle OR by source node type)
   // If it's a toolEdge type, it should NEVER be rendered as ButtonEdge

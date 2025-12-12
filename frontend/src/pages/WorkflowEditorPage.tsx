@@ -6,6 +6,7 @@ import { WorkflowCanvas } from '../components/WorkflowBuilder/WorkflowCanvas';
 import { workflowService } from '../services/workflowService';
 import type { Workflow } from '../types/workflow';
 import { computeEffectiveNodeType } from '../components/WorkflowBuilder/utils/nodeConfigUtils';
+import { EDGE_TYPE_BUTTON, EDGE_TYPE_LOOP, isLoopHandle, LOOP_HANDLE_IDS } from '../components/WorkflowBuilder/constants';
 
 export function WorkflowEditorPage() {
   const { id } = useParams<{ id: string }>();
@@ -119,10 +120,13 @@ export function WorkflowEditorPage() {
         }
       }
       
-      // Transform edges: Rename _id to id and clean null handles, detect tool edges
+      // Transform edges: Rename _id to id and clean null handles, detect edge types
       if (data.edges) {
         data.edges = data.edges.map((edge: any) => {
-          // Determine if this is a tool edge
+          // PRIORITY 1: Check for loop edges (handle-based)
+          const isLoopConnection = isLoopHandle(edge.sourceHandle) || isLoopHandle(edge.targetHandle);
+          
+          // PRIORITY 2: Check for tool edges
           const isToolConnection = 
             edge.targetHandle === 'tool' || 
             edge.targetHandle === 'chat-model' || 
@@ -133,24 +137,42 @@ export function WorkflowEditorPage() {
           const sourceNode = data.nodes?.find((n: any) => n.id === edge.source);
           const isSourceTool = sourceNode?.type?.startsWith('tool') || sourceNode?.type === 'tool';
           
-          // Use 'default' (bezier curve) for tool edges, 'buttonEdge' for regular edges
-          // Convert old 'toolEdge' type to 'default'
+          // Determine edge type with priority: Loop > Tool > Button
           let edgeType = edge.type;
-          if (edgeType === 'toolEdge' || (isToolConnection && isSourceTool)) {
+          if (isLoopConnection) {
+            edgeType = EDGE_TYPE_LOOP;
+          } else if (edgeType === 'toolEdge' || (isToolConnection && isSourceTool)) {
             edgeType = 'default'; // Use default bezier curve for tool edges
           } else if (!edgeType) {
-            edgeType = 'buttonEdge'; // Default for regular edges
+            edgeType = EDGE_TYPE_BUTTON; // Default for regular edges
+          }
+          
+          // Clean handles: null, 'null', empty string → undefined
+          const cleanedSourceHandle = (edge.sourceHandle === null || edge.sourceHandle === 'null' || edge.sourceHandle === '') ? undefined : edge.sourceHandle;
+          const cleanedTargetHandle = (edge.targetHandle === null || edge.targetHandle === 'null' || edge.targetHandle === '') ? undefined : edge.targetHandle;
+          
+          // Determine loopType for loop edges
+          let loopType: 'loop' | 'back' | undefined = undefined;
+          if (isLoopConnection && edgeType === EDGE_TYPE_LOOP) {
+            // Determine loop type: 'back' if targetHandle is 'back' or sourceHandle is 'back', else 'loop'
+            loopType = (cleanedTargetHandle === LOOP_HANDLE_IDS.BACK || cleanedSourceHandle === LOOP_HANDLE_IDS.BACK) 
+              ? 'back' 
+              : 'loop';
           }
           
           return {
             id: edge._id || edge.id,
             source: edge.source,
             target: edge.target,
-            // Clean handles: null, 'null', empty string → undefined
-            sourceHandle: (edge.sourceHandle === null || edge.sourceHandle === 'null' || edge.sourceHandle === '') ? undefined : edge.sourceHandle,
-            targetHandle: (edge.targetHandle === null || edge.targetHandle === 'null' || edge.targetHandle === '') ? undefined : edge.targetHandle,
+            sourceHandle: cleanedSourceHandle,
+            targetHandle: cleanedTargetHandle,
             type: edgeType,
-            data: (edgeType === 'default' && isToolConnection) ? {} : (edge.data || {}),
+            data: (edgeType === 'default' && isToolConnection) 
+              ? {} 
+              : {
+                  ...(edge.data || {}),
+                  ...(loopType && { loopType }), // Add loopType to data if it's a loop edge
+                },
           };
         });
       }

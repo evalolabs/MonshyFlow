@@ -27,6 +27,7 @@ import { createNodeTypesMap } from './nodeRegistry';
 
 // Edge Types
 import { ButtonEdge } from './EdgeTypes/ButtonEdge';
+import { LoopEdge } from './EdgeTypes/LoopEdge';
 
 // Components
 import { ResizableWorkflowLayout } from './ResizableWorkflowLayout';
@@ -66,6 +67,7 @@ import {
 
 const edgeTypes = {
   buttonEdge: ButtonEdge,
+  loopEdge: LoopEdge,
 };
 
 const compareNodesByPosition = (a: Node, b: Node) => {
@@ -849,10 +851,25 @@ export function WorkflowCanvas({
       // Skip tool nodes, they shouldn't have an add button
       if (node.type?.startsWith('tool')) return;
       
-      
-      // Handle all other nodes - check default output
-      if (!hasEdgeFromHandle(node.id)) {
-        result.push({ nodeId: node.id });
+      // Special handling for While nodes - check loop handles
+      if (node.type === 'while') {
+        // Check default output
+        if (!hasEdgeFromHandle(node.id)) {
+          result.push({ nodeId: node.id });
+        }
+        
+        // Check loop handle
+        if (!hasEdgeFromHandle(node.id, 'loop')) {
+          result.push({ nodeId: node.id, sourceHandle: 'loop' });
+        }
+        
+        // Note: 'back' is a target handle, so we don't add a button for it
+        // The loop-back edge will be created automatically when connecting to it
+      } else {
+        // Handle all other nodes - check default output
+        if (!hasEdgeFromHandle(node.id)) {
+          result.push({ nodeId: node.id });
+        }
       }
     });
     
