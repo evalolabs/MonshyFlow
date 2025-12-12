@@ -43,12 +43,12 @@ export function WhileNode({ data }: NodeProps) {
         {
           id: 'back',
           type: 'target',
-          position: Position.Bottom,
+          position: Position.Left,
           label: 'Back',
           style: { 
-            bottom: '-6px', 
-            left: '65%', 
-            transform: 'translateX(-50%)',
+            left: '-6px', 
+            top: '60%', 
+            transform: 'translateY(-50%)',
             background: '#ef4444', // Red for back
           }
         },

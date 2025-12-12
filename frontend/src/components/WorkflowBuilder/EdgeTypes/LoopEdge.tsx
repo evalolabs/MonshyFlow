@@ -49,14 +49,55 @@ export const LoopEdge: React.FC<LoopEdgeProps> = ({
      sourceHandle === LOOP_HANDLE_IDS.LOOP ? 'loop' : 
      'loop');
 
-  const [edgePath, labelX, labelY] = getSmoothStepPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
-  });
+  // Custom path for loop-back edges: go down from source, then left, then up to while node
+  let edgePath: string;
+  let labelX: number;
+  let labelY: number;
+
+  if (loopType === 'back') {
+    // For back edges: create a custom path that goes down, far left, then up along left side
+    // This creates a visual loop that goes under the loop nodes and connects to the INPUT handle
+    // Path: down -> far left -> up vertically along left side of while node -> to input handle
+    // NOTE: targetX/targetY are the Back-Handle position (left side, 60% from top)
+    const nodeHeight = 100; // Approximate node height
+    const verticalOffset = 20; // Distance to go down from source node
+    
+    // Start point: bottom of source node
+    const startX = sourceX;
+    const startY = sourceY + nodeHeight / 2 + 10; // Bottom of source node
+    
+    // Waypoint 1: Go down
+    const downY = startY + verticalOffset;
+    
+    // targetX/targetY are the Back-Handle position (left side, 60% from top)
+    // Back handle is at left side of while node, 60% from top
+    const backX = targetX; // Left side of while node (where back handle is)
+    const backY = targetY; // 60% from top of while node
+    
+    // Calculate left side of while node for the far left waypoint
+    const whileNodeLeftX = backX;
+    
+    // Go significantly further left to create a wide arc (100px+ beyond the left edge)
+    const farLeftX = whileNodeLeftX - 100;
+    
+    // Create path: down -> far left -> up vertically along left side -> horizontal to back handle
+    // Path structure: start -> down -> far left -> up vertically -> horizontal to back handle
+    edgePath = `M ${startX},${startY} L ${startX},${downY} L ${farLeftX},${downY} L ${farLeftX},${backY} L ${backX},${backY}`;
+    
+    // Calculate label position (middle of the horizontal segment at bottom)
+    labelX = (startX + farLeftX) / 2;
+    labelY = downY;
+  } else {
+    // For regular loop edges: use standard smooth step path
+    [edgePath, labelX, labelY] = getSmoothStepPath({
+      sourceX,
+      sourceY,
+      sourcePosition,
+      targetX,
+      targetY,
+      targetPosition,
+    });
+  }
 
   const handleAddNode = (e: React.MouseEvent) => {
     e.stopPropagation();
