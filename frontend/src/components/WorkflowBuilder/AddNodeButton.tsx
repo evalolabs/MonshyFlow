@@ -47,11 +47,6 @@ export const AddNodeButton: React.FC<AddNodeButtonProps> = ({ nodeId, sourceHand
       nodeRelativeY = sourceNode.position.y + nodeHeight / 2;
     }
   }
-  // While Node - loop-exit handle
-  else if (sourceHandle === 'loop-exit') {
-    nodeRelativeX = sourceNode.position.x + nodeWidth + 30;
-    nodeRelativeY = sourceNode.position.y + nodeHeight / 2;
-  }
   // IfElse Node - true/false handles
   else if (sourceHandle === 'true') {
     nodeRelativeX = sourceNode.position.x + nodeWidth + 25;

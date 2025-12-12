@@ -22,7 +22,6 @@ Der **WorkflowBuilder** ist ein visueller Editor zum Erstellen und Bearbeiten vo
 - ✅ **Drag & Drop** für Nodes und Edges
 - ✅ **Auto-Save** mit Debouncing
 - ✅ **Auto-Layout** für automatische Anordnung
-- ✅ **While-Loops** mit spezieller Visualisierung
 - ✅ **Node-Validierung** (z.B. nur ein Start-Node)
 - ✅ **Execution Monitoring** in Echtzeit
 - ✅ **Context Menus** für schnelle Aktionen
@@ -88,14 +87,12 @@ WorkflowBuilder/
 │   ├── EndNode.tsx
 │   ├── AgentNode.tsx
 │   ├── LLMNode.tsx
-│   ├── WhileNode.tsx
 │   ├── ... (weitere Nodes)
 │   ├── index.ts                    # Export aller Nodes
 │   └── OptimizedNodes.tsx          # React.memo optimierte Versionen
 │
 └── EdgeTypes/                      # Alle Edge-Komponenten
     ├── ButtonEdge.tsx              # Standard Edge mit + Button
-    ├── LoopEdge.tsx                # Loop-Edge für While-Nodes
     └── PhantomAddButtonEdge.tsx    # Unsichtbare Edge nur mit Button
 ```
 
@@ -284,7 +281,6 @@ const {
 **Szenarien:**
 1. Node zwischen zwei anderen Nodes einfügen
 2. Node von Node-Output hinzufügen
-3. Node in While-Loop einfügen
 
 ---
 
@@ -335,7 +331,6 @@ edgeLogger.error('Edge creation failed', error);
 ```typescript
 import {
   hasStartNode,
-  isWhileNode,
   createNode,
   generateNodeId,
   calculateRelativePosition,
@@ -365,25 +360,18 @@ const pos = calculateRelativePosition(sourceNode, 'below', 150);
 ```typescript
 import {
   createButtonEdge,
-  createLoopEdge,
   createPhantomEdge,
-  isLoopEdge,
-  shouldBeLoopEdge,
   findDownstreamNodes,
   buildEdgeLookup,
 } from '@/utils/edgeUtils';
 
 // Beispiele:
 const edge = createButtonEdge(sourceId, targetId, onAddNode);
-const loopEdge = createLoopEdge(whileNodeId, onAddNode);
 const downstream = findDownstreamNodes(nodeId, edges);
 ```
 
 **Wichtige Funktionen:**
 - `createButtonEdge(source, target, callback)` - Standard Edge
-- `createLoopEdge(whileNodeId, callback)` - Loop Edge für While
-- `isLoopEdge(edge)` - Prüft ob Loop-Edge
-- `shouldBeLoopEdge(connection, sourceNode, targetNode)` - Auto-Erkennung
 - `findDownstreamNodes(nodeId, edges)` - BFS-Suche nach Downstream-Nodes
 
 ---
@@ -407,9 +395,8 @@ import {
 **Kategorien:**
 - **Layout:** Spacing, Sizing
 - **Timing:** Auto-Save-Delays, Polling-Intervalle
-- **Edge Types:** buttonEdge, loopEdge, phantomAddButton
-- **Node Types:** start, end, while, ifelse, etc.
-- **Handle IDs:** input, loop-body, loop-exit, loop-back
+- **Edge Types:** buttonEdge, phantomAddButton
+- **Node Types:** start, end, ifelse, etc.
 - **Validation Messages:** Alle User-Nachrichten
 - **Colors:** MiniMap-Farben für Node-Types
 

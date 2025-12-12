@@ -235,10 +235,9 @@ const onConnect = useCallback((connection: Connection) => {
   const sourceNode = nodes.find(n => n.id === connection.source);
   const targetNode = nodes.find(n => n.id === connection.target);
   
-  let isLoopBack = targetNode?.type === 'while' && connection.targetHandle === 'loop-back';
   const isGoingBackwards = sourceNode && targetNode && targetNode.position.y < sourceNode.position.y;
   
-  const edgeType = (isLoopBack || isGoingBackwards) ? 'loopEdge' : 'buttonEdge';
+  const edgeType = isGoingBackwards ? 'buttonEdge' : 'buttonEdge';
   
   // ... viel mehr Code
   
@@ -255,8 +254,7 @@ const handleConnect = useCallback((connection: Connection) => {
   const sourceNode = nodes.find(n => n.id === connection.source);
   const targetNode = nodes.find(n => n.id === connection.target);
 
-  const isLoopEdge = shouldBeLoopEdge(connection, sourceNode, targetNode);
-  const targetHandle = getWhileNodeTargetHandle(connection, targetNode, isLoopEdge);
+  const targetHandle = connection.targetHandle;
 
   const newEdge = createButtonEdge(
     connection.source!,

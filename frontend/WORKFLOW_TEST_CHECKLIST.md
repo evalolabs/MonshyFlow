@@ -67,19 +67,6 @@
 
 ---
 
-### 6. **While Node (Loop)**
-- [ ] While Node hinzufügen
-- [ ] INPUT Handle (links, oben) verbinden
-- [ ] LOOP-BODY Handle (unten) für Schleifenkörper
-- [ ] LOOP-EXIT Handle (rechts) für Fortsetzung
-- [ ] LOOP-BACK Handle (links, Mitte) für Rücksprung
-
-**Erwartetes Problem:**
-- Loop-Back Edge geht nicht zurück zum While Node
-- Handle Positionen überlappen sich
-- Auto-Layout zerstört Loop-Struktur
-- Loop-Body Nodes werden in Hauptflow eingefügt
-
 ---
 
 ### 7. **Auto-Layout**

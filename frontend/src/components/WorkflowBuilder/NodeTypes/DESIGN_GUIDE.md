@@ -27,7 +27,7 @@ Kategoriebasierte Farbpalette:
 |----------------|---------------|-----------------------------------|
 | **core**       | Gray          | Start, End                        |
 | **ai**         | Indigo/Purple | LLM, Agent, AI-Tools             |
-| **logic**      | Amber/Orange  | If/Else, While, Parallel, Merge  |
+| **logic**      | Amber/Orange  | If/Else, Parallel, Merge  |
 | **data**       | Blue/Cyan     | Document Upload, Database        |
 | **integration**| Green/Emerald | API, Web Search, External        |
 | **utility**    | Slate/Zinc    | Tool, Transform, Email           |
@@ -77,7 +77,6 @@ interface BaseNodeProps {
 
 ### Logic Nodes
 - **If/Else**: ◆ (Conditional branching)
-- **While**: 🔁 (Loops)
 - **Parallel**: ⚡ (Parallel execution)
 - **Merge**: 🔀 (Path merging)
 
@@ -152,7 +151,6 @@ interface BaseNodeProps {
 - ✅ WebSearchNode
 - ✅ DocumentUploadNode
 - ✅ IfElseNode (Custom)
-- ✅ WhileNode (Custom)
 - ✅ ToolNode
 - ✅ APINode
 - ✅ MergeNode

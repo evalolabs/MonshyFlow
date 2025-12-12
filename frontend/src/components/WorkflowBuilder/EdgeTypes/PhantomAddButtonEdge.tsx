@@ -38,15 +38,9 @@ export const PhantomAddButtonEdge: React.FC<PhantomAddButtonEdgeProps> = (props)
   const nodeWidth = 220;
   const nodeHeight = 100;
   
-  if (sourceHandle === 'loop-exit') {
-    // While node's loop-exit: position to the right
-    buttonX = sourceNode.position.x + nodeWidth + 40;
-    buttonY = sourceNode.position.y + nodeHeight / 2;
-  } else {
-    // Normal nodes: position to the right (horizontal layout)
-    buttonX = sourceNode.position.x + nodeWidth + 40;
-    buttonY = sourceNode.position.y + nodeHeight / 2;
-  }
+  // Normal nodes: position to the right (horizontal layout)
+  buttonX = sourceNode.position.x + nodeWidth + 40;
+  buttonY = sourceNode.position.y + nodeHeight / 2;
   
   console.log('✅ PhantomAddButtonEdge button position:', { buttonX, buttonY });
 

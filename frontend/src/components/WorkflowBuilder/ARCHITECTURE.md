@@ -269,7 +269,7 @@ logger.info('message');  // Console in Dev
 
 ### 5. Factory Pattern
 ```typescript
-// createNode, createButtonEdge, createLoopEdge
+// createNode, createButtonEdge
 const node = createNode(type, position, data);
 ```
 

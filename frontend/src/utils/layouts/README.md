@@ -13,7 +13,6 @@ Das Layout-System ist eine erweiterbare Architektur für automatische Node-Posit
 - **Features**:
   - Horizontale Haupt-Flow (LR-Richtung)
   - Intelligente Branch-Verteilung
-  - Spezielle Behandlung für While-Loops (Loop-Body-Nodes links positioniert)
   - Agent Node Bottom-Inputs aus Haupt-Flow ausgeschlossen
   - Optimiertes Spacing für parallele Branches
 
@@ -126,7 +125,7 @@ const layouts = getAvailableLayouts();
 
 1. **Konsistente IDs**: Verwende `v1`, `v2`, `v3` etc. für sequenzielle Versionen
 2. **Dokumentation**: Beschreibe dein Layout klar in `name` und `description`
-3. **Edge-Filterung**: Berücksichtige spezielle Edges (Loop-Back, Agent-Bottom-Inputs, etc.)
+3. **Edge-Filterung**: Berücksichtige spezielle Edges (Agent-Bottom-Inputs, etc.)
 4. **Node-Größen**: Verwende die Standard-Größen (220x100) oder lasse sie konfigurierbar
 5. **Fehlerbehandlung**: Behandle Edge-Cases (leere Nodes, zirkuläre Abhängigkeiten, etc.)
 

@@ -45,7 +45,7 @@ class TestInputStorage {
       };
 
       localStorage.setItem(key, JSON.stringify(allInputs));
-      console.log(`[TestInputStorage] Saved test input for node ${nodeId} in workflow ${workflowId}`);
+      /* console.log(`[TestInputStorage] Saved test input for node ${nodeId} in workflow ${workflowId}`); */
     } catch (error) {
       console.error('[TestInputStorage] Failed to save test input:', error);
     }
@@ -64,7 +64,7 @@ class TestInputStorage {
       const stored = allInputs[nodeId];
 
       if (stored && stored.inputData) {
-        console.log(`[TestInputStorage] Loaded test input for node ${nodeId} (last used: ${stored.lastUsed})`);
+        /* console.log(`[TestInputStorage] Loaded test input for node ${nodeId} (last used: ${stored.lastUsed})`); */
         return stored.inputData;
       }
 
@@ -149,7 +149,7 @@ class TestInputStorage {
         localStorage.setItem(key, JSON.stringify(allInputs));
       }
 
-      console.log(`[TestInputStorage] Cleared test input for node ${nodeId} in workflow ${workflowId}`);
+      /* console.log(`[TestInputStorage] Cleared test input for node ${nodeId} in workflow ${workflowId}`); */
     } catch (error) {
       console.error('[TestInputStorage] Failed to clear test input:', error);
     }
