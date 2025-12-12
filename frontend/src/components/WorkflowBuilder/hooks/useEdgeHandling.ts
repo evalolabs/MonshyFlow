@@ -286,8 +286,22 @@ export function useEdgeHandling({
           };
         }
         
-        // Don't modify loop edges that are already correct
+        // Ensure loop edges have onAddNode callback
         if (edge.type === EDGE_TYPE_LOOP) {
+          // Check if onAddNode is missing or needs update
+          if (!edge.data?.onAddNode) {
+            logger.info(`Adding onAddNode to loop edge: ${edge.id}`);
+            return {
+              ...edge,
+              data: {
+                ...edge.data,
+                onAddNode: (edgeId: string, source: string, target: string) =>
+                  callbackRef.current(edgeId, source, target),
+                loopType: edge.data?.loopType || 
+                  (sourceHandle === LOOP_HANDLE_IDS.BACK || targetHandle === LOOP_HANDLE_IDS.BACK ? 'back' : 'loop'),
+              },
+            };
+          }
           return edge;
         }
         

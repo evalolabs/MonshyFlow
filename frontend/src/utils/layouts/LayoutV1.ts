@@ -14,6 +14,7 @@
 import type { Node, Edge } from '@xyflow/react';
 import dagre from 'dagre';
 import type { LayoutStrategy, LayoutStrategyOptions, LayoutResult } from './types';
+import { EDGE_TYPE_LOOP, isLoopHandle, NODE_TYPE_WHILE, LOOP_HANDLE_IDS } from '../../components/WorkflowBuilder/constants';
 
 // Helper functions
 function isAgentBottomInputEdge(edge: Edge): boolean {
@@ -22,6 +23,80 @@ function isAgentBottomInputEdge(edge: Edge): boolean {
          edge.targetHandle === 'chat-model' || 
          edge.targetHandle === 'memory' || 
          edge.targetHandle === 'tool';
+}
+
+/**
+ * Identifies loop edges (while loop connections)
+ * These edges connect loop handles and should be excluded from main flow layout
+ * to prevent cycles from disrupting the layout algorithm
+ */
+function isLoopEdge(edge: Edge): boolean {
+  // Check by edge type OR by handle IDs
+  return edge.type === EDGE_TYPE_LOOP ||
+         isLoopHandle(edge.sourceHandle) ||
+         isLoopHandle(edge.targetHandle);
+}
+
+/**
+ * Find all nodes that are inside a while loop
+ * Returns a map: whileNodeId -> Array of nodeIds inside that loop (in order)
+ * Uses BFS to find all nodes connected via loop edges
+ */
+function findLoopNodes(nodes: Node[], edges: Edge[]): Map<string, string[]> {
+  const loopMap = new Map<string, string[]>();
+  
+  // Find all while nodes
+  const whileNodes = nodes.filter(node => node.type === NODE_TYPE_WHILE);
+  
+  for (const whileNode of whileNodes) {
+    const loopNodes: string[] = [];
+    const visited = new Set<string>();
+    const queue: string[] = [];
+    
+    // Find nodes connected via 'loop' handle (forward direction)
+    const loopEdges = edges.filter(edge => 
+      edge.source === whileNode.id && 
+      edge.sourceHandle === LOOP_HANDLE_IDS.LOOP
+    );
+    
+    // Start BFS from nodes connected to the loop handle
+    for (const loopEdge of loopEdges) {
+      if (!visited.has(loopEdge.target)) {
+        queue.push(loopEdge.target);
+        visited.add(loopEdge.target);
+        loopNodes.push(loopEdge.target);
+      }
+    }
+    
+    // BFS to find all nodes in the loop
+    while (queue.length > 0) {
+      const currentNodeId = queue.shift()!;
+      
+      // Find outgoing edges from this node
+      const outgoingEdges = edges.filter(edge => edge.source === currentNodeId);
+      
+      for (const edge of outgoingEdges) {
+        // If this edge loops back to the while node, skip it
+        if (edge.target === whileNode.id && 
+            (edge.targetHandle === LOOP_HANDLE_IDS.BACK || isLoopHandle(edge.targetHandle))) {
+          continue;
+        }
+        
+        // If it's a loop edge or a normal edge within the loop, add the target
+        if (!visited.has(edge.target)) {
+          visited.add(edge.target);
+          loopNodes.push(edge.target);
+          queue.push(edge.target);
+        }
+      }
+    }
+    
+    if (loopNodes.length > 0) {
+      loopMap.set(whileNode.id, loopNodes);
+    }
+  }
+  
+  return loopMap;
 }
 
 /**
@@ -72,9 +147,19 @@ export const LayoutV1: LayoutStrategy = {
       );
     }
 
-    // Add nodes (exclude tool nodes and tools with relative positions)
+    // Find all nodes inside loops (to exclude them from main layout)
+    const loopMap = findLoopNodes(nodes, edges);
+    const loopNodeSet = new Set<string>();
+    for (const loopNodes of loopMap.values()) {
+      loopNodes.forEach(nodeId => loopNodeSet.add(nodeId));
+    }
+
+    // Add nodes (exclude tool nodes, tools with relative positions, and loop nodes)
+    // Loop nodes will be positioned separately after main layout
     nodes.forEach((node) => {
-      if (!isToolNode(node) && !isToolWithRelativePosition(node, edges)) {
+      if (!isToolNode(node) && 
+          !isToolWithRelativePosition(node, edges) &&
+          !loopNodeSet.has(node.id)) {
         dagreGraph.setNode(node.id, {
           width: nodeWidth,
           height: nodeHeight,
@@ -82,7 +167,7 @@ export const LayoutV1: LayoutStrategy = {
       }
     });
 
-    // Filter edges: exclude agent bottom inputs and edges from tools with relative positions
+    // Filter edges: exclude agent bottom inputs, tool edges, and loop edges
     const mainFlowEdges = edges.filter((edge) => {
       if (isAgentBottomInputEdge(edge)) return false;
       
@@ -90,6 +175,13 @@ export const LayoutV1: LayoutStrategy = {
       if (edge.type === 'toolEdge') return false;
       const sourceNode = nodes.find(n => n.id === edge.source);
       if (sourceNode && (isToolNode(sourceNode) || isToolWithRelativePosition(sourceNode, edges))) return false;
+      
+      // Exclude loop edges (while loop connections)
+      // These create cycles and should not affect the main flow layout
+      if (isLoopEdge(edge)) return false;
+      
+      // Exclude edges that connect to or from loop nodes
+      if (loopNodeSet.has(edge.source) || loopNodeSet.has(edge.target)) return false;
       
       return true;
     });
@@ -150,8 +242,45 @@ export const LayoutV1: LayoutStrategy = {
         }
       }
 
+      // Check if this node is inside a loop - position it relative to the while node
+      let whileNodeId: string | null = null;
+      for (const [wId, loopNodes] of loopMap.entries()) {
+        if (loopNodes.includes(node.id)) {
+          whileNodeId = wId;
+          break;
+        }
+      }
+      
+      if (whileNodeId) {
+        // This is a loop node - position it relative to the while node
+        const whileNodePosition = dagreGraph.node(whileNodeId);
+        if (whileNodePosition) {
+          const loopNodes = loopMap.get(whileNodeId) || [];
+          const nodeIndex = loopNodes.indexOf(node.id);
+          
+          // Position loop nodes in a stair-step layout (diagonal down-right)
+          // This prevents overlapping when multiple loops exist
+          // Each node is positioned slightly to the right and down from the previous one
+          const x = whileNodePosition.x + (nodeIndex * (nodeWidth + 50)); // Horizontal spacing
+          const y = whileNodePosition.y + nodeHeight + 150 + (nodeIndex * 60); // Stair-step: each node goes further down
+          
+          return {
+            ...node,
+            position: { 
+              x: x - nodeWidth / 2, 
+              y: y - nodeHeight / 2 
+            },
+          };
+        }
+      }
+
       // Main flow node
       const nodeWithPosition = dagreGraph.node(node.id);
+      if (!nodeWithPosition) {
+        // Node not in graph (shouldn't happen, but fallback)
+        return node;
+      }
+      
       const x = nodeWithPosition.x - nodeWidth / 2;
       const y = nodeWithPosition.y - nodeHeight / 2;
       

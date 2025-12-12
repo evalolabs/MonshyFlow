@@ -1,6 +1,7 @@
 import type { Node, Edge } from '@xyflow/react';
 import dagre from 'dagre';
 import { applyLayout as applyLayoutV1 } from './layouts';
+import { EDGE_TYPE_LOOP, isLoopHandle } from '../components/WorkflowBuilder/constants';
 
 export interface LayoutOptions {
   direction?: 'TB' | 'LR' | 'BT' | 'RL';
@@ -18,6 +19,18 @@ function isAgentBottomInputEdge(edge: Edge): boolean {
   return edge.targetHandle === 'chat-model' || 
          edge.targetHandle === 'memory' || 
          edge.targetHandle === 'tool';
+}
+
+/**
+ * Identifies loop edges (while loop connections)
+ * These edges connect loop handles and should be excluded from main flow layout
+ * to prevent cycles from disrupting the layout algorithm
+ */
+function isLoopEdge(edge: Edge): boolean {
+  // Check by edge type OR by handle IDs
+  return edge.type === EDGE_TYPE_LOOP ||
+         isLoopHandle(edge.sourceHandle) ||
+         isLoopHandle(edge.targetHandle);
 }
 
 /**
@@ -62,11 +75,16 @@ export function getLayoutedElements(
     });
   });
 
-  // Filter edges: exclude agent bottom inputs
+  // Filter edges: exclude agent bottom inputs and loop edges
   const mainFlowEdges = edges.filter((edge) => {
     // Exclude agent node bottom input edges (chat-model, memory, tool)
     // These are vertical connections and should not affect horizontal main flow layout
     if (isAgentBottomInputEdge(edge)) return false;
+    
+    // Exclude loop edges (while loop connections)
+    // These create cycles and should not affect the main flow layout
+    if (isLoopEdge(edge)) return false;
+    
     return true;
   });
 

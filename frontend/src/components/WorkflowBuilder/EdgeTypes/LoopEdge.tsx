@@ -60,8 +60,25 @@ export const LoopEdge: React.FC<LoopEdgeProps> = ({
 
   const handleAddNode = (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log('🔘 [LoopEdge] + button clicked', {
+      edgeId: id,
+      source,
+      target,
+      sourceHandle,
+      targetHandle,
+      loopType,
+      hasOnAddNode: !!data?.onAddNode,
+      dataKeys: data ? Object.keys(data) : [],
+    });
+    
     if (data?.onAddNode) {
+      console.log('✅ [LoopEdge] Calling onAddNode callback');
       data.onAddNode(id, source, target);
+    } else {
+      console.warn('❌ [LoopEdge] onAddNode callback is missing!', {
+        edgeId: id,
+        data,
+      });
     }
   };
 
