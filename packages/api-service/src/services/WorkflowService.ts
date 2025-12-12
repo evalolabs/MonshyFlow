@@ -146,5 +146,35 @@ export class WorkflowService {
       : await this.workflowRepo.findAll();
     return workflows.filter((w: any) => w.isPublished === true);
   }
+
+  async deleteNode(workflowId: string, nodeId: string) {
+    const workflow = await this.workflowRepo.findById(workflowId);
+    if (!workflow) {
+      throw new Error('Workflow not found');
+    }
+
+    // Convert Mongoose document to plain object if needed
+    const workflowObj = workflow.toObject ? workflow.toObject() : workflow;
+
+    // Find the node
+    const nodeIndex = workflowObj.nodes.findIndex((n: any) => n.id === nodeId);
+    if (nodeIndex === -1) {
+      throw new Error('Node not found');
+    }
+
+    // Remove node from nodes array
+    const updatedNodes = workflowObj.nodes.filter((n: any) => n.id !== nodeId);
+
+    // Remove all edges connected to this node
+    const updatedEdges = (workflowObj.edges || []).filter(
+      (e: any) => e.source !== nodeId && e.target !== nodeId
+    );
+
+    // Update workflow
+    return this.workflowRepo.update(workflowId, {
+      nodes: updatedNodes,
+      edges: updatedEdges,
+    });
+  }
 }
 

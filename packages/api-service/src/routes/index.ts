@@ -63,6 +63,9 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
   // Node Update (spezifisch, vor :id)
   app.put('/api/workflows/node', authMiddleware, (req, res) => workflowController.updateNode(req, res));
   
+  // Node Delete (spezifisch, vor :id)
+  app.delete('/api/workflows/:workflowId/nodes/:nodeId', authMiddleware, (req, res) => workflowController.deleteNode(req, res));
+  
   // Publish Workflow (spezifisch, vor :id)
   app.post('/api/workflows/publish', authMiddleware, (req, res) => workflowController.publish(req, res));
   

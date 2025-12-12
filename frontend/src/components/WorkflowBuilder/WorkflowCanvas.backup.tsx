@@ -18,7 +18,7 @@ import '@xyflow/react/dist/style.css';
 
 import { 
   StartNode, EndNode, AgentNode, LLMNode, IfElseNode, APINode, NoteNode,
-  FileSearchNode, GuardrailsNode, MCPNode, WhileNode, UserApprovalNode, SetStateNode, WebSearchNode, DocumentUploadNode, ImageGenerationNode, TextToSpeechNode, SpeechToTextNode, CodeInterpreterNode, EmailNode, DatabaseQueryNode, TransformNode
+  FileSearchNode, GuardrailsNode, MCPNode, UserApprovalNode, SetStateNode, WebSearchNode, DocumentUploadNode, ImageGenerationNode, TextToSpeechNode, SpeechToTextNode, CodeInterpreterNode, EmailNode, DatabaseQueryNode, TransformNode
 } from './NodeTypes';
 import { Toolbar } from './Toolbar';
 import { NodeConfigPanel } from './NodeConfigPanel';
@@ -45,7 +45,6 @@ const nodeTypes = {
   'file-search': FileSearchNode,
   guardrails: GuardrailsNode,
   mcp: MCPNode,
-  while: WhileNode,
   'user-approval': UserApprovalNode,
   'set-state': SetStateNode,
   'web-search': WebSearchNode,
@@ -239,38 +238,12 @@ export function WorkflowCanvas({
   // Find nodes without outgoing edges and create phantom edges with + buttons
   const nodesWithoutOutput = nodes.filter(node => {
     if (node.type === 'end') return false; // End nodes don't need output buttons
-    if (node.type === 'while') return false; // While nodes are handled specially
     const hasOutgoingEdge = edges.some(e => e.source === node.id && !e.id.startsWith('phantom-'));
     return !hasOutgoingEdge;
   });
   
-  // Find While nodes without loop-exit edges (for special handling)
-  const whileNodesWithoutExit = nodes.filter(node => {
-    if (node.type !== 'while') return false;
-    const hasLoopExitEdge = edges.some(e => e.source === node.id && e.sourceHandle === 'loop-exit' && !e.id.startsWith('phantom-'));
-    return !hasLoopExitEdge;
-  });
-  
   // Create phantom edges for normal nodes without output
   const phantomEdges: Edge[] = nodesWithoutOutput.map(node => ({
-    id: `phantom-${node.id}`,
-    source: node.id,
-    target: node.id, // Point to itself
-    type: 'phantomAddButton',
-    data: {
-      onAddNode: () => {
-        setAddNodePopup({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-          sourceNode: node.id,
-        });
-      },
-    },
-    style: { opacity: 0, pointerEvents: 'none' }, // Invisible edge
-  } as Edge));
-  
-  // Create phantom edges for While nodes at loop-exit handle
-  const whilePhantomEdges: Edge[] = whileNodesWithoutExit.map(node => ({
     id: `phantom-exit-${node.id}`,
     source: node.id,
     sourceHandle: 'loop-exit', // Explicitly from loop-exit handle
@@ -290,7 +263,7 @@ export function WorkflowCanvas({
   } as Edge));
   
   // Merge phantom edges with real edges for rendering
-  const allEdges = [...edges, ...phantomEdges, ...whilePhantomEdges];
+  const allEdges = [...edges, ...phantomEdges];
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -302,28 +275,12 @@ export function WorkflowCanvas({
       const sourceNode = nodes.find(n => n.id === connection.source);
       const targetNode = nodes.find(n => n.id === connection.target);
       
-      // If target is "while" node and connection is to "loop-back" handle → LoopEdge
-      let isLoopBack = targetNode?.type === 'while' && connection.targetHandle === 'loop-back';
-      
       // OR: If target is ABOVE source (going backwards in workflow) → LoopEdge
       const isGoingBackwards = sourceNode && targetNode && targetNode.position.y < sourceNode.position.y;
       
-      // Special case: If target is While node and no targetHandle specified, but going backwards → it's a loop-back!
-      if (targetNode?.type === 'while' && isGoingBackwards && !connection.targetHandle) {
-        isLoopBack = true;
-      }
+      const edgeType = isGoingBackwards ? 'loopEdge' : 'buttonEdge';
       
-      const edgeType = (isLoopBack || isGoingBackwards) ? 'loopEdge' : 'buttonEdge';
-      
-      // Force correct targetHandle for loop-back edges to While nodes
       let targetHandle = connection.targetHandle;
-      if (targetNode?.type === 'while') {
-        if (isLoopBack) {
-          targetHandle = 'loop-back'; // Force loop-back handle for loop edges
-        } else if (!targetHandle) {
-          targetHandle = 'input'; // Default to input handle for normal edges
-        }
-      }
       
       console.log('   🔍 Loop detection:', {
         isLoopBack,
@@ -532,24 +489,15 @@ export function WorkflowCanvas({
     
     // Determine source handle based on source node type
     let sourceHandle: string | undefined = undefined;
-    if (sourceNode.type === 'while') {
-      // For While nodes, use loop-exit handle
-      sourceHandle = 'loop-exit';
-    }
     
     // Create new node ID
     const newNodeId = `${nodeType}-${Date.now()}`;
     
-    // Position new node to the right for While nodes (exit), below for others
-    const newNodePosition = sourceNode.type === 'while' 
-      ? {
-          x: sourceNode.position.x + 300, // To the right
-          y: sourceNode.position.y,
-        }
-      : {
-          x: sourceNode.position.x,
-          y: sourceNode.position.y + 150, // Below
-        };
+    // Position new node below source node
+    const newNodePosition = {
+      x: sourceNode.position.x,
+      y: sourceNode.position.y + 150, // Below
+    };
     
     // Create new node
     const newNode: Node = {
@@ -564,20 +512,13 @@ export function WorkflowCanvas({
     // Add node
     setNodes((nds) => [...nds, newNode]);
     
-    // Determine target handle if the new node is a While node
-    let targetHandle = undefined;
-    if (nodeType === 'while') {
-      targetHandle = 'input'; // While nodes should receive connections at their input handle (top)
-    }
-    
     // Create edge
     setEdges((eds) => {
       const newEdge: Edge = {
         id: `${sourceNodeId}-${newNodeId}`,
         source: sourceNodeId,
-        sourceHandle: sourceHandle, // Set sourceHandle for source nodes (e.g., While nodes)
+        sourceHandle: sourceHandle,
         target: newNodeId,
-        targetHandle: targetHandle, // Set targetHandle for target nodes (e.g., While nodes)
         type: 'buttonEdge',
         data: { 
           onAddNode: (id: string, src: string, tgt: string) => 
@@ -586,31 +527,6 @@ export function WorkflowCanvas({
       };
       return [...eds, newEdge];
     });
-    
-    // Special handling for While nodes - automatically create loop edge
-    if (nodeType === 'while') {
-      console.log('🔄 Creating automatic loop edge for While node...');
-      
-      // Create a self-referencing loop edge (loop-body → loop-back) with + button
-      setEdges((eds) => {
-        const loopEdge: Edge = {
-          id: `${newNodeId}-loop`,
-          source: newNodeId,
-          sourceHandle: 'loop-body',
-          target: newNodeId,
-          targetHandle: 'loop-back',
-          type: 'loopEdge',
-          data: {
-            onAddNode: (edgeId: string, source: string, target: string) => 
-              handleAddNodeBetweenRef.current(edgeId, source, target)
-          },
-        };
-        
-        return [...eds, loopEdge];
-      });
-      
-      console.log('✅ Loop edge created automatically with + button');
-    }
     
     console.log('✅ Node added from output with handle:', sourceHandle);
   }, [nodes, setNodes, setEdges]);
@@ -637,78 +553,6 @@ export function WorkflowCanvas({
     // Close popup immediately to prevent double-clicks
     setNodeSelectorPopup(null);
     
-    // Check if this is a loop edge (self-referencing edge from While node)
-    const edge = edges.find(e => e.id === edgeId);
-    const isLoopEdge = edge && edge.source === edge.target && edge.sourceHandle === 'loop-body' && edge.targetHandle === 'loop-back';
-    
-    if (isLoopEdge) {
-      console.log('🔄 [LOOP EDGE DETECTED] - Special handling for inserting node into loop');
-      
-      // Special handling for loop edges
-      const whileNodeId = sourceNode; // source and target are the same for loop edges
-      const whileNode = nodes.find(n => n.id === whileNodeId);
-      
-      if (!whileNode) {
-        console.log('❌ While node not found!');
-        return;
-      }
-      
-      // Create new node ID
-      const newNodeId = `${nodeType}-${Date.now()}`;
-      
-      // Position new node below and to the left of the While node (inside the loop)
-      const newNodePosition = {
-        x: whileNode.position.x - 200,
-        y: whileNode.position.y + 150,
-      };
-      
-      // Create new node
-      const newNode: Node = {
-        id: newNodeId,
-        type: nodeType,
-        position: newNodePosition,
-        data: {
-          label: nodeType ? nodeType.charAt(0).toUpperCase() + nodeType.slice(1) : 'Node',
-        },
-      };
-      
-      console.log('✅ Adding node to loop:', newNodeId);
-      setNodes((nds) => [...nds, newNode]);
-      
-      // Update edges: Remove loop edge, add loop-body edge and loop-back edge
-      setEdges((eds) => {
-        const filteredEdges = eds.filter(e => e.id !== edgeId);
-        
-        const loopBodyEdge: Edge = {
-          id: `${whileNodeId}-${newNodeId}`,
-          source: whileNodeId,
-          sourceHandle: 'loop-body',
-          target: newNodeId,
-          type: 'buttonEdge',
-          data: { 
-            onAddNode: (id: string, src: string, tgt: string) => 
-              handleAddNodeBetweenRef.current(id, src, tgt)
-          },
-        };
-        
-        const loopBackEdge: Edge = {
-          id: `${newNodeId}-${whileNodeId}`,
-          source: newNodeId,
-          target: whileNodeId,
-          targetHandle: 'loop-back',
-          type: 'loopEdge',
-          data: {
-            onAddNode: (id: string, src: string, tgt: string) => 
-              handleAddNodeBetweenRef.current(id, src, tgt)
-          },
-        };
-        
-        console.log('✅ Created loop edges: loop-body and loop-back');
-        return [...filteredEdges, loopBodyEdge, loopBackEdge];
-      });
-      
-      return; // Exit early - loop edge handled
-    }
 
     // Calculate new node ID and data ONCE outside state updates
     const newNodeId = `${nodeType}-${Date.now()}`;
@@ -795,26 +639,12 @@ export function WorkflowCanvas({
       
       const filteredEdges = currentEdges.filter(e => e.id !== edgeId);
       
-      // Determine handles for While nodes
-      let incomingTargetHandle = undefined;
-      let outgoingSourceHandle = undefined;
-      
-      if (nodeType === 'while') {
-        // For While nodes:
-        // - Incoming edge should go to the "input" handle (top)
-        // - Outgoing edge should come from the "loop-exit" handle (right)
-        incomingTargetHandle = 'input';
-        outgoingSourceHandle = 'loop-exit';
-        console.log('   🔄 While node detected - using input handle for incoming edge and loop-exit handle for outgoing edge');
-      }
-      
       const newEdges = [
         ...filteredEdges,
         {
           id: `${sourceNode}-${newNodeId}`,
           source: sourceNode,
           target: newNodeId,
-          targetHandle: incomingTargetHandle, // Explicitly set target handle for While nodes
           type: 'buttonEdge',
           data: { 
             onAddNode: (id: string, src: string, tgt: string) => 
@@ -824,7 +654,6 @@ export function WorkflowCanvas({
         {
           id: `${newNodeId}-${targetNode}`,
           source: newNodeId,
-          sourceHandle: outgoingSourceHandle,
           target: targetNode,
           type: 'buttonEdge',
           data: { 
@@ -837,31 +666,6 @@ export function WorkflowCanvas({
       console.log('   ✅ New edges count:', newEdges.length);
       return newEdges;
     });
-    
-    // Special handling for While nodes - automatically create loop edge
-    if (nodeType === 'while') {
-      console.log('🔄 Creating automatic loop edge for While node (between nodes)...');
-      
-      // Create a self-referencing loop edge (loop-body → loop-back) with + button
-      setEdges((eds) => {
-        const loopEdge: Edge = {
-          id: `${newNodeId}-loop`,
-          source: newNodeId,
-          sourceHandle: 'loop-body',
-          target: newNodeId,
-          targetHandle: 'loop-back',
-          type: 'loopEdge',
-          data: {
-            onAddNode: (edgeId: string, source: string, target: string) => 
-              handleAddNodeBetweenRef.current(edgeId, source, target)
-          },
-        };
-        
-        return [...eds, loopEdge];
-      });
-      
-      console.log('✅ Loop edge created automatically with + button (between nodes)');
-    }
 
   }, [nodeSelectorPopup, nodes, edges, setNodes, setEdges, autoLayoutEnabled]);
   
@@ -1037,31 +841,6 @@ export function WorkflowCanvas({
     
     console.log('✅ [onAddNodeWithSave] Adding node:', type, newNodeId);
     setNodes((nds) => [...nds, newNode]);
-    
-    // Special handling for While nodes - automatically create loop edge
-    if (type === 'while') {
-      console.log('🔄 Creating automatic loop edge for While node (from toolbar)...');
-      
-      // Create a self-referencing loop edge (loop-body → loop-back) with + button
-      setEdges((eds) => {
-        const loopEdge: Edge = {
-          id: `${newNodeId}-loop`,
-          source: newNodeId,
-          sourceHandle: 'loop-body',
-          target: newNodeId,
-          targetHandle: 'loop-back',
-          type: 'loopEdge',
-          data: {
-            onAddNode: (edgeId: string, source: string, target: string) => 
-              handleAddNodeBetweenRef.current(edgeId, source, target)
-          },
-        };
-        
-        return [...eds, loopEdge];
-      });
-      
-      console.log('✅ Loop edge created automatically with + button (from toolbar)');
-    }
     
     // Trigger immediate save after adding node
     console.log('🔄 Node added, triggering immediate save...');
@@ -1258,7 +1037,6 @@ export function WorkflowCanvas({
             switch (node.type) {
               case 'start': return '#3b82f6';
               case 'end': return '#ef4444';
-              case 'while': return '#a855f7';
               case 'ifelse': return '#eab308';
               case 'agent': return '#06b6d4';
               case 'llm': return '#8b5cf6';

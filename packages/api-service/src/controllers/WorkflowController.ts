@@ -221,5 +221,26 @@ export class WorkflowController {
       res.status(500).json({ success: false, error: (error as Error).message });
     }
   }
+
+  async deleteNode(req: Request, res: Response): Promise<void> {
+    try {
+      const { workflowId, nodeId } = req.params;
+      if (!workflowId || !nodeId) {
+        res.status(400).json({ success: false, error: 'workflowId and nodeId are required' });
+        return;
+      }
+
+      await this.workflowService.deleteNode(workflowId, nodeId);
+      logger.info({ workflowId, nodeId }, 'Node deleted');
+      res.json({ success: true, message: 'Node deleted successfully' });
+    } catch (error) {
+      if ((error as Error).message === 'Workflow not found' || (error as Error).message === 'Node not found') {
+        res.status(404).json({ success: false, error: (error as Error).message });
+      } else {
+        logger.error({ err: error }, 'Failed to delete node');
+        res.status(500).json({ success: false, error: (error as Error).message });
+      }
+    }
+  }
 }
 

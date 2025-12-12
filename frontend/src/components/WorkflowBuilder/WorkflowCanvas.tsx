@@ -478,7 +478,7 @@ export function WorkflowCanvas({
     }
     
     // Calculate animation duration based on number of nodes in the path
-    // Calculate the path: Start → ... → tested node
+    // This is a fallback estimate - actual duration comes from SSE events
     const fullOrder = edges.length > 0 
       ? buildNodeOrderForDebugPanel(nodes, edges)
       : nodes;
@@ -506,7 +506,10 @@ export function WorkflowCanvas({
     // Use fallback duration (will be overridden by real SSE events for slow nodes)
     const estimatedDuration = (fastCount * 200) + (slowCount * 1500) + 2000; // Fast nodes + slow nodes (fallback) + buffer
     
-    // console.log('[WorkflowCanvas] Animation duration for node test path (fallback):', estimatedDuration, 'ms', 'nodes in path:', nodesInPath);
+    // Debug logging (uncomment to see duration estimates)
+    if (false) { // Change to true to enable debug logging
+      console.log('[WorkflowCanvas] Animation duration for node test path (fallback):', estimatedDuration, 'ms', 'nodes in path:', nodesInPath);
+    }
     
     // Note: SSE connection cleanup is handled in useEffect below
     // We don't disconnect here because the connection might be reused for multiple tests

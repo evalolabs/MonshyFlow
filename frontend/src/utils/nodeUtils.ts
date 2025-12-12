@@ -130,14 +130,14 @@ export function calculateMidpoint(sourceNode: Node, targetNode: Node): { x: numb
 /**
  * Get the appropriate source handle for a node type
  */
-export function getSourceHandle(nodeType: string | undefined): string | undefined {
+export function getSourceHandle(_nodeType: string | undefined): string | undefined {
   return undefined;
 }
 
 /**
  * Get the appropriate target handle for a node type
  */
-export function getTargetHandle(nodeType: string | undefined): string | undefined {
+export function getTargetHandle(_nodeType: string | undefined): string | undefined {
   return undefined;
 }
 

@@ -81,7 +81,7 @@ export function categorizeNode(node: DiscoveredNode): NodeCategoryId {
   }
   
   // Logic nodes
-  if (type.includes('if') || type.includes('else') || type.includes('while') || type.includes('loop')) {
+  if (type.includes('if') || type.includes('else') || type.includes('loop')) {
     return 'logic';
   }
   
