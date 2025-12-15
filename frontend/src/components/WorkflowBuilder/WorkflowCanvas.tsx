@@ -984,8 +984,8 @@ export function WorkflowCanvas({
       // Skip tool nodes, they shouldn't have an add button
       if (node.type?.startsWith('tool')) return;
       
-      // Special handling for While nodes - check loop handles
-      if (node.type === 'while') {
+      // Special handling for loop nodes (while and foreach) - check loop handles
+      if (node.type === 'while' || node.type === 'foreach') {
         // Check default output
         if (!hasEdgeFromHandle(node.id)) {
           result.push({ nodeId: node.id });

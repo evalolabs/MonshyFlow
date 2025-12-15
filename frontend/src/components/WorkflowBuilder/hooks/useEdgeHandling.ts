@@ -76,14 +76,22 @@ export function useEdgeHandling({
     const isLoopConnection = isLoopHandle(sourceHandle) || isLoopHandle(targetHandle);
     
     // SPECIAL CASE: Auto-detect loop-back connection
-    // If connecting from any node to a loop node (while/foreach), automatically create a loop-back edge
+    // Only create loop-back edge if:
+    // 1. Connecting to 'back' handle explicitly, OR
+    // 2. Connecting from a loop node (while/foreach) to another loop node
     const isConnectingToLoopNode = isLoopNodeType(targetNode?.type);
+    const isConnectingFromLoopNode = isLoopNodeType(sourceNode?.type);
     // Normal output: null, undefined, or empty string (no explicit sourceHandle)
     const isNormalOutput = !sourceHandle || sourceHandle === null || sourceHandle === undefined || sourceHandle === '';
     // If connecting to 'back' handle, it's definitely a loop-back
     const isConnectingToBackHandle = targetHandle === LOOP_HANDLE_IDS.BACK;
-    // Auto-create loop-back if: connecting to loop node AND (normal output OR connecting to back handle)
-    const shouldAutoCreateLoopBack = isConnectingToLoopNode && (isNormalOutput || isConnectingToBackHandle) && !isLoopHandle(sourceHandle);
+    // Auto-create loop-back ONLY if:
+    // - Connecting to 'back' handle explicitly, OR
+    // - Connecting from a loop node (within a loop) to another loop node
+    // NOT if connecting from a normal node to a loop node's input (that's a normal connection)
+    const shouldAutoCreateLoopBack = isConnectingToLoopNode && 
+      (isConnectingToBackHandle || (isConnectingFromLoopNode && isNormalOutput)) && 
+      !isLoopHandle(sourceHandle);
     
     // Determine edge type with priority: Loop > Tool > Button
     // If auto-creating loop-back, use loop edge type
@@ -98,13 +106,20 @@ export function useEdgeHandling({
     let finalTargetHandle = connection.targetHandle || undefined;
     
     // CRITICAL: If connecting to 'back' handle on loop node, keep 'back' as target handle
+    // Only set sourceHandle to 'back' if the source node is also a loop node (has 'back' handle)
     // This must happen BEFORE shouldAutoCreateLoopBack check, because isLoopConnection might be true
     if (isConnectingToLoopNode && isConnectingToBackHandle) {
-      finalSourceHandle = finalSourceHandle || LOOP_HANDLE_IDS.BACK;
+      // Only use 'back' as sourceHandle if source node is a loop node (has 'back' handle)
+      if (isConnectingFromLoopNode) {
+        finalSourceHandle = finalSourceHandle || LOOP_HANDLE_IDS.BACK;
+      }
       finalTargetHandle = LOOP_HANDLE_IDS.BACK; // Keep 'back' handle (the actual handle name on WhileNode)
     } else if (shouldAutoCreateLoopBack) {
       // Auto-create loop-back: use 'back' source handle and 'back' target handle
-      finalSourceHandle = LOOP_HANDLE_IDS.BACK;
+      // Only if source node is a loop node (has 'back' handle)
+      if (isConnectingFromLoopNode) {
+        finalSourceHandle = LOOP_HANDLE_IDS.BACK;
+      }
       finalTargetHandle = LOOP_HANDLE_IDS.BACK; // 'back' is the actual handle name on WhileNode
     }
     
