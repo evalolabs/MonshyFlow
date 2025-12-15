@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { isLoopNodeType, LOOP_HANDLE_IDS } from './constants';
 // Removed schema imports - we only show what's in debugStep.output
 
 interface VariableTreePopoverProps {
@@ -581,17 +582,122 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
   const guaranteed = useMemo(() => upstreamNodes.filter(n => guaranteedIds.has(n.id) && n.type !== 'start'), [upstreamNodes, guaranteedIds]);
   const conditional = useMemo(() => upstreamNodes.filter(n => !guaranteedIds.has(n.id) && n.type !== 'start'), [upstreamNodes, guaranteedIds]);
 
+  // Get current node's input from debugSteps (contains loop context if in a loop)
+  // OR derive loop context from parent loop node's output if node hasn't been executed yet
+  const currentInput = useMemo(() => {
+    if (!currentNodeId || !nodes || !edges) return null;
+    
+    // First, check if we have actual input from debugSteps (node was executed)
+    if (debugSteps) {
+      const currentDebugStep = debugSteps.find(s => s.nodeId === currentNodeId);
+      if (currentDebugStep?.input) {
+        const input = currentDebugStep.input;
+        // Check if input contains loop context (from ForEach/While)
+        if (input?.loop || input?.current !== undefined || input?.index !== undefined) {
+          return input;
+        }
+        // Also check if input.json contains loop context
+        if (input?.json?.loop || input?.json?.current !== undefined || input?.json?.index !== undefined) {
+          return input.json;
+        }
+      }
+    }
+    
+    // If no input from debugSteps, check if current node is inside a loop
+    // Find all loop nodes (while/foreach)
+    const loopNodes = nodes.filter(n => isLoopNodeType(n.type));
+    
+    // Check if current node is connected via loop edge to a loop node
+    for (const loopNode of loopNodes) {
+      // Check if there's a loop edge from loop node to current node
+      const loopEdge = edges.find(e => 
+        e.source === loopNode.id && 
+        e.target === currentNodeId &&
+        (e as any).sourceHandle === LOOP_HANDLE_IDS.LOOP
+      );
+      
+      if (loopEdge) {
+        // Current node is inside this loop
+        // Try to get sample data from loop node's output
+        const loopDebugStep = debugSteps?.find(s => s.nodeId === loopNode.id);
+        const loopOutput = loopDebugStep?.output;
+        
+        // For ForEach: extract array from output and use first item as sample
+        if (loopNode.type === 'foreach') {
+          // Try to get array from output
+          // ForEach node can have different array field names:
+          // - 'data' (from HTTP-Request nodes that return data)
+          // - 'results' (from ForEach node's own output)
+          // - Or any other array field in json
+          let arrayData: any[] | null = null;
+          
+          // Check if output itself is an array
+          if (Array.isArray(loopOutput) && loopOutput.length > 0) {
+            arrayData = loopOutput;
+          } else {
+            const jsonData = loopOutput?.json || loopOutput?.data || {};
+            
+            // First, try common field names
+            if (Array.isArray(jsonData.data) && jsonData.data.length > 0) {
+              arrayData = jsonData.data;
+            } else if (Array.isArray(jsonData.results) && jsonData.results.length > 0) {
+              arrayData = jsonData.results;
+            } else if (Array.isArray(jsonData.body?.data) && jsonData.body.data.length > 0) {
+              arrayData = jsonData.body.data;
+            } else {
+              // If no common field found, search for the first array field in json
+              for (const [_key, value] of Object.entries(jsonData)) {
+                if (Array.isArray(value) && value.length > 0) {
+                  arrayData = value as any[];
+                  break;
+                }
+              }
+            }
+          }
+          
+          if (arrayData && arrayData.length > 0) {
+            // Use first item as sample for loop.current
+            const sampleCurrent = arrayData[0];
+            return {
+              loop: {
+                current: sampleCurrent,
+                index: 0, // Sample index
+                array: arrayData, // Full array
+              },
+              current: sampleCurrent, // Convenience alias
+              index: 0, // Convenience alias
+            };
+          }
+        } else if (loopNode.type === 'while') {
+          // For While, use input as sample
+          const sampleCurrent = loopOutput?.json || loopOutput?.data || {};
+          return {
+            loop: {
+              current: sampleCurrent,
+              index: 0, // Sample index
+            },
+            current: sampleCurrent, // Convenience alias
+            index: 0, // Convenience alias
+          };
+        }
+      }
+    }
+    
+    return null;
+  }, [currentNodeId, nodes, edges, debugSteps]);
+
   // No schema suggestions - we only show what's actually in debugStep.output
   // This ensures the Variable Popup matches exactly what's shown in the Debug Console
 
   // Initialize expanded sections on mount (all expanded by default)
   useEffect(() => {
     const sections = new Set<string>();
+    if (currentInput) sections.add('currentInput'); // Add current input section if available
     if (startNodes.length > 0) sections.add('start');
     if (guaranteed.length > 0) sections.add('guaranteed');
     if (conditional.length > 0) sections.add('conditional');
     setExpandedSections(sections);
-  }, [startNodes.length, guaranteed.length, conditional.length]);
+  }, [currentInput, startNodes.length, guaranteed.length, conditional.length]);
 
   // Optional: fetch sample outputs for API upstreams to populate tree keys
   const [upstreamPreview, setUpstreamPreview] = useState<Record<string, any>>({});
@@ -703,6 +809,111 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
           minHeight: '100px', // Ensure minimum scrollable content
         }}
       >
+        {/* Current Input Section (Loop Context) */}
+        {currentInput && (
+          <div className="border border-purple-200 rounded-md overflow-hidden mb-2">
+            <button
+              onClick={() => toggleSection('currentInput')}
+              className="w-full px-3 py-2 bg-purple-50 hover:bg-purple-100 flex items-center justify-between transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <svg 
+                  className={`w-4 h-4 text-purple-600 transition-transform ${expandedSections.has('currentInput') ? 'rotate-90' : ''}`}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                <span className="text-xs font-semibold text-purple-700">Current Input</span>
+                <span className="text-xs text-purple-500">(Loop Context)</span>
+              </div>
+            </button>
+            {expandedSections.has('currentInput') && (
+              <div className="p-2 bg-white space-y-2 transition-all duration-200 ease-out">
+                <div className="text-xs text-gray-600 mb-2 px-1">
+                  Variables available in this node's input:
+                </div>
+                
+                {/* Show loop.current if available */}
+                {currentInput.loop?.current !== undefined && (
+                  <div className="border-l-2 border-purple-300 pl-2 py-1">
+                    <div className="text-xs font-semibold text-purple-700 mb-1">loop.current</div>
+                    <div className="text-xs text-gray-600 mb-2">Current item in the loop</div>
+                    <TreeNode 
+                      path="loop" 
+                      keyName="current" 
+                      value={currentInput.loop.current} 
+                      onPick={onPick} 
+                    />
+                  </div>
+                )}
+                
+                {/* Show current directly if available (convenience alias) */}
+                {currentInput.current !== undefined && !currentInput.loop && (
+                  <div className="border-l-2 border-purple-300 pl-2 py-1">
+                    <div className="text-xs font-semibold text-purple-700 mb-1">current</div>
+                    <div className="text-xs text-gray-600 mb-2">Current item (alias for loop.current)</div>
+                    <TreeNode 
+                      path="" 
+                      keyName="current" 
+                      value={currentInput.current} 
+                      onPick={onPick} 
+                    />
+                  </div>
+                )}
+                
+                {/* Show loop.index if available */}
+                {currentInput.loop?.index !== undefined && (
+                  <div className="border-l-2 border-purple-300 pl-2 py-1">
+                    <button
+                      onClick={() => onPick('loop.index')}
+                      className="w-full text-left flex items-center gap-2 hover:bg-gray-50 rounded px-1 py-1 transition-colors"
+                    >
+                      <span className="text-xs font-mono text-purple-600">loop.index</span>
+                      <span className="text-xs text-gray-500">= {currentInput.loop.index}</span>
+                    </button>
+                  </div>
+                )}
+                
+                {/* Show index directly if available (convenience alias) */}
+                {currentInput.index !== undefined && !currentInput.loop && (
+                  <div className="border-l-2 border-purple-300 pl-2 py-1">
+                    <button
+                      onClick={() => onPick('index')}
+                      className="w-full text-left flex items-center gap-2 hover:bg-gray-50 rounded px-1 py-1 transition-colors"
+                    >
+                      <span className="text-xs font-mono text-purple-600">index</span>
+                      <span className="text-xs text-gray-500">= {currentInput.index}</span>
+                    </button>
+                  </div>
+                )}
+                
+                {/* Show loop.array if available */}
+                {currentInput.loop?.array !== undefined && (
+                  <div className="border-l-2 border-purple-300 pl-2 py-1">
+                    <div className="text-xs font-semibold text-purple-700 mb-1">loop.array</div>
+                    <div className="text-xs text-gray-600 mb-2">Full array being iterated</div>
+                    <TreeNode 
+                      path="loop" 
+                      keyName="array" 
+                      value={currentInput.loop.array} 
+                      onPick={onPick} 
+                    />
+                  </div>
+                )}
+                
+                {/* Show other input fields if available */}
+                {Object.entries(currentInput).filter(([k]) => k !== 'loop' && k !== 'current' && k !== 'index').map(([k, v]) => (
+                  <div key={k} className="border-l-2 border-purple-300 pl-2 py-1">
+                    <TreeNode path="" keyName={k} value={v} onPick={onPick} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Start Nodes Section */}
         {hasStartNodes && (
           <div className="border border-gray-200 rounded-md overflow-hidden">
@@ -1003,7 +1214,7 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
         )}
 
         {/* Empty state */}
-        {!hasStartNodes && !hasGuaranteedNodes && !hasConditionalNodes && !hasFallbackData && (
+        {!currentInput && !hasStartNodes && !hasGuaranteedNodes && !hasConditionalNodes && !hasFallbackData && (
           <div className="text-center py-8 text-gray-400 text-sm">
             <svg className="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />

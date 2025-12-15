@@ -103,6 +103,38 @@ export function findConnectedEdges(edges: Edge[], nodeId: string): {
 }
 
 /**
+ * Find tool nodes that are only connected to a specific agent node
+ * Tool nodes connected to an agent via the 'tool' handle should be removed when the agent is deleted
+ */
+export function findToolNodesConnectedToAgent(
+  edges: Edge[],
+  agentNodeId: string,
+  nodes: Array<{ id: string; type?: string }>
+): string[] {
+  // Find all tool nodes connected to this agent via the 'tool' handle
+  const toolNodeIds = edges
+    .filter(edge => 
+      edge.target === agentNodeId && 
+      edge.targetHandle === 'tool' &&
+      edge.source
+    )
+    .map(edge => edge.source)
+    .filter(sourceId => {
+      // Verify that the source node is actually a tool node
+      const sourceNode = nodes.find(n => n.id === sourceId);
+      return sourceNode && (sourceNode.type === 'tool' || sourceNode.type?.startsWith('tool-'));
+    });
+
+  // Filter to only include tool nodes that have NO other connections
+  // (i.e., they are only connected to this agent)
+  return toolNodeIds.filter(toolNodeId => {
+    const toolEdges = edges.filter(e => e.source === toolNodeId || e.target === toolNodeId);
+    // Tool node should only have one edge (to the agent)
+    return toolEdges.length === 1;
+  });
+}
+
+/**
  * Build edge lookup map for graph traversal
  */
 export function buildEdgeLookup(edges: Edge[]): Map<string, string[]> {

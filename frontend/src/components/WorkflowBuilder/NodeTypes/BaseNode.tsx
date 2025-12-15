@@ -110,7 +110,7 @@ export function BaseNode({
   // Determine border color based on execution status and animation
   const getBorderColor = () => {
     if (executionStatus === 'running' && isAnimating) {
-      return 'border-blue-500 animate-pulse';
+      return 'border-emerald-500 border-4 animate-pulse';
     }
     if (executionStatus === 'completed') {
       return 'border-green-500';
@@ -124,7 +124,7 @@ export function BaseNode({
   // Determine background based on execution status
   const getBackgroundColor = () => {
     if (executionStatus === 'running' && isAnimating) {
-      return 'from-blue-50 to-blue-100'; // Keep gradient format
+      return 'from-emerald-50 to-emerald-100';
     }
     return colors.bg;
   };
@@ -138,11 +138,13 @@ export function BaseNode({
         px-4 py-3 
         rounded-lg shadow-md hover:shadow-lg
         bg-gradient-to-br ${bgGradient}
-        border-2 ${getBorderColor()}
+        ${getBorderColor()}
         transition-all duration-200
         flex flex-col justify-center
         overflow-visible
-        ${isAnimating && executionStatus === 'running' ? 'ring-2 ring-blue-300 ring-opacity-50' : ''}
+        ${isAnimating && executionStatus === 'running' 
+          ? 'ring-4 ring-emerald-400 ring-opacity-60 scale-105 animate-pulse' 
+          : ''}
       `}
       onMouseEnter={() => setIsNodeHovered(true)} // Set hovered state on node
       onMouseLeave={() => setIsNodeHovered(false)} // Reset hovered state on node
@@ -196,17 +198,17 @@ export function BaseNode({
                 {icon}
               </span>
               
-              {/* Spinner for running nodes */}
+              {/* Spinner for running nodes - größer und auffälliger */}
               {executionStatus === 'running' && isAnimating && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <svg
-                    className="w-8 h-8 text-blue-500 animate-spin"
+                    className="w-12 h-12 text-emerald-500 animate-spin"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
                   >
                     <circle
-                      className="opacity-25"
+                      className="opacity-30"
                       cx="12"
                       cy="12"
                       r="10"
@@ -214,7 +216,7 @@ export function BaseNode({
                       strokeWidth="4"
                     />
                     <path
-                      className="opacity-75"
+                      className="opacity-90"
                       fill="currentColor"
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />

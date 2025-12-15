@@ -27,11 +27,9 @@ export class SSEConnection {
    */
   connect(): void {
     if (this.eventSource) {
-      console.warn('SSE already connected');
       return;
     }
 
-    console.log('📡 Connecting to SSE:', this.url);
     this.eventSource = new EventSource(this.url);
 
     // Listen to all event types
@@ -40,7 +38,7 @@ export class SSEConnection {
         const data = JSON.parse(event.data);
         this.emit('message', data);
       } catch (error) {
-        console.error('Failed to parse SSE message:', error);
+        // Failed to parse SSE message
       }
     };
 
@@ -52,19 +50,17 @@ export class SSEConnection {
           const data = JSON.parse(event.data);
           this.emit(eventType, data);
         } catch (error) {
-          console.error(`Failed to parse ${eventType} event:`, error);
+          // Failed to parse event
         }
       });
     });
 
     // Error handling
-    this.eventSource.onerror = (error) => {
-      console.error('SSE error:', error);
+    this.eventSource.onerror = (_error) => {
       this.errorHandlers.forEach(handler => handler(new Error('SSE connection error')));
       
       // Auto-reconnect after 3 seconds
       setTimeout(() => {
-        console.log('🔄 Reconnecting SSE...');
         this.disconnect();
         this.connect();
       }, 3000);
@@ -72,7 +68,7 @@ export class SSEConnection {
 
     // Connection opened
     this.eventSource.onopen = () => {
-      console.log('✅ SSE connected');
+      // SSE connected
     };
   }
 
@@ -102,7 +98,7 @@ export class SSEConnection {
       try {
         handler({ type: eventType, data });
       } catch (error) {
-        console.error(`Error in ${eventType} handler:`, error);
+        // Error in handler
       }
     });
   }
@@ -112,7 +108,6 @@ export class SSEConnection {
    */
   disconnect(): void {
     if (this.eventSource) {
-      console.log('👋 Disconnecting SSE');
       this.eventSource.close();
       this.eventSource = null;
     }

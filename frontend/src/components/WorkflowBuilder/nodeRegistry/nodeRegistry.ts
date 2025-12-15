@@ -23,6 +23,8 @@ import { HttpRequestNode } from '../NodeTypes/OptimizedNodes';
 import { TransformNode } from '../NodeTypes/OptimizedNodes';
 import { EmailNode } from '../NodeTypes/OptimizedNodes';
 import { WhileNode } from '../NodeTypes/WhileNode';
+import { ForEachNode } from '../NodeTypes/ForEachNode';
+import { IfElseNode } from '../NodeTypes/IfElseNode';
 import { ToolNodeComponent } from '../ToolNodes/ToolNodeComponent';
 import { BaseNode } from '../NodeTypes/BaseNode';
 import { getNodeMetadata } from './nodeMetadata';
@@ -40,6 +42,8 @@ const NODE_COMPONENTS: Record<string, ComponentType<any>> = {
   'http-request': HttpRequestNode,
   email: EmailNode,
   while: WhileNode,
+  foreach: ForEachNode,
+  ifelse: IfElseNode,
   
   // Tool nodes use special component
   tool: ToolNodeComponent,
@@ -144,10 +148,9 @@ export function registerNodeComponent(
   component: ComponentType<any>
 ): void {
   if (NODE_COMPONENTS[nodeType]) {
-    console.warn(`[NodeRegistry] Node type "${nodeType}" is already registered. Overwriting.`);
+    // Node type already registered, overwriting
   }
   NODE_COMPONENTS[nodeType] = component;
-  console.log(`[NodeRegistry] Registered node component: ${nodeType}`);
 }
 
 /**
@@ -185,19 +188,24 @@ export function createNodeTypesMap(
   currentAnimatedNodeId?: string | null,
   onUpdateComment?: (nodeId: string, comment: string) => void,
   secrets?: Array<{ key: string; isActive: boolean }>,
-  showOverlays: boolean = true
+  showOverlays: boolean = true,
+  isNodeAnimating?: (nodeId: string) => boolean
 ): Record<string, ComponentType<any>> {
   const nodeTypes: Record<string, ComponentType<any>> = {};
   
-  // Helper to get execution status for a node
+  // Helper to get execution status for a node (wie Activepieces)
   const getNodeExecutionStatus = (nodeId: string, isAnimating: boolean): 'idle' | 'running' | 'completed' | 'failed' => {
-    // If node is currently animating, it's running
+    // Wenn Node aktuell animiert wird, zeige als 'running'
     if (isAnimating && isExecuting) {
       return 'running';
     }
     
+    // Ansonsten: Status direkt aus executionSteps lesen (wie Activepieces)
     const step = executionSteps.find((s: any) => s.nodeId === nodeId);
-    if (!step) return 'idle';
+    if (!step) {
+      return 'idle';
+    }
+    
     return step.status as 'idle' | 'running' | 'completed' | 'failed';
   };
   
@@ -213,13 +221,11 @@ export function createNodeTypesMap(
     // Use React.createElement since this is a .ts file (not .tsx)
     nodeTypes[nodeType] = (props: any) => {
       const nodeId = props.data?.id;
-      const isAnimating = currentAnimatedNodeId === nodeId;
+      // Use isNodeAnimating function if available, otherwise fallback to simple comparison
+      const isAnimating = typeof isNodeAnimating === 'function' 
+        ? isNodeAnimating(nodeId)
+        : currentAnimatedNodeId === nodeId;
       const executionStatus = isExecuting ? getNodeExecutionStatus(nodeId, isAnimating) : 'idle';
-      
-      // Debug log for animation
-      if (isAnimating) {
-        console.log('[NodeRegistry] Animating node:', nodeId, 'status:', executionStatus);
-      }
       
       // Pass animation props to component if it supports them
       const componentProps = {
@@ -265,7 +271,10 @@ export function createNodeTypesMap(
     // Wrap with execution status and animation
     nodeTypes[nodeType] = (props: any) => {
       const nodeId = props.data?.id || props.id;
-      const isAnimating = currentAnimatedNodeId === nodeId;
+      // Use isNodeAnimating function if available, otherwise fallback to simple comparison
+      const isAnimating = typeof isNodeAnimating === 'function' 
+        ? isNodeAnimating(nodeId)
+        : currentAnimatedNodeId === nodeId;
       const executionStatus = isExecuting ? getNodeExecutionStatus(nodeId, isAnimating) : 'idle';
       
       // Pass animation props to default component
@@ -290,7 +299,10 @@ export function createNodeTypesMap(
   const defaultFallback = (props: any) => {
     const nodeType = props.type || props.data?.type || 'unknown';
     const nodeId = props.data?.id || props.id;
-    const isAnimating = currentAnimatedNodeId === nodeId;
+    // Use isNodeAnimating function if available, otherwise fallback to simple comparison
+    const isAnimating = typeof isNodeAnimating === 'function' 
+      ? isNodeAnimating(nodeId)
+      : currentAnimatedNodeId === nodeId;
     const executionStatus = isExecuting ? getNodeExecutionStatus(nodeId, isAnimating) : 'idle';
     
     // Try to get component using fallback mechanism

@@ -461,6 +461,88 @@
           }
         }
       }
+    },
+    {
+      "type": "foreach",
+      "name": "For Each",
+      "icon": "🔁",
+      "description": "Iterate over an array and execute a block of nodes for each item",
+      "category": "logic",
+      "animationSpeed": "slow",
+      "csharpProcessor": "ForEachNodeProcessor",
+      "typescriptProcessor": "./nodes/registerBuiltIns#foreach",
+      "inputSchema": {
+        "type": "object",
+        "description": "Accepts any input. The arrayPath specifies which array to iterate over.",
+        "additionalProperties": true
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "iterations": { "type": "number", "description": "Number of iterations executed" },
+          "results": { "type": "array", "description": "Array of outputs from each iteration" },
+          "finalOutput": { "description": "Output from the last iteration" }
+        }
+      },
+      "frontend": {
+        "hasConfigForm": true,
+        "useAutoConfigForm": true,
+        "hasInput": true,
+        "hasOutput": true,
+        "fields": {
+          "label": {
+            "type": "text",
+            "placeholder": "For Each Name"
+          },
+          "arrayPath": {
+            "type": "expression",
+            "multiline": false,
+            "placeholder": "Enter array path (e.g., {{steps.nodeId.data}} or {{steps.nodeId.json.data}})",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "type": "ifelse",
+      "name": "If / Else",
+      "icon": "↗️",
+      "description": "Execute different paths based on a condition",
+      "category": "logic",
+      "animationSpeed": "fast",
+      "csharpProcessor": "IfElseNodeProcessor",
+      "typescriptProcessor": "./nodes/registerBuiltIns#ifelse",
+      "inputSchema": {
+        "type": "object",
+        "description": "Accepts any input. The condition is evaluated to determine which branch to execute.",
+        "additionalProperties": true
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "condition": { "type": "string", "description": "The evaluated condition" },
+          "result": { "type": "boolean", "description": "Whether the condition was true or false" },
+          "output": { "description": "Output from the executed branch" }
+        }
+      },
+      "frontend": {
+        "hasConfigForm": true,
+        "useAutoConfigForm": true,
+        "hasInput": true,
+        "hasOutput": false,
+        "fields": {
+          "label": {
+            "type": "text",
+            "placeholder": "If / Else Name"
+          },
+          "condition": {
+            "type": "expression",
+            "multiline": false,
+            "placeholder": "Enter condition (e.g., {{loop.current.id}} === 5)",
+            "required": true
+          }
+        }
+      }
     }
   ],
   "tools": [

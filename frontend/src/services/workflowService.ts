@@ -231,36 +231,7 @@ export const workflowService = {
 
   // Test a single node
   async testNode(workflowId: string, nodeId: string, input?: any): Promise<any> {
-    console.log('[workflowService.testNode] 🔵 Sending test request:', {
-      workflowId,
-      nodeId,
-      input,
-      inputKeys: input ? Object.keys(input) : [],
-      inputString: JSON.stringify(input || {}).substring(0, 200)
-    });
     const response = await api.post(`/api/workflows/${workflowId}/nodes/${nodeId}/test-with-context`, input || {});
-    console.log('[workflowService.testNode] 🔵 Received response:', response.data);
-    
-    // DEBUG: Check if _debug exists in response
-    console.log('[workflowService.testNode] 🔍 Checking for _debug:', {
-      hasDebug: !!response.data._debug,
-      responseKeys: Object.keys(response.data || {}),
-      fullResponse: JSON.stringify(response.data, null, 2)
-    });
-    
-    // DEBUG: Log debug info if available
-    if (response.data._debug) {
-      console.log('[workflowService.testNode] 🔍 DEBUG INFO:', JSON.stringify(response.data._debug, null, 2));
-      console.log('[workflowService.testNode] 🔍 receivedBody:', response.data._debug.receivedBody);
-      console.log('[workflowService.testNode] 🔍 bodyKeys:', response.data._debug.bodyKeys);
-      console.log('[workflowService.testNode] 🔍 inputData:', response.data._debug.inputData);
-      console.log('[workflowService.testNode] 🔍 inputKeys:', response.data._debug.inputKeys);
-      console.log('[workflowService.testNode] 🔍 executionRequestBodyInput:', response.data._debug.executionRequestBodyInput);
-      console.log('[workflowService.testNode] 🔍 executionRequestBodyInputKeys:', response.data._debug.executionRequestBodyInputKeys);
-    } else {
-      console.log('[workflowService.testNode] ⚠️ No _debug info in response!');
-    }
-    
     return response.data;
   },
 };

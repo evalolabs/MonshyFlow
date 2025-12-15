@@ -844,7 +844,215 @@ class ExecutionService {
                 }
 
                 // Move to next node
-                const nextEdge = workflow.edges.find((e: any) => e.source === currentNode.id);
+                // Special handling for ForEach nodes: execute loop body for each array item
+                if (currentNode.type === 'foreach') {
+                    // Extract array from foreach output
+                    const foreachOutput = mappedOutput?.json || mappedOutput?.data || {};
+                    const array = foreachOutput.results || foreachOutput.data || [];
+                    
+                    if (!Array.isArray(array) || array.length === 0) {
+                        console.log(`[ExecutionService] ForEach node ${currentNode.id}: Empty array, skipping loop body`);
+                    } else {
+                        console.log(`[ExecutionService] ForEach node ${currentNode.id}: Executing loop body for ${array.length} items`);
+                        
+                        // Find loop edge (edge with sourceHandle === 'loop')
+                        const loopEdge = workflow.edges.find((e: any) => 
+                            e.source === currentNode.id && 
+                            (e.sourceHandle === 'loop' || e.SourceHandle === 'loop')
+                        );
+                        
+                        if (loopEdge) {
+                            // Execute loop body for each array item
+                            for (let index = 0; index < array.length; index++) {
+                                const currentItem = array[index];
+                                
+                                // Create loop context input for loop body nodes
+                                const loopContext = {
+                                    current: currentItem,
+                                    index: index,
+                                    array: array,
+                                };
+                                
+                                let loopInput = this.ensureNodeData({
+                                    ...(currentInput?.json || {}),
+                                    loop: loopContext,
+                                    current: currentItem,
+                                    index: index,
+                                }, loopEdge.target, 'loop-body');
+                                
+                                // Execute loop body nodes
+                                let loopBodyNode = workflow.nodes.find((n: any) => n.id === loopEdge.target);
+                                if (!loopBodyNode) {
+                                    throw new Error(`Loop body node ${loopEdge.target} not found`);
+                                }
+                                
+                                // Track loop body execution
+                                const loopBodyVisited = new Set<string>();
+                                
+                                while (loopBodyNode) {
+                                    // Check for infinite loops in loop body
+                                    if (loopBodyVisited.has(loopBodyNode.id)) {
+                                        throw new Error(`Circular dependency detected in loop body at node ${loopBodyNode.id}`);
+                                    }
+                                    loopBodyVisited.add(loopBodyNode.id);
+                                    
+                                    // Process loop body node
+                                    const loopBodyStartTime = Date.now();
+                                    try {
+                                        await redisService.publish('node.start', {
+                                            executionId: execution.id,
+                                            nodeId: loopBodyNode.id,
+                                            nodeType: loopBodyNode.type,
+                                            nodeLabel: loopBodyNode.data?.label,
+                                            startedAt: new Date().toISOString()
+                                        });
+                                    } catch (err) {
+                                        console.warn('[ExecutionService] Failed to publish node.start event:', err);
+                                    }
+                                    
+                                    try {
+                                        const loopBodyOutput = await this.processNode(loopBodyNode, loopInput, workflow, execution);
+                                        const loopBodyDuration = Date.now() - loopBodyStartTime;
+                                        
+                                        try {
+                                            await redisService.publish('node.end', {
+                                                executionId: execution.id,
+                                                nodeId: loopBodyNode.id,
+                                                nodeType: loopBodyNode.type,
+                                                nodeLabel: loopBodyNode.data?.label,
+                                                status: 'completed',
+                                                duration: loopBodyDuration,
+                                                output: loopBodyOutput,
+                                                completedAt: new Date().toISOString()
+                                            });
+                                        } catch (err) {
+                                            console.warn('[ExecutionService] Failed to publish node.end event:', err);
+                                        }
+                                        
+                                        // Add trace entry for loop body node
+                                        const loopBodyTraceEntry = {
+                                            nodeId: loopBodyNode.id,
+                                            type: loopBodyNode.type,
+                                            input: loopInput,
+                                            output: loopBodyOutput,
+                                            timestamp: new Date(),
+                                            duration: loopBodyDuration,
+                                            debugInfo: this.generateDebugInfo(loopInput, loopBodyOutput),
+                                            _loopIteration: index,
+                                            _loopNodeId: currentNode.id,
+                                        };
+                                        this.addSchemaToTraceEntry(loopBodyTraceEntry);
+                                        await this.addTraceEntry(execution.id!, loopBodyTraceEntry, execution);
+                                        
+                                        // Find next node in loop body (look for back edge or next node)
+                                        const backEdge = workflow.edges.find((e: any) => 
+                                            e.source === loopBodyNode.id && 
+                                            e.target === currentNode.id &&
+                                            (e.targetHandle === 'back' || e.TargetHandle === 'back')
+                                        );
+                                        
+                                        if (backEdge) {
+                                            // Loop back to foreach node - iteration complete
+                                            break;
+                                        }
+                                        
+                                        // Find next node in loop body
+                                        const nextLoopEdge = workflow.edges.find((e: any) => 
+                                            e.source === loopBodyNode.id &&
+                                            e.target !== currentNode.id // Don't go back to foreach yet
+                                        );
+                                        
+                                        if (!nextLoopEdge) {
+                                            // No more nodes in loop body, iteration complete
+                                            break;
+                                        }
+                                        
+                                        loopBodyNode = workflow.nodes.find((n: any) => n.id === nextLoopEdge.target);
+                                        if (!loopBodyNode) {
+                                            throw new Error(`Next loop body node ${nextLoopEdge.target} not found`);
+                                        }
+                                        
+                                        loopInput = this.ensureNodeData(loopBodyOutput, loopBodyNode.id, loopBodyNode.type);
+                                        
+                                    } catch (error: any) {
+                                        const loopBodyDuration = Date.now() - loopBodyStartTime;
+                                        
+                                        try {
+                                            await redisService.publish('node.end', {
+                                                executionId: execution.id,
+                                                nodeId: loopBodyNode.id,
+                                                nodeType: loopBodyNode.type,
+                                                nodeLabel: loopBodyNode.data?.label,
+                                                status: 'failed',
+                                                duration: loopBodyDuration,
+                                                error: error.message,
+                                                completedAt: new Date().toISOString()
+                                            });
+                                        } catch (err) {
+                                            console.warn('[ExecutionService] Failed to publish node.end event (error):', err);
+                                        }
+                                        
+                                        const errorNodeData = createErrorNodeData(
+                                            error.message,
+                                            loopBodyNode.id,
+                                            loopBodyNode.type,
+                                            'EXECUTION_ERROR',
+                                            { originalError: error.toString() }
+                                        );
+                                        
+                                        const errorTraceEntry = {
+                                            nodeId: loopBodyNode.id,
+                                            type: loopBodyNode.type,
+                                            input: loopInput,
+                                            output: errorNodeData,
+                                            error: error.message,
+                                            timestamp: new Date(),
+                                            duration: loopBodyDuration,
+                                            _loopIteration: index,
+                                            _loopNodeId: currentNode.id,
+                                        };
+                                        this.addSchemaToTraceEntry(errorTraceEntry);
+                                        await this.addTraceEntry(execution.id!, errorTraceEntry, execution);
+                                        throw error;
+                                    }
+                                }
+                            }
+                        } else {
+                            console.warn(`[ExecutionService] ForEach node ${currentNode.id}: No loop edge found, skipping loop body`);
+                        }
+                    }
+                }
+                
+                // Special handling for If-Else nodes: choose branch based on condition result
+                let nextEdge: any;
+                if (currentNode.type === 'ifelse') {
+                    // Extract condition result from node output
+                    const conditionResult = mappedOutput?.json?.result ?? mappedOutput?.result ?? false;
+                    const targetHandle = conditionResult ? 'true' : 'false';
+                    
+                    // Find edge with matching sourceHandle
+                    nextEdge = workflow.edges.find((e: any) => 
+                        e.source === currentNode.id && 
+                        (e.sourceHandle === targetHandle || e.SourceHandle === targetHandle)
+                    );
+                    
+                    if (!nextEdge) {
+                        // No matching branch found, return current output
+                        console.warn(`[ExecutionService] If-Else node ${currentNode.id}: No ${targetHandle} branch found`);
+                        return mappedOutput;
+                    }
+                } else if (currentNode.type === 'foreach') {
+                    // For foreach nodes, skip the loop edge and find the normal output edge
+                    nextEdge = workflow.edges.find((e: any) => 
+                        e.source === currentNode.id && 
+                        e.sourceHandle !== 'loop' && 
+                        e.SourceHandle !== 'loop'
+                    );
+                } else {
+                    // For other nodes, find first outgoing edge
+                    nextEdge = workflow.edges.find((e: any) => e.source === currentNode.id);
+                }
+                
                 if (!nextEdge) {
                     // No more nodes, return current output
                     return mappedOutput;

@@ -14,9 +14,11 @@ import {
   createNode,
   generateNodeId,
 } from '../../../utils/nodeUtils';
+import { isToolNodeType } from '../../../types/toolCatalog';
 import {
   findConnectedEdges,
   createReconnectionEdges,
+  findToolNodesConnectedToAgent,
 } from '../../../utils/edgeUtils';
 import { VALIDATION_MESSAGES } from '../constants';
 import { nodeLogger as logger } from '../../../utils/logger';
@@ -81,22 +83,38 @@ export function useNodeOperations({
       
       logger.debug(`Node has ${incoming.length} incoming and ${outgoing.length} outgoing edges`);
 
-      // Delete from backend if workflowId exists
-      if (workflowId && deleteNodeFromBackend) {
-        await deleteNodeFromBackend(workflowId, nodeId);
-        logger.info('Node deleted from backend');
+      // SPECIAL CASE: If deleting an Agent node, find and remove orphaned tool nodes
+      const isAgentNode = nodeToDelete?.type === 'agent';
+      let toolNodesToDelete: string[] = [];
+      let nodesToDelete = [nodeId];
+      
+      if (isAgentNode) {
+        toolNodesToDelete = findToolNodesConnectedToAgent(edges, nodeId, nodes);
+        if (toolNodesToDelete.length > 0) {
+          logger.info(`Found ${toolNodesToDelete.length} tool node(s) connected only to this agent. They will be removed as well.`);
+          nodesToDelete = [...nodesToDelete, ...toolNodesToDelete];
+        }
       }
 
-      // Delete from local state
-      const updatedNodes = nodes.filter(node => node.id !== nodeId);
+      // Delete from backend if workflowId exists
+      if (workflowId && deleteNodeFromBackend) {
+        // Delete all nodes (agent + tools) from backend
+        for (const idToDelete of nodesToDelete) {
+          await deleteNodeFromBackend(workflowId, idToDelete);
+        }
+        logger.info(`Deleted ${nodesToDelete.length} node(s) from backend`);
+      }
+
+      // Delete from local state (remove agent and all connected tool nodes)
+      const updatedNodes = nodes.filter(node => !nodesToDelete.includes(node.id));
       onNodesChange(updatedNodes);
 
-      // Update edges: remove old ones and create reconnections
+      // Update edges: remove edges connected to any of the deleted nodes
       const filteredEdges = edges.filter(
-        edge => edge.source !== nodeId && edge.target !== nodeId
+        edge => !nodesToDelete.includes(edge.source) && !nodesToDelete.includes(edge.target)
       );
 
-      // Create reconnection edges
+      // Create reconnection edges (only for the main node, not for tool nodes)
       const reconnectionEdges = createReconnectionEdges(
         incoming,
         outgoing,
@@ -107,7 +125,11 @@ export function useNodeOperations({
       logger.debug(`Created ${reconnectionEdges.length} reconnection edges`);
       onEdgesChange([...filteredEdges, ...reconnectionEdges]);
 
-      logger.info('Node deleted successfully with automatic reconnection');
+      if (toolNodesToDelete.length > 0) {
+        logger.info(`Node deleted successfully. Removed agent and ${toolNodesToDelete.length} connected tool node(s).`);
+      } else {
+        logger.info('Node deleted successfully with automatic reconnection');
+      }
     } catch (error) {
       logger.error('Failed to delete node', error);
       alert(VALIDATION_MESSAGES.DELETE_NODE_FAILED);

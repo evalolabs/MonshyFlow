@@ -48,7 +48,7 @@ export function ToolNode({ data, selected }: ToolNodeProps) {
   // Determine border color based on execution status
   const getBorderColor = () => {
     if (executionStatus === 'running' && isAnimating) {
-      return 'border-blue-500 animate-pulse';
+      return 'border-emerald-500 border-4 animate-pulse';
     }
     if (executionStatus === 'completed') {
       return 'border-green-500';
@@ -80,11 +80,11 @@ export function ToolNode({ data, selected }: ToolNodeProps) {
       {/* Circular Tool Node */}
       <div
         className={`
-          relative rounded-full ${colorClass.bg} ${getBorderColor()} border-2
+          relative rounded-full ${colorClass.bg} ${getBorderColor()}
           flex flex-col items-center justify-center
           shadow-lg hover:shadow-xl transition-all duration-200
           ${selected ? 'ring-4 ring-blue-400 ring-offset-2' : ''}
-          ${isAnimating && executionStatus === 'running' ? 'ring-2 ring-blue-300 ring-opacity-50' : ''}
+          ${isAnimating && executionStatus === 'running' ? 'ring-4 ring-emerald-400 ring-opacity-60 scale-110 animate-pulse' : ''}
         `}
         style={{
           width: size,

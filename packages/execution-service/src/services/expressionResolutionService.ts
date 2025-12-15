@@ -418,6 +418,81 @@ export class ExpressionResolutionService {
             }
         }
 
+        // Replace {{loop.current.path}}, {{loop.index}}, {{loop.array}} patterns
+        // These are shortcuts for {{input.loop.current.path}}, {{input.loop.index}}, {{input.loop.array}}
+        const loopPattern = /\{\{loop\.([^}]+)\}\}/g;
+        while ((match = loopPattern.exec(text)) !== null) {
+            const fullMatch = match[0];
+            const path = match[1].trim();
+            const pathParts = path.split('.');
+
+            let replacement: string | null = null;
+
+            // Get loop context from input
+            if (normalizedContext.input) {
+                let loopData: any = null;
+                
+                if (this.isNodeData(normalizedContext.input)) {
+                    const nodeData = normalizedContext.input as NodeData;
+                    const mainData = nodeData.json ?? (nodeData as any).data;
+                    loopData = mainData?.loop;
+                } else if (typeof normalizedContext.input === 'object' && normalizedContext.input !== null) {
+                    loopData = (normalizedContext.input as any).loop || (normalizedContext.input as any).json?.loop;
+                }
+
+                if (loopData) {
+                    // Resolve path within loop context
+                    // pathParts[0] should be "current", "index", or "array"
+                    if (pathParts[0] === 'current' && pathParts.length > 1) {
+                        // {{loop.current.id}} -> loopData.current.id
+                        replacement = this.resolveObjectPath(loopData.current, pathParts.slice(1));
+                    } else if (pathParts[0] === 'current' && pathParts.length === 1) {
+                        // {{loop.current}} -> entire current object
+                        replacement = typeof loopData.current === 'object' 
+                            ? JSON.stringify(loopData.current) 
+                            : String(loopData.current || '');
+                    } else if (pathParts[0] === 'index') {
+                        // {{loop.index}} -> loopData.index
+                        replacement = String(loopData.index ?? '');
+                    } else if (pathParts[0] === 'array') {
+                        // {{loop.array}} -> entire array
+                        replacement = Array.isArray(loopData.array)
+                            ? JSON.stringify(loopData.array)
+                            : String(loopData.array || '');
+                    } else {
+                        // Try to resolve as direct path in loop context
+                        replacement = this.resolveObjectPath(loopData, pathParts);
+                    }
+                }
+            }
+
+            if (replacement !== null) {
+                text = text.replace(fullMatch, replacement);
+                if (options?.debug) {
+                    traces.push({
+                        expression: fullMatch,
+                        resolvedValue: replacement,
+                        duration: Date.now() - startTime
+                    });
+                }
+            } else {
+                const error = new ExpressionResolutionError(
+                    fullMatch,
+                    'not_found',
+                    { path: `loop.${path}` }
+                );
+                this.handleError(error, options);
+                if (options?.debug) {
+                    traces.push({
+                        expression: fullMatch,
+                        resolvedValue: null,
+                        duration: Date.now() - startTime,
+                        errors: [error.message]
+                    });
+                }
+            }
+        }
+
         // Replace {{secret:name}} patterns
         const secretPattern = /\{\{secret:([^}]+)\}\}/g;
         while ((match = secretPattern.exec(text)) !== null) {
@@ -855,12 +930,41 @@ export class ExpressionResolutionService {
                     }
                 }
             } else if (typeof current === 'object' && current !== null) {
-                // Regular object property access
-                if (part in current) {
-                    current = current[part];
+                // Check if part contains array index notation (e.g., "data[0]", "items[1]")
+                // This handles cases like: {{steps.nodeId.json.data[0]}} where "data[0]" is a single part
+                const arrayIndexMatch = part.match(/^(.+)\[(\d+)\]$/);
+                if (arrayIndexMatch) {
+                    const propertyName = arrayIndexMatch[1];
+                    const arrayIndex = parseInt(arrayIndexMatch[2], 10);
+                    
+                    // First access the property
+                    if (propertyName in current) {
+                        current = current[propertyName];
+                        
+                        // Then access the array index if current is an array
+                        if (Array.isArray(current)) {
+                            if (arrayIndex >= 0 && arrayIndex < current.length) {
+                                current = current[arrayIndex];
+                            } else {
+                                // Index out of bounds
+                                return null;
+                            }
+                        } else {
+                            // Property exists but is not an array, cannot use index
+                            return null;
+                        }
+                    } else {
+                        // Property not found
+                        return null;
+                    }
                 } else {
-                    // Property not found
-                    return null;
+                    // Regular object property access (no array index notation)
+                    if (part in current) {
+                        current = current[part];
+                    } else {
+                        // Property not found
+                        return null;
+                    }
                 }
             } else {
                 // Cannot access property of primitive type

@@ -18,6 +18,8 @@ import { HttpRequestNode as HttpRequestNodeBase } from './HttpRequestNode';
 import { TransformNode as TransformNodeBase } from './TransformNode';
 import { EmailNode as EmailNodeBase } from './EmailNode';
 import { WhileNode as WhileNodeBase } from './WhileNode';
+import { ForEachNode as ForEachNodeBase } from './ForEachNode';
+import { IfElseNode as IfElseNodeBase } from './IfElseNode';
 
 /**
  * Custom comparison function for node props
@@ -40,5 +42,7 @@ export const HttpRequestNode = React.memo(HttpRequestNodeBase, areNodePropsEqual
 export const TransformNode = React.memo(TransformNodeBase, areNodePropsEqual);
 export const EmailNode = React.memo(EmailNodeBase, areNodePropsEqual);
 export const WhileNode = React.memo(WhileNodeBase, areNodePropsEqual);
+export const ForEachNode = React.memo(ForEachNodeBase, areNodePropsEqual);
+export const IfElseNode = React.memo(IfElseNodeBase, areNodePropsEqual);
 
 

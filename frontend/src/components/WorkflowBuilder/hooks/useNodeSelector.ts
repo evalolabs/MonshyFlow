@@ -27,7 +27,7 @@ import {
   VERTICAL_SPACING,
   HORIZONTAL_SPACING,
   EDGE_TYPE_LOOP,
-  NODE_TYPE_WHILE,
+  isLoopNodeType,
   isLoopHandle,
   LOOP_HANDLE_IDS,
 } from '../constants';
@@ -204,13 +204,13 @@ export function useNodeSelector({
       const newEdges: Edge[] = [];
       
       if (isLoopHandleConnection) {
-        logger.info('🔄 [CASE 1] Creating loop edge from loop handle', {
-          sourceHandle,
-          sourceNodeType: sourceNode.type,
-          sourceNodeId: activePopup.sourceNode,
-          newNodeId: newNode.id,
-          isWhileNode: sourceNode.type === NODE_TYPE_WHILE,
-        });
+            logger.info('🔄 [CASE 1] Creating loop edge from loop handle', {
+              sourceHandle,
+              sourceNodeType: sourceNode.type,
+              sourceNodeId: activePopup.sourceNode,
+              newNodeId: newNode.id,
+              isLoopNode: isLoopNodeType(sourceNode.type),
+            });
         
         // Create edge from while node to new node
         newEdge = createLoopEdge(
@@ -232,11 +232,11 @@ export function useNodeSelector({
           edgeType: newEdge.type,
         });
         
-        // CRITICAL: If adding from 'loop' handle of while node, automatically create loop-back edge
-        // Only While nodes have a 'back' handle; other nodes use normal output (undefined)
-        if (sourceNode.type === NODE_TYPE_WHILE && sourceHandle === LOOP_HANDLE_IDS.LOOP) {
-          const loopBackSourceHandle = newNode.type === NODE_TYPE_WHILE 
-            ? LOOP_HANDLE_IDS.BACK  // While nodes have 'back' handle
+        // CRITICAL: If adding from 'loop' handle of loop node (while/foreach), automatically create loop-back edge
+        // Only loop nodes (while/foreach) have a 'back' handle; other nodes use normal output (undefined)
+        if (isLoopNodeType(sourceNode.type) && sourceHandle === LOOP_HANDLE_IDS.LOOP) {
+          const loopBackSourceHandle = isLoopNodeType(newNode.type)
+            ? LOOP_HANDLE_IDS.BACK  // Loop nodes have 'back' handle
             : undefined;             // Other nodes use normal output
           
           logger.info('✅ [CASE 1] Source is while node with loop handle - creating automatic loop-back edge', {
@@ -269,12 +269,12 @@ export function useNodeSelector({
         }
       } else {
         newEdge = createButtonEdge(
-          activePopup.sourceNode,
-          newNode.id,
-          (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
-          sourceHandle,
-          targetHandle
-        );
+        activePopup.sourceNode,
+        newNode.id,
+        (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+        sourceHandle,
+        targetHandle
+      );
         newEdges.push(newEdge);
       }
 
@@ -320,15 +320,6 @@ export function useNodeSelector({
                        isLoopHandle(edge.sourceHandle) || 
                        isLoopHandle(edge.targetHandle);
     
-    logger.info('Inserting node between nodes', {
-      nodeType,
-      source: sourceNode.id,
-      target: targetNode.id,
-      edgeType: edge.type,
-      sourceHandle: edge.sourceHandle,
-      targetHandle: edge.targetHandle,
-      isLoopEdge,
-    });
 
     // Determine handles
     const incomingTargetHandle = getTargetHandle(nodeType);
@@ -361,57 +352,46 @@ export function useNodeSelector({
 
     if (isLoopEdge) {
       // LOOP EDGE INSERTION: Maintain loop structure
-      logger.info('🔄 [LOOP EDGE] Inserting node into loop edge', {
-        preservedSourceHandle,
-        preservedTargetHandle,
-        targetNodeType: targetNode.type,
-        targetNodeId: targetNode.id,
-        NODE_TYPE_WHILE,
-        isWhileNode: targetNode.type === NODE_TYPE_WHILE,
-        LOOP_HANDLE_IDS,
-      });
 
-      // Incoming edge: preserve loop handle
-      const incomingLoopEdge = createLoopEdge(
-        sourceNode.id,
-        newNode.id,
-        (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
-        preservedSourceHandle, // Preserve 'loop' handle
-        incomingTargetHandle,
-        preservedSourceHandle === LOOP_HANDLE_IDS.LOOP ? 'loop' : 'back'
-      );
-      newEdges.push(incomingLoopEdge);
-      logger.info('🔄 [LOOP EDGE] Created incoming loop edge', {
-        edgeId: incomingLoopEdge.id,
-        source: incomingLoopEdge.source,
-        target: incomingLoopEdge.target,
-        sourceHandle: incomingLoopEdge.sourceHandle,
-        targetHandle: incomingLoopEdge.targetHandle,
-      });
-
-      // Outgoing edge: check if target is while node
-      logger.info('🔄 [LOOP EDGE] Checking if target is while node', {
-        targetNodeType: targetNode.type,
-        targetNodeId: targetNode.id,
-        NODE_TYPE_WHILE,
-        comparison: `${targetNode.type} === ${NODE_TYPE_WHILE}`,
-        result: targetNode.type === NODE_TYPE_WHILE,
-      });
+      // Determine if incoming edge should be normal or loop
+      // If original edge was loop-back (targetHandle === 'back'), incoming should be NORMAL
+      // (because it's between nodes in the loop, not going back to the loop node)
+      // If original edge was loop (sourceHandle === 'loop'), incoming should be LOOP
+      // If both handles are undefined, it's also a normal edge between nodes
+      const shouldCreateNormalIncomingEdge = 
+        preservedTargetHandle === LOOP_HANDLE_IDS.BACK ||  // Loop-back edge → normal incoming
+        (preservedSourceHandle === undefined && preservedTargetHandle === undefined); // Both undefined → normal
       
-      if (targetNode.type === NODE_TYPE_WHILE) {
-        // Target is while node → create loop-back edge
-        // Only While nodes have a 'back' handle; other nodes use normal output (undefined)
-        const loopBackSourceHandle = newNode.type === NODE_TYPE_WHILE 
-          ? LOOP_HANDLE_IDS.BACK  // While nodes have 'back' handle
+      if (shouldCreateNormalIncomingEdge && preservedSourceHandle !== LOOP_HANDLE_IDS.LOOP) {
+        // Normal edge between nodes in loop (gray)
+        const incomingEdge = createButtonEdge(
+          sourceNode.id,
+          newNode.id,
+          (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+          undefined,
+          incomingTargetHandle
+        );
+        newEdges.push(incomingEdge);
+      } else {
+        // Has loop handles → create loop edge
+        const incomingLoopEdge = createLoopEdge(
+          sourceNode.id,
+          newNode.id,
+          (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+          preservedSourceHandle,
+          incomingTargetHandle,
+          preservedSourceHandle === LOOP_HANDLE_IDS.LOOP ? 'loop' : 'back'
+        );
+        newEdges.push(incomingLoopEdge);
+      }
+
+      // Outgoing edge: check if target is loop node
+      if (isLoopNodeType(targetNode.type)) {
+        // Target is loop node (while/foreach) → create loop-back edge
+        // Only loop nodes have a 'back' handle; other nodes use normal output (undefined)
+        const loopBackSourceHandle = isLoopNodeType(newNode.type)
+          ? LOOP_HANDLE_IDS.BACK  // Loop nodes have 'back' handle
           : undefined;             // Other nodes use normal output
-        
-        logger.info('✅ [LOOP EDGE] Target IS while node - creating loop-back edge', {
-          newNodeId: newNode.id,
-          newNodeType: newNode.type,
-          targetNodeId: targetNode.id,
-          loopBackSourceHandle,
-          loopBackHandle: LOOP_HANDLE_IDS.BACK,
-        });
         
         const loopBackEdge = createLoopEdge(
           newNode.id,
@@ -422,78 +402,56 @@ export function useNodeSelector({
           'back'
         );
         newEdges.push(loopBackEdge);
-        
-        logger.info('✅ [LOOP EDGE] Created loop-back edge automatically', {
-          edgeId: loopBackEdge.id,
-          from: newNode.id,
-          to: targetNode.id,
-          sourceHandle: loopBackEdge.sourceHandle,
-          targetHandle: loopBackEdge.targetHandle,
-          edgeType: loopBackEdge.type,
-        });
       } else {
-        // Target is not while node → continue loop
-        logger.info('⚠️ [LOOP EDGE] Target is NOT while node - continuing loop', {
-          targetNodeType: targetNode.type,
-          targetNodeId: targetNode.id,
-          expectedType: NODE_TYPE_WHILE,
-        });
-        
-        const outgoingLoopEdge = createLoopEdge(
-          newNode.id,
-          targetNode.id,
-          (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
-          outgoingSourceHandle,
-          preservedTargetHandle, // Preserve target handle
-          preservedSourceHandle === LOOP_HANDLE_IDS.LOOP ? 'loop' : 'back'
-        );
-        newEdges.push(outgoingLoopEdge);
-        logger.info('🔄 [LOOP EDGE] Created outgoing loop edge (continue)', {
-          edgeId: outgoingLoopEdge.id,
-          source: outgoingLoopEdge.source,
-          target: outgoingLoopEdge.target,
-        });
+        // Target is not loop node → continue loop
+        // If both handles are undefined, this is a normal edge between nodes in the loop
+        if (outgoingSourceHandle === undefined && preservedTargetHandle === undefined) {
+          // Normal edge between nodes in loop (gray)
+          const outgoingEdge = createButtonEdge(
+            newNode.id,
+            targetNode.id,
+            (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+            undefined,
+            preservedTargetHandle
+          );
+          newEdges.push(outgoingEdge);
+        } else {
+          // Has loop handles → create loop edge
+          const outgoingLoopEdge = createLoopEdge(
+            newNode.id,
+            targetNode.id,
+            (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+            outgoingSourceHandle,
+            preservedTargetHandle,
+            preservedSourceHandle === LOOP_HANDLE_IDS.LOOP ? 'loop' : 'back'
+          );
+          newEdges.push(outgoingLoopEdge);
+        }
       }
     } else {
       // NORMAL EDGE INSERTION: Standard behavior
-      const incomingEdge = createButtonEdge(
-        sourceNode.id,
-        newNode.id,
-        (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
-        preservedSourceHandle,
-        incomingTargetHandle
-      );
+    const incomingEdge = createButtonEdge(
+      sourceNode.id,
+      newNode.id,
+      (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+      preservedSourceHandle,
+      incomingTargetHandle
+    );
 
-      const outgoingEdge = createButtonEdge(
-        newNode.id,
-        targetNode.id,
-        (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
-        outgoingSourceHandle,
-        preservedTargetHandle
-      );
+    const outgoingEdge = createButtonEdge(
+      newNode.id,
+      targetNode.id,
+      (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+      outgoingSourceHandle,
+      preservedTargetHandle
+    );
 
       newEdges.push(incomingEdge, outgoingEdge);
     }
 
-    logger.info('🔄 [LOOP EDGE] Final edges to create', {
-      totalEdges: newEdges.length,
-      edges: newEdges.map(e => ({
-        id: e.id,
-        source: e.source,
-        target: e.target,
-        sourceHandle: e.sourceHandle,
-        targetHandle: e.targetHandle,
-        type: e.type,
-      })),
-    });
 
     onEdgesChange([...filteredEdges, ...newEdges]);
 
-    logger.info('✅ Node inserted between nodes successfully', {
-      isLoopEdge,
-      edgesCreated: newEdges.length,
-      newNodeId: newNode.id,
-    });
   }, [nodes, edges, onNodesChange, onEdgesChange, autoLayoutEnabled, openPopupBetweenNodes]);
 
   // Handle API endpoint selection
@@ -556,10 +514,10 @@ export function useNodeSelector({
           sourceNodeType: sourceNode.type,
           sourceNodeId: originalPopup.sourceNode,
           newNodeId: newNode.id,
-          isWhileNode: sourceNode.type === NODE_TYPE_WHILE,
+          isLoopNode: isLoopNodeType(sourceNode.type),
         });
         
-        // Create edge from while node to new node
+        // Create edge from loop node to new node
         const newEdge = createLoopEdge(
           originalPopup.sourceNode,
           newNode.id,
@@ -579,10 +537,10 @@ export function useNodeSelector({
           edgeType: newEdge.type,
         });
         
-        // CRITICAL: If adding from 'loop' handle of while node, automatically create loop-back edge
+        // CRITICAL: If adding from 'loop' handle of loop node, automatically create loop-back edge
         // Note: The new node (HTTP Request) doesn't have a 'back' handle, so we use undefined (normal output)
-        if (sourceNode.type === NODE_TYPE_WHILE && sourceHandle === LOOP_HANDLE_IDS.LOOP) {
-          logger.info('✅ [API ENDPOINT - CASE 1] Source is while node with loop handle - creating automatic loop-back edge', {
+        if (isLoopNodeType(sourceNode.type) && sourceHandle === LOOP_HANDLE_IDS.LOOP) {
+          logger.info('✅ [API ENDPOINT - CASE 1] Source is loop node with loop handle - creating automatic loop-back edge', {
             sourceNodeId: originalPopup.sourceNode,
             newNodeId: newNode.id,
             newNodeType: newNode.type,
@@ -611,13 +569,13 @@ export function useNodeSelector({
           });
         }
       } else {
-        const newEdge = createButtonEdge(
-          originalPopup.sourceNode,
-          newNode.id,
-          (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
-          sourceHandle,
-          targetHandle
-        );
+      const newEdge = createButtonEdge(
+        originalPopup.sourceNode,
+        newNode.id,
+        (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+        sourceHandle,
+        targetHandle
+      );
         newEdges.push(newEdge);
       }
 
@@ -668,52 +626,48 @@ export function useNodeSelector({
                        isLoopHandle(edge.sourceHandle) || 
                        isLoopHandle(edge.targetHandle);
 
-    logger.info('🔄 [API ENDPOINT - CASE 2] Inserting HTTP Request node between nodes', {
-      source: sourceNode.id,
-      target: targetNode.id,
-      edgeType: edge.type,
-      sourceHandle: edge.sourceHandle,
-      targetHandle: edge.targetHandle,
-      isLoopEdge,
-    });
 
     const newEdges: Edge[] = [];
 
     if (isLoopEdge) {
       // LOOP EDGE INSERTION: Maintain loop structure
-      logger.info('🔄 [API ENDPOINT - CASE 2] Inserting into loop edge', {
-        preservedSourceHandle,
-        preservedTargetHandle,
-        targetNodeType: targetNode.type,
-        targetNodeId: targetNode.id,
-        NODE_TYPE_WHILE,
-        isWhileNode: targetNode.type === NODE_TYPE_WHILE,
-      });
+      // Determine if incoming edge should be normal or loop
+      // If original edge was loop-back (targetHandle === 'back'), incoming should be NORMAL
+      // (because it's between nodes in the loop, not going back to the loop node)
+      // If original edge was loop (sourceHandle === 'loop'), incoming should be LOOP
+      // If both handles are undefined, it's also a normal edge between nodes
+      const shouldCreateNormalIncomingEdge = 
+        preservedTargetHandle === LOOP_HANDLE_IDS.BACK ||  // Loop-back edge → normal incoming
+        (preservedSourceHandle === undefined && preservedTargetHandle === undefined); // Both undefined → normal
+      
+      if (shouldCreateNormalIncomingEdge && preservedSourceHandle !== LOOP_HANDLE_IDS.LOOP) {
+        // Normal edge between nodes in loop (gray)
+        const incomingEdge = createButtonEdge(
+          sourceNode.id,
+          newNode.id,
+          (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+          undefined,
+          getTargetHandle('http-request')
+        );
+        newEdges.push(incomingEdge);
+      } else {
+        // Has loop handles → create loop edge
+        const incomingLoopEdge = createLoopEdge(
+          sourceNode.id,
+          newNode.id,
+          (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+          preservedSourceHandle,
+          getTargetHandle('http-request'),
+          preservedSourceHandle === LOOP_HANDLE_IDS.LOOP ? 'loop' : 'back'
+        );
+        newEdges.push(incomingLoopEdge);
+      }
 
-      // Incoming edge: preserve loop handle
-      const incomingLoopEdge = createLoopEdge(
-        sourceNode.id,
-        newNode.id,
-        (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
-        preservedSourceHandle, // Preserve 'loop' handle
-        getTargetHandle('http-request'),
-        preservedSourceHandle === LOOP_HANDLE_IDS.LOOP ? 'loop' : 'back'
-      );
-      newEdges.push(incomingLoopEdge);
-
-      // Outgoing edge: check if target is while node
-      if (targetNode.type === NODE_TYPE_WHILE) {
-        // Target is while node → create loop-back edge
+      // Outgoing edge: check if target is loop node
+      if (isLoopNodeType(targetNode.type)) {
+        // Target is loop node (while/foreach) → create loop-back edge
         // HTTP Request nodes don't have a 'back' handle, so use undefined (normal output)
         const loopBackSourceHandle = undefined; // HTTP Request nodes use normal output
-        
-        logger.info('✅ [API ENDPOINT - CASE 2] Target IS while node - creating loop-back edge', {
-          newNodeId: newNode.id,
-          newNodeType: newNode.type,
-          targetNodeId: targetNode.id,
-          loopBackSourceHandle,
-          loopBackHandle: LOOP_HANDLE_IDS.BACK,
-        });
         
         const loopBackEdge = createLoopEdge(
           newNode.id,
@@ -725,34 +679,50 @@ export function useNodeSelector({
         );
         newEdges.push(loopBackEdge);
       } else {
-        // Target is not while node → continue loop
-        const outgoingLoopEdge = createLoopEdge(
-          newNode.id,
-          targetNode.id,
-          (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
-          getSourceHandle('http-request'),
-          preservedTargetHandle, // Preserve target handle
-          preservedSourceHandle === LOOP_HANDLE_IDS.LOOP ? 'loop' : 'back'
-        );
-        newEdges.push(outgoingLoopEdge);
+        // Target is not loop node → continue loop
+        const outgoingSourceHandle = getSourceHandle('http-request');
+        
+        // If both handles are undefined, this is a normal edge between nodes in the loop
+        if (outgoingSourceHandle === undefined && preservedTargetHandle === undefined) {
+          // Normal edge between nodes in loop (gray)
+          const outgoingEdge = createButtonEdge(
+            newNode.id,
+            targetNode.id,
+            (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+            undefined,
+            preservedTargetHandle
+          );
+          newEdges.push(outgoingEdge);
+        } else {
+          // Has loop handles → create loop edge
+          const outgoingLoopEdge = createLoopEdge(
+            newNode.id,
+            targetNode.id,
+            (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+            outgoingSourceHandle,
+            preservedTargetHandle,
+            preservedSourceHandle === LOOP_HANDLE_IDS.LOOP ? 'loop' : 'back'
+          );
+          newEdges.push(outgoingLoopEdge);
+        }
       }
     } else {
       // Normal edge insertion
-      const incomingEdge = createButtonEdge(
-        sourceNode.id,
-        newNode.id,
-        (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
-        preservedSourceHandle,
-        getTargetHandle('http-request')
-      );
+    const incomingEdge = createButtonEdge(
+      sourceNode.id,
+      newNode.id,
+      (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+      preservedSourceHandle,
+      getTargetHandle('http-request')
+    );
 
-      const outgoingEdge = createButtonEdge(
-        newNode.id,
-        targetNode.id,
-        (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
-        getSourceHandle('http-request'),
-        preservedTargetHandle
-      );
+    const outgoingEdge = createButtonEdge(
+      newNode.id,
+      targetNode.id,
+      (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+      getSourceHandle('http-request'),
+      preservedTargetHandle
+    );
 
       newEdges.push(incomingEdge, outgoingEdge);
     }

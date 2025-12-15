@@ -65,7 +65,7 @@ export function AgentNode({ data, id, type, ...props }: NodeProps) {
   // Determine border and background based on execution status and animation
   const getBorderColor = () => {
     if (safeData.executionStatus === 'running' && safeData.isAnimating) {
-      return 'border-blue-500 animate-pulse';
+      return 'border-emerald-500 border-4 animate-pulse';
     }
     if (safeData.executionStatus === 'completed') {
       return 'border-green-500';
@@ -78,14 +78,14 @@ export function AgentNode({ data, id, type, ...props }: NodeProps) {
 
   const getBackgroundColor = () => {
     if (safeData.executionStatus === 'running' && safeData.isAnimating) {
-      return 'bg-blue-50';
+      return 'from-emerald-50 to-emerald-100';
     }
     return 'from-indigo-50 to-purple-50';
   };
 
   return (
     <div 
-      className={`relative w-[240px] h-[100px] px-4 py-3 rounded-lg shadow-md hover:shadow-lg bg-gradient-to-br ${getBackgroundColor()} border-2 ${getBorderColor()} transition-all duration-200 flex flex-col justify-center overflow-visible group ${safeData.isAnimating && safeData.executionStatus === 'running' ? 'ring-2 ring-blue-300 ring-opacity-50' : ''}`}
+      className={`relative w-[240px] h-[100px] px-4 py-3 rounded-lg shadow-md hover:shadow-lg bg-gradient-to-br ${getBackgroundColor()} ${getBorderColor()} transition-all duration-200 flex flex-col justify-center overflow-visible group ${safeData.isAnimating && safeData.executionStatus === 'running' ? 'ring-4 ring-emerald-400 ring-opacity-60 scale-105 animate-pulse' : ''}`}
       onMouseEnter={() => setIsNodeHovered(true)} // Set hovered state on node
       onMouseLeave={() => setIsNodeHovered(false)} // Reset hovered state on node
     >

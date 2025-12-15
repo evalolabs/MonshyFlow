@@ -28,15 +28,6 @@ export function StartNode({ data }: StartNodeProps) {
   const isAnimating = data?.isAnimating ?? false;
   const executionStatus = data?.executionStatus ?? 'idle';
 
-  // Debug log
-  if (isAnimating || executionStatus !== 'idle') {
-    console.log('[StartNode] Animation props:', { 
-      nodeId: (data as any)?.id || 'unknown',
-      isAnimating, 
-      executionStatus,
-      dataKeys: Object.keys(data || {})
-    });
-  }
 
   return (
     <div className="relative">

@@ -1070,7 +1070,339 @@ function getNestedValue(obj: any, path: string): any {
     return current;
 }
 
+// For-Each Node Processor
+// Iterate over an array and execute a block of nodes for each item
+registerNodeProcessor({
+    type: 'foreach',
+    name: 'For Each Node',
+    description: 'Iterate over an array and execute a block of nodes for each item',
+    processNodeData: async (node, input, context) => {
+        const nodeData = node.data || {};
+        const arrayPath = nodeData.arrayPath || '';
 
+        if (!arrayPath) {
+            throw new Error('For-Each Node: arrayPath is required');
+        }
+
+        // Build steps object from execution trace for expression resolution
+        const steps: Record<string, any> = {};
+        if (context.execution?.trace) {
+            for (const traceEntry of context.execution.trace) {
+                if (traceEntry.nodeId) {
+                    steps[traceEntry.nodeId] = traceEntry.output || traceEntry.input;
+                }
+            }
+        }
+
+        // Get secrets from workflow context
+        const secrets: Record<string, string> = {};
+        if (context.workflow?.secrets) {
+            Object.assign(secrets, context.workflow.secrets);
+        }
+
+        // Resolve arrayPath expression (e.g., {{steps.nodeId.json.data}})
+        const resolvedArrayPath = expressionResolutionService.resolveExpressions(
+            arrayPath,
+            { input: input?.json || context.input || {}, steps, secrets },
+            { execution: context.execution, currentNodeId: node.id }
+        );
+        let finalArrayPath: any = typeof resolvedArrayPath === 'string' ? resolvedArrayPath : resolvedArrayPath.result;
+
+        // If finalArrayPath is a string, try to parse it as JSON
+        if (typeof finalArrayPath === 'string') {
+            try {
+                const parsed = JSON.parse(finalArrayPath);
+                finalArrayPath = parsed;
+            } catch (e) {
+                // Not a JSON string, keep as is
+            }
+        }
+
+        // Resolve the array from the resolved expression
+        let array: any[] = [];
+        
+        if (Array.isArray(finalArrayPath)) {
+            // Direct array
+            array = finalArrayPath;
+        } else if (typeof finalArrayPath === 'object' && finalArrayPath !== null) {
+            // If it's an object, try to find an array within it
+            // Prioritize 'data', 'results', 'items', or the first array found
+            array = finalArrayPath.data || finalArrayPath.results || finalArrayPath.items;
+            if (!Array.isArray(array)) {
+                // Fallback: find the first property that is an array
+                for (const key in finalArrayPath) {
+                    if (Object.prototype.hasOwnProperty.call(finalArrayPath, key) && Array.isArray(finalArrayPath[key])) {
+                        array = finalArrayPath[key];
+                        break;
+                    }
+                }
+            }
+        } else if (typeof finalArrayPath === 'string') {
+            // If it's still a string (wasn't parsed as JSON), try to resolve it as a path
+            const trimmed = finalArrayPath.trim();
+            if (trimmed.startsWith('{{') && trimmed.endsWith('}}')) {
+                // Expression was not resolved (still contains {{}}), meaning the node/data was not found
+                throw new Error(`For-Each Node: arrayPath "${arrayPath}" could not be resolved. The referenced node or data may not exist.`);
+            } else {
+                // Try to resolve as path (legacy support for non-expression paths)
+                // First check if it's a steps reference
+                if (finalArrayPath.startsWith('steps.')) {
+                    const pathParts = finalArrayPath.substring(6).split('.');
+                    const nodeId = pathParts[0];
+                    const restPath = pathParts.slice(1).join('.');
+                    
+                    if (steps[nodeId]) {
+                        const nodeOutput = steps[nodeId];
+                        // If nodeOutput is NodeData, extract json
+                        const nodeData = nodeOutput?.json || nodeOutput;
+                        if (restPath) {
+                            array = resolvePath(nodeData, restPath);
+                        } else {
+                            array = Array.isArray(nodeData) ? nodeData : [];
+                        }
+                    } else {
+                        throw new Error(`For-Each Node: arrayPath "${arrayPath}" references node "${nodeId}" which was not found in execution trace`);
+                    }
+                } else {
+                    // Try to resolve from input
+                    const inputData = input?.json || context.input || {};
+                    array = resolvePath(inputData, finalArrayPath);
+                }
+            }
+        }
+
+        // Ensure array is actually an array
+        if (!Array.isArray(array)) {
+            throw new Error(`For-Each Node: arrayPath "${arrayPath}" does not resolve to an array. Got: ${typeof array} (resolved value: ${JSON.stringify(finalArrayPath).substring(0, 200)})`);
+        }
+
+        if (array.length === 0) {
+            // Empty array - return empty results
+            return createNodeData(
+                {
+                    iterations: 0,
+                    results: [],
+                    finalOutput: null,
+                },
+                node.id,
+                node.type || 'foreach',
+                input?.metadata?.nodeId
+            );
+        }
+
+        // Store results from each iteration
+        const results: any[] = [];
+        let finalOutput: any = null;
+
+        // Iterate over array
+        for (let index = 0; index < array.length; index++) {
+            const currentItem = array[index];
+            
+            // Create context for loop iteration
+            // Users can access:
+            // - loop.current: current array item
+            // - loop.index: current index (0-based)
+            // - loop.array: the full array
+            const loopContext = {
+                current: currentItem,
+                index: index,
+                array: array,
+            };
+
+            // Pass current item as input to loop body
+            // The loop body nodes will receive this as their input
+            const iterationInput = createNodeData(
+                {
+                    ...(input?.json || {}),
+                    loop: loopContext, // Add loop context
+                    current: currentItem, // For convenience
+                    index: index,
+                },
+                node.id,
+                node.type || 'foreach',
+                input?.metadata?.nodeId
+            );
+
+            // Store iteration input for later use in loop body
+            // Note: The actual loop body execution is handled by the execution service
+            // This processor just prepares the data structure
+            results.push({
+                index,
+                input: iterationInput,
+                current: currentItem,
+            });
+
+            finalOutput = iterationInput;
+        }
+
+        // Return summary with all results
+        return createNodeData(
+            {
+                iterations: array.length,
+                results: results.map(r => r.current), // Just the items, not the full input
+                finalOutput: finalOutput?.json || finalOutput,
+            },
+            node.id,
+            node.type || 'foreach',
+            input?.metadata?.nodeId
+        );
+    },
+});
+
+// If-Else Node Processor
+// Execute different paths based on a condition
+registerNodeProcessor({
+    type: 'ifelse',
+    name: 'If-Else Node',
+    description: 'Execute different paths based on a condition',
+    processNodeData: async (node, input, context) => {
+        const nodeData = node.data || {};
+        const condition = nodeData.condition || '';
+
+        if (!condition) {
+            throw new Error('If-Else Node: condition is required');
+        }
+
+        // Build steps object from execution trace for expression resolution
+        const steps: Record<string, any> = {};
+        if (context.execution?.trace) {
+            for (const traceEntry of context.execution.trace) {
+                if (traceEntry.nodeId) {
+                    steps[traceEntry.nodeId] = traceEntry.output || traceEntry.input;
+                }
+            }
+        }
+
+        // Get secrets from workflow context
+        const secrets: Record<string, string> = {};
+        if (context.workflow?.secrets) {
+            Object.assign(secrets, context.workflow.secrets);
+        }
+
+        // Resolve condition expression (e.g., {{loop.current.id}} === 5)
+        const resolvedCondition = expressionResolutionService.resolveExpressions(
+            condition,
+            { input: input?.json || context.input || {}, steps, secrets },
+            { execution: context.execution, currentNodeId: node.id }
+        );
+        const conditionString = typeof resolvedCondition === 'string' ? resolvedCondition : resolvedCondition.result;
+
+        // Evaluate condition
+        // Support common comparison operators: ===, ==, !==, !=, <, >, <=, >=
+        // Also support truthy/falsy evaluation
+        let conditionResult: boolean;
+        
+        try {
+            // Try to evaluate as JavaScript expression
+            // First, try to parse as a comparison
+            if (conditionString.includes('===') || conditionString.includes('!==') || 
+                conditionString.includes('==') || conditionString.includes('!=') ||
+                conditionString.includes('<=') || conditionString.includes('>=') ||
+                conditionString.includes('<') || conditionString.includes('>')) {
+                // It's a comparison - evaluate it
+                // Note: This is a simple evaluation - for production, consider using a proper expression evaluator
+                conditionResult = evaluateCondition(conditionString);
+            } else {
+                // Treat as truthy/falsy
+                conditionResult = !!conditionString && conditionString !== 'false' && conditionString !== '0' && conditionString !== '';
+            }
+        } catch (error) {
+            // If evaluation fails, treat as falsy
+            console.warn(`[If-Else Node] Failed to evaluate condition: ${conditionString}`, error);
+            conditionResult = false;
+        }
+
+        // Return result with condition evaluation
+        return createNodeData(
+            {
+                condition: conditionString,
+                result: conditionResult,
+                output: input?.json || input || {},
+            },
+            node.id,
+            node.type || 'ifelse',
+            input?.metadata?.nodeId
+        );
+    },
+});
+
+// Helper: Evaluate condition string
+function evaluateCondition(condition: string): boolean {
+    // Simple condition evaluator
+    // Supports: ===, ==, !==, !=, <, >, <=, >=
+    // For more complex expressions, consider using a proper expression evaluator library
+    
+    try {
+        // Remove whitespace
+        const cleanCondition = condition.trim();
+        
+        // Try different operators
+        if (cleanCondition.includes('===')) {
+            const [left, right] = cleanCondition.split('===').map(s => s.trim());
+            return evaluateValue(left) === evaluateValue(right);
+        } else if (cleanCondition.includes('!==')) {
+            const [left, right] = cleanCondition.split('!==').map(s => s.trim());
+            return evaluateValue(left) !== evaluateValue(right);
+        } else if (cleanCondition.includes('==')) {
+            const [left, right] = cleanCondition.split('==').map(s => s.trim());
+            return evaluateValue(left) == evaluateValue(right);
+        } else if (cleanCondition.includes('!=')) {
+            const [left, right] = cleanCondition.split('!=').map(s => s.trim());
+            return evaluateValue(left) != evaluateValue(right);
+        } else if (cleanCondition.includes('<=')) {
+            const [left, right] = cleanCondition.split('<=').map(s => s.trim());
+            return Number(evaluateValue(left)) <= Number(evaluateValue(right));
+        } else if (cleanCondition.includes('>=')) {
+            const [left, right] = cleanCondition.split('>=').map(s => s.trim());
+            return Number(evaluateValue(left)) >= Number(evaluateValue(right));
+        } else if (cleanCondition.includes('<')) {
+            const [left, right] = cleanCondition.split('<').map(s => s.trim());
+            return Number(evaluateValue(left)) < Number(evaluateValue(right));
+        } else if (cleanCondition.includes('>')) {
+            const [left, right] = cleanCondition.split('>').map(s => s.trim());
+            return Number(evaluateValue(left)) > Number(evaluateValue(right));
+        }
+        
+        // If no operator found, evaluate as truthy/falsy
+        return !!evaluateValue(cleanCondition);
+    } catch (error) {
+        console.warn(`[If-Else Node] Error evaluating condition: ${condition}`, error);
+        return false;
+    }
+}
+
+// Helper: Evaluate a value (handle strings, numbers, booleans)
+function evaluateValue(value: string): any {
+    // Remove quotes if present
+    const trimmed = value.trim();
+    
+    // Try to parse as number
+    if (!isNaN(Number(trimmed)) && trimmed !== '') {
+        return Number(trimmed);
+    }
+    
+    // Try to parse as boolean
+    if (trimmed === 'true') return true;
+    if (trimmed === 'false') return false;
+    
+    // Try to parse as JSON
+    if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || 
+        (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+        try {
+            return JSON.parse(trimmed);
+        } catch {
+            // Not valid JSON, return as string
+        }
+    }
+    
+    // Return as string (remove quotes if present)
+    if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || 
+        (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+        return trimmed.slice(1, -1);
+    }
+    
+    return trimmed;
+}
 
 // ============================================
 // END AUTO-GENERATED REGISTRATIONS

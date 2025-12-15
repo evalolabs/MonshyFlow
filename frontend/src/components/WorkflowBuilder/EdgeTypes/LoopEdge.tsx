@@ -23,6 +23,7 @@ interface LoopEdgeProps extends Omit<EdgeProps, 'data'> {
   data?: LoopEdgeData;
   sourceHandle?: string | null;
   targetHandle?: string | null;
+  currentAnimatedNodeId?: string | null;
 }
 
 export const LoopEdge: React.FC<LoopEdgeProps> = ({
@@ -40,6 +41,7 @@ export const LoopEdge: React.FC<LoopEdgeProps> = ({
   data,
   markerEnd,
   style = {},
+  currentAnimatedNodeId,
 }) => {
   // Determine loop type from handles or data
   // Priority: data.loopType > targetHandle === 'back' > sourceHandle === 'back' > sourceHandle === 'loop' > default 'loop'
@@ -123,14 +125,21 @@ export const LoopEdge: React.FC<LoopEdgeProps> = ({
     }
   };
 
+  // Check if this edge is connected to the currently animated node
+  const isActiveEdge = currentAnimatedNodeId === source || currentAnimatedNodeId === target;
+  
   // Loop edge styling: dashed line, purple/red color
+  // Enhanced for active edges during execution
   const loopEdgeStyle = {
     ...style,
-    strokeWidth: 2.5,
-    stroke: loopType === 'back' ? '#ef4444' : '#a855f7', // Red for back, purple for loop
+    strokeWidth: isActiveEdge ? 3.5 : 2.5,
+    stroke: isActiveEdge 
+      ? '#10b981' // Emerald for active edges
+      : (loopType === 'back' ? '#ef4444' : '#a855f7'), // Red for back, purple for loop
     strokeDasharray: '8,4', // Dashed line
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,
+    transition: 'all 0.3s ease',
   };
 
   return (
@@ -139,7 +148,8 @@ export const LoopEdge: React.FC<LoopEdgeProps> = ({
         id={id} 
         path={edgePath} 
         markerEnd={markerEnd} 
-        style={loopEdgeStyle} 
+        style={loopEdgeStyle}
+        className={isActiveEdge ? 'animate-pulse' : ''}
       />
       <EdgeLabelRenderer>
         <div

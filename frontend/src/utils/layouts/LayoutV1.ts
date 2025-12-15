@@ -14,7 +14,7 @@
 import type { Node, Edge } from '@xyflow/react';
 import dagre from 'dagre';
 import type { LayoutStrategy, LayoutStrategyOptions, LayoutResult } from './types';
-import { EDGE_TYPE_LOOP, isLoopHandle, NODE_TYPE_WHILE, LOOP_HANDLE_IDS } from '../../components/WorkflowBuilder/constants';
+import { EDGE_TYPE_LOOP, isLoopHandle, isLoopNodeType, LOOP_HANDLE_IDS } from '../../components/WorkflowBuilder/constants';
 
 // Helper functions
 function isAgentBottomInputEdge(edge: Edge): boolean {
@@ -38,24 +38,24 @@ function isLoopEdge(edge: Edge): boolean {
 }
 
 /**
- * Find all nodes that are inside a while loop
- * Returns a map: whileNodeId -> Array of nodeIds inside that loop (in order)
+ * Find all nodes that are inside a loop (while or foreach)
+ * Returns a map: loopNodeId -> Array of nodeIds inside that loop (in order)
  * Uses BFS to find all nodes connected via loop edges
  */
 function findLoopNodes(nodes: Node[], edges: Edge[]): Map<string, string[]> {
   const loopMap = new Map<string, string[]>();
   
-  // Find all while nodes
-  const whileNodes = nodes.filter(node => node.type === NODE_TYPE_WHILE);
+  // Find all loop nodes (while and foreach)
+  const loopNodes = nodes.filter(node => isLoopNodeType(node.type));
   
-  for (const whileNode of whileNodes) {
+  for (const loopNode of loopNodes) {
     const loopNodes: string[] = [];
     const visited = new Set<string>();
     const queue: string[] = [];
     
     // Find nodes connected via 'loop' handle (forward direction)
     const loopEdges = edges.filter(edge => 
-      edge.source === whileNode.id && 
+      edge.source === loopNode.id && 
       edge.sourceHandle === LOOP_HANDLE_IDS.LOOP
     );
     
@@ -76,8 +76,8 @@ function findLoopNodes(nodes: Node[], edges: Edge[]): Map<string, string[]> {
       const outgoingEdges = edges.filter(edge => edge.source === currentNodeId);
       
       for (const edge of outgoingEdges) {
-        // If this edge loops back to the while node, skip it
-        if (edge.target === whileNode.id && 
+        // If this edge loops back to the loop node, skip it
+        if (edge.target === loopNode.id && 
             (edge.targetHandle === LOOP_HANDLE_IDS.BACK || isLoopHandle(edge.targetHandle))) {
           continue;
         }
@@ -92,7 +92,7 @@ function findLoopNodes(nodes: Node[], edges: Edge[]): Map<string, string[]> {
     }
     
     if (loopNodes.length > 0) {
-      loopMap.set(whileNode.id, loopNodes);
+      loopMap.set(loopNode.id, loopNodes);
     }
   }
   
@@ -242,27 +242,27 @@ export const LayoutV1: LayoutStrategy = {
         }
       }
 
-      // Check if this node is inside a loop - position it relative to the while node
-      let whileNodeId: string | null = null;
-      for (const [wId, loopNodes] of loopMap.entries()) {
+      // Check if this node is inside a loop - position it relative to the loop node (while/foreach)
+      let loopNodeId: string | null = null;
+      for (const [lId, loopNodes] of loopMap.entries()) {
         if (loopNodes.includes(node.id)) {
-          whileNodeId = wId;
+          loopNodeId = lId;
           break;
         }
       }
       
-      if (whileNodeId) {
-        // This is a loop node - position it relative to the while node
-        const whileNodePosition = dagreGraph.node(whileNodeId);
-        if (whileNodePosition) {
-          const loopNodes = loopMap.get(whileNodeId) || [];
+      if (loopNodeId) {
+        // This is a loop node - position it relative to the loop node (while/foreach)
+        const loopNodePosition = dagreGraph.node(loopNodeId);
+        if (loopNodePosition) {
+          const loopNodes = loopMap.get(loopNodeId) || [];
           const nodeIndex = loopNodes.indexOf(node.id);
           
           // Position loop nodes in a stair-step layout (diagonal down-right)
           // This prevents overlapping when multiple loops exist
           // Each node is positioned slightly to the right and down from the previous one
-          const x = whileNodePosition.x + (nodeIndex * (nodeWidth + 50)); // Horizontal spacing
-          const y = whileNodePosition.y + nodeHeight + 150 + (nodeIndex * 60); // Stair-step: each node goes further down
+          const x = loopNodePosition.x + (nodeIndex * (nodeWidth + 50)); // Horizontal spacing
+          const y = loopNodePosition.y + nodeHeight + 150 + (nodeIndex * 60); // Stair-step: each node goes further down
           
           return {
             ...node,

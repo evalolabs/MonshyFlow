@@ -11,6 +11,7 @@ interface ButtonEdgeData {
 interface ButtonEdgeProps extends Omit<EdgeProps, 'data'> {
   data?: ButtonEdgeData;
   targetHandle?: string | null;
+  currentAnimatedNodeId?: string | null;
 }
 
 /**
@@ -37,6 +38,7 @@ export const ButtonEdge: React.FC<ButtonEdgeProps> = ({
   data,
   markerEnd,
   style = {},
+  currentAnimatedNodeId,
 }) => {
   const { getEdge, getNode } = useReactFlow();
   
@@ -118,9 +120,28 @@ export const ButtonEdge: React.FC<ButtonEdgeProps> = ({
   // Don't show button for tool edges (agent bottom inputs or toolEdge type)
   const showButton = !isToolEdgeConnection;
 
+  // Check if this edge is connected to the currently animated node
+  const isActiveEdge = currentAnimatedNodeId === source || currentAnimatedNodeId === target;
+  
+  // Enhanced style for active edges during execution
+  const edgeStyle = isActiveEdge && currentAnimatedNodeId
+    ? {
+        ...style,
+        stroke: '#10b981', // Emerald-500
+        strokeWidth: 3,
+        transition: 'all 0.3s ease',
+      }
+    : style;
+
   return (
     <>
-      <BaseEdge id={id} path={edgePath} markerEnd={markerEnd} style={style} />
+      <BaseEdge 
+        id={id} 
+        path={edgePath} 
+        markerEnd={markerEnd} 
+        style={edgeStyle}
+        className={isActiveEdge ? 'animate-pulse' : ''}
+      />
       {showButton && (
         <EdgeLabelRenderer>
           <div

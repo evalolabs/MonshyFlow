@@ -42,7 +42,7 @@ import {
   useWorkflowExecution,
   useAgentToolPositioning,
 } from './hooks';
-import { useSequentialNodeAnimation } from './hooks/useSequentialNodeAnimation';
+import { useWorkflowAnimation } from './hooks/useWorkflowAnimation';
 import { useSecrets } from './hooks/useSecrets';
 
 // Services & Utils
@@ -460,12 +460,39 @@ export function WorkflowCanvas({
   }, []);
 
   // Handler to start animation immediately when Play button is clicked
-  const handleDebugTestStart = useCallback((nodeId: string, _step: any) => {
+  const handleDebugTestStart = useCallback((nodeId: string, step: any) => {
     // Start animation IMMEDIATELY when Play button is clicked (before backend call)
-    // console.log('[WorkflowCanvas] Node test started - triggering animation immediately:', nodeId);
-    
     // Set testing state to trigger animation
     // This will trigger animation for all nodes from Start to this node
+    
+    // LOG 1: Workflow-Elemente
+    const fullOrder = edges.length > 0 
+      ? buildNodeOrderForDebugPanel(nodes, edges)
+      : nodes;
+    console.log('[Animation] 📋 Workflow-Elemente:', {
+      totalNodes: nodes.length,
+      totalEdges: edges.length,
+      executionOrder: fullOrder.map(n => ({
+        id: n.id,
+        type: n.type,
+        label: n.data?.label || n.type
+      })),
+      testedNodeId: nodeId,
+      testedNodeType: step?.nodeType || 'unknown',
+      testedNodeLabel: step?.nodeLabel || step?.nodeType || nodeId
+    });
+    
+    // LOG 2: Welcher Node wurde geklickt
+    const clickedNode = nodes.find(n => n.id === nodeId);
+    console.log('[Animation] 🖱️ Node geklickt:', {
+      nodeId,
+      nodeType: step?.nodeType || clickedNode?.type || 'unknown',
+      nodeLabel: step?.nodeLabel || clickedNode?.data?.label || nodeId,
+      position: clickedNode?.position,
+      hasInput: clickedNode?.data?.hasInput,
+      hasOutput: clickedNode?.data?.hasOutput
+    });
+    
     setTestingNodeId(nodeId);
     
     // Create SSE connection for real-time events (if not already connected)
@@ -473,7 +500,6 @@ export function WorkflowCanvas({
       // Use Gateway (Port 5000) instead of direct service (Port 5002)
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const eventsStreamUrl = `${API_URL}/api/events/stream`;
-      // console.log('[WorkflowCanvas] Creating SSE connection for node test:', eventsStreamUrl);
       const sse = createSSEConnection(eventsStreamUrl);
       sse.connect();
       setSseConnection(sse);
@@ -481,9 +507,7 @@ export function WorkflowCanvas({
     
     // Calculate animation duration based on number of nodes in the path
     // This is a fallback estimate - actual duration comes from SSE events
-    const fullOrder = edges.length > 0 
-      ? buildNodeOrderForDebugPanel(nodes, edges)
-      : nodes;
+    // fullOrder is already defined above for LOG 1
     const testNodeIndex = fullOrder.findIndex(n => n.id === nodeId);
     const nodesInPath = testNodeIndex >= 0 ? testNodeIndex + 1 : 1;
     
@@ -543,8 +567,9 @@ export function WorkflowCanvas({
     // Animation should already be running from handleDebugTestStart
     // console.log('[WorkflowCanvas] Node test result:', result, 'nodeId:', originalStep.nodeId);
     
-    // Reset testingNodeId after a short delay to allow animation to complete
+    // Reset testingNodeId after a longer delay to allow animation to complete
     // This ensures the animation finishes before we reset the state
+    // For fast nodes: 200ms timeout + 1000ms additional visibility = 1200ms total
     setTimeout(() => {
       setTestingNodeId(prevTestingNodeId => {
         if (prevTestingNodeId === originalStep.nodeId) {
@@ -553,7 +578,7 @@ export function WorkflowCanvas({
         }
         return prevTestingNodeId; // Keep current value if it changed (new test started)
       });
-    }, 500); // Small delay to allow final animation states
+    }, 1500); // Longer delay to allow animation to complete (200ms + 1000ms + buffer)
     
     // Extract data from response structure: { success: true, data: { output: {...}, execution: {...} } }
     const responseData = result.data || result;
@@ -744,20 +769,133 @@ export function WorkflowCanvas({
     closeExecutionMonitor,
   } = useWorkflowExecution({ workflowId });
 
+  // Use executing for animation, and convert debugSteps to executionSteps format
+  // Also support single node testing animation
+  // MUST be declared after executing is available, but before useEffect that uses it (line 599)
+  const isExecuting = executing || testingNodeId !== null;
+
+  // Update debugSteps in real-time based on SSE events (like Activepieces updates run.steps)
+  useEffect(() => {
+    if (!sseConnection || !isExecuting) {
+      return;
+    }
+
+    // Track animation start times for duration calculation
+    const nodeAnimationStartTimes = new Map<string, number>();
+
+    const handleNodeStart = (event: any) => {
+      const nodeId = event.data?.node_id || event.data?.nodeId;
+      if (!nodeId) return;
+
+      // LOG 3: Animation start - track start time
+      const startTime = Date.now();
+      nodeAnimationStartTimes.set(nodeId, startTime);
+      
+      const nodeLabel = event.data?.nodeLabel || event.data?.node_label || nodeId;
+      console.log(`[Animation] ▶️ Node-Animation gestartet: ${nodeLabel} (${nodeId})`, {
+        nodeId,
+        nodeType: event.data?.nodeType || event.data?.node_type || 'unknown',
+        nodeLabel,
+        startTime: new Date(startTime).toISOString(),
+        timestamp: startTime
+      });
+
+      // Update debugSteps in real-time - mark node as 'running'
+      setDebugSteps(prevSteps => {
+        const existingIndex = prevSteps.findIndex(step => step.nodeId === nodeId);
+        if (existingIndex >= 0) {
+          // Update existing step
+          const newSteps = [...prevSteps];
+          newSteps[existingIndex] = {
+            ...newSteps[existingIndex],
+            status: 'running',
+            startedAt: event.data?.startedAt || new Date().toISOString(),
+          };
+          return newSteps;
+        } else {
+          // Add new step if it doesn't exist
+          return [...prevSteps, {
+            nodeId,
+            nodeType: event.data?.nodeType || event.data?.node_type || 'unknown',
+            nodeLabel: event.data?.nodeLabel || event.data?.node_label,
+            status: 'running',
+            startedAt: event.data?.startedAt || new Date().toISOString(),
+            completedAt: null,
+            duration: 0,
+          }];
+        }
+      });
+    };
+
+    const handleNodeEnd = (event: any) => {
+      const nodeId = event.data?.node_id || event.data?.nodeId;
+      if (!nodeId) return;
+
+      // LOG 3: Animation end - calculate duration
+      const endTime = Date.now();
+      const startTime = nodeAnimationStartTimes.get(nodeId);
+      const animationDuration = startTime ? endTime - startTime : event.data?.duration || 0;
+      
+      // Clean up start time
+      if (startTime) {
+        nodeAnimationStartTimes.delete(nodeId);
+      }
+      
+      const nodeLabel = event.data?.nodeLabel || event.data?.node_label || nodeId;
+      console.log(`[Animation] ⏹️ Node-Animation beendet: ${nodeLabel} (${nodeId})`, {
+        nodeId,
+        nodeType: event.data?.nodeType || event.data?.node_type || 'unknown',
+        nodeLabel,
+        animationDuration: `${animationDuration}ms`,
+        backendDuration: event.data?.duration ? `${event.data.duration}ms` : 'N/A',
+        endTime: new Date(endTime).toISOString(),
+        timestamp: endTime
+      });
+
+      // Update debugSteps in real-time - mark node as 'completed'
+      setDebugSteps(prevSteps => {
+        const existingIndex = prevSteps.findIndex(step => step.nodeId === nodeId);
+        if (existingIndex >= 0) {
+          // Update existing step
+          const newSteps = [...prevSteps];
+          newSteps[existingIndex] = {
+            ...newSteps[existingIndex],
+            status: 'completed',
+            output: event.data?.output,
+            completedAt: event.data?.completedAt || new Date().toISOString(),
+            duration: event.data?.duration || 0,
+          };
+          return newSteps;
+        } else {
+          // Add new step if it doesn't exist
+          return [...prevSteps, {
+            nodeId,
+            nodeType: event.data?.nodeType || event.data?.node_type || 'unknown',
+            nodeLabel: event.data?.nodeLabel || event.data?.node_label,
+            status: 'completed',
+            output: event.data?.output,
+            startedAt: event.data?.startedAt || new Date().toISOString(),
+            completedAt: event.data?.completedAt || new Date().toISOString(),
+            duration: event.data?.duration || 0,
+          }];
+        }
+      });
+    };
+
+    // Register SSE event handlers
+    sseConnection.on('node.start', handleNodeStart);
+    sseConnection.on('node.end', handleNodeEnd);
+
+    return () => {
+      // Cleanup handlers (SSE connection handles cleanup on disconnect)
+    };
+  }, [sseConnection, isExecuting]);
+
   // Load secrets for validation
   const { secrets: allSecrets } = useSecrets();
   // Convert to simplified format for node components
   const secrets = allSecrets.map(s => ({ key: s.name, isActive: s.isActive }));
 
-  // Use executing for animation, and convert debugSteps to executionSteps format
-  // Also support single node testing animation
-  const isExecuting = executing || testingNodeId !== null;
-  
-  // Debug: Log when executing changes
-  useEffect(() => {
-    // console.log('[WorkflowCanvas] executing state changed:', executing, 'testingNodeId:', testingNodeId, 'isExecuting:', isExecuting);
-  }, [executing, testingNodeId, isExecuting]);
-  
   const executionSteps = useMemo(() => {
     // Convert debugSteps to executionSteps format for animation
     return debugSteps.map(step => ({
@@ -771,9 +909,7 @@ export function WorkflowCanvas({
       completedAt: step.completedAt,
       duration: step.duration,
     }));
-  }, [debugSteps]);
-
-
+  }, [debugSteps, isExecuting]);
 
   // Update debug steps when executing
   React.useEffect(() => {
@@ -803,14 +939,11 @@ export function WorkflowCanvas({
   }, [executing]);
 
 
-  // Sequential node animation for live execution visualization
-  const { currentAnimatedNodeId } = useSequentialNodeAnimation({
-    nodes,
-    edges,
+  // Simplified workflow animation - status-based (like Activepieces)
+  // executionSteps wird in Echtzeit aktualisiert durch SSE-Events oben
+  const { currentAnimatedNodeId, isNodeAnimating } = useWorkflowAnimation({
     executionSteps,
-    sseConnection: sseConnection, // Use SSE connection for real-time events (node tests and full executions)
     isExecuting,
-    testingNodeId, // Pass testingNodeId for single node tests
   });
 
   // Debug log for animation state
@@ -828,10 +961,10 @@ export function WorkflowCanvas({
   // Get node types from registry (automatically includes all registered nodes)
   // Memoize with stable reference to avoid React Flow warnings
   const nodeTypes = useMemo(() => {
-    const types = createNodeTypesMap(isExecuting, executionSteps, currentAnimatedNodeId, handleUpdateComment, secrets, showOverlays);
+    const types = createNodeTypesMap(isExecuting, executionSteps, currentAnimatedNodeId, handleUpdateComment, secrets, showOverlays, isNodeAnimating);
     // Return a stable reference
     return types;
-  }, [isExecuting, executionSteps.length, currentAnimatedNodeId, handleUpdateComment, secrets, showOverlays]);
+  }, [isExecuting, executionSteps.length, currentAnimatedNodeId, handleUpdateComment, secrets, showOverlays, isNodeAnimating]);
 
   // Calculate which nodes need add-node buttons
   const nodesWithAddButtons = useMemo(() => {

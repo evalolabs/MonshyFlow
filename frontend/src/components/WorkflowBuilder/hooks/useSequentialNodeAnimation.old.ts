@@ -53,10 +53,6 @@ export function useSequentialNodeAnimation({
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasStartedRef = useRef<boolean>(false);
   const receivedNodeStartEventsRef = useRef<Set<string>>(new Set()); // Buffer for node.start events that arrived early
-  const nodeAnimationStartTimeRef = useRef<Map<string, number>>(new Map());
-  const workflowStructureLoggedRef = useRef<boolean>(false);
-  const stopTimeoutRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map()); // Track stop timeouts to prevent duplicates
-  const currentAnimatedNodeIdRef = useRef<string | null>(null); // Track current animated node ID for immediate access by SSE events
   
   // Memoize execution order calculation to prevent unnecessary recalculations
   const calculatedExecutionOrder = useMemo(() => {
@@ -120,69 +116,32 @@ export function useSequentialNodeAnimation({
 
   // 1. Berechne Execution-Reihenfolge wenn Execution startet
   useEffect(() => {
-    // Log workflow structure on initial load (only once)
-    if (nodes.length > 0 && edges.length > 0 && !workflowStructureLoggedRef.current) {
-      const workflowStructure = {
-        nodes: nodes.map(n => ({
-          id: n.id,
-          type: n.type,
-          label: n.data?.label || 'No label',
-          position: { x: n.position.x, y: n.position.y }
-        })),
-        edges: edges.map(e => ({
-          id: e.id,
-          source: e.source,
-          target: e.target,
-          sourceHandle: e.sourceHandle,
-          targetHandle: e.targetHandle
-        })),
-        executionOrder: calculatedExecutionOrder.map(n => ({
-          id: n.id,
-          type: n.type,
-          label: n.data?.label || 'No label',
-          isFast: n.type ? isFastNode(n.type) : false,
-          isSlow: n.type ? isSlowNode(n.type) : false
-        }))
-      };
-      console.log('Workflow Structure:', workflowStructure);
-      workflowStructureLoggedRef.current = true;
-    }
+    // console.log('[Animation] Effect triggered:', { isExecuting, nodesCount: nodes.length, edgesCount: edges.length, testingNodeId, calculatedOrderLength: calculatedExecutionOrder.length });
     
     // Detect if execution just started (transition from false to true)
     const executionJustStarted = !prevIsExecutingRef.current && isExecuting;
     const testingNodeChanged = prevTestingNodeIdRef.current !== testingNodeId;
     
     // CRITICAL: If testingNodeId changed, immediately reset everything to prevent race conditions
-    // BUT: Don't reset if we're currently animating the tested node and testingNodeId is being cleared
-    // This allows the animation to complete before resetting
     if (testingNodeChanged && prevTestingNodeIdRef.current !== null) {
-      const currentlyAnimatingTestedNode = animationState.currentAnimatedNodeId === prevTestingNodeIdRef.current;
-      
-      if (currentlyAnimatingTestedNode && !testingNodeId) {
-        // We're animating the tested node and testingNodeId is being cleared
-        // Don't reset immediately - let the timeout handle it
-        console.log(`[Animation] testingNodeId cleared but node ${prevTestingNodeIdRef.current} is still animating, delaying reset`);
-        // Don't reset here - the timeout will handle stopping the animation
-      } else {
-        // console.log('[Animation] ⚠️ testingNodeId changed - immediately resetting animation state to prevent race conditions');
-        // Clear all timeouts immediately
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-          timeoutRef.current = null;
-        }
-        // Reset all refs immediately
-        waitingForEventRef.current = false;
-        waitingForStartEventRef.current = false;
-        hasStartedRef.current = false;
-        receivedNodeStartEventsRef.current.clear();
-        // Reset animation state immediately
-        setAnimationState({
-          currentAnimatedNodeId: null,
-          executionOrder: [],
-          currentIndex: 0,
-          waitingForEvent: false,
-        });
+      // console.log('[Animation] ⚠️ testingNodeId changed - immediately resetting animation state to prevent race conditions');
+      // Clear all timeouts immediately
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
+      // Reset all refs immediately
+      waitingForEventRef.current = false;
+      waitingForStartEventRef.current = false;
+      hasStartedRef.current = false;
+      receivedNodeStartEventsRef.current.clear();
+      // Reset animation state immediately
+      setAnimationState({
+        currentAnimatedNodeId: null,
+        executionOrder: [],
+        currentIndex: 0,
+        waitingForEvent: false,
+      });
     }
     
     // Update refs
@@ -224,15 +183,11 @@ export function useSequentialNodeAnimation({
       waitingForEventRef.current = false;
       waitingForStartEventRef.current = false;
       receivedNodeStartEventsRef.current.clear();
-      currentAnimatedNodeIdRef.current = null;
       // Clear any pending timeouts
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
-      // Clear stop timeouts
-      stopTimeoutRef.current.forEach(timeout => clearTimeout(timeout));
-      stopTimeoutRef.current.clear();
     } else if (!isExecuting) {
       // Reset when execution stops
       // console.log('[Animation] Execution stopped, resetting animation');
@@ -248,9 +203,6 @@ export function useSequentialNodeAnimation({
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
-      // Clear stop timeouts
-      stopTimeoutRef.current.forEach(timeout => clearTimeout(timeout));
-      stopTimeoutRef.current.clear();
     }
   }, [isExecuting, calculatedExecutionOrder, testingNodeId]);
 
@@ -259,14 +211,6 @@ export function useSequentialNodeAnimation({
     setAnimationState(prev => {
       if (prev.currentIndex >= prev.executionOrder.length) {
         // Alle Nodes animiert → fertig
-        // CRITICAL: If we're currently animating the tested node, don't stop immediately
-        // This allows the animation to complete its timeout duration
-        if (testingNodeId && prev.currentAnimatedNodeId === testingNodeId) {
-          // We're animating the tested node - let the timeout handle stopping
-          // Don't stop here, return current state to keep animation visible
-          console.log(`[moveToNextNode] At end, but tested node ${testingNodeId} is still animating, keeping animation visible`);
-          return prev;
-        }
         // If this was a node test, stop here (don't continue to next nodes)
         if (testingNodeId) {
           // console.log('[Animation] Node test completed - stopping at tested node');
@@ -286,22 +230,15 @@ export function useSequentialNodeAnimation({
       const nextNode = prev.executionOrder[prev.currentIndex];
       const nextIndex = prev.currentIndex + 1;
       const isTestedNode = testingNodeId && nextNode.id === testingNodeId;
-      
-      // Debug: Log when moving to next node
-      const nodeLabel = nextNode.data?.label || nextNode.type || nextNode.id;
-      const isFast = nextNode.type ? isFastNode(nextNode.type) : false;
-      const isSlow = nextNode.type ? isSlowNode(nextNode.type) : false;
-      console.log(`[moveToNextNode] Moving to: ${nodeLabel} (${nextNode.id}), type: ${nextNode.type}, fast: ${isFast}, slow: ${isSlow}, index: ${prev.currentIndex}/${prev.executionOrder.length}`);
 
       // If we're already animating this node, don't process it again
       if (prev.currentAnimatedNodeId === nextNode.id && (waitingForEventRef.current || waitingForStartEventRef.current)) {
-        console.log(`[moveToNextNode] Already animating ${nextNode.data?.label || nextNode.type || nextNode.id}, skipping duplicate call`);
+        // console.log('[Animation] Already animating this node, skipping:', nextNode.id);
         return prev;
       }
 
       // Clear any existing timeout
       if (timeoutRef.current) {
-        console.log(`[moveToNextNode] Clearing existing timeout for ${prev.currentAnimatedNodeId || 'none'}`);
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
@@ -350,8 +287,6 @@ export function useSequentialNodeAnimation({
           
           // Set currentAnimatedNodeId to show node is waiting, and increment index
           // IMPORTANT: For tested node, we must NOT stop here - we need to wait for node.start and node.end
-          // Don't set start time here - wait for node.start event (that's when animation really starts)
-          
           return {
             ...prev,
             currentAnimatedNodeId: nextNode.id, // Mark node as waiting for start
@@ -369,155 +304,38 @@ export function useSequentialNodeAnimation({
         animationDuration = 1500;
       }
 
-      // Set current animated node and track start time (for fast nodes)
-      // IMPORTANT: Set start time BEFORE scheduling timeout to ensure accurate duration
-      if (animationDuration !== null) {
-        // CRITICAL: For tested nodes, prevent duplicate calls that happen too quickly
-        // BUT: Ensure currentAnimatedNodeId is set even if we skip the timeout
-        if (isTestedNode && nodeAnimationStartTimeRef.current.has(nextNode.id)) {
-          const existingStartTime = nodeAnimationStartTimeRef.current.get(nextNode.id);
-          const timeSinceStart = Date.now() - (existingStartTime || 0);
-          if (timeSinceStart < 100) { // If set less than 100ms ago, it's likely a duplicate call
-            console.log(`[moveToNextNode] Tested node ${nextNode.data?.label || nextNode.type || nextNode.id} start time was just set (${timeSinceStart}ms ago), skipping duplicate call but ensuring currentAnimatedNodeId is set`);
-            // CRITICAL: Even if we skip the timeout, ensure currentAnimatedNodeId is set
-            if (prev.currentAnimatedNodeId !== nextNode.id) {
-              return {
-                ...prev,
-                currentAnimatedNodeId: nextNode.id,
-              };
-            }
-            return prev;
-          }
-        }
-        
-        // Also check if timeout is already set for this node
-        if (timeoutRef.current && nodeAnimationStartTimeRef.current.has(nextNode.id)) {
-          const existingStartTime = nodeAnimationStartTimeRef.current.get(nextNode.id);
-          const timeSinceStart = Date.now() - (existingStartTime || 0);
-          if (timeSinceStart < 100) {
-            console.log(`[moveToNextNode] Timeout already set for ${nextNode.data?.label || nextNode.type || nextNode.id} (started ${timeSinceStart}ms ago), skipping duplicate call but ensuring currentAnimatedNodeId is set`);
-            // CRITICAL: Even if we skip the timeout, ensure currentAnimatedNodeId is set
-            if (prev.currentAnimatedNodeId !== nextNode.id) {
-              return {
-                ...prev,
-                currentAnimatedNodeId: nextNode.id,
-              };
-            }
-            return prev;
-          }
-        }
-        
-        const animationStartTime = Date.now();
-        // Always set/update start time when moving to a new node
-        // This ensures we have the correct start time even if moveToNextNode is called multiple times
-        const previousStartTime = nodeAnimationStartTimeRef.current.get(nextNode.id);
-        nodeAnimationStartTimeRef.current.set(nextNode.id, animationStartTime);
-        if (previousStartTime) {
-          console.log(`[moveToNextNode] Updated start time for ${nextNode.data?.label || nextNode.type || nextNode.id}: ${previousStartTime} -> ${animationStartTime}, duration: ${animationDuration}ms`);
-        } else {
-          console.log(`[moveToNextNode] Set start time for ${nextNode.data?.label || nextNode.type || nextNode.id}: ${animationStartTime}, duration: ${animationDuration}ms`);
-        }
-      }
-      
+      // Set current animated node
+      // console.log('[Animation] Animating node:', nextNode.id, 'type:', nextNode.type, 'duration:', animationDuration);
       const newState = {
         ...prev,
         currentAnimatedNodeId: nextNode.id,
         currentIndex: nextIndex,
         waitingForEvent: animationDuration === null,
       };
-      
-      // Debug: Log state update for tested nodes
-      if (isTestedNode) {
-        console.log(`[moveToNextNode] Setting currentAnimatedNodeId to ${nextNode.id} for tested node ${nextNode.data?.label || nextNode.type || nextNode.id}`);
-      }
-      
-      // CRITICAL: For tested fast nodes, immediately update the ref to ensure
-      // that node.end events can see the correct currentAnimatedNodeId
-      // This is necessary because setAnimationState is asynchronous, but SSE events arrive synchronously
-      currentAnimatedNodeIdRef.current = nextNode.id;
 
       // Schedule next node animation
       if (animationDuration !== null) {
-        // Capture current testingNodeId and isTestedNode to check in timeout callback
+        // Capture current testingNodeId to check in timeout callback
         const timeoutTestingNodeId = testingNodeId;
-        const timeoutIsTestedNode = isTestedNode;
-        const timeoutNodeId = nextNode.id;
-        
         timeoutRef.current = setTimeout(() => {
           // CRITICAL: Check if testingNodeId changed - if so, don't continue animation
           if (timeoutTestingNodeId !== testingNodeId) {
+            // console.log('[Animation] ⚠️ testingNodeId changed during timeout, canceling animation continuation');
             return;
-          }
-          
-          // Log animation duration for fast nodes
-          const startTime = nodeAnimationStartTimeRef.current.get(timeoutNodeId);
-          if (startTime) {
-            const duration = Date.now() - startTime;
-            const durationStr = duration < 1000 ? `${duration}ms` : `${(duration / 1000).toFixed(2)}s`;
-            // Get node display name for logging
-            const node = animationState.executionOrder.find(n => n.id === timeoutNodeId);
-            const displayName = node?.data?.label && typeof node.data.label === 'string' 
-              ? node.data.label 
-              : (node?.type ? node.type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : timeoutNodeId);
-            console.log(`${displayName} ${durationStr}`);
-            nodeAnimationStartTimeRef.current.delete(timeoutNodeId);
           }
           
           // Check if this was the tested node - if so, stop animation
           // BUT: For slow nodes (animationDuration === null), we wait for node.end event
           // which is handled in handleNodeEnd, so we don't stop here for slow nodes
-          if (timeoutIsTestedNode) {
-            // For tested fast nodes, keep animation visible longer before stopping
-            // This ensures the user can see the animation, especially for the end node
-            // IMPORTANT: Don't set currentAnimatedNodeId to null immediately - keep it visible
-            console.log(`[moveToNextNode] Tested node ${timeoutNodeId} completed, keeping animation visible for additional 1000ms. currentAnimatedNodeId should be: ${timeoutNodeId}`);
-            // Verify that currentAnimatedNodeId is set correctly
-            setAnimationState(checkState => {
-              if (checkState.currentAnimatedNodeId !== timeoutNodeId) {
-                console.log(`[moveToNextNode] WARNING: currentAnimatedNodeId is ${checkState.currentAnimatedNodeId}, expected ${timeoutNodeId}. Fixing...`);
-                return {
-                  ...checkState,
-                  currentAnimatedNodeId: timeoutNodeId, // Ensure it's set
-                };
-              }
-              return checkState;
-            });
-            // Prevent duplicate stop timeouts using stopTimeoutRef
-            if (stopTimeoutRef.current.has(timeoutNodeId)) {
-              console.log(`[moveToNextNode] Stop timeout already scheduled for ${timeoutNodeId}, skipping duplicate`);
-            } else {
-              const stopTimeout = setTimeout(() => {
-                setAnimationState(finalPrev => {
-                  // Double-check: only stop if this is still the tested node
-                  if (finalPrev.currentAnimatedNodeId === timeoutNodeId && timeoutTestingNodeId === testingNodeId) {
-                    console.log(`[moveToNextNode] Stopping animation for tested node ${timeoutNodeId}`);
-                    stopTimeoutRef.current.delete(timeoutNodeId); // Clear the ref
-                    return {
-                      ...finalPrev,
-                      currentAnimatedNodeId: null,
-                      waitingForEvent: false,
-                    };
-                  } else {
-                    console.log(`[moveToNextNode] Not stopping - currentAnimatedNodeId: ${finalPrev.currentAnimatedNodeId}, expected: ${timeoutNodeId}, testingNodeId: ${timeoutTestingNodeId}`);
-                  }
-                  return finalPrev;
-                });
-              }, 1000); // Keep animation visible for additional 1000ms (total ~1200ms for fast nodes)
-              
-              stopTimeoutRef.current.set(timeoutNodeId, stopTimeout);
-            }
+          if (isTestedNode) {
+            // console.log('[Animation] Node test completed - stopping at tested node (fast node)');
+            setAnimationState(finalPrev => ({
+              ...finalPrev,
+              currentAnimatedNodeId: null,
+              waitingForEvent: false,
+            }));
           } else {
-            // Check if we've reached the end before calling moveToNextNode
-            // This prevents calling moveToNextNode when we're already at the last node
-            setAnimationState(currentState => {
-              if (currentState.currentIndex >= currentState.executionOrder.length) {
-                // Already at end - don't call moveToNextNode
-                return currentState;
-              }
-              // Continue to next node
-              setTimeout(() => moveToNextNode(), 0);
-              return currentState;
-            });
+            moveToNextNode();
           }
         }, animationDuration);
       }
@@ -539,23 +357,13 @@ export function useSequentialNodeAnimation({
     // console.log('[Animation] Setting up SSE event handlers for node.start and node.end');
 
     const handleNodeEnd = (event: any) => {
+      // console.log('[Animation] 📥 Received node.end SSE event:', event);
       const nodeId = event.data?.node_id || event.data?.nodeId;
-      
-      // Debug: Log all node.end events
-      // Use ref value if state hasn't updated yet (for fast nodes)
-      const effectiveCurrentAnimatedNodeIdForLog = currentAnimatedNodeIdRef.current || animationState.currentAnimatedNodeId;
-      const node = animationState.executionOrder.find(n => n.id === nodeId);
-      const nodeLabel = node?.data?.label || node?.type || nodeId;
-      console.log(`[node.end] Received: ${nodeLabel} (${nodeId}), currentAnimatedNodeId: ${effectiveCurrentAnimatedNodeIdForLog} (state: ${animationState.currentAnimatedNodeId}, ref: ${currentAnimatedNodeIdRef.current}), waitingForEvent: ${waitingForEventRef.current}`);
       
       // CRITICAL: Check if this event is still relevant for the current test
       const currentTestingNodeId = testingNodeId;
       
       setAnimationState(prev => {
-        // CRITICAL: Use ref value if state hasn't updated yet (for fast nodes)
-        // This ensures we see the correct currentAnimatedNodeId even if setAnimationState is still pending
-        const effectiveCurrentAnimatedNodeId = currentAnimatedNodeIdRef.current || prev.currentAnimatedNodeId;
-        
         // Check if this event is still relevant for the current test
         // If testingNodeId changed, ignore events from previous tests
         const isRelevantForCurrentTest = !currentTestingNodeId || 
@@ -564,7 +372,7 @@ export function useSequentialNodeAnimation({
             prev.executionOrder.findIndex(n2 => n2.id === nodeId)));
         
         if (!isRelevantForCurrentTest) {
-          console.log(`[node.end] ⚠️ Ignoring - not relevant for test: ${nodeLabel} (${nodeId}), currentTestingNodeId: ${currentTestingNodeId}`);
+          // console.log('[Animation] ⚠️ Ignoring node.end event - not relevant for current test:', nodeId, 'currentTestingNodeId:', currentTestingNodeId);
           return prev;
         }
         
@@ -576,42 +384,26 @@ export function useSequentialNodeAnimation({
           return prev;
         }
         
-        // Log animation duration for slow nodes if this is the current animated node
-        // Use effectiveCurrentAnimatedNodeId to handle async state updates
-        // Check both waitingForEventRef.current and prev.waitingForEvent to handle race conditions
-        if (nodeId === effectiveCurrentAnimatedNodeId) {
-          const startTime = nodeAnimationStartTimeRef.current.get(nodeId);
-          if (startTime) {
-            const duration = Date.now() - startTime;
-            const durationStr = duration < 1000 ? `${duration}ms` : `${(duration / 1000).toFixed(2)}s`;
-            const node = prev.executionOrder.find(n => n.id === nodeId);
-            const displayName = node?.data?.label && typeof node.data.label === 'string' 
-              ? node.data.label 
-              : (node?.type ? node.type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : nodeId);
-            console.log(`${displayName} ${durationStr}`);
-            nodeAnimationStartTimeRef.current.delete(nodeId);
-          }
-          
-          // Only process if we were actually waiting for this event
-          // This prevents processing events that arrived after we already moved to next node
-          if (waitingForEventRef.current || prev.waitingForEvent) {
-            // Check if this is the tested node - if so, stop animation instead of moving to next
-            if (currentTestingNodeId && nodeId === currentTestingNodeId) {
-              waitingForEventRef.current = false;
-              return {
-                ...prev,
-                currentAnimatedNodeId: null,
-                waitingForEvent: false,
-              };
-            } else {
-              waitingForEventRef.current = false;
-              // Schedule moveToNextNode after state update
-              setTimeout(() => moveToNextNode(), 0);
-              return {
-                ...prev,
-                waitingForEvent: false,
-              };
-            }
+        if (nodeId === prev.currentAnimatedNodeId && waitingForEventRef.current) {
+          // console.log('[Animation] ✅ Node matches current animated node and waiting for end event');
+          // Check if this is the tested node - if so, stop animation instead of moving to next
+          if (currentTestingNodeId && nodeId === currentTestingNodeId) {
+            // console.log('[Animation] 🛑 Tested node completed - stopping animation');
+            waitingForEventRef.current = false;
+            return {
+              ...prev,
+              currentAnimatedNodeId: null,
+              waitingForEvent: false,
+            };
+          } else {
+            // console.log('[Animation] 🚀 Node completed, will move to next after state update');
+            waitingForEventRef.current = false;
+            // Schedule moveToNextNode after state update
+            setTimeout(() => moveToNextNode(), 0);
+            return {
+              ...prev,
+              waitingForEvent: false,
+            };
           }
         } else {
           // console.log('[Animation] ⚠️ Node ID does not match current animated node or not waiting for event, ignoring');
@@ -622,12 +414,9 @@ export function useSequentialNodeAnimation({
 
     // Listen for node.start to start animation for slow nodes
     const handleNodeStart = (event: any) => {
+      // console.log('[Animation] 📥 Received node.start SSE event:', event);
       const nodeId = event.data?.node_id || event.data?.nodeId;
-      
-      // Debug: Log all node.start events
-      const node = calculatedExecutionOrder.find(n => n.id === nodeId);
-      const nodeLabel = node?.data?.label || node?.type || nodeId;
-      console.log(`[node.start] Received: ${nodeLabel} (${nodeId}), waitingForStartEvent: ${waitingForStartEventRef.current}, currentAnimatedNodeId: ${animationState.currentAnimatedNodeId}`);
+      // console.log('[Animation] 📥 node.start - nodeId:', nodeId, 'waitingForStartEvent:', waitingForStartEventRef.current, 'currentAnimatedNodeId:', animationState.currentAnimatedNodeId);
       
       // CRITICAL: Check if this event is still relevant for the current test
       const currentTestingNodeId = testingNodeId;
@@ -637,7 +426,7 @@ export function useSequentialNodeAnimation({
           calculatedExecutionOrder.findIndex(n2 => n2.id === nodeId));
       
       if (!isRelevantForCurrentTest) {
-        console.log(`[node.start] ⚠️ Ignoring - not relevant for test: ${nodeLabel} (${nodeId}), currentTestingNodeId: ${currentTestingNodeId}`);
+        // console.log('[Animation] ⚠️ Ignoring node.start event - not relevant for current test:', nodeId, 'currentTestingNodeId:', currentTestingNodeId);
         return;
       }
       
@@ -660,9 +449,7 @@ export function useSequentialNodeAnimation({
           // Check if this is the current node we're waiting for
           // OR if currentAnimatedNodeId matches this node (even if we're waiting for start)
           if (prev.currentAnimatedNodeId === nodeId) {
-            // Node is already set as current animated node - just update waiting flags
-            // Set start time for slow nodes when node.start arrives (this is when animation really starts)
-            nodeAnimationStartTimeRef.current.set(nodeId, Date.now());
+            // console.log('[Animation] ✅ node.start received for slow node, now waiting for node.end:', nodeId);
             waitingForStartEventRef.current = false;
             waitingForEventRef.current = true; // Now wait for node.end
             
@@ -676,8 +463,7 @@ export function useSequentialNodeAnimation({
             const nodeInOrder = calculatedExecutionOrder.find(n => n.id === nodeId);
             if (nodeInOrder) {
               const nodeIndex = calculatedExecutionOrder.findIndex(n => n.id === nodeId);
-              // Set start time for slow nodes when node.start arrives
-              nodeAnimationStartTimeRef.current.set(nodeId, Date.now());
+              // console.log('[Animation] ✅ node.start received for slow node (currentAnimatedNodeId was null), now waiting for node.end:', nodeId);
               waitingForStartEventRef.current = false;
               waitingForEventRef.current = true; // Now wait for node.end
               

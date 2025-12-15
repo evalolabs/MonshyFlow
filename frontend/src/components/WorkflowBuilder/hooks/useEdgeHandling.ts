@@ -9,8 +9,7 @@ import type { Edge, Connection, Node } from '@xyflow/react';
 import {
   cleanEdgeHandles,
 } from '../../../utils/edgeUtils';
-import { EDGE_TYPE_BUTTON, EDGE_TYPE_LOOP, NODE_TYPE_WHILE, isLoopHandle, LOOP_HANDLE_IDS } from '../constants';
-import { edgeLogger as logger } from '../../../utils/logger';
+import { EDGE_TYPE_BUTTON, EDGE_TYPE_LOOP, isLoopNodeType, isLoopHandle, LOOP_HANDLE_IDS } from '../constants';
 import { isToolNodeType } from '../../../types/toolCatalog';
 
 const EDGE_TYPE_TOOL = 'default'; // Use default bezier curve for a more pronounced arc
@@ -35,12 +34,6 @@ export function useEdgeHandling({
 
   // Handle new connection
   const handleConnect = useCallback((connection: Connection) => {
-    logger.info('Manual connection created', {
-      source: connection.source,
-      sourceHandle: connection.sourceHandle,
-      target: connection.target,
-      targetHandle: connection.targetHandle,
-    });
 
     // Validation: Only tool nodes can connect to Agent Tool handles
     const targetHandle = connection.targetHandle;
@@ -52,10 +45,6 @@ export function useEdgeHandling({
       
       if (!isSourceTool) {
         alert('⚠️ Only Tool nodes can be connected to Agent Tool handles.\n\nPlease use a Tool from the "Tools" tab instead of a regular node.');
-        logger.warn('Prevented non-tool node from connecting to Agent Tool handle', {
-          sourceNodeType: sourceNode?.type,
-          targetHandle,
-        });
         return;
       }
     }
@@ -67,10 +56,6 @@ export function useEdgeHandling({
       
       if (isSourceTool && !isAgentToolHandle) {
         alert('⚠️ Tool nodes can only be connected to Agent Tool handles.\n\nPlease connect the tool to the "Tool" input handle on an Agent node.');
-        logger.warn('Prevented tool node from connecting to non-tool handle', {
-          sourceNodeType: sourceNode?.type,
-          targetHandle,
-        });
         return;
       }
     }
@@ -91,30 +76,14 @@ export function useEdgeHandling({
     const isLoopConnection = isLoopHandle(sourceHandle) || isLoopHandle(targetHandle);
     
     // SPECIAL CASE: Auto-detect loop-back connection
-    // If connecting from any node to a while node, automatically create a loop-back edge
-    const isConnectingToWhileNode = targetNode?.type === NODE_TYPE_WHILE;
+    // If connecting from any node to a loop node (while/foreach), automatically create a loop-back edge
+    const isConnectingToLoopNode = isLoopNodeType(targetNode?.type);
     // Normal output: null, undefined, or empty string (no explicit sourceHandle)
     const isNormalOutput = !sourceHandle || sourceHandle === null || sourceHandle === undefined || sourceHandle === '';
     // If connecting to 'back' handle, it's definitely a loop-back
     const isConnectingToBackHandle = targetHandle === LOOP_HANDLE_IDS.BACK;
-    // Auto-create loop-back if: connecting to while node AND (normal output OR connecting to back handle)
-    const shouldAutoCreateLoopBack = isConnectingToWhileNode && (isNormalOutput || isConnectingToBackHandle) && !isLoopHandle(sourceHandle);
-    
-    logger.info('🔗 [MANUAL CONNECTION] Creating edge', {
-      source: connection.source,
-      target: connection.target,
-      sourceHandle,
-      targetHandle,
-      sourceNodeType: sourceNode?.type,
-      targetNodeType: targetNode?.type,
-      isLoopConnection,
-      isConnectingToWhileNode,
-      isNormalOutput,
-      isConnectingToBackHandle,
-      shouldAutoCreateLoopBack,
-      sourceHandleType: typeof sourceHandle,
-      sourceHandleValue: sourceHandle,
-    });
+    // Auto-create loop-back if: connecting to loop node AND (normal output OR connecting to back handle)
+    const shouldAutoCreateLoopBack = isConnectingToLoopNode && (isNormalOutput || isConnectingToBackHandle) && !isLoopHandle(sourceHandle);
     
     // Determine edge type with priority: Loop > Tool > Button
     // If auto-creating loop-back, use loop edge type
@@ -128,44 +97,16 @@ export function useEdgeHandling({
     let finalSourceHandle = connection.sourceHandle || undefined;
     let finalTargetHandle = connection.targetHandle || undefined;
     
-    // CRITICAL: If connecting to 'back' handle on while node, keep 'back' as target handle
+    // CRITICAL: If connecting to 'back' handle on loop node, keep 'back' as target handle
     // This must happen BEFORE shouldAutoCreateLoopBack check, because isLoopConnection might be true
-    if (isConnectingToWhileNode && isConnectingToBackHandle) {
+    if (isConnectingToLoopNode && isConnectingToBackHandle) {
       finalSourceHandle = finalSourceHandle || LOOP_HANDLE_IDS.BACK;
       finalTargetHandle = LOOP_HANDLE_IDS.BACK; // Keep 'back' handle (the actual handle name on WhileNode)
-      logger.info('✅ [LOOP-BACK] Connecting to back handle - using loop-back target handle', {
-        source: connection.source,
-        target: connection.target,
-        originalSourceHandle: connection.sourceHandle,
-        originalTargetHandle: connection.targetHandle,
-        finalSourceHandle,
-        finalTargetHandle,
-        isLoopConnection,
-      });
     } else if (shouldAutoCreateLoopBack) {
       // Auto-create loop-back: use 'back' source handle and 'back' target handle
       finalSourceHandle = LOOP_HANDLE_IDS.BACK;
       finalTargetHandle = LOOP_HANDLE_IDS.BACK; // 'back' is the actual handle name on WhileNode
-      logger.info('✅ [AUTO LOOP-BACK] Automatically creating loop-back edge', {
-        source: connection.source,
-        target: connection.target,
-        originalSourceHandle: connection.sourceHandle,
-        originalTargetHandle: connection.targetHandle,
-        finalSourceHandle,
-        finalTargetHandle,
-      });
     }
-    
-    logger.info(`Creating edge with type: ${edgeType}`, {
-      sourceHandle: finalSourceHandle,
-      targetHandle: finalTargetHandle,
-      isLoopConnection: isLoopConnection || shouldAutoCreateLoopBack,
-      isSourceTool,
-      isAgentToolHandle,
-      isToolConnection,
-      sourceNodeType: sourceNode?.type,
-      shouldAutoCreateLoopBack,
-    });
     
     // Create new edge - CRITICAL: Set type immediately so ReactFlow uses correct component
     const newEdge: Edge = {
@@ -188,7 +129,6 @@ export function useEdgeHandling({
     };
 
     onEdgesChange([...edges, newEdge]);
-    logger.info('Edge created successfully');
   }, [nodes, edges, onEdgesChange]);
 
   // CRITICAL: Ensure all edges have correct types
@@ -258,8 +198,6 @@ export function useEdgeHandling({
     });
 
     if (edgesNeedingUpdate.length > 0 || hasEdgesToConvert) {
-      logger.debug(`Updating ${edgesNeedingUpdate.length} edges`);
-
       const updatedEdges = edges.map(edge => {
         // PRIORITY 1: Convert loop edges (handle-based)
         const sourceHandle = edge.sourceHandle;
@@ -267,11 +205,6 @@ export function useEdgeHandling({
         const isLoopEdge = isLoopHandle(sourceHandle) || isLoopHandle(targetHandle);
         
         if (isLoopEdge && edge.type !== EDGE_TYPE_LOOP) {
-          logger.info(`Converting edge to loopEdge type: ${edge.id}`, {
-            sourceHandle,
-            targetHandle,
-            currentType: edge.type,
-          });
           return {
             ...edge,
             type: EDGE_TYPE_LOOP,
@@ -290,7 +223,6 @@ export function useEdgeHandling({
         if (edge.type === EDGE_TYPE_LOOP) {
           // Check if onAddNode is missing or needs update
           if (!edge.data?.onAddNode) {
-            logger.info(`Adding onAddNode to loop edge: ${edge.id}`);
             return {
               ...edge,
               data: {
@@ -313,11 +245,6 @@ export function useEdgeHandling({
         // CRITICAL: Convert old 'toolEdge' type to 'default' (for backward compatibility)
         // Also convert tool connections to use 'default' edge type (bezier curve)
         if (edge.type === 'toolEdge' || (isSourceTool && isAgentToolHandle)) {
-          logger.info(`Converting edge to default (bezier) type: ${edge.id}`, {
-            sourceNodeType: sourceNode?.type,
-            targetHandle,
-            currentType: edge.type,
-          });
           return {
             ...edge,
             type: 'default', // Use default bezier curve for tool edges

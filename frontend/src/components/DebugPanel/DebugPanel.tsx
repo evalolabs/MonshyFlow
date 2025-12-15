@@ -309,6 +309,10 @@ function DebugNode({ step, isExpanded, onToggle, workflowId, onStepUpdate, onTes
   const handlePlayNode = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent toggling the node when clicking play
     
+    // Log which node's Play button was clicked
+    const nodeLabel = step.nodeLabel || formatNodeType(step.nodeType);
+    console.log(`Play clicked: ${nodeLabel} (${step.nodeType}, id: ${step.nodeId})`);
+    
     if (!workflowId) {
       console.warn('No workflowId provided, cannot test node');
       return;
@@ -467,7 +471,6 @@ function DebugNode({ step, isExpanded, onToggle, workflowId, onStepUpdate, onTes
 
     // Test with input data (empty object if no start node or no saved data)
     setIsRunning(true);
-    console.log('[DebugPanel] Testing node:', step.nodeId, 'type:', step.nodeType);
     
     // ✅ Start animation IMMEDIATELY (before backend call)
     if (onTestStart) {
@@ -476,7 +479,6 @@ function DebugNode({ step, isExpanded, onToggle, workflowId, onStepUpdate, onTes
     
     try {
       const result = await workflowService.testNode(workflowId, step.nodeId, inputDataToUse);
-      console.log('[DebugPanel] Node test completed:', result);
       
       if (onTestResult) {
         onTestResult(result, step);

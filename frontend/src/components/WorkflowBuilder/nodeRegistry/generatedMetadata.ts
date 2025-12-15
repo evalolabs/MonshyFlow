@@ -4,7 +4,7 @@
  * This file is generated from shared/registry.json
  * Run: npm run generate:registry
  * 
- * Last generated: 2025-12-03T16:37:51.539Z
+ * Last generated: 2025-12-13T09:16:17.526Z
  */
 
 import type { NodeCategoryId } from './nodeMetadata';
@@ -639,6 +639,158 @@ export const GENERATED_NODE_METADATA = {
             "type": "object",
             "description": "Returns the input data unchanged after the delay",
             "additionalProperties": true
+      },
+  },
+  'while': {
+    id: 'while',
+    name: 'While Loop',
+    icon: '🔄',
+    description: 'Execute a block of nodes repeatedly while a condition is true',
+    category: 'logic' as NodeCategoryId,
+    animationSpeed: 'slow',
+    component: () => null, // Will be lazy-loaded
+    hasConfigForm: true,
+    useAutoConfigForm: true,
+    
+    
+    hasInput: true,
+    hasOutput: true,
+    fields: {
+              "label": {
+                      "type": "text",
+                      "placeholder": "While Loop Name"
+              },
+              "condition": {
+                      "type": "expression",
+                      "multiline": false,
+                      "placeholder": "Enter condition (e.g., {{steps.nodeId.count}} < 10)",
+                      "required": true
+              },
+              "maxIterations": {
+                      "type": "number",
+                      "placeholder": "Maximum iterations (safety limit)",
+                      "default": 100,
+                      "min": 1,
+                      "max": 10000,
+                      "required": true
+              }
+      },
+    inputSchema: {
+            "type": "object",
+            "description": "Accepts any input. The condition is evaluated on each iteration.",
+            "additionalProperties": true
+      },
+    outputSchema: {
+            "type": "object",
+            "properties": {
+                  "iterations": {
+                        "type": "number",
+                        "description": "Number of loop iterations executed"
+                  },
+                  "finalOutput": {
+                        "description": "Output from the last iteration"
+                  },
+                  "exitedEarly": {
+                        "type": "boolean",
+                        "description": "Whether loop exited due to max iterations"
+                  }
+            }
+      },
+  },
+  'foreach': {
+    id: 'foreach',
+    name: 'For Each',
+    icon: '🔁',
+    description: 'Iterate over an array and execute a block of nodes for each item',
+    category: 'logic' as NodeCategoryId,
+    animationSpeed: 'slow',
+    component: () => null, // Will be lazy-loaded
+    hasConfigForm: true,
+    useAutoConfigForm: true,
+    
+    
+    hasInput: true,
+    hasOutput: true,
+    fields: {
+              "label": {
+                      "type": "text",
+                      "placeholder": "For Each Name"
+              },
+              "arrayPath": {
+                      "type": "expression",
+                      "multiline": false,
+                      "placeholder": "Enter array path (e.g., {{steps.nodeId.data}} or {{steps.nodeId.json.data}})",
+                      "required": true
+              }
+      },
+    inputSchema: {
+            "type": "object",
+            "description": "Accepts any input. The arrayPath specifies which array to iterate over.",
+            "additionalProperties": true
+      },
+    outputSchema: {
+            "type": "object",
+            "properties": {
+                  "iterations": {
+                        "type": "number",
+                        "description": "Number of iterations executed"
+                  },
+                  "results": {
+                        "type": "array",
+                        "description": "Array of outputs from each iteration"
+                  },
+                  "finalOutput": {
+                        "description": "Output from the last iteration"
+                  }
+            }
+      },
+  },
+  'ifelse': {
+    id: 'ifelse',
+    name: 'If / Else',
+    icon: '↗️',
+    description: 'Execute different paths based on a condition',
+    category: 'logic' as NodeCategoryId,
+    animationSpeed: 'fast',
+    component: () => null, // Will be lazy-loaded
+    hasConfigForm: true,
+    useAutoConfigForm: true,
+    
+    
+    hasInput: true,
+    hasOutput: false,
+    fields: {
+              "label": {
+                      "type": "text",
+                      "placeholder": "If / Else Name"
+              },
+              "condition": {
+                      "type": "expression",
+                      "multiline": false,
+                      "placeholder": "Enter condition (e.g., {{loop.current.id}} === 5)",
+                      "required": true
+              }
+      },
+    inputSchema: {
+            "type": "object",
+            "description": "Accepts any input. The condition is evaluated to determine which branch to execute.",
+            "additionalProperties": true
+      },
+    outputSchema: {
+            "type": "object",
+            "properties": {
+                  "condition": {
+                        "type": "string",
+                        "description": "The evaluated condition"
+                  },
+                  "result": {
+                        "type": "boolean",
+                        "description": "Whether the condition was true or false"
+                  },
+                  "output": {
+                        "description": "Output from the executed branch"
+                  }
+            }
       },
   },
 };

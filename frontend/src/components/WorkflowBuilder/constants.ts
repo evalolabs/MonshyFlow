@@ -69,6 +69,17 @@ export const NODE_TYPE_IFELSE = 'ifelse';
 /** While loop node type */
 export const NODE_TYPE_WHILE = 'while';
 
+/** For-Each loop node type */
+export const NODE_TYPE_FOREACH = 'foreach';
+
+/**
+ * Check if a node type is a loop node (while or foreach)
+ */
+export function isLoopNodeType(nodeType?: string | null): boolean {
+  if (!nodeType) return false;
+  return nodeType === NODE_TYPE_WHILE || nodeType === NODE_TYPE_FOREACH;
+}
+
 // ============================================================================
 // LOOP HANDLE IDs (for robust edge type detection)
 // ============================================================================
