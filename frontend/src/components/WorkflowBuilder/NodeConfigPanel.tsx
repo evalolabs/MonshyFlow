@@ -428,16 +428,16 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
 
       case 'agent':
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
                 Agent Name
               </label>
               <input
                 type="text"
                 value={config.agentName || ''}
                 onChange={(e) => setConfig({ ...config, agentName: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter agent name"
               />
             </div>
@@ -449,13 +449,13 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               onChange: (v) => setConfig({ ...config, systemPrompt: v }),
             })}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
                 Model
               </label>
               <select
                 value={config.model || 'gpt-4o'}
                 onChange={(e) => setConfig({ ...config, model: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="gpt-4o">GPT-4o (Recommended)</option>
                 <option value="gpt-4">GPT-4</option>
@@ -469,13 +469,13 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
                 Reasoning Effort
               </label>
               <select
                 value={config.reasoningEffort || 'low'}
                 onChange={(e) => setConfig({ ...config, reasoningEffort: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="low">Low (Fast, Basic reasoning)</option>
                 <option value="medium">Medium (Balanced)</option>
@@ -486,7 +486,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
                 Temperature
               </label>
               <input
@@ -498,20 +498,20 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 onChange={(e) => setConfig({ ...config, temperature: parseFloat(e.target.value) })}
                 className="w-full"
               />
-              <div className="text-sm text-gray-500">{config.temperature || 0.7}</div>
+              <div className="text-xs text-gray-500">{config.temperature || 0.7}</div>
               <p className="text-xs text-gray-500 mt-1">
                 Controls randomness: 0 = deterministic, 2 = very creative
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
                 Output Format
               </label>
               <select
                 value={config.outputFormat || 'auto'}
                 onChange={(e) => setConfig({ ...config, outputFormat: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="auto">Auto (default)</option>
                 <option value="json">JSON</option>
@@ -524,9 +524,9 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
             </div>
 
             {/* User Prompt */}
-            <div className="border-t border-gray-200 pt-4 mt-4">
-              <h3 className="text-sm font-semibold text-gray-800 mb-2">💬 User Prompt</h3>
-              <p className="text-xs text-gray-500 mb-3">
+            <div className="border-t border-gray-200 pt-2 mt-2">
+              <h3 className="text-xs font-semibold text-gray-800 mb-1.5">💬 User Prompt</h3>
+              <p className="text-xs text-gray-500 mb-2">
                 Define the user message that will be sent to the agent. This field is required – the agent will not run without it.
               </p>
               {renderFieldWithDebug({
@@ -539,14 +539,14 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
             </div>
 
             {/* Agents SDK Features */}
-            <div className="border-t border-gray-200 pt-4 mt-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-800">🤖 Agents SDK Features</h3>
+            <div className="border-t border-gray-200 pt-2 mt-2">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-semibold text-gray-800">🤖 Agents SDK Features</h3>
                 <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">NEW</span>
               </div>
 
               {/* Include Chat History */}
-              <div className="mb-3">
+              <div className="mb-2">
                 <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -554,7 +554,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                     onChange={(e) => setConfig({ ...config, includeChatHistory: e.target.checked })}
                     className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <span className="text-sm text-gray-700">
+                  <span className="text-xs text-gray-700">
                     Include Chat History
                   </span>
                 </label>
@@ -564,7 +564,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               </div>
 
               {/* Enable Streaming */}
-              <div className="mb-3">
+              <div className="mb-2">
                 <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -572,7 +572,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                     onChange={(e) => setConfig({ ...config, enableStreaming: e.target.checked })}
                     className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <span className="text-sm text-gray-700">
+                  <span className="text-xs text-gray-700">
                     Enable Real-time Streaming
                   </span>
                 </label>
@@ -582,7 +582,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               </div>
 
               {/* Continue on Error */}
-              <div className="mb-3">
+              <div className="mb-2">
                 <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -590,7 +590,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                     onChange={(e) => setConfig({ ...config, continueOnError: e.target.checked })}
                     className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <span className="text-sm text-gray-700">
+                  <span className="text-xs text-gray-700">
                     Continue on Error
                   </span>
                 </label>
@@ -600,8 +600,8 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               </div>
 
               {/* Input Guardrails */}
-              <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="mb-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">
                   Input Guardrails
                 </label>
                 <textarea
@@ -613,7 +613,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                       input: e.target.value 
                     } 
                   })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
                   rows={2}
                   placeholder="Input validation rules (e.g., must not contain profanity)"
                 />
@@ -623,8 +623,8 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               </div>
 
               {/* Output Guardrails */}
-              <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="mb-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">
                   Output Guardrails
                 </label>
                 <textarea
@@ -636,7 +636,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                       output: e.target.value 
                     } 
                   })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
                   rows={2}
                   placeholder="Output validation rules (e.g., must be JSON)"
                 />
@@ -646,18 +646,18 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               </div>
 
               {/* Model Parameters */}
-              <div className="border-t border-gray-200 pt-4 mt-4">
-                <h4 className="text-sm font-semibold text-gray-800 mb-3">⚙️ Model Parameters</h4>
+              <div className="border-t border-gray-200 pt-2 mt-2">
+                <h4 className="text-xs font-semibold text-gray-800 mb-2">⚙️ Model Parameters</h4>
                 
                 {/* Verbosity */}
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
                     Verbosity
                   </label>
                   <select
                     value={config.verbosity || 'medium'}
                     onChange={(e) => setConfig({ ...config, verbosity: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
                   >
                     <option value="low">Low (Minimal output)</option>
                     <option value="medium">Medium (Balanced)</option>
@@ -669,14 +669,14 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 </div>
 
                 {/* Summary */}
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
                     Summary
                   </label>
                   <select
                     value={config.summary || 'auto'}
                     onChange={(e) => setConfig({ ...config, summary: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
                   >
                     <option value="auto">Auto (Automatic summary)</option>
                     <option value="manual">Manual (No auto-summary)</option>
@@ -689,7 +689,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               </div>
 
               {/* Info */}
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-2">
                 <div className="flex items-start">
                   <span className="text-blue-600 mr-2">ℹ️</span>
                   <div className="text-xs text-blue-800">
@@ -716,14 +716,14 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
         const isToolNode = nodeType === 'tool-web-search';
 
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {webSearchHandlersError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-md p-3">
+              <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-md p-2">
                 ❌ {webSearchHandlersError}
               </div>
             )}
               <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Web Search Provider auswählen</label>
+              <label className="block text-xs font-medium text-gray-700">Web Search Provider auswählen</label>
               {isLoadingWebSearchHandlers ? (
                 <div className="text-xs text-gray-500 py-2">Lade Web-Search-Integrationen…</div>
               ) : webSearchHandlers.length > 0 ? (
@@ -739,7 +739,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                       maxResults: prevConfig?.maxResults ?? selected?.defaultConfig?.maxResults ?? 5,
                     }));
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
                 >
                   {webSearchHandlers.map(handler => (
                     <option key={handler.id} value={handler.id}>
@@ -785,9 +785,9 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
 
       case 'tool-file-search':
         return (
-          <div className="space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4">
-              <p className="text-sm text-blue-800">
+          <div className="space-y-3">
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-2 mb-3">
+              <p className="text-xs text-blue-800">
                 📑 <strong>File Search</strong> – Lässt den Agent Inhalte aus hochgeladenen Dateien oder Vector Stores abrufen.
               </p>
             </div>
@@ -806,14 +806,14 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               onChange: (v) => setConfig({ ...config, description: v }),
             })}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
                 Vector Store IDs (Komma-separiert)
               </label>
               <input
                 type="text"
                 value={config.vectorStoreIds || ''}
                 onChange={(e) => setConfig({ ...config, vectorStoreIds: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="vs_123, vs_456"
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -825,9 +825,9 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
 
       case 'tool-code-interpreter':
         return (
-          <div className="space-y-4">
-            <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-4">
-              <p className="text-sm text-amber-800">
+          <div className="space-y-3">
+            <div className="bg-amber-50 border border-amber-200 rounded-md p-2 mb-3">
+              <p className="text-xs text-amber-800">
                 💻 <strong>Code Interpreter</strong> – Führt Python-Code in einer sicheren Umgebung aus (OpenAI Built-in).
               </p>
             </div>
@@ -845,7 +845,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               value: config.description || 'Execute Python code, analyse Dateien, generiere Diagramme',
               onChange: (v) => setConfig({ ...config, description: v }),
             })}
-            <div className="bg-gray-50 border border-gray-200 rounded-md p-3 text-xs text-gray-600">
+            <div className="bg-gray-50 border border-gray-200 rounded-md p-2 text-xs text-gray-600">
               📁 Dateiuploads erfolgen über den Start-Node / Files-API. Der Interpreter arbeitet automatisch damit.
             </div>
           </div>
@@ -855,14 +855,14 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
         const selectedMcpHandler = mcpHandlers.find(h => h.id === config.mcpHandlerId);
 
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {mcpHandlersError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-md p-3">
+              <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-md p-2">
                     ❌ {mcpHandlersError}
                 </div>
             )}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-xs font-medium text-gray-700">
                 MCP Integration auswählen
               </label>
               {isLoadingMcpHandlers ? (
@@ -881,7 +881,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                       requireApproval: selectedHandler?.defaultConfig?.requireApproval || config.requireApproval || 'never',
                       });
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   {mcpHandlers.map(handler => (
                       <option key={handler.id} value={handler.id}>
@@ -929,14 +929,14 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
         const selectedCatalogFunction = functionCatalog.find(fn => fn.name === config.functionName);
 
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {functionCatalogError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-md p-3">
+              <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-md p-2">
                 ❌ {functionCatalogError}
                   </div>
                 )}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-xs font-medium text-gray-700">
                 Funktion auswählen
                 </label>
               {isLoadingFunctionCatalog ? (
@@ -955,7 +955,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                       functionParameters: JSON.stringify(selected.parameters, null, 2),
                     }));
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
                   <option value="">Katalogfunktion auswählen</option>
                   {functionCatalog.map(fn => (
@@ -1002,7 +1002,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
 
       case 'end':
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {renderFieldWithDebug({
               nodeType: 'end',
               fieldName: 'label',
@@ -1023,7 +1023,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
 
       case 'llm':
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* LLM Node - Uses renderField helper for consistent ExpressionEditor integration */}
             {renderFieldWithDebug({
               nodeType: 'llm',
@@ -1076,7 +1076,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
 
       case 'http-request':
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {renderFieldWithDebug({
               nodeType: 'http-request',
               fieldName: 'label',
@@ -1130,8 +1130,8 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
 
             {/* Validation Issues */}
             {validationResult && (validationResult.errors.length > 0 || validationResult.warnings.length > 0) && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <h4 className="text-xs font-semibold text-gray-700 mb-2">Validation</h4>
+              <div className="mt-4 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                <h4 className="text-xs font-semibold text-gray-700 mb-1.5">Validation</h4>
                 <div className="space-y-1">
                   {validationResult.errors.map((error, idx) => (
                     <div key={idx} className="flex items-start gap-1.5 text-xs">
@@ -1149,8 +1149,8 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               </div>
             )}
             
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mt-4">
-              <h4 className="font-semibold text-blue-800 mb-2">💡 Usage Tips</h4>
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-2 mt-4">
+              <h4 className="font-semibold text-blue-800 mb-1.5">💡 Usage Tips</h4>
               <ul className="text-xs text-blue-700 space-y-1">
                 <li>• Use this node to test scheduled workflows by sending data to webhook.site</li>
                 <li>• If "Send Workflow Input" is enabled, the workflow input will be sent as JSON body</li>
@@ -1194,7 +1194,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex-1">
-              <div className="flex items-center gap-3 min-h-[2rem]">
+              <div className="flex items-center gap-2 min-h-[2rem]">
                 <h2 className="text-lg font-bold text-gray-800">
                   {selectedNode.type?.charAt(0).toUpperCase()}{selectedNode.type?.slice(1)}
                 </h2>
@@ -1203,7 +1203,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                   <span className="font-medium">Saving...</span>
                 </div>
               </div>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 mt-1">
                 {(selectedNode.data?.label as string) || 'Configure this node'}
               </p>
             </div>
@@ -1225,8 +1225,8 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
           {/* Data Structure Configuration Section - Only available for Start Node */}
           {selectedNode && selectedNode.type === 'start' && (
             <div className="mt-6 pt-4 border-t border-gray-200">
-              <div className="mb-4">
-                <h3 className="text-sm font-semibold text-gray-800 mb-1">📋 Data Structure Configuration</h3>
+              <div className="mb-3">
+                <h3 className="text-xs font-semibold text-gray-800 mb-1">📋 Data Structure Configuration</h3>
                 <p className="text-xs text-gray-500">
                   Define input and output schemas for this node (optional)
                 </p>
@@ -1240,8 +1240,8 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 
                 if (metadata?.inputSchema || metadata?.outputSchema) {
                   return (
-                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
+                    <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center gap-2 mb-1.5">
                         <span className="text-blue-600">ℹ️</span>
                         <span className="text-xs font-medium text-blue-900">Standard Schemas</span>
                       </div>
@@ -1278,12 +1278,12 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 return null;
               })()}
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Input Schema */}
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
+                <div className="border border-gray-200 rounded-lg p-2">
+                  <div className="flex items-center justify-between mb-2">
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-800">Input Schema</h4>
+                      <h4 className="text-xs font-semibold text-gray-800">Input Schema</h4>
                       <p className="text-xs text-gray-500 mt-1">
                         Define what data this node expects as input
                       </p>
@@ -1300,7 +1300,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                     </button>
                   </div>
                   {config.inputSchema && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-2">
                       <div className="flex items-center gap-2">
                         <span className="text-green-600">✅</span>
                         <span className="text-xs text-green-800 font-medium">
@@ -1310,7 +1310,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                     </div>
                   )}
                   {!config.inputSchema && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-2">
                       <p className="text-xs text-gray-600">
                         No input schema defined - any data format will be accepted
                       </p>
@@ -1319,10 +1319,10 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 </div>
 
                 {/* Output Schema */}
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
+                <div className="border border-gray-200 rounded-lg p-2">
+                  <div className="flex items-center justify-between mb-2">
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-800">Output Schema</h4>
+                      <h4 className="text-xs font-semibold text-gray-800">Output Schema</h4>
                       <p className="text-xs text-gray-500 mt-1">
                         Define what data this node will output
                       </p>
@@ -1339,7 +1339,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                     </button>
                   </div>
                   {config.outputSchema && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-2">
                       <div className="flex items-center gap-2">
                         <span className="text-green-600">✅</span>
                         <span className="text-xs text-green-800 font-medium">
@@ -1349,7 +1349,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                     </div>
                   )}
                   {!config.outputSchema && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-2">
                       <p className="text-xs text-gray-600">
                         No output schema defined - output structure is not validated
                       </p>
@@ -1413,13 +1413,13 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
           {/* Transform Node has its own transformation logic, so Output Mapping is not needed */}
           {selectedNode && selectedNode.type !== 'start' && selectedNode.type !== 'end' && selectedNode.type !== 'transform' && (
             <div className="mt-6 pt-4 border-t border-gray-200">
-              <div className="mb-4">
-                <h3 className="text-sm font-semibold text-gray-800 mb-1">🔀 Output Mapping</h3>
+              <div className="mb-3">
+                <h3 className="text-xs font-semibold text-gray-800 mb-1">🔀 Output Mapping</h3>
                 <p className="text-xs text-gray-500">
                   Quick setting: What to pass to the next node
                 </p>
               </div>
-              <div className="border border-gray-200 rounded-lg p-4">
+              <div className="border border-gray-200 rounded-lg p-2">
                 <div className="space-y-2">
                   <select
                     value={config.outputMapping || 'full'}
@@ -1438,7 +1438,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                         });
                       }
                     }}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="full">📦 Pass Full NodeData (Standard)</option>
                     <option value="extract_path">🔍 Extract Path</option>
@@ -1462,7 +1462,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                           }
                         }}
                         placeholder="data"
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                        className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                       />
                       <p className="text-xs text-gray-500 mt-1">
                         Path to extract (e.g., "data", "data.field")

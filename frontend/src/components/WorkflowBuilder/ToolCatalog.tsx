@@ -70,30 +70,30 @@ export function ToolCatalog({ onAddTool }: ToolCatalogProps) {
   }));
 
   return (
-    <div className="h-full p-4 space-y-3 overflow-y-auto">
+    <div className="h-full p-2 space-y-2 overflow-y-auto">
       {/* Search Bar */}
-      <div className="mb-4">
+      <div className="mb-2">
         <input
           type="text"
           placeholder="🔍 Search tools..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
         />
       </div>
 
       {/* Expand/Collapse buttons */}
-      <div className="flex gap-1 mb-3">
+      <div className="flex gap-1 mb-2">
         <button
           onClick={expandAll}
-          className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+          className="px-1.5 py-0.5 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
           title="Expand All"
         >
           ⬇️
         </button>
         <button
           onClick={collapseAll}
-          className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+          className="px-1.5 py-0.5 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
           title="Collapse All"
         >
           ⬆️
@@ -101,7 +101,7 @@ export function ToolCatalog({ onAddTool }: ToolCatalogProps) {
       </div>
 
       {/* Tool Categories */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {toolsByCategory.map((category) => {
           const isExpanded = expandedCategories.has(category.id);
           const hasTools = category.tools.length > 0;
@@ -113,47 +113,47 @@ export function ToolCatalog({ onAddTool }: ToolCatalogProps) {
               {/* Category Header */}
               <button
                 onClick={() => toggleCategory(category.id)}
-                className={`w-full px-3 py-2 text-left flex items-center justify-between rounded-t-lg transition-colors ${
+                className={`w-full px-2 py-1.5 text-left flex items-center justify-between rounded-t-lg transition-colors ${
                   isExpanded
                     ? 'bg-amber-50 text-amber-800'
                     : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <span>{category.icon}</span>
-                  <span className="font-medium text-sm">{category.name}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm">{category.icon}</span>
+                  <span className="font-medium text-xs">{category.name}</span>
                   <span className="text-xs text-gray-500">({category.tools.length})</span>
                 </div>
-                <span className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                <span className={`text-xs transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
                   ▼
                 </span>
               </button>
 
               {/* Category Content */}
               {isExpanded && (
-                <div className="p-3 border-t border-gray-200 bg-white">
-                  <div className="grid grid-cols-1 gap-3">
+                <div className="p-2 border-t border-gray-200 bg-white">
+                  <div className="grid grid-cols-1 gap-2">
                     {category.tools.map((tool) => (
                       <button
                         key={tool.id}
                         onClick={() => onAddTool(tool.id)}
-                        className="group relative bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 rounded-lg p-3 transition-all duration-200 flex items-center gap-3 text-left shadow-sm hover:shadow-md"
+                        className="group relative bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 rounded-lg p-2 transition-all duration-200 flex items-center gap-2 text-left shadow-sm hover:shadow-md"
                         title={tool.description}
                       >
                         {/* Circular Tool Icon */}
                         <div
-                          className={`w-12 h-12 rounded-full ${colorClasses[tool.color] || 'bg-gray-500'} border-2 flex items-center justify-center text-white text-xl flex-shrink-0 shadow-md group-hover:scale-110 transition-transform`}
+                          className={`w-10 h-10 rounded-full ${colorClasses[tool.color] || 'bg-gray-500'} border-2 flex items-center justify-center text-white text-lg flex-shrink-0 shadow-md group-hover:scale-110 transition-transform`}
                         >
                           {tool.icon}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm text-gray-800">{tool.name}</div>
+                          <div className="font-semibold text-xs text-gray-800">{tool.name}</div>
                           <div className="text-xs text-gray-500 mt-0.5 line-clamp-2">
                             {tool.description}
                           </div>
                         </div>
                         <div className="text-gray-400 group-hover:text-gray-600 transition-colors">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         </div>
@@ -168,7 +168,7 @@ export function ToolCatalog({ onAddTool }: ToolCatalogProps) {
       </div>
 
       {/* Info Box */}
-      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+      <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
         <p className="text-xs text-blue-800">
           <strong>💡 Tip:</strong> Tools can only be connected to Agent nodes at the "Tool" input handle.
           Drag a tool to an Agent node or click to add it to the canvas.

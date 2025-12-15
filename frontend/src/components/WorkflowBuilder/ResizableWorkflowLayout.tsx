@@ -295,11 +295,11 @@ export function ResizableWorkflowLayout({
             >
               <div className="h-full bg-white border-r border-gray-200 shadow-xl flex flex-col">
                 {/* Tab Navigation */}
-                <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-gray-50">
+                <div className="flex items-center justify-between p-2 border-b border-gray-200 bg-gray-50">
                   <div className="flex space-x-1">
                     <button
                       onClick={() => setActiveLeftTab('debug')}
-                      className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
+                      className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
                         activeLeftTab === 'debug'
                           ? 'bg-blue-100 text-blue-700 border border-blue-200'
                           : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
@@ -309,7 +309,7 @@ export function ResizableWorkflowLayout({
                     </button>
                     <button
                       onClick={() => setActiveLeftTab('toolbar')}
-                      className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
+                      className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
                         activeLeftTab === 'toolbar'
                           ? 'bg-blue-100 text-blue-700 border border-blue-200'
                           : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
@@ -319,7 +319,7 @@ export function ResizableWorkflowLayout({
                     </button>
                     <button
                       onClick={() => setActiveLeftTab('tools')}
-                      className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
+                      className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
                         activeLeftTab === 'tools'
                           ? 'bg-amber-100 text-amber-700 border border-amber-200'
                           : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
@@ -334,7 +334,7 @@ export function ResizableWorkflowLayout({
                       className="p-1 hover:bg-gray-200 rounded transition-colors"
                       title="Collapse panel"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
                     </button>
@@ -474,26 +474,26 @@ export function ResizableWorkflowLayout({
               onExpand={() => setCollapsedPanels(prev => ({ ...prev, config: false }))}
             >
               <div className="h-full bg-white/95 backdrop-blur-sm border-l border-gray-200/50 shadow-xl flex flex-col">
-                <div className="flex items-center justify-between p-4 border-b border-gray-200/50 bg-gray-50/80">
-                  <h3 className="text-sm font-semibold text-gray-700">
+                <div className="flex items-center justify-between p-2 border-b border-gray-200/50 bg-gray-50/80">
+                  <h3 className="text-xs font-semibold text-gray-700">
                     Configure {selectedNode.type?.charAt(0).toUpperCase()}{selectedNode.type?.slice(1)}
                   </h3>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => togglePanel('config')}
-                      className="p-2 hover:bg-gray-200/50 rounded-lg transition-all duration-200"
+                      className="p-1 hover:bg-gray-200/50 rounded-lg transition-all duration-200"
                       title={collapsedPanels.config ? "Expand panel" : "Collapse panel"}
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={collapsedPanels.config ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"} />
                       </svg>
                     </button>
                     <button
                       onClick={onCloseConfigPanel}
-                      className="p-2 hover:bg-red-100/50 rounded-lg transition-all duration-200"
+                      className="p-1 hover:bg-red-100/50 rounded-lg transition-all duration-200"
                       title="Close config panel"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>

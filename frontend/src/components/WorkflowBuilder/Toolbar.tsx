@@ -34,19 +34,19 @@ export function Toolbar({ onAddNode, onToggleDebug, showDebugPanel }: ToolbarPro
   };
 
   return (
-    <div className="h-full p-4 space-y-3 overflow-y-auto">
+    <div className="h-full p-2 space-y-2 overflow-y-auto">
             {/* Expand/Collapse buttons */}
-            <div className="flex gap-1 mb-3">
+            <div className="flex gap-1 mb-2">
               <button
                 onClick={expandAll}
-                className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                className="px-1.5 py-0.5 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
                 title="Expand All"
               >
                 ⬇️
               </button>
               <button
                 onClick={collapseAll}
-                className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                className="px-1.5 py-0.5 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
                 title="Collapse All"
               >
                 ⬆️
@@ -54,7 +54,7 @@ export function Toolbar({ onAddNode, onToggleDebug, showDebugPanel }: ToolbarPro
             </div>
 
       {/* Accordion Categories */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {nodeCategories.map((category) => {
           const isExpanded = expandedCategories.has(category.id);
           
@@ -63,36 +63,36 @@ export function Toolbar({ onAddNode, onToggleDebug, showDebugPanel }: ToolbarPro
               {/* Category Header */}
               <button
                 onClick={() => toggleCategory(category.id)}
-                className={`w-full px-3 py-2 text-left flex items-center justify-between rounded-t-lg transition-colors ${
+                className={`w-full px-2 py-1.5 text-left flex items-center justify-between rounded-t-lg transition-colors ${
                   isExpanded 
                     ? `bg-${category.color}-50 text-${category.color}-800` 
                     : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <span>{category.icon}</span>
-                  <span className="font-medium text-sm">{category.name}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm">{category.icon}</span>
+                  <span className="font-medium text-xs">{category.name}</span>
                   <span className="text-xs text-gray-500">({category.nodes.length})</span>
                 </div>
-                <span className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                <span className={`text-xs transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
                   ▼
                 </span>
               </button>
 
               {/* Category Content */}
               {isExpanded && (
-                <div className="p-3 border-t border-gray-200 bg-white">
-                  <div className="grid grid-cols-1 gap-2">
+                <div className="p-2 border-t border-gray-200 bg-white">
+                  <div className="grid grid-cols-1 gap-1.5">
                     {category.nodes.map((node) => (
                       <button
                         key={node.id}
                         onClick={() => onAddNode(node.id)}
-                        className={`bg-${node.color}-100 hover:bg-${node.color}-200 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 text-left`}
+                        className={`bg-${node.color}-100 hover:bg-${node.color}-200 px-2 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 text-left`}
                         title={node.description}
                       >
-                        <span className="text-base">{node.icon}</span>
+                        <span className="text-sm">{node.icon}</span>
                         <div className="flex-1">
-                          <div className="font-medium">{node.name}</div>
+                          <div className="font-medium text-xs">{node.name}</div>
                           <div className="text-xs text-gray-500 truncate">{node.description}</div>
                         </div>
                       </button>
@@ -107,10 +107,10 @@ export function Toolbar({ onAddNode, onToggleDebug, showDebugPanel }: ToolbarPro
 
             {/* Debug Button - Keep only this action button in the sidebar */}
             {onToggleDebug && (
-              <div className="border-t pt-3">
+              <div className="border-t pt-2">
                 <button
                   onClick={onToggleDebug}
-                  className={`w-full px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 border ${
+                  className={`w-full px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 border ${
                     showDebugPanel 
                       ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600 shadow-md' 
                       : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300 hover:border-gray-400'
