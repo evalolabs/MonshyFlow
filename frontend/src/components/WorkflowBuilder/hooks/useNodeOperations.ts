@@ -14,7 +14,6 @@ import {
   createNode,
   generateNodeId,
 } from '../../../utils/nodeUtils';
-import { isToolNodeType } from '../../../types/toolCatalog';
 import {
   findConnectedEdges,
   createReconnectionEdges,
