@@ -16,6 +16,14 @@ interface WorkflowToolbarProps {
   showOverlays?: boolean;
   onToggleOverlays?: () => void;
   
+  // Undo/Redo
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
+  undoDescription?: string; // Description of what will be undone
+  redoDescription?: string; // Description of what will be redone
+  
   // Workflow actions
   onSave: () => void;
   onPublish?: () => void;
@@ -35,6 +43,12 @@ export function WorkflowToolbar({
   onToggleAutoLayout,
   showOverlays = true,
   onToggleOverlays,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false,
+  undoDescription,
+  redoDescription,
   onSave,
   onPublish,
   onExecute,
@@ -48,10 +62,39 @@ export function WorkflowToolbar({
       <div className="flex items-center justify-between px-4 py-2.5">
         {/* Left: Layout Tools */}
         <div className="flex items-center gap-2">
+          {/* Undo/Redo Buttons */}
+          {onUndo && (
+            <div className="flex items-center gap-1 border-r border-gray-300 pr-2 mr-2">
+              <button
+                onClick={onUndo}
+                disabled={!canUndo}
+                className="flex items-center justify-center px-2 py-1.5 text-gray-700 hover:text-gray-900 hover:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-transparent rounded-md transition-all duration-200 border border-transparent hover:border-gray-300"
+                title={undoDescription ? `Undo: ${undoDescription} (Ctrl+Z)` : 'Undo (Ctrl+Z)'}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                </svg>
+              </button>
+              
+              {onRedo && (
+                <button
+                  onClick={onRedo}
+                  disabled={!canRedo}
+                  className="flex items-center justify-center px-2 py-1.5 text-gray-700 hover:text-gray-900 hover:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-transparent rounded-md transition-all duration-200 border border-transparent hover:border-gray-300"
+                  title={redoDescription ? `Redo: ${redoDescription} (Ctrl+Y)` : 'Redo (Ctrl+Y)'}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
+          
           {onAutoLayout && (
             <button
               onClick={onAutoLayout}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-all duration-200 border border-transparent hover:border-gray-300"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-all duration-200 border border-transparent hover:border-gray-300"
               title="Auto-arrange all nodes"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +107,7 @@ export function WorkflowToolbar({
           {onFitView && (
             <button
               onClick={onFitView}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-all duration-200 border border-transparent hover:border-gray-300"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-all duration-200 border border-transparent hover:border-gray-300"
               title="Fit all nodes in view"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,26 +118,26 @@ export function WorkflowToolbar({
           )}
           
           {onToggleAutoLayout && (
-            <label className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 cursor-pointer hover:bg-gray-100 rounded-md transition-all duration-200 border border-transparent hover:border-gray-300">
+            <label className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-700 cursor-pointer hover:bg-gray-100 rounded-md transition-all duration-200 border border-transparent hover:border-gray-300">
               <input
                 type="checkbox"
                 checked={autoLayoutEnabled}
                 onChange={onToggleAutoLayout}
                 className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0"
               />
-              <span className="text-sm font-medium">Auto-layout on add</span>
+              <span className="text-xs font-medium">Auto-layout on add</span>
             </label>
           )}
           
           {onToggleOverlays && (
-            <label className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 cursor-pointer hover:bg-gray-100 rounded-md transition-all duration-200 border border-transparent hover:border-gray-300">
+            <label className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-700 cursor-pointer hover:bg-gray-100 rounded-md transition-all duration-200 border border-transparent hover:border-gray-300">
               <input
                 type="checkbox"
                 checked={showOverlays}
                 onChange={onToggleOverlays}
                 className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0"
               />
-              <span className="text-sm font-medium">Show Overlays</span>
+              <span className="text-xs font-medium">Show Overlays</span>
             </label>
           )}
         </div>

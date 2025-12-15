@@ -61,6 +61,12 @@ interface ResizableWorkflowLayoutProps {
   onToggleDebug: () => void;
   showOverlays?: boolean;
   onToggleOverlays?: () => void;
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
+  undoDescription?: string;
+  redoDescription?: string;
   saving: boolean;
   executing: boolean;
   autoSaving?: boolean;
@@ -134,6 +140,12 @@ export function ResizableWorkflowLayout({
   onToggleDebug,
   showOverlays,
   onToggleOverlays,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
+  undoDescription,
+  redoDescription,
   saving,
   executing,
   autoSaving,
@@ -378,6 +390,12 @@ export function ResizableWorkflowLayout({
                 onToggleAutoLayout={onToggleAutoLayout}
                 showOverlays={showOverlays}
                 onToggleOverlays={onToggleOverlays}
+                onUndo={onUndo}
+                onRedo={onRedo}
+                canUndo={canUndo}
+                canRedo={canRedo}
+                undoDescription={undoDescription}
+                redoDescription={redoDescription}
                 onSave={onSave}
                 onPublish={onPublish}
                 onExecute={onExecute}

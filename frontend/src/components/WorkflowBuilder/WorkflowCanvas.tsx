@@ -12,7 +12,7 @@
  * - Context menus and modals
  */
 
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
 import {
   useNodesState,
   useEdgesState,
@@ -41,6 +41,7 @@ import {
   useNodeSelector,
   useWorkflowExecution,
   useAgentToolPositioning,
+  useUndoRedo,
 } from './hooks';
 import { useWorkflowAnimation } from './hooks/useWorkflowAnimation';
 import { useSecrets } from './hooks/useSecrets';
@@ -758,6 +759,61 @@ export function WorkflowCanvas({
     onNodesChange: setNodes,
   });
 
+  // Undo/Redo hook
+  const { 
+    undo, 
+    redo, 
+    canUndo, 
+    canRedo, 
+    clearHistory, 
+    initializeHistory,
+    currentHistoryEntry,
+    nextHistoryEntry,
+  } = useUndoRedo({
+    nodes,
+    edges,
+    onNodesChange: setNodes,
+    onEdgesChange: setEdges,
+    enabled: true,
+  });
+
+  // Initialize history when workflow loads (only once per workflow)
+  const workflowIdRef = useRef<string | undefined>(workflowId);
+  const historyInitializedRef = useRef(false);
+  
+  useEffect(() => {
+    // If workflow changed, clear and reinitialize
+    if (workflowId !== workflowIdRef.current) {
+      workflowIdRef.current = workflowId;
+      historyInitializedRef.current = false;
+      clearHistory();
+    }
+    
+    // Initialize after nodes are loaded (only once per workflow)
+    // Check both nodes.length and that nodes array is actually populated
+    if (nodes.length > 0 && !historyInitializedRef.current) {
+      console.log('[WorkflowCanvas] Preparing to initialize history', {
+        nodesCount: nodes.length,
+        edgesCount: edges.length,
+        workflowId,
+        firstNodeId: nodes[0]?.id,
+      });
+      
+      historyInitializedRef.current = true;
+      
+      // Initialize immediately, no delay needed
+      console.log('[WorkflowCanvas] Initializing undo/redo history NOW', {
+        nodesCount: nodes.length,
+        edgesCount: edges.length,
+        workflowId,
+      });
+      initializeHistory();
+    } else if (nodes.length === 0 && historyInitializedRef.current) {
+      // If nodes become empty, reset initialization flag
+      historyInitializedRef.current = false;
+    }
+  }, [workflowId, nodes.length, edges.length, clearHistory, initializeHistory, nodes]);
+
   // Workflow execution hook
   const {
     executing,
@@ -1150,6 +1206,12 @@ export function WorkflowCanvas({
       autoLayoutEnabled={autoLayoutEnabled}
       onToggleAutoLayout={toggleAutoLayout}
       onFitView={handleFitView}
+      onUndo={undo}
+      onRedo={redo}
+      canUndo={canUndo}
+      canRedo={canRedo}
+      undoDescription={currentHistoryEntry?.description}
+      redoDescription={nextHistoryEntry?.description}
       onToggleDebug={() => {
         setShowDebugPanel(!showDebugPanel);
         // Allow both panels to be open simultaneously

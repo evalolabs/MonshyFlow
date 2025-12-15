@@ -16,5 +16,6 @@ export { useAgentToolPositioning } from './useAgentToolPositioning';
 export { useSecrets } from './useSecrets';
 export { useNodeCatalogs } from './useNodeCatalogs';
 export { useNodeConfigAutoSave } from './useNodeConfigAutoSave';
+export { useUndoRedo } from './useUndoRedo';
 
 
