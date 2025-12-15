@@ -88,5 +88,6 @@ export const nodeLogger = new Logger({ prefix: 'Node' });
 export const edgeLogger = new Logger({ prefix: 'Edge' });
 export const autoSaveLogger = new Logger({ prefix: 'AutoSave' });
 export const layoutLogger = new Logger({ prefix: 'Layout' });
+export const undoRedoLogger = new Logger({ prefix: 'UndoRedo' });
 
 export { Logger };
