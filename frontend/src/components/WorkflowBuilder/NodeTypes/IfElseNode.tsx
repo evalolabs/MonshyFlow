@@ -13,7 +13,7 @@ import { Position } from '@xyflow/react';
 import { BaseNode } from './BaseNode';
 import type { NodeProps } from '@xyflow/react';
 
-export function IfElseNode({ data }: NodeProps) {
+export function IfElseNode({ data, selected }: NodeProps) {
   const label = typeof data?.label === 'string' ? data.label : 'If / Else';
   const condition = typeof data?.condition === 'string' ? data.condition : 'No condition set';
 
@@ -51,6 +51,7 @@ export function IfElseNode({ data }: NodeProps) {
           }
         },
       ]}
+      selected={selected}
     />
   );
 }

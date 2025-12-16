@@ -1,16 +1,8 @@
 import { BaseNode } from './BaseNode';
+import type { NodeProps } from '@xyflow/react';
 
-interface LLMNodeProps {
-  data: {
-    label?: string;
-    model?: string;
-    prompt?: string;
-    temperature?: number;
-  };
-}
-
-export function LLMNode({ data }: LLMNodeProps) {
-  const safeData = data || {};
+export function LLMNode({ data, selected }: NodeProps) {
+  const safeData = (data || {}) as any;
   
   const getSubtitle = () => {
     if (safeData.model) return safeData.model;
@@ -25,6 +17,7 @@ export function LLMNode({ data }: LLMNodeProps) {
       subtitle={getSubtitle()}
       hasInput={true}
       hasOutput={true}
+      selected={selected}
     />
   );
 }

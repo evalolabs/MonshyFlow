@@ -20,7 +20,7 @@ interface UseAutoSaveProps {
 
 export function useAutoSave({ workflowId, nodes, edges, onSave, enabled = true }: UseAutoSaveProps) {
   const [autoSaving, setAutoSaving] = useState(false);
-  const autoSaveTimeoutRef = useRef<number | null>(null);
+  const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstRenderRef = useRef(true);
   const componentMountTimeRef = useRef<number>(Date.now());
   const lastSavedRef = useRef<string>(''); // Track last saved state as JSON string

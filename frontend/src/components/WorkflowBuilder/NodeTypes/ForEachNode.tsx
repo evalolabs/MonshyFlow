@@ -13,7 +13,7 @@ import { Position } from '@xyflow/react';
 import { BaseNode } from './BaseNode';
 import type { NodeProps } from '@xyflow/react';
 
-export function ForEachNode({ data }: NodeProps) {
+export function ForEachNode({ data, selected }: NodeProps) {
   const label = typeof data?.label === 'string' ? data.label : 'For Each';
   const arrayPath = typeof data?.arrayPath === 'string' ? data.arrayPath : 'No array path set';
 
@@ -51,6 +51,7 @@ export function ForEachNode({ data }: NodeProps) {
           }
         },
       ]}
+      selected={selected}
     />
   );
 }

@@ -66,12 +66,12 @@ export function useAnimationScheduler({ onTimeout }: UseAnimationSchedulerProps)
     (_node: Node, duration: number = 200) => {
       // Clear existing timeout
       if (timeoutRef.current) {
-        window.clearTimeout(timeoutRef.current);
+        clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
 
       // Schedule new timeout
-      timeoutRef.current = window.setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         timeoutRef.current = null;
         onTimeout();
       }, duration);
@@ -84,7 +84,7 @@ export function useAnimationScheduler({ onTimeout }: UseAnimationSchedulerProps)
    */
   const clearScheduledTimeout = useCallback(() => {
     if (timeoutRef.current) {
-      window.clearTimeout(timeoutRef.current);
+      clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
   }, []);

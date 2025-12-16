@@ -15,7 +15,7 @@ import { Handle, Position } from '@xyflow/react';
 import { NodeInfoOverlay } from './NodeInfoOverlay';
 import { useState } from 'react';
 
-export function AgentNode({ data, id, type, ...props }: NodeProps) {
+export function AgentNode({ data, id, type, selected, ...props }: NodeProps) {
   const safeData = (data || {}) as Record<string, any>;
   const [isNodeHovered, setIsNodeHovered] = useState(false); // Track hover state of the node itself
   
@@ -85,7 +85,7 @@ export function AgentNode({ data, id, type, ...props }: NodeProps) {
 
   return (
     <div 
-      className={`relative w-[240px] h-[100px] px-4 py-3 rounded-lg shadow-md hover:shadow-lg bg-gradient-to-br ${getBackgroundColor()} ${getBorderColor()} transition-all duration-200 flex flex-col justify-center overflow-visible group ${safeData.isAnimating && safeData.executionStatus === 'running' ? 'ring-4 ring-emerald-400 ring-opacity-60 scale-105 animate-pulse' : ''}`}
+      className={`relative w-[240px] h-[100px] px-4 py-3 rounded-lg shadow-md hover:shadow-lg bg-gradient-to-br ${getBackgroundColor()} ${getBorderColor()} transition-all duration-200 flex flex-col justify-center overflow-visible group ${selected ? 'ring-4 ring-blue-400 ring-offset-2' : ''} ${safeData.isAnimating && safeData.executionStatus === 'running' ? 'ring-4 ring-emerald-400 ring-opacity-60 scale-105 animate-pulse' : ''}`}
       onMouseEnter={() => setIsNodeHovered(true)} // Set hovered state on node
       onMouseLeave={() => setIsNodeHovered(false)} // Reset hovered state on node
     >

@@ -10,7 +10,7 @@ import type { ApiIntegrationColor } from '../../../types/apiIntegrations';
 import { getApiIntegration } from '../../../config/apiIntegrations';
 
 export function HttpRequestNode(props: NodeProps) {
-  const { data, id, type } = props;
+  const { data, id, type, selected } = props;
   const safeData = data || {};
   const label = (safeData.label as string) || 'HTTP Request';
   const url = (safeData.url || safeData.endpoint || '') as string;
@@ -69,6 +69,7 @@ export function HttpRequestNode(props: NodeProps) {
       onUpdateComment={safeData.onUpdateComment as ((nodeId: string, comment: string) => void) | undefined}
       showInfoOverlay={showInfoOverlay}
       secrets={nodeSecrets}
+      selected={selected}
     />
   );
 }

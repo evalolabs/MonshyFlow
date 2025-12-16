@@ -23,6 +23,9 @@ export interface BaseNodeProps {
   badge?: string;
   status?: 'active' | 'inactive' | 'error' | 'warning';
   
+  // Selection state (from React Flow)
+  selected?: boolean;
+  
   // Execution animation
   isAnimating?: boolean;
   executionStatus?: 'idle' | 'running' | 'completed' | 'failed';
@@ -92,6 +95,7 @@ export function BaseNode({
   subtitle,
   badge,
   status,
+  selected = false,
   isAnimating = false,
   executionStatus = 'idle',
   hasInput = true,
@@ -133,19 +137,20 @@ export function BaseNode({
   
   return (
     <div 
-      className={`
-        relative w-[220px] h-[100px] 
-        px-4 py-3 
-        rounded-lg shadow-md hover:shadow-lg
-        bg-gradient-to-br ${bgGradient}
-        ${getBorderColor()}
-        transition-all duration-200
-        flex flex-col justify-center
-        overflow-visible
-        ${isAnimating && executionStatus === 'running' 
-          ? 'ring-4 ring-emerald-400 ring-opacity-60 scale-105 animate-pulse' 
-          : ''}
-      `}
+        className={`
+          relative w-[220px] h-[100px] 
+          px-4 py-3 
+          rounded-lg shadow-md hover:shadow-lg
+          bg-gradient-to-br ${bgGradient}
+          ${getBorderColor()}
+          transition-all duration-200
+          flex flex-col justify-center
+          overflow-visible
+          ${selected ? 'ring-4 ring-blue-400 ring-offset-2' : ''}
+          ${isAnimating && executionStatus === 'running' 
+            ? 'ring-4 ring-emerald-400 ring-opacity-60 scale-105 animate-pulse' 
+            : ''}
+        `}
       onMouseEnter={() => setIsNodeHovered(true)} // Set hovered state on node
       onMouseLeave={() => setIsNodeHovered(false)} // Reset hovered state on node
     >

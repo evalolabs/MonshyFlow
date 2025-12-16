@@ -13,7 +13,7 @@ import { Position } from '@xyflow/react';
 import { BaseNode } from './BaseNode';
 import type { NodeProps } from '@xyflow/react';
 
-export function WhileNode({ data }: NodeProps) {
+export function WhileNode({ data, selected }: NodeProps) {
   const label = typeof data?.label === 'string' ? data.label : 'While Loop';
   const condition = typeof data?.condition === 'string' ? data.condition : 'No condition set';
   const maxIterations = typeof data?.maxIterations === 'number' ? data.maxIterations : 100;
@@ -53,6 +53,7 @@ export function WhileNode({ data }: NodeProps) {
           }
         },
       ]}
+      selected={selected}
     />
   );
 }

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { BaseNode } from './BaseNode';
-import type { StartNodeProps } from '../../../types/startNode';
 import { ENTRY_TYPE_LABELS } from '../../../types/startNode';
 import { InlineExecutionMonitor } from '../InlineExecutionMonitor';
+import type { NodeProps } from '@xyflow/react';
 
-export function StartNode({ data }: StartNodeProps) {
-  const safeData = data || {};
+export function StartNode({ data, selected }: NodeProps) {
+  const safeData = (data || {}) as any;
   const [showExecutionMonitor, setShowExecutionMonitor] = useState(false);
   const [currentExecutionId, setCurrentExecutionId] = useState<string | null>(null);
   
@@ -25,8 +25,8 @@ export function StartNode({ data }: StartNodeProps) {
   };
 
   // Extract animation props (added at runtime by nodeRegistry)
-  const isAnimating = data?.isAnimating ?? false;
-  const executionStatus = data?.executionStatus ?? 'idle';
+  const isAnimating = safeData.isAnimating ?? false;
+  const executionStatus = safeData.executionStatus ?? 'idle';
 
 
   return (
@@ -41,6 +41,7 @@ export function StartNode({ data }: StartNodeProps) {
         status={getStatus()}
         isAnimating={isAnimating}
         executionStatus={executionStatus}
+        selected={selected}
       />
       
       {/* Inline Execution Monitor */}

@@ -43,7 +43,7 @@ export function useUndoRedo({
   // Refs for tracking state
   const isApplyingHistoryRef = useRef(false);
   const lastSavedStateRef = useRef<HistoryState | null>(null);
-  const positionDebounceTimerRef = useRef<number | null>(null);
+  const positionDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInitializedRef = useRef(false);
 
   /**
@@ -306,35 +306,8 @@ export function useUndoRedo({
     addToHistory();
   }, [nodes, edges, enabled, addToHistory, handlePositionChange, createSnapshot, hasChanges]);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    if (!enabled) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && (event.key === 'z' || event.key === 'y')) {
-        const target = event.target as HTMLElement;
-        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-          return;
-        }
-        
-        event.preventDefault();
-        
-        if (!event.shiftKey && event.key === 'z') {
-          undo();
-        } else if (
-          ((event.ctrlKey || event.metaKey) && event.key === 'y') ||
-          ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'z')
-        ) {
-          redo();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [enabled, undo, redo]);
+  // Note: Keyboard shortcuts are now handled by useKeyboardShortcuts in WorkflowCanvas
+  // This allows for centralized shortcut management
 
   return {
     undo,

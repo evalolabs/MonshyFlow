@@ -1,20 +1,12 @@
 import { BaseNode } from './BaseNode';
+import type { NodeProps } from '@xyflow/react';
 
-interface EndNodeProps {
-  data: {
-    label?: string;
-    result?: string;
-    isAnimating?: boolean;
-    executionStatus?: 'idle' | 'running' | 'completed' | 'failed';
-  };
-}
-
-export function EndNode({ data }: EndNodeProps) {
-  const safeData = data || {};
+export function EndNode({ data, selected }: NodeProps) {
+  const safeData = (data || {}) as any;
   
   // Extract animation props (added at runtime by nodeRegistry)
-  const isAnimating = data?.isAnimating ?? false;
-  const executionStatus = data?.executionStatus ?? 'idle';
+  const isAnimating = safeData.isAnimating ?? false;
+  const executionStatus = safeData.executionStatus ?? 'idle';
   
   return (
     <BaseNode
@@ -26,6 +18,7 @@ export function EndNode({ data }: EndNodeProps) {
       hasOutput={false}
       isAnimating={isAnimating}
       executionStatus={executionStatus}
+      selected={selected}
     />
   );
 }

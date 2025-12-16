@@ -420,6 +420,8 @@ export function ResizableWorkflowLayout({
                 fitView
                 className="bg-gray-50"
                 deleteKeyCode={['Backspace', 'Delete']}
+                multiSelectionKeyCode={['Meta', 'Control']} // Strg/Cmd für Multi-Select
+                selectionOnDrag={false} // Disable drag-selection (optional, kann später aktiviert werden)
                 edgesReconnectable={true}
                 edgesFocusable={true}
                 defaultEdgeOptions={defaultEdgeOptions}

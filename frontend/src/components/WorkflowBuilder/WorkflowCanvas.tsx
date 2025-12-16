@@ -42,6 +42,7 @@ import {
   useWorkflowExecution,
   useAgentToolPositioning,
   useUndoRedo,
+  useKeyboardShortcuts,
 } from './hooks';
 import { useWorkflowAnimation } from './hooks/useWorkflowAnimation';
 import { useSecrets } from './hooks/useSecrets';
@@ -49,6 +50,7 @@ import { useSecrets } from './hooks/useSecrets';
 // Services & Utils
 import { workflowService } from '../../services/workflowService';
 import { createSSEConnection, type SSEConnection } from '../../services/sseService';
+import { findAllChildNodes, isParentNode, getNodeGroup, findLoopBlockNodes } from '../../utils/nodeGroupingUtils';
 import type { WorkflowNode, WorkflowEdge } from '../../types/workflow';
 
 // Constants
@@ -767,8 +769,8 @@ export function WorkflowCanvas({
     canRedo, 
     clearHistory, 
     initializeHistory,
-    currentHistoryEntry,
-    nextHistoryEntry,
+    getUndoActionDescription,
+    getRedoActionDescription,
   } = useUndoRedo({
     nodes,
     edges,
@@ -813,6 +815,30 @@ export function WorkflowCanvas({
       historyInitializedRef.current = false;
     }
   }, [workflowId, nodes.length, edges.length, clearHistory, initializeHistory, nodes]);
+
+  // Keyboard shortcuts - centralized management
+  useKeyboardShortcuts({
+    enabled: true,
+    shortcuts: {
+      'ctrl+z': () => {
+        if (canUndo) undo();
+      },
+      'ctrl+shift+z': () => {
+        if (canRedo) redo();
+      },
+      'ctrl+y': () => {
+        if (canRedo) redo();
+      },
+      // Additional shortcuts will be added here in future phases
+      // 'ctrl+c': () => copyNodes(),
+      // 'ctrl+v': () => pasteNodes(),
+      // 'delete': () => deleteNodes(),
+    },
+    shouldDisable: () => {
+      // Disable shortcuts when modals are open
+      return showConfigPanel || contextMenu !== null || deleteModal !== null;
+    },
+  });
 
   // Workflow execution hook
   const {
@@ -1090,20 +1116,22 @@ export function WorkflowCanvas({
   }, [duplicateNode, triggerImmediateSave]);
 
   // Node click handler
-  const handleNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
+  const handleNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    // Check if Ctrl/Cmd is pressed (Multi-Select mode)
+    const isMultiSelect = event.ctrlKey || event.metaKey;
+    
     // Always get the latest node from the nodes state to ensure we have the latest data
     const latestNode = nodes.find(n => n.id === node.id) || node;
-    // console.log('[WorkflowCanvas] Node clicked:', {
-    //   clickedNodeId: node.id,
-    //   clickedNodeData: node.data,
-    //   clickedNodeData_url: node.data?.url,
-    //   foundInState: !!nodes.find(n => n.id === node.id),
-    //   latestNodeData: latestNode.data,
-    //   latestNodeData_url: latestNode.data?.url,
-    //   allNodesInState: nodes.map(n => ({ id: n.id, type: n.type, dataKeys: Object.keys(n.data || {}), url: n.data?.url }))
-    // });
-    // console.log('[WorkflowCanvas] Full clicked node:', JSON.stringify(node, null, 2));
-    // console.log('[WorkflowCanvas] Full latest node:', JSON.stringify(latestNode, null, 2));
+    
+    if (isMultiSelect) {
+      // Multi-Select mode: Don't open config panel, just toggle selection
+      // React Flow handles the selection state automatically
+      setContextMenu(null);
+      // Don't open config panel in multi-select mode
+      return;
+    }
+    
+    // Single-Select mode: Open config panel (existing behavior)
     setSelectedNode(latestNode);
     setShowConfigPanel(true);
     setContextMenu(null);
@@ -1116,12 +1144,18 @@ export function WorkflowCanvas({
     setContextMenu({ x: event.clientX, y: event.clientY, node });
   }, []);
 
-  // Pane click handler (close panels)
+  // Pane click handler (close panels and deselect nodes)
   const handlePaneClick = useCallback(() => {
     setContextMenu(null);
     setShowConfigPanel(false);
     setSelectedNode(null);
-  }, []);
+    
+    // Deselect all nodes (React Flow handles this via onNodesChange)
+    // We need to explicitly deselect all nodes
+    setNodes((currentNodes) =>
+      currentNodes.map((node) => ({ ...node, selected: false }))
+    );
+  }, [setNodes]);
 
   // Close config panel
   const handleCloseConfigPanel = useCallback(() => {
@@ -1149,6 +1183,65 @@ export function WorkflowCanvas({
     // Log other errors normally
     console.error(`[React Flow Error ${errorCode}]:`, errorMessage);
   }, []);
+
+  // ============================================================================
+  // TESTING: Node Grouping Utilities (temporary - for testing)
+  // ============================================================================
+  // Expose test function to window for console testing
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).testNodeGrouping = () => {
+        console.log('🧪 Testing nodeGroupingUtils with current workflow...');
+        console.log(`📊 Total nodes: ${nodes.length}, Total edges: ${edges.length}`);
+        
+        // Test 1: Find all parent nodes
+        console.log('\n1️⃣ Testing isParentNode()...');
+        const parentNodes = nodes.filter(node => isParentNode(node, edges));
+        console.log(`Found ${parentNodes.length} parent nodes:`, parentNodes.map(n => `${n.type} (${n.id})`));
+        
+        // Test 2: For each parent, find children
+        console.log('\n2️⃣ Testing findAllChildNodes()...');
+        for (const parent of parentNodes) {
+          const childIds = findAllChildNodes(parent.id, parent.type, edges, nodes);
+          if (childIds.length > 0) {
+            console.log(`  ${parent.type} (${parent.id}):`, childIds);
+            const childNodes = nodes.filter(n => childIds.includes(n.id));
+            console.log(`    Children:`, childNodes.map(n => `${n.type} (${n.id})`));
+          }
+        }
+        
+        // Test 3: Test getNodeGroup
+        console.log('\n3️⃣ Testing getNodeGroup()...');
+        for (const parent of parentNodes) {
+          const group = getNodeGroup(parent.id, parent.type, edges, nodes);
+          if (group.childIds.length > 0) {
+            console.log(`  Group for ${parent.type} (${parent.id}):`, {
+              parent: group.parentId,
+              children: group.childIds,
+              all: group.allIds,
+            });
+          }
+        }
+        
+        // Test 4: Specific test for ForEach node (from your logs)
+        const forEachNodes = nodes.filter(n => n.type === 'foreach');
+        if (forEachNodes.length > 0) {
+          console.log('\n4️⃣ Testing ForEach Loop-Block...');
+          forEachNodes.forEach(forEachNode => {
+            const loopBlock = findLoopBlockNodes(forEachNode.id, edges);
+            console.log(`  ForEach (${forEachNode.id}): ${loopBlock.length} nodes in loop block`, loopBlock);
+            const loopBlockNodes = nodes.filter(n => loopBlock.includes(n.id));
+            console.log(`    Loop block nodes:`, loopBlockNodes.map(n => `${n.type} (${n.id})`));
+          });
+        }
+        
+        console.log('\n✅ Test completed!');
+        return { parentNodes, nodes, edges };
+      };
+      
+      console.log('💡 Test function available: window.testNodeGrouping()');
+    }
+  }, [nodes, edges]);
 
   // ============================================================================
   // RENDER
@@ -1210,8 +1303,8 @@ export function WorkflowCanvas({
       onRedo={redo}
       canUndo={canUndo}
       canRedo={canRedo}
-      undoDescription={currentHistoryEntry?.description}
-      redoDescription={nextHistoryEntry?.description}
+      undoDescription={getUndoActionDescription()}
+      redoDescription={getRedoActionDescription()}
       onToggleDebug={() => {
         setShowDebugPanel(!showDebugPanel);
         // Allow both panels to be open simultaneously

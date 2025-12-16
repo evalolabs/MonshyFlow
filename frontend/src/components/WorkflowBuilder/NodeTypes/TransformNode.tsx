@@ -7,7 +7,7 @@
 import type { NodeProps } from '@xyflow/react';
 import { BaseNode } from './BaseNode';
 
-export function TransformNode({ data }: NodeProps) {
+export function TransformNode({ data, selected }: NodeProps) {
   const safeData = data || {};
   const label = (safeData.label as string) || 'Transform';
   const transformMode = (safeData.transformMode || 'extract_path') as string;
@@ -34,6 +34,7 @@ export function TransformNode({ data }: NodeProps) {
       subtitle={getSubtitle()}
       hasInput={true}
       hasOutput={true}
+      selected={selected}
     />
   );
 }

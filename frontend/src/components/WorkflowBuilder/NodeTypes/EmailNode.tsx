@@ -7,7 +7,7 @@
 import type { NodeProps } from '@xyflow/react';
 import { BaseNode } from './BaseNode';
 
-export function EmailNode({ data }: NodeProps) {
+export function EmailNode({ data, selected }: NodeProps) {
   const safeData = data || {};
   const label = (safeData.label as string) || 'Email';
   const to = (safeData.to || '') as string;
@@ -36,6 +36,7 @@ export function EmailNode({ data }: NodeProps) {
       hasOutput={true}
       isAnimating={isAnimating}
       executionStatus={executionStatus}
+      selected={selected}
     />
   );
 }

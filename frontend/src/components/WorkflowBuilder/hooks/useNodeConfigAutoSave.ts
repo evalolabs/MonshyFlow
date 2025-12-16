@@ -35,7 +35,7 @@ export function useNodeConfigAutoSave({
   onUpdateNode,
 }: UseNodeConfigAutoSaveProps): UseNodeConfigAutoSaveResult {
   const [isAutoSaving, setIsAutoSaving] = useState(false);
-  const autoSaveTimeoutRef = useRef<number | null>(null);
+  const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstRenderRef = useRef(true);
   const lastSavedConfigRef = useRef<string>('');
 

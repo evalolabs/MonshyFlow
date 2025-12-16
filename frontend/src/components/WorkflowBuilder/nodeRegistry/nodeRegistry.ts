@@ -108,6 +108,7 @@ function createDefaultNodeComponent(nodeType: string): ComponentType<any> | unde
       icon: metadata.icon || '📦',
       category: category as any,
       subtitle,
+      selected: props.selected || false,
       isAnimating,
       executionStatus,
       hasInput: metadata.hasInput !== false,
@@ -277,9 +278,10 @@ export function createNodeTypesMap(
         : currentAnimatedNodeId === nodeId;
       const executionStatus = isExecuting ? getNodeExecutionStatus(nodeId, isAnimating) : 'idle';
       
-      // Pass animation props to default component
+      // Pass animation props and selected state to default component
       const componentProps = {
         ...props,
+        selected: props.selected || false, // Pass selected prop to component
         data: {
           ...props.data,
           isAnimating,
@@ -331,6 +333,7 @@ export function createNodeTypesMap(
       label: props.data?.label || nodeType,
       icon: '📦',
       category: 'utility',
+      selected: props.selected || false,
       isAnimating,
       executionStatus,
       hasInput: true,
