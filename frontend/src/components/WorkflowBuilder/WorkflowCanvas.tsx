@@ -51,6 +51,7 @@ import { useSecrets } from './hooks/useSecrets';
 import { workflowService } from '../../services/workflowService';
 import { createSSEConnection, type SSEConnection } from '../../services/sseService';
 import { findAllChildNodes, isParentNode, getNodeGroup, findLoopBlockNodes } from '../../utils/nodeGroupingUtils';
+import type { NodeChange } from '@xyflow/react';
 import type { WorkflowNode, WorkflowEdge } from '../../types/workflow';
 
 // Constants
@@ -169,8 +170,63 @@ export function WorkflowCanvas({
   // STATE MANAGEMENT
   // ============================================================================
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes as Node[]);
+  const [nodes, setNodes, onNodesChangeBase] = useNodesState(initialNodes as Node[]);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges as Edge[]);
+
+  // Wrapper for onNodesChange that handles multi-select delete with grouping support
+  const onNodesChange = useCallback((changes: NodeChange[]) => {
+    // Find all nodes that are being removed
+    const nodesToRemove = new Set<string>();
+    
+    changes.forEach(change => {
+      if (change.type === 'remove') {
+        nodesToRemove.add(change.id);
+      }
+    });
+
+    // If there are nodes to remove, check for parent-child relationships
+    if (nodesToRemove.size > 0) {
+      const additionalRemovals: NodeChange[] = [];
+      const processedParents = new Set<string>();
+
+      nodesToRemove.forEach(nodeId => {
+        // Skip if already processed (might be a child of another parent being deleted)
+        if (processedParents.has(nodeId)) {
+          return;
+        }
+
+        const node = nodes.find(n => n.id === nodeId);
+        if (!node) return;
+
+        // Check if this is a parent node
+        if (isParentNode(node, edges)) {
+          // Find all children
+          const childIds = findAllChildNodes(nodeId, node.type, edges, nodes);
+          
+          // Add children to removal set (only if not already being removed)
+          childIds.forEach(childId => {
+            if (!nodesToRemove.has(childId)) {
+              nodesToRemove.add(childId);
+              additionalRemovals.push({
+                id: childId,
+                type: 'remove',
+              });
+            }
+          });
+
+          processedParents.add(nodeId);
+        }
+      });
+
+      // If we found additional children to remove, add them to the changes
+      if (additionalRemovals.length > 0) {
+        changes = [...changes, ...additionalRemovals];
+      }
+    }
+
+    // Call the base onNodesChange with all changes (including children)
+    onNodesChangeBase(changes);
+  }, [nodes, edges, onNodesChangeBase]);
 
   // Update nodes when initialNodes changes (e.g., workflow loaded from backend)
   React.useEffect(() => {

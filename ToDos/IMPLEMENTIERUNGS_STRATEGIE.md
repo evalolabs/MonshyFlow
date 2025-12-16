@@ -462,15 +462,17 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
 - **Tests:** `frontend/src/components/WorkflowBuilder/__tests__/multiSelect.test.tsx` (3 Tests) ✅
 - **Status:** ✅ Implementiert, getestet und integriert
 
-#### 1.3 Delete-Key Shortcut
-- [ ] Delete/Backspace für ausgewählte Nodes
-- [ ] **WICHTIG:** React Flow hat bereits `deleteKeyCode={['Backspace', 'Delete']}` - prüfen ob Multi-Select funktioniert
-- [ ] Integration in `useKeyboardShortcuts` (falls Custom Handler nötig)
-- [ ] Bestätigung für mehrere Nodes
-- [ ] **Gruppierung:** Delete von Parent löscht auch Children
-- **Datei:** `useKeyboardShortcuts.ts`, `WorkflowCanvas.tsx` (React Flow Props prüfen)
-- **Dependencies:** Multi-Select, nodeGroupingUtils
-- **Risiko:** Niedrig (wenn React Flow Multi-Select-Delete unterstützt)
+#### 1.3 Delete-Key Shortcut ✅
+- [x] Delete/Backspace für ausgewählte Nodes (React Flow Standard)
+- [x] **WICHTIG:** React Flow unterstützt Multi-Select-Delete automatisch ✅
+- [x] Custom `onNodesChange` Wrapper für Gruppierungs-Support
+- [ ] Bestätigung für mehrere Nodes (optional - für später)
+- [x] **Gruppierung:** Delete von Parent löscht auch Children automatisch
+- **Datei:** `WorkflowCanvas.tsx` (onNodesChange Wrapper)
+- **Dependencies:** Multi-Select ✅, nodeGroupingUtils ✅
+- **Risiko:** Niedrig ✅
+- **Tests:** `frontend/src/components/WorkflowBuilder/__tests__/deleteKeyShortcut.test.tsx` (3 Tests) ✅
+- **Status:** ✅ Implementiert, getestet und integriert
 
 ---
 
@@ -1031,8 +1033,8 @@ export interface NodeMetadata {
 
 ## 📈 Test-Statistiken
 
-- **Test-Dateien:** 5 (3 Unit-Tests + 2 Integration-Tests)
-- **Tests:** 48 (29 Unit-Tests + 19 Integration-Tests)
+- **Test-Dateien:** 6 (4 Unit-Tests + 2 Integration-Tests)
+- **Tests:** 51 (29 Unit-Tests + 22 Integration-Tests)
 - **Coverage:** Grundlagen abgedeckt
 - **Status:** ✅ Alle Tests bestanden
 
@@ -1079,12 +1081,14 @@ export interface NodeMetadata {
 ### Beispiel-Workflow:
 
 ```
-1. Ich: Implementiere Phase 1.2 (Multi-Select)
-2. Ich: Schreibe Tests (Unit + Integration)
-3. Ich: Führe Tests aus → ✅ Alle bestanden
-4. Ich: "Bitte teste im Browser: Multi-Select mit Strg+Klick auf mehrere Nodes"
-5. Du: Testest und gibst Feedback
-6. Wenn OK → Weiter zu Phase 1.3
+1. ✅ Ich: Implementiere Phase 1.2 (Multi-Select)
+2. ✅ Ich: Schreibe Tests (Unit + Integration)
+3. ✅ Ich: Führe Tests aus → ✅ Alle 48 Tests bestanden
+4. ✅ Du: Testest und gibst Feedback → ✅ Funktioniert
+5. ✅ Ich: Implementiere Phase 1.3 (Delete-Key Shortcut)
+6. ✅ Ich: Schreibe Tests → ✅ Alle 51 Tests bestanden
+7. ✅ Du: Testest und gibst Feedback → ✅ Funktioniert
+8. ⏳ Nächster Schritt: Phase 2 (Copy/Paste)
 ```
 
 ---
