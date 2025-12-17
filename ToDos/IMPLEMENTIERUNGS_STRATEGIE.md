@@ -513,7 +513,7 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
 - [x] **Edge-Paste:** Rechtsklick auf "+" Button → Popover-Menü mit **Paste** (disabled wenn Clipboard leer) ✅
 - [x] **Konflikt:** Auto-Save während Paste pausieren ✅ (Auto-Save wird durch onNodesChange getriggert)
 - [x] **Konflikt:** Auto-Layout während Paste pausieren (wenn aktiv) ✅ (Auto-Layout läuft nach Paste)
-- [ ] Undo/Redo Integration (geplant)
+- [x] Undo/Redo Integration für Copy/Paste/Cut ✅ *(“gehackt”: funktioniert soweit / ausreichend für aktuellen Stand)*
 - [x] **Konflikt:** Mausposition-Erkennung (React Flow Koordinaten) ✅
 - **Datei:** `useKeyboardShortcuts.ts`, `WorkflowCanvas.tsx`, `ButtonEdge.tsx`, `AddNodeButton.tsx` ✅
 - **Dependencies:** Clipboard Hook ✅, Keyboard Shortcuts ✅, useAutoSave ✅, useAutoLayout ✅
@@ -1030,7 +1030,7 @@ export interface NodeMetadata {
 - ✅ **2.2 Copy/Paste Integration** - Implementiert
   - ✅ Strg+C/V Shortcuts
   - ✅ Edge-Paste (Strg+V auf selektierter Edge, Rechtsklick auf + → Paste-Menü)
-  - ❌ Undo/Redo Integration (noch ausstehend)
+  - ✅ Undo/Redo Integration (Copy/Paste/Cut “gehackt”: funktioniert soweit)
 
 ### 🔄 In Arbeit
 
@@ -1039,7 +1039,7 @@ export interface NodeMetadata {
 ### 📋 Geplant
 
 #### Phase 2: Copy/Paste (Fortsetzung)
-- [ ] **2.2 Undo/Redo Integration** für Copy/Paste
+- [x] **2.2 Undo/Redo Integration** für Copy/Paste/Cut ✅ *(gehackt)*
 - [ ] **2.3 Duplicate erweitern**
 
 #### Phase 3: Alignment & Layout Tools

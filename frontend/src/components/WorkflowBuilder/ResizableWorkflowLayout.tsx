@@ -21,6 +21,7 @@ interface ResizableWorkflowLayoutProps {
   onEdgesChange: (changes: any) => void;
   onConnect: (connection: any) => void;
   onNodeClick: (event: React.MouseEvent, node: Node) => void;
+  onNodeDoubleClick?: (event: React.MouseEvent, node: Node) => void;
   onNodeContextMenu: (event: React.MouseEvent, node: Node) => void;
   onEdgeClick?: (event: React.MouseEvent, edge: Edge) => void;
   onPaneClick: () => void;
@@ -101,6 +102,7 @@ export function ResizableWorkflowLayout({
   onEdgesChange,
   onConnect,
   onNodeClick,
+  onNodeDoubleClick,
   onNodeContextMenu,
   onEdgeClick,
   onPaneClick,
@@ -414,6 +416,7 @@ export function ResizableWorkflowLayout({
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onNodeClick={onNodeClick}
+                onNodeDoubleClick={onNodeDoubleClick}
                 onNodeContextMenu={onNodeContextMenu}
                 onEdgeClick={onEdgeClick}
                 onPaneClick={onPaneClick}
@@ -422,7 +425,9 @@ export function ResizableWorkflowLayout({
                 edgeTypes={edgeTypes}
                 fitView
                 className="bg-gray-50"
-                deleteKeyCode={['Backspace', 'Delete']}
+                // We handle Delete/Backspace via useKeyboardShortcuts in WorkflowCanvas
+                // to preserve linear chains (reconnect prev -> next) and respect grouping.
+                deleteKeyCode={[]}
                 multiSelectionKeyCode={['Meta', 'Control']} // Strg/Cmd für Multi-Select
                 selectionOnDrag={false} // Disable drag-selection (optional, kann später aktiviert werden)
                 edgesReconnectable={true}

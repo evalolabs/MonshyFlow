@@ -15,6 +15,7 @@ import type { Node, Edge } from '@xyflow/react';
 import { findAllChildNodes } from '../../../utils/nodeGroupingUtils';
 import { generateNodeId } from '../../../utils/nodeUtils';
 import { generateEdgeId } from '../../../utils/edgeUtils';
+import { computeReconnectForRemovedSet } from '../utils/reconnectEdges';
 
 /**
  * Find entry and exit nodes for paste between operation
@@ -240,6 +241,54 @@ export function useClipboard({
     console.log('=====================================');
     console.log(`[Clipboard] Copied ${nodesToCopy.length} nodes and ${edgesToCopy.length} edges`);
   }, [nodes, edges]);
+
+  /**
+   * Cut selected nodes (copy + delete)
+   * - Copies selected nodes + all children (grouping)
+   * - Removes them from the canvas (nodes + connected edges)
+   */
+  const cutNodes = useCallback((selectedNodeIds: string[]) => {
+    if (selectedNodeIds.length === 0) return;
+
+    // Copy first (ensures clipboard is updated even if delete changes state)
+    copyNodes(selectedNodeIds);
+
+    const selectedNodes = nodes.filter(n => selectedNodeIds.includes(n.id));
+
+    // Expand selection to include children of any selected parent nodes
+    const idsToRemove = new Set<string>(selectedNodeIds);
+    for (const node of selectedNodes) {
+      const childIds = findAllChildNodes(node.id, node.type, edges, nodes);
+      childIds.forEach(id => idsToRemove.add(id));
+    }
+
+    const remainingNodes = nodes
+      .filter(n => !idsToRemove.has(n.id))
+      .map(n => ({ ...n, selected: false }));
+
+    const remainingEdges = edges.filter(
+      e => !idsToRemove.has(e.source) && !idsToRemove.has(e.target)
+    );
+
+    const reconnect = computeReconnectForRemovedSet(edges, idsToRemove);
+    const updatedEdges = reconnect
+      ? [
+          ...remainingEdges,
+          {
+            id: generateEdgeId(reconnect.source, reconnect.target),
+            source: reconnect.source,
+            target: reconnect.target,
+            type: 'buttonEdge',
+            data: {},
+          } as Edge,
+        ]
+      : remainingEdges;
+
+    onNodesChange(remainingNodes);
+    onEdgesChange(updatedEdges);
+
+    console.log(`[Clipboard] Cut ${idsToRemove.size} nodes (including grouped children)`);
+  }, [copyNodes, nodes, edges, onNodesChange, onEdgesChange]);
 
   /**
    * Paste nodes at a specific position (Canvas paste)
@@ -507,6 +556,7 @@ export function useClipboard({
 
   return {
     copyNodes,
+    cutNodes,
     pasteNodes,
     pasteNodesBetween,
     hasClipboardData,

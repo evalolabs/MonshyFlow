@@ -631,6 +631,133 @@ describe('useClipboard', () => {
       expect(edge2).toBeDefined();
     });
 
+    it('should cut nodes (copy + delete) including grouped children', () => {
+      const nodesWithAgentAndTools: Node[] = [
+        {
+          id: 'agent-1',
+          type: 'agent',
+          position: { x: 0, y: 0 },
+          data: { label: 'Agent' },
+        },
+        {
+          id: 'tool-1',
+          type: 'tool',
+          position: { x: 100, y: 100 },
+          data: { label: 'Tool 1' },
+        },
+        {
+          id: 'tool-2',
+          type: 'tool',
+          position: { x: 200, y: 100 },
+          data: { label: 'Tool 2' },
+        },
+        {
+          id: 'end-1',
+          type: 'end',
+          position: { x: 400, y: 0 },
+          data: { label: 'End' },
+        },
+      ];
+
+      const edgesWithAgentAndTools: Edge[] = [
+        {
+          id: 'edge-tool1-agent',
+          source: 'tool-1',
+          target: 'agent-1',
+          sourceHandle: 'tool-output',
+          targetHandle: 'tool',
+          type: 'buttonEdge',
+        },
+        {
+          id: 'edge-tool2-agent',
+          source: 'tool-2',
+          target: 'agent-1',
+          sourceHandle: 'tool-output',
+          targetHandle: 'tool',
+          type: 'buttonEdge',
+        },
+        {
+          id: 'edge-agent-end',
+          source: 'agent-1',
+          target: 'end-1',
+          type: 'buttonEdge',
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        useClipboard({
+          nodes: nodesWithAgentAndTools,
+          edges: edgesWithAgentAndTools,
+          onNodesChange,
+          onEdgesChange,
+        })
+      );
+
+      act(() => {
+        result.current.cutNodes(['agent-1']);
+      });
+
+      // Clipboard should have data after cut (copy part)
+      expect(result.current.hasClipboardData()).toBe(true);
+
+      // Nodes should be removed (agent + tools), end remains
+      expect(onNodesChange).toHaveBeenCalled();
+      const remainingNodes: Node[] = onNodesChange.mock.calls[0][0];
+      const remainingIds = new Set(remainingNodes.map(n => n.id));
+      expect(remainingIds.has('agent-1')).toBe(false);
+      expect(remainingIds.has('tool-1')).toBe(false);
+      expect(remainingIds.has('tool-2')).toBe(false);
+      expect(remainingIds.has('end-1')).toBe(true);
+
+      // Edges touching removed nodes should be removed too
+      expect(onEdgesChange).toHaveBeenCalled();
+      const remainingEdges: Edge[] = onEdgesChange.mock.calls[0][0];
+      expect(remainingEdges.find(e => e.id === 'edge-tool1-agent')).toBeUndefined();
+      expect(remainingEdges.find(e => e.id === 'edge-tool2-agent')).toBeUndefined();
+      expect(remainingEdges.find(e => e.id === 'edge-agent-end')).toBeUndefined();
+    });
+
+    it('should cut a middle node and reconnect the linear chain (prev -> next)', () => {
+      const chainNodes: Node[] = [
+        { id: 'start', type: 'start', position: { x: 0, y: 0 }, data: { label: 'Start' } },
+        { id: 'node1', type: 'transform', position: { x: 200, y: 0 }, data: { label: '1' } },
+        { id: 'node2', type: 'transform', position: { x: 400, y: 0 }, data: { label: '2' } },
+        { id: 'node3', type: 'transform', position: { x: 600, y: 0 }, data: { label: '3' } },
+        { id: 'end', type: 'end', position: { x: 800, y: 0 }, data: { label: 'End' } },
+      ];
+
+      const chainEdges: Edge[] = [
+        { id: 'e-start-1', source: 'start', target: 'node1', type: 'buttonEdge' },
+        { id: 'e-1-2', source: 'node1', target: 'node2', type: 'buttonEdge' },
+        { id: 'e-2-3', source: 'node2', target: 'node3', type: 'buttonEdge' },
+        { id: 'e-3-end', source: 'node3', target: 'end', type: 'buttonEdge' },
+      ];
+
+      const { result } = renderHook(() =>
+        useClipboard({
+          nodes: chainNodes,
+          edges: chainEdges,
+          onNodesChange,
+          onEdgesChange,
+        })
+      );
+
+      act(() => {
+        result.current.cutNodes(['node2']);
+      });
+
+      const remainingNodes: Node[] = onNodesChange.mock.calls[0][0];
+      expect(remainingNodes.find(n => n.id === 'node2')).toBeUndefined();
+
+      const updatedEdges: Edge[] = onEdgesChange.mock.calls[0][0];
+      // old adjacent edges removed
+      expect(updatedEdges.find(e => e.id === 'e-1-2')).toBeUndefined();
+      expect(updatedEdges.find(e => e.id === 'e-2-3')).toBeUndefined();
+      // new reconnect edge exists
+      const reconnectEdge = updatedEdges.find(e => e.source === 'node1' && e.target === 'node3');
+      expect(reconnectEdge).toBeDefined();
+    });
+
     it('should paste multiple connected nodes between nodes correctly (Agent + HTTP Request scenario)', () => {
       // This test reproduces the bug from the browser test:
       // User selects Agent and HTTP Request, copies them, then pastes between Start and End

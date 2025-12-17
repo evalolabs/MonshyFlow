@@ -53,9 +53,12 @@ import { useSecrets } from './hooks/useSecrets';
 // Services & Utils
 import { workflowService } from '../../services/workflowService';
 import { createSSEConnection, type SSEConnection } from '../../services/sseService';
-import { findAllChildNodes, isParentNode, getNodeGroup, findLoopBlockNodes } from '../../utils/nodeGroupingUtils';
+import { findAllChildNodes, isParentNode, findParentNode, getNodeGroup, findLoopBlockNodes } from '../../utils/nodeGroupingUtils';
+import { generateEdgeId } from '../../utils/edgeUtils';
 import type { NodeChange } from '@xyflow/react';
+import type { EdgeChange } from '@xyflow/react';
 import type { WorkflowNode, WorkflowEdge } from '../../types/workflow';
+import { computeReconnectForRemovedSet } from './utils/reconnectEdges';
 
 // Constants
 import {
@@ -175,10 +178,65 @@ export function WorkflowCanvas({
   // ============================================================================
 
   const [nodes, setNodes, onNodesChangeBase] = useNodesState(initialNodes as Node[]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges as Edge[]);
+  const [edges, setEdges, onEdgesChangeBase] = useEdgesState(initialEdges as Edge[]);
+
+  // We keep a thin wrapper so we can extend edge-change behavior in the future if needed.
+  const onEdgesChange = useCallback((changes: EdgeChange[]) => {
+    onEdgesChangeBase(changes);
+  }, [onEdgesChangeBase]);
 
   // Wrapper for onNodesChange that handles multi-select delete with grouping support
   const onNodesChange = useCallback((changes: NodeChange[]) => {
+    // --------------------------------------------------------------------------
+    // Group-selection (optional): selecting a parent selects children; selecting a child selects its parent.
+    // Keeps multi-select behavior, but expands selection to whole groups.
+    // --------------------------------------------------------------------------
+    const selectionChanges = changes.filter(c => c.type === 'select') as Array<{ id: string; type: 'select'; selected: boolean }>;
+    if (selectionChanges.length > 0) {
+      const additionalSelectChanges: Array<{ id: string; type: 'select'; selected: boolean }> = [];
+      const alreadyChanged = new Set(selectionChanges.map(c => c.id));
+
+      for (const change of selectionChanges) {
+        const node = nodes.find(n => n.id === change.id);
+        if (!node) continue;
+
+        if (change.selected) {
+          // If a parent is selected, select all children.
+          if (isParentNode(node, edges)) {
+            const childIds = findAllChildNodes(node.id, node.type, edges, nodes);
+            childIds.forEach(childId => {
+              if (!alreadyChanged.has(childId)) {
+                additionalSelectChanges.push({ id: childId, type: 'select', selected: true });
+                alreadyChanged.add(childId);
+              }
+            });
+          } else {
+            // If a child is selected, select its parent (if any).
+            const parentId = findParentNode(node.id, edges, nodes);
+            if (parentId && !alreadyChanged.has(parentId)) {
+              additionalSelectChanges.push({ id: parentId, type: 'select', selected: true });
+              alreadyChanged.add(parentId);
+            }
+          }
+        } else {
+          // If a parent is deselected, deselect all children.
+          if (isParentNode(node, edges)) {
+            const childIds = findAllChildNodes(node.id, node.type, edges, nodes);
+            childIds.forEach(childId => {
+              if (!alreadyChanged.has(childId)) {
+                additionalSelectChanges.push({ id: childId, type: 'select', selected: false });
+                alreadyChanged.add(childId);
+              }
+            });
+          }
+        }
+      }
+
+      if (additionalSelectChanges.length > 0) {
+        changes = [...changes, ...additionalSelectChanges];
+      }
+    }
+
     // Find all nodes that are being removed
     const nodesToRemove = new Set<string>();
     
@@ -272,6 +330,7 @@ export function WorkflowCanvas({
 
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
+  const lastNodeClickRef = useRef<{ nodeId: string; ts: number } | null>(null);
   
   // SSE connection for real-time events (used for node tests)
   const [sseConnection, setSseConnection] = useState<SSEConnection | null>(null);
@@ -832,6 +891,7 @@ export function WorkflowCanvas({
   // Clipboard hook
   const {
     copyNodes,
+    cutNodes,
     pasteNodes,
     pasteNodesBetween,
     hasClipboardData,
@@ -948,6 +1008,95 @@ export function WorkflowCanvas({
   useKeyboardShortcuts({
     enabled: true,
     shortcuts: {
+      // Delete/Backspace: custom delete to preserve linear chains (reconnect prev -> next)
+      delete: () => {
+        const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
+        if (selectedNodeIds.length === 0) return;
+
+        const selectedNodes = nodes.filter(n => selectedNodeIds.includes(n.id));
+        const idsToRemove = new Set<string>(selectedNodeIds);
+        for (const node of selectedNodes) {
+          const childIds = findAllChildNodes(node.id, node.type, edges, nodes);
+          childIds.forEach(id => idsToRemove.add(id));
+        }
+
+        const reconnect = computeReconnectForRemovedSet(edges, idsToRemove);
+
+        const remainingNodes = nodes
+          .filter(n => !idsToRemove.has(n.id))
+          .map(n => ({ ...n, selected: false }));
+
+        const remainingEdges = edges.filter(e => !idsToRemove.has(e.source) && !idsToRemove.has(e.target));
+        const updatedEdges = reconnect
+          ? [
+              ...remainingEdges,
+              {
+                id: generateEdgeId(reconnect.source, reconnect.target),
+                source: reconnect.source,
+                target: reconnect.target,
+                type: 'buttonEdge',
+                data: {},
+              } as Edge,
+            ]
+          : remainingEdges;
+
+        setNodes(remainingNodes);
+        setEdges(updatedEdges);
+
+        setSelectedNode(null);
+        setShowConfigPanel(false);
+        setSelectedEdge(null);
+        setContextMenu(null);
+        setEdgeContextMenu(null);
+      },
+      backspace: () => {
+        // same behavior as delete (but still blocked in input fields by useKeyboardShortcuts)
+        const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
+        if (selectedNodeIds.length === 0) return;
+
+        const selectedNodes = nodes.filter(n => selectedNodeIds.includes(n.id));
+        const idsToRemove = new Set<string>(selectedNodeIds);
+        for (const node of selectedNodes) {
+          const childIds = findAllChildNodes(node.id, node.type, edges, nodes);
+          childIds.forEach(id => idsToRemove.add(id));
+        }
+
+        const reconnect = computeReconnectForRemovedSet(edges, idsToRemove);
+
+        const remainingNodes = nodes
+          .filter(n => !idsToRemove.has(n.id))
+          .map(n => ({ ...n, selected: false }));
+
+        const remainingEdges = edges.filter(e => !idsToRemove.has(e.source) && !idsToRemove.has(e.target));
+        const updatedEdges = reconnect
+          ? [
+              ...remainingEdges,
+              {
+                id: generateEdgeId(reconnect.source, reconnect.target),
+                source: reconnect.source,
+                target: reconnect.target,
+                type: 'buttonEdge',
+                data: {},
+              } as Edge,
+            ]
+          : remainingEdges;
+
+        setNodes(remainingNodes);
+        setEdges(updatedEdges);
+
+        setSelectedNode(null);
+        setShowConfigPanel(false);
+        setSelectedEdge(null);
+        setContextMenu(null);
+        setEdgeContextMenu(null);
+      },
+      enter: () => {
+        if (selectedNode) {
+          setShowConfigPanel(true);
+          setContextMenu(null);
+          setEdgeContextMenu(null);
+        }
+      },
       'ctrl+z': () => {
         if (canUndo) undo();
       },
@@ -962,6 +1111,17 @@ export function WorkflowCanvas({
         const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
         if (selectedNodeIds.length > 0) {
           copyNodes(selectedNodeIds);
+        }
+      },
+      'ctrl+x': () => {
+        const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
+        if (selectedNodeIds.length > 0) {
+          cutNodes(selectedNodeIds);
+          setSelectedNode(null);
+          setShowConfigPanel(false);
+          setSelectedEdge(null);
+          setContextMenu(null);
+          setEdgeContextMenu(null);
         }
       },
       'ctrl+v': () => {
@@ -1284,11 +1444,32 @@ export function WorkflowCanvas({
       return;
     }
     
-    // Single-Select mode: Open config panel (existing behavior)
+    // Single-Select mode:
+    // - Click = selection (no auto-open)
+    // - Double-click = configure
+    //
+    // NOTE: We detect double-click here via event.detail because ReactFlow's onNodeDoubleClick
+    // doesn't always fire unless the node was already selected (browser/interaction quirks).
+    const now = Date.now();
+    const last = lastNodeClickRef.current;
+    const isDoubleClick = event.detail >= 2 || (last?.nodeId === latestNode.id && now - last.ts < 350);
+    lastNodeClickRef.current = { nodeId: latestNode.id, ts: now };
+
+    setSelectedNode(latestNode);
+    setContextMenu(null);
+
+    if (isDoubleClick) {
+      setShowConfigPanel(true);
+    }
+    // Don't close debug panel when opening config panel
+  }, [nodes]);
+
+  // Node double-click handler: explicit "configure"
+  const handleNodeDoubleClick = useCallback((_event: React.MouseEvent, node: Node) => {
+    const latestNode = nodes.find(n => n.id === node.id) || node;
     setSelectedNode(latestNode);
     setShowConfigPanel(true);
     setContextMenu(null);
-    // Don't close debug panel when opening config panel
   }, [nodes]);
 
   // Node context menu handler
@@ -1423,6 +1604,7 @@ export function WorkflowCanvas({
       onEdgesChange={onEdgesChange}
       onConnect={handleConnect}
       onNodeClick={handleNodeClick}
+      onNodeDoubleClick={handleNodeDoubleClick}
       onNodeContextMenu={handleNodeContextMenu}
       onEdgeClick={handleEdgeClick}
       onPaneClick={handlePaneClick}
