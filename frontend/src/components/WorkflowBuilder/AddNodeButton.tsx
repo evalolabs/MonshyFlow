@@ -12,9 +12,10 @@ interface AddNodeButtonProps {
   nodeId: string;
   sourceHandle?: string;
   onClick: () => void;
+  onContextMenu?: (event: React.MouseEvent) => void;
 }
 
-export const AddNodeButton: React.FC<AddNodeButtonProps> = ({ nodeId, sourceHandle, onClick }) => {
+export const AddNodeButton: React.FC<AddNodeButtonProps> = ({ nodeId, sourceHandle, onClick, onContextMenu }) => {
   const { getNode } = useReactFlow();
   const { x: viewportX, y: viewportY, zoom } = useViewport();
   
@@ -75,6 +76,14 @@ export const AddNodeButton: React.FC<AddNodeButtonProps> = ({ nodeId, sourceHand
     e.stopPropagation();
     onClick();
   };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onContextMenu) {
+      onContextMenu(e);
+    }
+  };
   
   // Determine button styling based on handle type
   const isLoopHandle = sourceHandle === 'loop' || sourceHandle === 'back';
@@ -110,6 +119,7 @@ export const AddNodeButton: React.FC<AddNodeButtonProps> = ({ nodeId, sourceHand
     >
       <button
         onClick={handleClick}
+        onContextMenu={handleContextMenu}
         className={buttonClasses}
         title={buttonTitle}
       >

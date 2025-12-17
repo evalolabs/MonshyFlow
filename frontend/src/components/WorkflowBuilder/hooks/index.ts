@@ -20,5 +20,6 @@ export { useNodeConfigAutoSave } from './useNodeConfigAutoSave';
 export { useUndoRedo } from './useUndoRedo';
 export { useKeyboardShortcuts } from './useKeyboardShortcuts';
 export type { KeyboardShortcut, ShortcutHandler, UseKeyboardShortcutsProps } from './useKeyboardShortcuts';
+export { useClipboard } from './useClipboard';
 
 

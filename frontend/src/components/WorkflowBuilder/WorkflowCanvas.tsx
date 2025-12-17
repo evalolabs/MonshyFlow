@@ -17,6 +17,7 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
+  useViewport,
   type Node,
   type Edge,
 } from '@xyflow/react';
@@ -43,6 +44,7 @@ import {
   useAgentToolPositioning,
   useUndoRedo,
   useKeyboardShortcuts,
+  useClipboard,
 } from './hooks';
 import { useWorkflowAnimation } from './hooks/useWorkflowAnimation';
 import { useSecrets } from './hooks/useSecrets';
@@ -165,6 +167,7 @@ export function WorkflowCanvas({
   workflowId,
 }: WorkflowCanvasProps) {
   const { fitView } = useReactFlow();
+  const { x: viewportX, y: viewportY, zoom } = useViewport();
 
   // ============================================================================
   // STATE MANAGEMENT
@@ -267,6 +270,7 @@ export function WorkflowCanvas({
   }, [initialEdges, setEdges]);
 
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
   
   // SSE connection for real-time events (used for node tests)
   const [sseConnection, setSseConnection] = useState<SSEConnection | null>(null);
@@ -817,6 +821,19 @@ export function WorkflowCanvas({
     onNodesChange: setNodes,
   });
 
+  // Clipboard hook
+  const {
+    copyNodes,
+    pasteNodes,
+    pasteNodesBetween,
+    hasClipboardData,
+  } = useClipboard({
+    nodes,
+    edges,
+    onNodesChange: setNodes,
+    onEdgesChange: setEdges,
+  });
+
   // Undo/Redo hook
   const { 
     undo, 
@@ -885,10 +902,35 @@ export function WorkflowCanvas({
       'ctrl+y': () => {
         if (canRedo) redo();
       },
-      // Additional shortcuts will be added here in future phases
-      // 'ctrl+c': () => copyNodes(),
-      // 'ctrl+v': () => pasteNodes(),
-      // 'delete': () => deleteNodes(),
+      // Copy/Paste shortcuts
+      'ctrl+c': () => {
+        const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
+        if (selectedNodeIds.length > 0) {
+          copyNodes(selectedNodeIds);
+        }
+      },
+      'ctrl+v': () => {
+        if (!hasClipboardData()) return;
+        
+        // Check if an edge is selected (for paste-between)
+        if (selectedEdge) {
+          pasteNodesBetween(
+            selectedEdge.source,
+            selectedEdge.target,
+            selectedEdge.id
+          );
+          setSelectedEdge(null); // Clear selection after paste
+        } else {
+          // Paste on canvas - use viewport center
+          // Calculate viewport center in flow coordinates
+          // Formula: flowX = (screenX - viewportX) / zoom
+          const viewportCenter = {
+            x: (window.innerWidth / 2 - viewportX) / zoom,
+            y: (window.innerHeight / 2 - viewportY) / zoom,
+          };
+          pasteNodes(viewportCenter);
+        }
+      },
     },
     shouldDisable: () => {
       // Disable shortcuts when modals are open
@@ -1200,11 +1242,22 @@ export function WorkflowCanvas({
     setContextMenu({ x: event.clientX, y: event.clientY, node });
   }, []);
 
+  // Edge click handler (for paste-between functionality)
+  const handleEdgeClick = useCallback((_event: React.MouseEvent, edge: Edge) => {
+    // Select edge for paste-between functionality
+    setSelectedEdge(edge);
+    // Deselect all nodes when edge is clicked
+    setNodes((currentNodes) =>
+      currentNodes.map((node) => ({ ...node, selected: false }))
+    );
+  }, [setNodes]);
+
   // Pane click handler (close panels and deselect nodes)
   const handlePaneClick = useCallback(() => {
     setContextMenu(null);
     setShowConfigPanel(false);
     setSelectedNode(null);
+    setSelectedEdge(null); // Also deselect edge
     
     // Deselect all nodes (React Flow handles this via onNodesChange)
     // We need to explicitly deselect all nodes
@@ -1313,6 +1366,7 @@ export function WorkflowCanvas({
       onConnect={handleConnect}
       onNodeClick={handleNodeClick}
       onNodeContextMenu={handleNodeContextMenu}
+      onEdgeClick={handleEdgeClick}
       onPaneClick={handlePaneClick}
       onError={handleReactFlowError}
       nodeTypes={nodeTypes}
@@ -1322,7 +1376,15 @@ export function WorkflowCanvas({
         // Don't set a default type - let useEdgeHandling determine it based on connection
         style: DEFAULT_EDGE_STYLE,
         markerEnd: { ...DEFAULT_EDGE_MARKER },
-        data: { onAddNode: addNodeCallbackRef },
+        data: { 
+          onAddNode: addNodeCallbackRef,
+          onPasteBetween: (edgeId: string, sourceNode: string, targetNode: string) => {
+            if (hasClipboardData()) {
+              pasteNodesBetween(sourceNode, targetNode, edgeId);
+            }
+          },
+          hasClipboardData: hasClipboardData,
+        },
       }}
       nodesWithAddButtons={nodesWithAddButtons}
       

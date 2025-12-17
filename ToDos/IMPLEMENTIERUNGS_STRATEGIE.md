@@ -500,11 +500,13 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
 - [ ] Strg+C / Strg+V Shortcuts
 - [ ] Integration in `useKeyboardShortcuts`
 - [ ] Paste-Position (Mausposition oder Canvas-Mitte)
+- [ ] **Edge-Paste:** Strg+V wenn Edge fokussiert → Paste zwischen Nodes
+- [ ] **Edge-Paste:** Rechtsklick auf "+" Button → Paste zwischen Nodes (wenn Clipboard vorhanden)
 - [ ] **Konflikt:** Auto-Save während Paste pausieren
 - [ ] **Konflikt:** Auto-Layout während Paste pausieren (wenn aktiv)
 - [ ] Undo/Redo Integration
 - [ ] **Konflikt:** Mausposition-Erkennung (React Flow Koordinaten)
-- **Datei:** `useKeyboardShortcuts.ts`, `WorkflowCanvas.tsx`
+- **Datei:** `useKeyboardShortcuts.ts`, `WorkflowCanvas.tsx`, `ButtonEdge.tsx`, `AddNodeButton.tsx`
 - **Dependencies:** Clipboard Hook, Keyboard Shortcuts, useAutoSave, useAutoLayout
 - **Risiko:** Mittel-Hoch (mehrere Konflikte zu lösen)
 
@@ -1093,8 +1095,8 @@ export interface NodeMetadata {
 
 ---
 
-**Status:** Phase 0, Phase 1.1 und Phase 1.2 abgeschlossen ✅  
-**Nächster Schritt:** Phase 1.3 (Delete-Key Shortcut)  
+**Status:** Phase 0, Phase 1.1, Phase 1.2 und Phase 1.3 abgeschlossen ✅  
+**Nächster Schritt:** Phase 2 (Copy/Paste)  
 **Wichtig:** Alle Konflikte vor Implementierung prüfen und Lösungen vorbereiten  
 **KRITISCH:** Dynamische Gruppierungs-Erkennung für neue Nodes implementiert ✅
 

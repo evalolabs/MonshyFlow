@@ -54,9 +54,10 @@ export function generateRandomPosition(): { x: number; y: number } {
 
 /**
  * Generate a unique node ID
+ * Uses timestamp + random component to ensure uniqueness even when called in quick succession
  */
 export function generateNodeId(type: string): string {
-  return `${type}-${Date.now()}`;
+  return `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 /**

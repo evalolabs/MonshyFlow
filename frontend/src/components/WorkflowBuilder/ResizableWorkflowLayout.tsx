@@ -22,6 +22,7 @@ interface ResizableWorkflowLayoutProps {
   onConnect: (connection: any) => void;
   onNodeClick: (event: React.MouseEvent, node: Node) => void;
   onNodeContextMenu: (event: React.MouseEvent, node: Node) => void;
+  onEdgeClick?: (event: React.MouseEvent, edge: Edge) => void;
   onPaneClick: () => void;
   onError: (errorCode: string, errorMessage: string) => void;
   nodeTypes: any;
@@ -101,6 +102,7 @@ export function ResizableWorkflowLayout({
   onConnect,
   onNodeClick,
   onNodeContextMenu,
+  onEdgeClick,
   onPaneClick,
   onError,
   nodeTypes,
@@ -413,6 +415,7 @@ export function ResizableWorkflowLayout({
                 onConnect={onConnect}
                 onNodeClick={onNodeClick}
                 onNodeContextMenu={onNodeContextMenu}
+                onEdgeClick={onEdgeClick}
                 onPaneClick={onPaneClick}
                 onError={onError}
                 nodeTypes={nodeTypes}

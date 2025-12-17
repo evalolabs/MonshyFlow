@@ -6,6 +6,8 @@ import { EDGE_TYPE_LOOP, isLoopHandle } from '../constants';
 
 interface ButtonEdgeData {
   onAddNode?: (edgeId: string, sourceNode: string, targetNode: string) => void;
+  onPasteBetween?: (edgeId: string, sourceNode: string, targetNode: string) => void;
+  hasClipboardData?: () => boolean;
 }
 
 interface ButtonEdgeProps extends Omit<EdgeProps, 'data'> {
@@ -117,6 +119,15 @@ export const ButtonEdge: React.FC<ButtonEdgeProps> = ({
     }
   };
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Check if clipboard has data and paste-between callback exists
+    if (data?.hasClipboardData?.() && data?.onPasteBetween) {
+      data.onPasteBetween(id, source, target);
+    }
+  };
+
   // Don't show button for tool edges (agent bottom inputs or toolEdge type)
   const showButton = !isToolEdgeConnection;
 
@@ -154,8 +165,9 @@ export const ButtonEdge: React.FC<ButtonEdgeProps> = ({
           >
             <button
               onClick={handleAddNode}
+              onContextMenu={handleContextMenu}
               className="group flex items-center justify-center w-6 h-6 bg-white border-2 border-gray-300 rounded-full shadow-md hover:shadow-lg hover:bg-blue-500 hover:border-blue-500 transition-all duration-150 hover:scale-125 cursor-pointer"
-              title="Add node"
+              title="Add node (Right-click to paste)"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
