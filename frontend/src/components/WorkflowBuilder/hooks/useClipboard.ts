@@ -32,30 +32,44 @@ function findEntryAndExitNodes(nodes: Node[], edges: Edge[]): { entryNode: Node;
   
   console.log('[findEntryAndExitNodes] Input nodes:', nodes.map(n => ({ id: n.id, type: n.type })));
   console.log('[findEntryAndExitNodes] Input edges:', edges.map(e => ({ source: e.source, target: e.target })));
-  
-  // Count incoming edges for each node (from other nodes in the set)
+
+  // For entry/exit decisions we must ignore loop-body structural edges, otherwise a loop node
+  // looks "central" (incoming from back-edge) and can incorrectly become entry/exit even when
+  // it's part of a larger linear chain (e.g. Agent -> While).
+  const isLoopStructuralEdge = (edge: Edge) =>
+    edge.sourceHandle === 'loop' || edge.targetHandle === 'back' || edge.type === 'loopEdge';
+
+  const flowEdges = edges.filter(
+    edge => nodeIds.has(edge.source) && nodeIds.has(edge.target) && !isLoopStructuralEdge(edge)
+  );
+
+  // Count incoming/outgoing edges for each node based on "flow edges" (non-loop structural).
   const incomingCounts = new Map<string, number>();
   const outgoingCounts = new Map<string, number>();
-  
+
   nodes.forEach(node => {
     incomingCounts.set(node.id, 0);
     outgoingCounts.set(node.id, 0);
   });
-  
-  edges.forEach(edge => {
-    if (nodeIds.has(edge.source) && nodeIds.has(edge.target)) {
-      incomingCounts.set(edge.target, (incomingCounts.get(edge.target) || 0) + 1);
-      outgoingCounts.set(edge.source, (outgoingCounts.get(edge.source) || 0) + 1);
-    }
+
+  flowEdges.forEach(edge => {
+    incomingCounts.set(edge.target, (incomingCounts.get(edge.target) || 0) + 1);
+    outgoingCounts.set(edge.source, (outgoingCounts.get(edge.source) || 0) + 1);
   });
-  
-  console.log('[findEntryAndExitNodes] Incoming counts:', Array.from(incomingCounts.entries()).map(([id, count]) => ({ id, count })));
-  console.log('[findEntryAndExitNodes] Outgoing counts:', Array.from(outgoingCounts.entries()).map(([id, count]) => ({ id, count })));
-  
-  // Find central node (node with most incoming edges) - this is typically the Agent in Agent+Tools scenario
+
+  console.log(
+    '[findEntryAndExitNodes] Incoming counts (flow edges):',
+    Array.from(incomingCounts.entries()).map(([id, count]) => ({ id, count }))
+  );
+  console.log(
+    '[findEntryAndExitNodes] Outgoing counts (flow edges):',
+    Array.from(outgoingCounts.entries()).map(([id, count]) => ({ id, count }))
+  );
+
+  // Find central node (node with most incoming flow-edges) - typically the Agent in Agent+Tools scenario.
   let maxIncoming = 0;
   let centralNode: Node | null = null;
-  
+
   for (const [nodeId, count] of incomingCounts.entries()) {
     if (count > maxIncoming) {
       maxIncoming = count;
@@ -65,40 +79,50 @@ function findEntryAndExitNodes(nodes: Node[], edges: Edge[]): { entryNode: Node;
       }
     }
   }
-  
-  // If we have a central node (multiple incoming edges), use it as both entry and exit
+
+  // If we have a central node (multiple incoming edges), use it as both entry and exit.
   if (centralNode && maxIncoming > 1) {
     console.log('[findEntryAndExitNodes] Found central node:', { id: centralNode.id, type: centralNode.type, incomingCount: maxIncoming });
     return { entryNode: centralNode, exitNode: centralNode };
   }
-  
-  // Check for loop structure (Foreach/While with loop block)
-  // Loop nodes have edges with sourceHandle='loop' and targetHandle='back'
+
+  // Detect loop parent nodes (Foreach/While with loop block).
+  // A loop node is ONLY treated as both entry/exit if it is "standalone" in the selected subgraph,
+  // i.e. it doesn't have normal (non-loop) incoming/outgoing edges to other selected nodes.
   const loopNode = nodes.find(node => {
-    if (node.type !== 'foreach' && node.type !== 'while') {
-      return false;
-    }
-    // Check if this node has loop edges (sourceHandle='loop' and incoming edge with targetHandle='back')
-    const hasLoopOutgoing = edges.some(edge => 
+    if (node.type !== 'foreach' && node.type !== 'while') return false;
+
+    const hasLoopOutgoing = edges.some(edge =>
       edge.source === node.id && edge.sourceHandle === 'loop' && nodeIds.has(edge.target)
     );
-    const hasLoopBack = edges.some(edge => 
+    const hasLoopBack = edges.some(edge =>
       edge.target === node.id && edge.targetHandle === 'back' && nodeIds.has(edge.source)
     );
     return hasLoopOutgoing && hasLoopBack;
   });
 
   if (loopNode) {
-    console.log('[findEntryAndExitNodes] Found loop node (foreach/while):', { id: loopNode.id, type: loopNode.type });
-    // For loop structures, the loop node itself is both entry and exit
-    return { entryNode: loopNode, exitNode: loopNode };
+    const hasNonLoopIncoming = flowEdges.some(e => e.target === loopNode.id);
+    const hasNonLoopOutgoing = flowEdges.some(e => e.source === loopNode.id);
+    const isStandaloneLoopGroup = !hasNonLoopIncoming && !hasNonLoopOutgoing;
+
+    console.log('[findEntryAndExitNodes] Found loop node (foreach/while):', {
+      id: loopNode.id,
+      type: loopNode.type,
+      isStandaloneLoopGroup,
+      hasNonLoopIncoming,
+      hasNonLoopOutgoing,
+    });
+
+    if (isStandaloneLoopGroup) {
+      // For pure loop structures (loop node + loop-block), the loop node is both entry and exit.
+      return { entryNode: loopNode, exitNode: loopNode };
+    }
   }
-  
-  // Otherwise, find linear chain: first node (no incoming) -> ... -> last node (no outgoing)
+
+  // Otherwise, find linear chain using flowEdges: first node (no incoming) -> ... -> last node (no outgoing)
   const firstNode = nodes.find(node => {
-    return !edges.some(edge => 
-      edge.target === node.id && nodeIds.has(edge.source)
-    );
+    return !flowEdges.some(edge => edge.target === node.id);
   });
 
   if (!firstNode) {
@@ -109,9 +133,7 @@ function findEntryAndExitNodes(nodes: Node[], edges: Edge[]): { entryNode: Node;
 
   // Find last node (no outgoing edges to other nodes in set)
   const lastNode = nodes.find(node => {
-    return !edges.some(edge => 
-      edge.source === node.id && nodeIds.has(edge.target)
-    );
+    return !flowEdges.some(edge => edge.source === node.id);
   }) || firstNode; // Fallback to first if no clear last node
 
   console.log('[findEntryAndExitNodes] Linear chain - First:', { id: firstNode.id, type: firstNode.type });

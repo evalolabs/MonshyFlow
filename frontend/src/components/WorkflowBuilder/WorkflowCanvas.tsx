@@ -32,6 +32,7 @@ import { LoopEdge } from './EdgeTypes/LoopEdge';
 
 // Components
 import { ResizableWorkflowLayout } from './ResizableWorkflowLayout';
+import { EdgeContextMenu } from './EdgeContextMenu';
 
 // Custom Hooks
 import {
@@ -276,6 +277,13 @@ export function WorkflowCanvas({
   const [sseConnection, setSseConnection] = useState<SSEConnection | null>(null);
   const [showConfigPanel, setShowConfigPanel] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; node: Node } | null>(null);
+  const [edgeContextMenu, setEdgeContextMenu] = useState<{
+    x: number;
+    y: number;
+    edgeId: string;
+    sourceNodeId: string;
+    targetNodeId: string;
+  } | null>(null);
   const [deleteModal, setDeleteModal] = useState<{ node: Node } | null>(null);
   
   // Debug panel state
@@ -834,6 +842,53 @@ export function WorkflowCanvas({
     onEdgesChange: setEdges,
   });
 
+  // Keep latest edges in a ref so callbacks can be stable (important for edge.data function injection)
+  const edgesRef = useRef<Edge[]>(edges);
+  useEffect(() => {
+    edgesRef.current = edges;
+  }, [edges]);
+
+  const handleOpenEdgePasteMenu = useCallback(
+    ({ edgeId, sourceNode, targetNode, x, y }: { edgeId: string; sourceNode: string; targetNode: string; x: number; y: number }) => {
+      setSelectedEdge(edgesRef.current.find(e => e.id === edgeId) || null);
+      setEdgeContextMenu({
+        x,
+        y,
+        edgeId,
+        sourceNodeId: sourceNode,
+        targetNodeId: targetNode,
+      });
+    },
+    []
+  );
+
+  // Ensure ButtonEdge always has the context-menu callbacks available via edge.data
+  // (existing edges from DB or edges normalized by useEdgeHandling may not include these).
+  useEffect(() => {
+    const needsEnhancement = edges.some(
+      edge =>
+        edge.type === 'buttonEdge' &&
+        (typeof (edge.data as any)?.onOpenPasteMenu !== 'function' || typeof (edge.data as any)?.hasClipboardData !== 'function')
+    );
+
+    if (!needsEnhancement) return;
+
+    setEdges(prevEdges =>
+      prevEdges.map(edge => {
+        if (edge.type !== 'buttonEdge') return edge;
+        const data = (edge.data ?? {}) as any;
+        return {
+          ...edge,
+          data: {
+            ...data,
+            onOpenPasteMenu: data.onOpenPasteMenu ?? handleOpenEdgePasteMenu,
+            hasClipboardData: data.hasClipboardData ?? hasClipboardData,
+          },
+        };
+      })
+    );
+  }, [edges, setEdges, handleOpenEdgePasteMenu, hasClipboardData]);
+
   // Undo/Redo hook
   const { 
     undo, 
@@ -934,7 +989,7 @@ export function WorkflowCanvas({
     },
     shouldDisable: () => {
       // Disable shortcuts when modals are open
-      return showConfigPanel || contextMenu !== null || deleteModal !== null;
+      return showConfigPanel || contextMenu !== null || edgeContextMenu !== null || deleteModal !== null;
     },
   });
 
@@ -1246,6 +1301,7 @@ export function WorkflowCanvas({
   const handleEdgeClick = useCallback((_event: React.MouseEvent, edge: Edge) => {
     // Select edge for paste-between functionality
     setSelectedEdge(edge);
+    setEdgeContextMenu(null);
     // Deselect all nodes when edge is clicked
     setNodes((currentNodes) =>
       currentNodes.map((node) => ({ ...node, selected: false }))
@@ -1255,6 +1311,7 @@ export function WorkflowCanvas({
   // Pane click handler (close panels and deselect nodes)
   const handlePaneClick = useCallback(() => {
     setContextMenu(null);
+    setEdgeContextMenu(null);
     setShowConfigPanel(false);
     setSelectedNode(null);
     setSelectedEdge(null); // Also deselect edge
@@ -1357,6 +1414,7 @@ export function WorkflowCanvas({
   // ============================================================================
 
   return (
+    <>
     <ResizableWorkflowLayout
       // Canvas props
       nodes={nodes}
@@ -1378,10 +1436,15 @@ export function WorkflowCanvas({
         markerEnd: { ...DEFAULT_EDGE_MARKER },
         data: { 
           onAddNode: addNodeCallbackRef,
-          onPasteBetween: (edgeId: string, sourceNode: string, targetNode: string) => {
-            if (hasClipboardData()) {
-              pasteNodesBetween(sourceNode, targetNode, edgeId);
-            }
+          onOpenPasteMenu: ({ edgeId, sourceNode, targetNode, x, y }: { edgeId: string; sourceNode: string; targetNode: string; x: number; y: number }) => {
+            setSelectedEdge(edges.find(e => e.id === edgeId) || null);
+            setEdgeContextMenu({
+              x,
+              y,
+              edgeId,
+              sourceNodeId: sourceNode,
+              targetNodeId: targetNode,
+            });
           },
           hasClipboardData: hasClipboardData,
         },
@@ -1453,6 +1516,20 @@ export function WorkflowCanvas({
       // Workflow props
       workflowId={workflowId}
     />
+    {edgeContextMenu && (
+      <EdgeContextMenu
+        x={edgeContextMenu.x}
+        y={edgeContextMenu.y}
+        canPaste={hasClipboardData()}
+        onPaste={() => {
+          pasteNodesBetween(edgeContextMenu.sourceNodeId, edgeContextMenu.targetNodeId, edgeContextMenu.edgeId);
+          setSelectedEdge(null);
+          setEdgeContextMenu(null);
+        }}
+        onClose={() => setEdgeContextMenu(null)}
+      />
+    )}
+    </>
   );
 }
 

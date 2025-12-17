@@ -136,13 +136,15 @@ describe('useClipboard', () => {
       });
 
       const pastedNodes = onNodesChange.mock.calls[0][0];
+      // Only the newly pasted node is marked selected=true
       const pastedNode = pastedNodes.find(
-        (n: Node) => n.type === 'transform' && n.id !== 'transform-1'
+        (n: Node) => n.type === 'transform' && n.selected === true
       );
 
       // Pasted node should have a different ID
       expect(pastedNode?.id).not.toBe('transform-1');
-      expect(pastedNode?.id).toMatch(/^transform-\d+$/);
+      // generateNodeId() uses timestamp + random suffix for uniqueness
+      expect(pastedNode?.id).toMatch(/^transform-\d+-[a-z0-9]+$/);
     });
   });
 
@@ -1108,6 +1110,167 @@ describe('useClipboard', () => {
       const edgeIds = pastedEdges.map((e: Edge) => e.id);
       const uniqueEdgeIds = new Set(edgeIds);
       expect(edgeIds.length).toBe(uniqueEdgeIds.size); // All edge IDs should be unique
+    });
+
+    it('should paste Agent + While group between nodes with Agent as entry and While as exit (ignore loop/back edges)', () => {
+      // Regression test for multi-select of multiple parent nodes:
+      // When copying Agent + While (and While has loop/back edges), entry must be Agent (not While),
+      // and exit must be While (not Agent), so paste-between wires: Source -> Agent -> While -> Target.
+
+      const nodesScenario: Node[] = [
+        {
+          id: 'start-1',
+          type: 'start',
+          position: { x: 40, y: 40 },
+          data: { label: 'Start' },
+        },
+        {
+          id: 'end-1',
+          type: 'end',
+          position: { x: 840, y: 40 },
+          data: { label: 'End' },
+        },
+        {
+          id: 'agent-1',
+          type: 'agent',
+          position: { x: 240, y: 40 },
+          data: { label: 'Agent' },
+        },
+        {
+          id: 'while-1',
+          type: 'while',
+          position: { x: 440, y: 40 },
+          data: { label: 'While' },
+        },
+        {
+          id: 'http-request-1',
+          type: 'http-request',
+          position: { x: 440, y: 260 },
+          data: { label: 'Loop HTTP' },
+        },
+      ];
+
+      const edgesScenario: Edge[] = [
+        {
+          id: 'edge-start-end',
+          source: 'start-1',
+          target: 'end-1',
+          type: 'buttonEdge',
+        },
+        {
+          id: 'edge-agent-while',
+          source: 'agent-1',
+          target: 'while-1',
+          type: 'buttonEdge',
+        },
+        {
+          id: 'edge-while-loop',
+          source: 'while-1',
+          target: 'http-request-1',
+          sourceHandle: 'loop',
+          type: 'buttonEdge',
+        },
+        {
+          id: 'edge-http-back',
+          source: 'http-request-1',
+          target: 'while-1',
+          targetHandle: 'back',
+          type: 'buttonEdge',
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        useClipboard({
+          nodes: nodesScenario,
+          edges: edgesScenario,
+          onNodesChange,
+          onEdgesChange,
+        })
+      );
+
+      // Multi-select copy: Agent + While (While should include its loop body via grouping)
+      act(() => {
+        result.current.copyNodes(['agent-1', 'while-1']);
+      });
+
+      // Paste between Start and End (on edge-start-end)
+      act(() => {
+        result.current.pasteNodesBetween('start-1', 'end-1', 'edge-start-end');
+      });
+
+      expect(onNodesChange).toHaveBeenCalled();
+      expect(onEdgesChange).toHaveBeenCalled();
+
+      const pastedNodes = onNodesChange.mock.calls[0][0];
+      const pastedEdges = onEdgesChange.mock.calls[0][0];
+
+      const pastedAgent = pastedNodes.find(
+        (n: Node) => n.type === 'agent' && n.id !== 'agent-1' && n.selected === true
+      );
+      const pastedWhile = pastedNodes.find(
+        (n: Node) => n.type === 'while' && n.id !== 'while-1' && n.selected === true
+      );
+      const pastedHttp = pastedNodes.find(
+        (n: Node) => n.type === 'http-request' && n.id !== 'http-request-1' && n.selected === true
+      );
+
+      expect(pastedAgent).toBeDefined();
+      expect(pastedWhile).toBeDefined();
+      expect(pastedHttp).toBeDefined(); // loop body should be copied via grouping
+
+      // Required wiring:
+      // 1) start -> pastedAgent (entry)
+      // 2) pastedAgent -> pastedWhile (internal "flow" edge)
+      // 3) pastedWhile -> end (exit)
+      const edgeStartToPastedAgent = pastedEdges.find(
+        (e: Edge) => e.source === 'start-1' && e.target === pastedAgent?.id
+      );
+      const edgePastedAgentToPastedWhile = pastedEdges.find(
+        (e: Edge) => e.source === pastedAgent?.id && e.target === pastedWhile?.id
+      );
+      const edgePastedWhileToEnd = pastedEdges.find(
+        (e: Edge) => e.source === pastedWhile?.id && e.target === 'end-1'
+      );
+
+      expect(edgeStartToPastedAgent).toBeDefined();
+      expect(edgePastedAgentToPastedWhile).toBeDefined();
+      expect(edgePastedWhileToEnd).toBeDefined();
+
+      // Loop edges must stay internal:
+      const edgePastedWhileToPastedHttp = pastedEdges.find(
+        (e: Edge) =>
+          e.source === pastedWhile?.id &&
+          e.target === pastedHttp?.id &&
+          e.sourceHandle === 'loop'
+      );
+      const edgePastedHttpBackToPastedWhile = pastedEdges.find(
+        (e: Edge) =>
+          e.source === pastedHttp?.id &&
+          e.target === pastedWhile?.id &&
+          e.targetHandle === 'back'
+      );
+
+      expect(edgePastedWhileToPastedHttp).toBeDefined();
+      expect(edgePastedHttpBackToPastedWhile).toBeDefined();
+
+      // Guardrails: these wrong edges must NOT exist.
+      const wrongStartToWhile = pastedEdges.find(
+        (e: Edge) => e.source === 'start-1' && e.target === pastedWhile?.id
+      );
+      const wrongStartToHttp = pastedEdges.find(
+        (e: Edge) => e.source === 'start-1' && e.target === pastedHttp?.id
+      );
+      const wrongAgentToEnd = pastedEdges.find(
+        (e: Edge) => e.source === pastedAgent?.id && e.target === 'end-1'
+      );
+
+      expect(wrongStartToWhile).toBeUndefined();
+      expect(wrongStartToHttp).toBeUndefined();
+      expect(wrongAgentToEnd).toBeUndefined();
+
+      // Verify original edge was removed
+      const originalEdge = pastedEdges.find((e: Edge) => e.id === 'edge-start-end');
+      expect(originalEdge).toBeUndefined();
     });
 
     it('should paste Foreach with Loop-Block between nodes correctly (loop node detection)', () => {
