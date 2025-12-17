@@ -44,35 +44,35 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
 - **Status:**
   - ✅ Löschen: Tools werden mit entfernt
   - ✅ Verschieben: `useAgentToolPositioning` funktioniert
-  - ❌ Copy/Paste: Tools werden nicht mit kopiert
+  - ✅ Copy/Paste: Tools werden mit kopiert (über `useClipboard` + `findAllChildNodes`)
   - ❌ Duplicate: Tools werden nicht mit dupliziert
-  - ❌ Multi-Select: Gruppierung wird nicht berücksichtigt
+  - ⚪ Multi-Select: Gruppierungs-Auswahl (Parent ↔ Children automatisch) noch nicht implementiert (optional)
 
-#### 2. **While/ForEach + Loop-Block** ❌ (Nicht implementiert)
+#### 2. **While/ForEach + Loop-Block** ✅ (Teilweise implementiert)
 - **Parent:** While Node oder ForEach Node
 - **Children:** Alle Nodes im Loop-Block
 - **Verbindung:** 
   - `sourceHandle: 'loop'` vom Loop-Node
   - `targetHandle: 'back'` zurück zum Loop-Node
 - **Status:**
-  - ❌ Löschen: Loop-Block wird nicht mit entfernt
-  - ❌ Verschieben: Loop-Block wird nicht mit verschoben
-  - ❌ Copy/Paste: Loop-Block wird nicht mit kopiert
+  - ✅ Löschen: Loop-Block wird mit entfernt (über `onNodesChange` Wrapper + `findAllChildNodes`)
+  - ❌ Verschieben: Loop-Block wird nicht mit verschoben (Move-Grouping noch offen)
+  - ✅ Copy/Paste: Loop-Block wird mit kopiert (über `useClipboard` + `findAllChildNodes`)
   - ❌ Duplicate: Loop-Block wird nicht mit dupliziert
-  - ❌ Multi-Select: Gruppierung wird nicht berücksichtigt
+  - ⚪ Multi-Select: Gruppierungs-Auswahl (optional) noch nicht implementiert
 
-#### 3. **IfElse + Branches** ❌ (Nicht implementiert)
+#### 3. **IfElse + Branches** ✅ (Teilweise implementiert)
 - **Parent:** IfElse Node
 - **Children:** 
   - True-Branch Nodes (über `sourceHandle: 'true'`)
   - False-Branch Nodes (über `sourceHandle: 'false'`)
 - **Besonderheit:** Beide Branches können zu einem Merge-Node führen
 - **Status:**
-  - ❌ Löschen: Branches werden nicht mit entfernt
-  - ❌ Verschieben: Branches werden nicht mit verschoben
-  - ❌ Copy/Paste: Branches werden nicht mit kopiert
+  - ✅ Löschen: Branches werden mit entfernt (über `onNodesChange` Wrapper + `findAllChildNodes`)
+  - ❌ Verschieben: Branches werden nicht mit verschoben (Move-Grouping noch offen)
+  - ✅ Copy/Paste: Branches werden mit kopiert (über `useClipboard` + `findAllChildNodes`)
   - ❌ Duplicate: Branches werden nicht mit dupliziert
-  - ❌ Multi-Select: Gruppierung wird nicht berücksichtigt
+  - ⚪ Multi-Select: Gruppierungs-Auswahl (optional) noch nicht implementiert
 
 #### 4. **Standard Nodes** ✅
 - **Parent:** Keine
@@ -496,12 +496,11 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
   - Zentrale Node-Erkennung (Agent+Tools) ✅
   - Loop-Node-Erkennung (Foreach/While) ✅
   - Lineare Kette-Erkennung ✅
-- [ ] **BUG:** Multi-Select Copy mit mehreren Parent-Nodes (z.B. Agent + While)
-  - Problem: Entry/Exit-Erkennung wählt falschen Node (zentrale Node statt erster in Kette)
-  - Szenario: Agent + While kopiert → While wird als Entry erkannt (falsch, sollte Agent sein)
-  - Fix: Unterscheidung zwischen zentraler Node-Struktur vs. linearer Kette verbessern
+- [x] **Fix:** Multi-Select Copy mit mehreren Parent-Nodes (z.B. Agent + While) ✅
+  - Ursache: Loop-Edges (`sourceHandle: 'loop'`, `targetHandle: 'back'`) wurden fälschlich für Entry/Exit herangezogen
+  - Fix: Entry/Exit-Erkennung basiert jetzt auf **Flow-Edges ohne loop/back**, Loop-Node nur “standalone”, wenn keine normalen In/Out-Edges existieren ✅
 - **Datei:** `frontend/src/components/WorkflowBuilder/hooks/useClipboard.ts` ✅
-- **Tests:** `frontend/src/components/WorkflowBuilder/hooks/__tests__/useClipboard.test.ts` (18 Tests) ✅
+- **Tests:** `frontend/src/components/WorkflowBuilder/hooks/__tests__/useClipboard.test.ts` (19 Tests) ✅
 - **Dependencies:** Multi-Select ✅, nodeGroupingUtils ✅
 - **Risiko:** Mittel-Hoch (komplexe Gruppierungs-Logik, ID-Mapping, Edge-Verbindungen, dynamische Erkennung)
 - **Status:** ✅ Grundfunktionalität implementiert, Bug bei Multi-Select mit mehreren Parent-Nodes
@@ -511,7 +510,7 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
 - [x] Integration in `useKeyboardShortcuts` ✅
 - [x] Paste-Position (Mausposition oder Canvas-Mitte) ✅
 - [x] **Edge-Paste:** Strg+V wenn Edge fokussiert → Paste zwischen Nodes ✅
-- [x] **Edge-Paste:** Rechtsklick auf "+" Button → Paste zwischen Nodes (wenn Clipboard vorhanden) ✅
+- [x] **Edge-Paste:** Rechtsklick auf "+" Button → Popover-Menü mit **Paste** (disabled wenn Clipboard leer) ✅
 - [x] **Konflikt:** Auto-Save während Paste pausieren ✅ (Auto-Save wird durch onNodesChange getriggert)
 - [x] **Konflikt:** Auto-Layout während Paste pausieren (wenn aktiv) ✅ (Auto-Layout läuft nach Paste)
 - [ ] Undo/Redo Integration (geplant)
@@ -1022,28 +1021,24 @@ export interface NodeMetadata {
   - Unit-Tests: 3 Tests ✅
 
 #### Phase 2: Copy/Paste
-- ✅ **2.1 Clipboard Hook** - Teilweise implementiert
-  - Unit-Tests: 18 Tests ✅
+- ✅ **2.1 Clipboard Hook** - Implementiert
+  - Unit-Tests: 19 Tests ✅
   - ✅ Copy-Funktion mit Gruppierung
   - ✅ Paste-Funktion mit ID-Mapping
   - ✅ Entry/Exit-Erkennung (zentrale Node, Loop-Node, lineare Kette)
-  - ❌ **BUG:** Multi-Select Copy mit mehreren Parent-Nodes (Agent + While)
+  - ✅ Multi-Select Copy mit mehreren Parent-Nodes (Agent + While) ✅ (Fix: loop/back-Edges werden für Entry/Exit ignoriert)
 - ✅ **2.2 Copy/Paste Integration** - Implementiert
   - ✅ Strg+C/V Shortcuts
-  - ✅ Edge-Paste (Strg+V auf Edge, Rechtsklick auf +)
+  - ✅ Edge-Paste (Strg+V auf selektierter Edge, Rechtsklick auf + → Paste-Menü)
   - ❌ Undo/Redo Integration (noch ausstehend)
 
 ### 🔄 In Arbeit
 
-- ❌ **2.1 Bug-Fix:** Entry/Exit-Erkennung bei Multi-Select mit mehreren Parent-Nodes
-  - Problem: Bei Agent + While wird While als Entry erkannt (falsch, sollte Agent sein)
-  - Ursache: Zentrale Node-Erkennung priorisiert Loop-Node über lineare Kette
-  - Fix: Unterscheidung zwischen zentraler Struktur vs. linearer Kette verbessern
+- (nichts kritisch offen in Phase 2.1/2.2 – nächste Punkte sind Feature-Erweiterungen)
 
 ### 📋 Geplant
 
 #### Phase 2: Copy/Paste (Fortsetzung)
-- [ ] **2.1 Bug-Fix:** Multi-Select Copy mit mehreren Parent-Nodes
 - [ ] **2.2 Undo/Redo Integration** für Copy/Paste
 - [ ] **2.3 Duplicate erweitern**
 
@@ -1062,11 +1057,11 @@ export interface NodeMetadata {
 ## 📈 Test-Statistiken
 
 - **Test-Dateien:** 8 (6 Unit-Tests + 2 Integration-Tests)
-- **Tests:** 69 (47 Unit-Tests + 22 Integration-Tests)
+- **Tests:** 75
 - **Coverage:** Grundlagen abgedeckt, Copy/Paste Szenarien getestet
 - **Status:** ✅ Alle Tests bestanden
 - **Neue Tests:**
-  - `useClipboard.test.ts`: 18 Tests (Copy/Paste mit verschiedenen Szenarien)
+  - `useClipboard.test.ts`: 19 Tests (Copy/Paste inkl. Agent+While + Edge-Paste Menü)
   - `multiSelect.test.tsx`: 3 Tests
   - `deleteKeyShortcut.test.tsx`: 3 Tests
 
@@ -1125,9 +1120,9 @@ export interface NodeMetadata {
 
 ---
 
-**Status:** Phase 0, Phase 1, Phase 2.1 (teilweise), Phase 2.2 (teilweise) abgeschlossen ✅  
-**Aktueller Bug:** Multi-Select Copy mit mehreren Parent-Nodes - Entry/Exit-Erkennung wählt falschen Node  
-**Nächster Schritt:** Bug-Fix für Multi-Select Copy Entry/Exit-Erkennung  
+**Status:** Phase 0, Phase 1, Phase 2.1/2.2 abgeschlossen ✅  
+**Aktueller Bug:** —  
+**Nächster Schritt:** Undo/Redo Integration für Copy/Paste, danach Cut (Ctrl+X) und Duplicate mit Gruppierung  
 **Wichtig:** Alle Konflikte vor Implementierung prüfen und Lösungen vorbereiten  
 **KRITISCH:** Dynamische Gruppierungs-Erkennung für neue Nodes implementiert ✅
 
