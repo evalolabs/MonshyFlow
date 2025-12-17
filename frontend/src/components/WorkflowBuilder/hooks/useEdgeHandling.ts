@@ -60,6 +60,29 @@ export function useEdgeHandling({
       }
     }
 
+    // Validation: Prevent "shared tools" across multiple agents.
+    // A tool node may only connect to ONE agent's tool handle. This avoids ambiguous ownership and edge cases
+    // for delete/duplicate/drag.
+    if (isAgentToolHandle && connection.source && connection.target) {
+      const sourceNode = nodes.find(n => n.id === connection.source);
+      const isSourceTool = sourceNode?.type === 'tool' || isToolNodeType(sourceNode?.type || '');
+      if (isSourceTool) {
+        const existingAgentConnections = edges.filter(
+          e =>
+            e.source === connection.source &&
+            (e.targetHandle === 'tool' || e.targetHandle === 'chat-model' || e.targetHandle === 'memory')
+        );
+
+        const isAlreadyConnectedToOtherAgent = existingAgentConnections.some(e => e.target !== connection.target);
+        if (isAlreadyConnectedToOtherAgent) {
+          alert(
+            '⚠️ This Tool is already connected to another Agent.\n\nTo keep workflows predictable, each Tool node can only belong to one Agent. Please duplicate the Tool first if you want to use it with multiple Agents.'
+          );
+          return;
+        }
+      }
+    }
+
     // Determine edge type: 
     // 1. Loop edges (based on handle IDs - ROBUST, works with any node)
     // 2. Tool edges (based on tool connections)
