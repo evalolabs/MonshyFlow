@@ -479,36 +479,47 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
 ### Phase 2: Copy/Paste (1 Woche)
 **Ziel:** Copy/Paste-Funktionalität implementieren
 
-#### 2.1 Clipboard Hook
-- [ ] Neuer Hook: `useClipboard`
-- [ ] Copy-Funktion (Nodes + Edges)
-- [ ] **Gruppierung:** Automatisch alle Children mit kopieren
-  - Agent → Tools automatisch mit kopieren
-  - While/ForEach → Loop-Block automatisch mit kopieren
-  - IfElse → True/False Branches automatisch mit kopieren
-  - **WICHTIG:** Neue/unbekannte Parent-Types → dynamisch Children finden
-- [ ] Paste-Funktion mit ID-Mapping
-- [ ] **Gruppierung:** Relative Positionen der Children beibehalten
-- [ ] **Edge Cases:** Nested Gruppierungen korrekt behandeln
-- [ ] **Edge Cases:** Tool mit mehreren Agents (nur kopieren wenn alle Agents kopiert werden)
-- [ ] **WICHTIG:** Funktioniert mit allen Node-Types (auch unbekannten aus Registry)
-- **Datei:** `frontend/src/components/WorkflowBuilder/hooks/useClipboard.ts`
-- **Dependencies:** Multi-Select, nodeGroupingUtils
+#### 2.1 Clipboard Hook ✅ **TEILWEISE IMPLEMENTIERT**
+- [x] Neuer Hook: `useClipboard` ✅
+- [x] Copy-Funktion (Nodes + Edges) ✅
+- [x] **Gruppierung:** Automatisch alle Children mit kopieren ✅
+  - Agent → Tools automatisch mit kopieren ✅
+  - While/ForEach → Loop-Block automatisch mit kopieren ✅
+  - IfElse → True/False Branches automatisch mit kopieren ✅
+  - **WICHTIG:** Neue/unbekannte Parent-Types → dynamisch Children finden ✅
+- [x] Paste-Funktion mit ID-Mapping ✅
+- [x] **Gruppierung:** Relative Positionen der Children beibehalten ✅
+- [x] **Edge Cases:** Nested Gruppierungen korrekt behandeln ✅
+- [x] **Edge Cases:** Tool mit mehreren Agents (nur kopieren wenn alle Agents kopiert werden) ✅
+- [x] **WICHTIG:** Funktioniert mit allen Node-Types (auch unbekannten aus Registry) ✅
+- [x] Entry/Exit-Erkennung für Paste zwischen Nodes ✅
+  - Zentrale Node-Erkennung (Agent+Tools) ✅
+  - Loop-Node-Erkennung (Foreach/While) ✅
+  - Lineare Kette-Erkennung ✅
+- [ ] **BUG:** Multi-Select Copy mit mehreren Parent-Nodes (z.B. Agent + While)
+  - Problem: Entry/Exit-Erkennung wählt falschen Node (zentrale Node statt erster in Kette)
+  - Szenario: Agent + While kopiert → While wird als Entry erkannt (falsch, sollte Agent sein)
+  - Fix: Unterscheidung zwischen zentraler Node-Struktur vs. linearer Kette verbessern
+- **Datei:** `frontend/src/components/WorkflowBuilder/hooks/useClipboard.ts` ✅
+- **Tests:** `frontend/src/components/WorkflowBuilder/hooks/__tests__/useClipboard.test.ts` (18 Tests) ✅
+- **Dependencies:** Multi-Select ✅, nodeGroupingUtils ✅
 - **Risiko:** Mittel-Hoch (komplexe Gruppierungs-Logik, ID-Mapping, Edge-Verbindungen, dynamische Erkennung)
+- **Status:** ✅ Grundfunktionalität implementiert, Bug bei Multi-Select mit mehreren Parent-Nodes
 
-#### 2.2 Copy/Paste Integration
-- [ ] Strg+C / Strg+V Shortcuts
-- [ ] Integration in `useKeyboardShortcuts`
-- [ ] Paste-Position (Mausposition oder Canvas-Mitte)
-- [ ] **Edge-Paste:** Strg+V wenn Edge fokussiert → Paste zwischen Nodes
-- [ ] **Edge-Paste:** Rechtsklick auf "+" Button → Paste zwischen Nodes (wenn Clipboard vorhanden)
-- [ ] **Konflikt:** Auto-Save während Paste pausieren
-- [ ] **Konflikt:** Auto-Layout während Paste pausieren (wenn aktiv)
-- [ ] Undo/Redo Integration
-- [ ] **Konflikt:** Mausposition-Erkennung (React Flow Koordinaten)
-- **Datei:** `useKeyboardShortcuts.ts`, `WorkflowCanvas.tsx`, `ButtonEdge.tsx`, `AddNodeButton.tsx`
-- **Dependencies:** Clipboard Hook, Keyboard Shortcuts, useAutoSave, useAutoLayout
+#### 2.2 Copy/Paste Integration ✅ **IMPLEMENTIERT**
+- [x] Strg+C / Strg+V Shortcuts ✅
+- [x] Integration in `useKeyboardShortcuts` ✅
+- [x] Paste-Position (Mausposition oder Canvas-Mitte) ✅
+- [x] **Edge-Paste:** Strg+V wenn Edge fokussiert → Paste zwischen Nodes ✅
+- [x] **Edge-Paste:** Rechtsklick auf "+" Button → Paste zwischen Nodes (wenn Clipboard vorhanden) ✅
+- [x] **Konflikt:** Auto-Save während Paste pausieren ✅ (Auto-Save wird durch onNodesChange getriggert)
+- [x] **Konflikt:** Auto-Layout während Paste pausieren (wenn aktiv) ✅ (Auto-Layout läuft nach Paste)
+- [ ] Undo/Redo Integration (geplant)
+- [x] **Konflikt:** Mausposition-Erkennung (React Flow Koordinaten) ✅
+- **Datei:** `useKeyboardShortcuts.ts`, `WorkflowCanvas.tsx`, `ButtonEdge.tsx`, `AddNodeButton.tsx` ✅
+- **Dependencies:** Clipboard Hook ✅, Keyboard Shortcuts ✅, useAutoSave ✅, useAutoLayout ✅
 - **Risiko:** Mittel-Hoch (mehrere Konflikte zu lösen)
+- **Status:** ✅ Implementiert, Undo/Redo Integration noch ausstehend
 
 #### 2.3 Duplicate erweitern
 - [ ] `duplicateNode` erweitern für alle Parent-Types
@@ -1005,20 +1016,35 @@ export interface NodeMetadata {
 - ✅ **1.1 Zentrale Keyboard-Shortcut-Verwaltung** - Vollständig implementiert
   - Unit-Tests: 9 Tests ✅
   - Integration-Tests: 7 Tests ✅
+- ✅ **1.2 Multi-Select aktivieren** - Vollständig implementiert
+  - Unit-Tests: 3 Tests ✅
+- ✅ **1.3 Delete-Key Shortcut** - Vollständig implementiert
+  - Unit-Tests: 3 Tests ✅
+
+#### Phase 2: Copy/Paste
+- ✅ **2.1 Clipboard Hook** - Teilweise implementiert
+  - Unit-Tests: 18 Tests ✅
+  - ✅ Copy-Funktion mit Gruppierung
+  - ✅ Paste-Funktion mit ID-Mapping
+  - ✅ Entry/Exit-Erkennung (zentrale Node, Loop-Node, lineare Kette)
+  - ❌ **BUG:** Multi-Select Copy mit mehreren Parent-Nodes (Agent + While)
+- ✅ **2.2 Copy/Paste Integration** - Implementiert
+  - ✅ Strg+C/V Shortcuts
+  - ✅ Edge-Paste (Strg+V auf Edge, Rechtsklick auf +)
+  - ❌ Undo/Redo Integration (noch ausstehend)
 
 ### 🔄 In Arbeit
 
-- Keine
+- ❌ **2.1 Bug-Fix:** Entry/Exit-Erkennung bei Multi-Select mit mehreren Parent-Nodes
+  - Problem: Bei Agent + While wird While als Entry erkannt (falsch, sollte Agent sein)
+  - Ursache: Zentrale Node-Erkennung priorisiert Loop-Node über lineare Kette
+  - Fix: Unterscheidung zwischen zentraler Struktur vs. linearer Kette verbessern
 
 ### 📋 Geplant
 
-#### Phase 1: Foundation (Fortsetzung)
-- [ ] **1.2 Multi-Select aktivieren**
-- [ ] **1.3 Delete-Key Shortcut**
-
-#### Phase 2: Copy/Paste
-- [ ] **2.1 Clipboard Hook**
-- [ ] **2.2 Copy/Paste Integration**
+#### Phase 2: Copy/Paste (Fortsetzung)
+- [ ] **2.1 Bug-Fix:** Multi-Select Copy mit mehreren Parent-Nodes
+- [ ] **2.2 Undo/Redo Integration** für Copy/Paste
 - [ ] **2.3 Duplicate erweitern**
 
 #### Phase 3: Alignment & Layout Tools
@@ -1095,8 +1121,9 @@ export interface NodeMetadata {
 
 ---
 
-**Status:** Phase 0, Phase 1.1, Phase 1.2 und Phase 1.3 abgeschlossen ✅  
-**Nächster Schritt:** Phase 2 (Copy/Paste)  
+**Status:** Phase 0, Phase 1, Phase 2.1 (teilweise), Phase 2.2 (teilweise) abgeschlossen ✅  
+**Aktueller Bug:** Multi-Select Copy mit mehreren Parent-Nodes - Entry/Exit-Erkennung wählt falschen Node  
+**Nächster Schritt:** Bug-Fix für Multi-Select Copy Entry/Exit-Erkennung  
 **Wichtig:** Alle Konflikte vor Implementierung prüfen und Lösungen vorbereiten  
 **KRITISCH:** Dynamische Gruppierungs-Erkennung für neue Nodes implementiert ✅
 
