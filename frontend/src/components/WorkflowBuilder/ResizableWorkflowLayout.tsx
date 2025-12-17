@@ -361,6 +361,7 @@ export function ResizableWorkflowLayout({
                       workflowId={workflowId}
                       onStepUpdate={onDebugStepUpdate}
                       nodes={nodes}
+                      edges={edges}
                       onTestResult={onDebugTestResult}
                       onTestStart={onDebugTestStart}
                     />
