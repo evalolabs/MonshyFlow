@@ -211,13 +211,6 @@ export function WorkflowCanvas({
                 alreadyChanged.add(childId);
               }
             });
-          } else {
-            // If a child is selected, select its parent (if any).
-            const parentId = findParentNode(node.id, edges, nodes);
-            if (parentId && !alreadyChanged.has(parentId)) {
-              additionalSelectChanges.push({ id: parentId, type: 'select', selected: true });
-              alreadyChanged.add(parentId);
-            }
           }
         } else {
           // If a parent is deselected, deselect all children.

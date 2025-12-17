@@ -174,7 +174,7 @@ export function findBranchNodes(
  */
 export function isParentNode(node: Node, edges: Edge[]): boolean {
   const nodeId = node.id;
-  const nodeType = node.type || '';
+  const nodeType = (node.type || '').toLowerCase();
   
   // Known parent types (hardcoded for performance)
   const knownParents = ['agent', 'while', 'foreach', 'ifelse'];
@@ -218,9 +218,10 @@ export function findAllChildNodes(
   nodes: Node[]
 ): string[] {
   const childIds: string[] = [];
+  const normalizedType = (parentNodeType || '').toLowerCase();
   
   // Handle known parent types
-  switch (parentNodeType) {
+  switch (normalizedType) {
     case 'agent':
       childIds.push(...findToolNodesForAgent(parentNodeId, edges));
       break;
