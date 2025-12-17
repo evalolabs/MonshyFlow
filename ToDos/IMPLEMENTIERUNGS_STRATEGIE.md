@@ -46,7 +46,7 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
   - ✅ Verschieben: `useAgentToolPositioning` funktioniert
   - ✅ Copy/Paste: Tools werden mit kopiert (über `useClipboard` + `findAllChildNodes`)
   - ❌ Duplicate: Tools werden nicht mit dupliziert
-  - ⚪ Multi-Select: Gruppierungs-Auswahl (Parent ↔ Children automatisch) noch nicht implementiert (optional)
+  - ✅ Multi-Select: Gruppierungs-Auswahl aktiv (Parent ↔ Children wird automatisch mit-selektiert)
 
 #### 2. **While/ForEach + Loop-Block** ✅ (Teilweise implementiert)
 - **Parent:** While Node oder ForEach Node
@@ -59,7 +59,7 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
   - ❌ Verschieben: Loop-Block wird nicht mit verschoben (Move-Grouping noch offen)
   - ✅ Copy/Paste: Loop-Block wird mit kopiert (über `useClipboard` + `findAllChildNodes`)
   - ❌ Duplicate: Loop-Block wird nicht mit dupliziert
-  - ⚪ Multi-Select: Gruppierungs-Auswahl (optional) noch nicht implementiert
+  - ✅ Multi-Select: Gruppierungs-Auswahl aktiv (Parent ↔ Children wird automatisch mit-selektiert)
 
 #### 3. **IfElse + Branches** ✅ (Teilweise implementiert)
 - **Parent:** IfElse Node
@@ -72,7 +72,7 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
   - ❌ Verschieben: Branches werden nicht mit verschoben (Move-Grouping noch offen)
   - ✅ Copy/Paste: Branches werden mit kopiert (über `useClipboard` + `findAllChildNodes`)
   - ❌ Duplicate: Branches werden nicht mit dupliziert
-  - ⚪ Multi-Select: Gruppierungs-Auswahl (optional) noch nicht implementiert
+  - ✅ Multi-Select: Gruppierungs-Auswahl aktiv (Parent ↔ Children wird automatisch mit-selektiert)
 
 #### 4. **Standard Nodes** ✅
 - **Parent:** Keine
@@ -112,11 +112,12 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
 4. **Node Selection (React Flow Standard)** ✅
    - React Flow hat eingebaute Selection
    - `node.selected` Property
-   - **Einschränkung:** Kein Multi-Select mit Strg+Klick
+   - **Status:** Multi-Select mit Strg/Cmd+Klick ist aktiv ✅
+   - **Enhancement:** Group-Selection aktiv (Parent/Child werden automatisch mit-selektiert) ✅
 
 5. **Delete Node** ✅
    - Funktioniert über Kontext-Menü
-   - **Einschränkung:** Kein Delete-Key Shortcut
+   - ✅ Delete/Backspace Shortcut aktiv (custom) inkl. Gruppierung + **Ketten-Reconnect** (prev → next) ✅
 
 ---
 
@@ -211,9 +212,9 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
 #### 1.2 Multi-Select aktivieren
 **Potenzielle Konflikte:**
 - [ ] **Konflikt mit React Flow `deleteKeyCode`:**
-  - React Flow hat bereits `deleteKeyCode={['Backspace', 'Delete']}`
-  - Funktioniert bereits für einzelne Nodes
-  - **Lösung:** Prüfen ob Multi-Select bereits unterstützt wird, ggf. Custom Handler
+  - React Flow hatte `deleteKeyCode={['Backspace', 'Delete']}` (früher)
+  - **Update:** Delete/Backspace wird jetzt bewusst **custom** gelöst (kein ReactFlow deleteKeyCode),
+    damit Ketten-Reconnect (prev → next) + Gruppierung konsistent sind ✅
 - [ ] **Konflikt mit `onNodeClick`:**
   - `handleNodeClick` öffnet Config-Panel
   - Bei Multi-Select sollte Config-Panel nicht öffnen
@@ -229,8 +230,9 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
 #### 1.3 Delete-Key Shortcut
 **Potenzielle Konflikte:**
 - [ ] **Konflikt mit React Flow `deleteKeyCode`:**
-  - React Flow unterstützt bereits Delete-Key
-  - **Lösung:** Prüfen ob Multi-Select-Delete funktioniert, ggf. Custom Handler
+  - React Flow unterstützt Delete-Key, aber Delete/Backspace wird jetzt **custom** gehandhabt
+  - **Grund:** Ketten-Reconnect (prev → next) + Gruppierung
+  - **Lösung:** `useKeyboardShortcuts` Delete/Backspace Handler ✅
 - [ ] **Konflikt mit Browser-Navigation:**
   - Backspace = Browser-Zurück in manchen Browsern
   - **Lösung:** `event.preventDefault()`, nur wenn Canvas fokussiert
@@ -474,6 +476,9 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
 - **Tests:** `frontend/src/components/WorkflowBuilder/__tests__/deleteKeyShortcut.test.tsx` (3 Tests) ✅
 - **Status:** ✅ Implementiert, getestet und integriert
 
+**Update:** Delete/Backspace wird inzwischen **custom** über `useKeyboardShortcuts` gehandhabt (nicht mehr ReactFlow `deleteKeyCode`),
+damit bei linearen Ketten automatisch **prev → next** reconnected wird und Gruppierung konsistent ist. ✅
+
 ---
 
 ### Phase 2: Copy/Paste (1 Woche)
@@ -500,7 +505,7 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
   - Ursache: Loop-Edges (`sourceHandle: 'loop'`, `targetHandle: 'back'`) wurden fälschlich für Entry/Exit herangezogen
   - Fix: Entry/Exit-Erkennung basiert jetzt auf **Flow-Edges ohne loop/back**, Loop-Node nur “standalone”, wenn keine normalen In/Out-Edges existieren ✅
 - **Datei:** `frontend/src/components/WorkflowBuilder/hooks/useClipboard.ts` ✅
-- **Tests:** `frontend/src/components/WorkflowBuilder/hooks/__tests__/useClipboard.test.ts` (19 Tests) ✅
+- **Tests:** `frontend/src/components/WorkflowBuilder/hooks/__tests__/useClipboard.test.ts` (21 Tests) ✅
 - **Dependencies:** Multi-Select ✅, nodeGroupingUtils ✅
 - **Risiko:** Mittel-Hoch (komplexe Gruppierungs-Logik, ID-Mapping, Edge-Verbindungen, dynamische Erkennung)
 - **Status:** ✅ Grundfunktionalität implementiert, Bug bei Multi-Select mit mehreren Parent-Nodes
@@ -518,7 +523,7 @@ Das System hat verschiedene Node-Types mit Parent-Child-Beziehungen, die bei all
 - **Datei:** `useKeyboardShortcuts.ts`, `WorkflowCanvas.tsx`, `ButtonEdge.tsx`, `AddNodeButton.tsx` ✅
 - **Dependencies:** Clipboard Hook ✅, Keyboard Shortcuts ✅, useAutoSave ✅, useAutoLayout ✅
 - **Risiko:** Mittel-Hoch (mehrere Konflikte zu lösen)
-- **Status:** ✅ Implementiert, Undo/Redo Integration noch ausstehend
+- **Status:** ✅ Implementiert (Undo/Redo “gehackt” ausreichend), Cut (Ctrl+X) ✅, Delete-Ketten-Reconnect ✅
 
 #### 2.3 Duplicate erweitern
 - [ ] `duplicateNode` erweitern für alle Parent-Types
@@ -1056,12 +1061,12 @@ export interface NodeMetadata {
 
 ## 📈 Test-Statistiken
 
-- **Test-Dateien:** 8 (6 Unit-Tests + 2 Integration-Tests)
-- **Tests:** 75
+- **Test-Dateien:** 9
+- **Tests:** 79
 - **Coverage:** Grundlagen abgedeckt, Copy/Paste Szenarien getestet
 - **Status:** ✅ Alle Tests bestanden
 - **Neue Tests:**
-  - `useClipboard.test.ts`: 19 Tests (Copy/Paste inkl. Agent+While + Edge-Paste Menü)
+  - `useClipboard.test.ts`: 21 Tests (Copy/Paste/Cut inkl. Reconnect)
   - `multiSelect.test.tsx`: 3 Tests
   - `deleteKeyShortcut.test.tsx`: 3 Tests
 
@@ -1122,7 +1127,7 @@ export interface NodeMetadata {
 
 **Status:** Phase 0, Phase 1, Phase 2.1/2.2 abgeschlossen ✅  
 **Aktueller Bug:** —  
-**Nächster Schritt:** Undo/Redo Integration für Copy/Paste, danach Cut (Ctrl+X) und Duplicate mit Gruppierung  
+**Nächster Schritt:** Duplicate mit Gruppierung, Move/Drag mit Gruppierung, Alignment Tools  
 **Wichtig:** Alle Konflikte vor Implementierung prüfen und Lösungen vorbereiten  
 **KRITISCH:** Dynamische Gruppierungs-Erkennung für neue Nodes implementiert ✅
 

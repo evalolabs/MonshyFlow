@@ -18,7 +18,9 @@ import {
   findConnectedEdges,
   createReconnectionEdges,
   findToolNodesConnectedToAgent,
+  generateEdgeId,
 } from '../../../utils/edgeUtils';
+import { findAllChildNodes } from '../../../utils/nodeGroupingUtils';
 import { VALIDATION_MESSAGES } from '../constants';
 import { nodeLogger as logger } from '../../../utils/logger';
 
@@ -82,16 +84,26 @@ export function useNodeOperations({
       
       logger.debug(`Node has ${incoming.length} incoming and ${outgoing.length} outgoing edges`);
 
-      // SPECIAL CASE: If deleting an Agent node, find and remove orphaned tool nodes
-      const isAgentNode = nodeToDelete?.type === 'agent';
-      let toolNodesToDelete: string[] = [];
+      // Delete with grouping support:
+      // - For loops/ifelse: delete all child nodes in the group
+      // - For agent: delete ONLY tool nodes that are orphaned (connected only to this agent)
+      const parentType = nodeToDelete?.type;
       let nodesToDelete = [nodeId];
-      
-      if (isAgentNode) {
+      let toolNodesToDelete: string[] = [];
+
+      if (parentType === 'agent') {
         toolNodesToDelete = findToolNodesConnectedToAgent(edges, nodeId, nodes);
         if (toolNodesToDelete.length > 0) {
-          logger.info(`Found ${toolNodesToDelete.length} tool node(s) connected only to this agent. They will be removed as well.`);
+          logger.info(
+            `Found ${toolNodesToDelete.length} tool node(s) connected only to this agent. They will be removed as well.`
+          );
           nodesToDelete = [...nodesToDelete, ...toolNodesToDelete];
+        }
+      } else if (parentType) {
+        const childIds = findAllChildNodes(nodeId, parentType, edges, nodes);
+        if (childIds.length > 0) {
+          nodesToDelete = Array.from(new Set([...nodesToDelete, ...childIds]));
+          logger.info(`Deleting grouped node ${nodeId} (${parentType}) with ${childIds.length} child node(s).`);
         }
       }
 
@@ -104,7 +116,7 @@ export function useNodeOperations({
         logger.info(`Deleted ${nodesToDelete.length} node(s) from backend`);
       }
 
-      // Delete from local state (remove agent and all connected tool nodes)
+      // Delete from local state (remove node + group children)
       const updatedNodes = nodes.filter(node => !nodesToDelete.includes(node.id));
       onNodesChange(updatedNodes);
 
@@ -126,6 +138,8 @@ export function useNodeOperations({
 
       if (toolNodesToDelete.length > 0) {
         logger.info(`Node deleted successfully. Removed agent and ${toolNodesToDelete.length} connected tool node(s).`);
+      } else if (nodesToDelete.length > 1) {
+        logger.info(`Node deleted successfully with grouping (${nodesToDelete.length} total nodes) and automatic reconnection`);
       } else {
         logger.info('Node deleted successfully with automatic reconnection');
       }
@@ -145,26 +159,70 @@ export function useNodeOperations({
       return;
     }
 
-    const newNode: Node = {
-      ...node,
-      id: generateNodeId(node.type || 'node'),
-      position: {
-        x: node.position.x + 200,
-        y: node.position.y + 100,
-      },
-      selected: true,
-      data: {
-        ...node.data,
-        label: `${node.data?.label || node.type} (Copy)`,
-      },
-    };
+    // Duplicate with grouping support:
+    // - Duplicate the node + all children (via dynamic grouping detection)
+    // - Duplicate internal edges between the duplicated nodes
+    // - Preserve relative positions, apply a visual offset
+    const parentId = node.id;
+    const nodeType = node.type || '';
 
-    // Deselect all other nodes and add the new one
+    const idsToDuplicate = new Set<string>([parentId]);
+    const childIds = findAllChildNodes(parentId, nodeType, edges, nodes);
+    childIds.forEach(id => idsToDuplicate.add(id));
+
+    const nodesToDuplicate = nodes.filter(n => idsToDuplicate.has(n.id));
+    const edgesToDuplicate = edges.filter(e => idsToDuplicate.has(e.source) && idsToDuplicate.has(e.target));
+
+    const idMapping = new Map<string, string>();
+    for (const n of nodesToDuplicate) {
+      idMapping.set(n.id, generateNodeId(n.type || 'node'));
+    }
+
+    const offset = { x: 200, y: 100 };
+
+    const newNodes: Node[] = nodesToDuplicate.map(n => {
+      const newId = idMapping.get(n.id)!;
+      return {
+        ...n,
+        id: newId,
+        position: {
+          x: n.position.x + offset.x,
+          y: n.position.y + offset.y,
+        },
+        selected: true,
+        data: {
+          ...n.data,
+          // Only suffix label for the duplicated "main" node; keep children unchanged
+          ...(n.id === parentId && {
+            label: `${(n.data as any)?.label || n.type} (Copy)`,
+          }),
+        },
+      };
+    });
+
+    const newEdges: Edge[] = edgesToDuplicate
+      .map(e => {
+        const newSource = idMapping.get(e.source);
+        const newTarget = idMapping.get(e.target);
+        if (!newSource || !newTarget) return null;
+        return {
+          ...e,
+          id: generateEdgeId(newSource, newTarget),
+          source: newSource,
+          target: newTarget,
+          // data callbacks are injected/normalized by edge handling; keep minimal data
+          data: {},
+        } as Edge;
+      })
+      .filter(Boolean) as Edge[];
+
+    // Deselect all existing nodes and add the new group
     const updatedNodes = nodes.map(n => ({ ...n, selected: false }));
-    onNodesChange([...updatedNodes, newNode]);
+    onNodesChange([...updatedNodes, ...newNodes]);
+    onEdgesChange([...edges, ...newEdges]);
 
-    logger.info(`Node duplicated: ${newNode.id}`);
-  }, [nodes, onNodesChange]);
+    logger.info(`Duplicated ${newNodes.length} node(s) and ${newEdges.length} edge(s) from ${parentId}`);
+  }, [nodes, edges, onNodesChange, onEdgesChange]);
 
   // Update node data
   const updateNode = useCallback((nodeId: string, data: any) => {
