@@ -4,8 +4,6 @@
  * Simple JSON syntax highlighting without external dependencies
  */
 
-import React from 'react';
-
 interface JsonHighlighterProps {
   children: string | undefined | null;
 }

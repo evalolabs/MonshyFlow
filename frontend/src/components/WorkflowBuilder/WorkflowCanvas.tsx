@@ -53,7 +53,7 @@ import { useSecrets } from './hooks/useSecrets';
 // Services & Utils
 import { workflowService } from '../../services/workflowService';
 import { createSSEConnection, type SSEConnection } from '../../services/sseService';
-import { findAllChildNodes, isParentNode, findParentNode, getNodeGroup, findLoopBlockNodes } from '../../utils/nodeGroupingUtils';
+import { findAllChildNodes, isParentNode, getNodeGroup, findLoopBlockNodes } from '../../utils/nodeGroupingUtils';
 import { generateEdgeId } from '../../utils/edgeUtils';
 import type { NodeChange } from '@xyflow/react';
 import type { EdgeChange } from '@xyflow/react';
