@@ -11,11 +11,20 @@
 
 import { Position } from '@xyflow/react';
 import { BaseNode } from './BaseNode';
-import type { NodeProps } from '@xyflow/react';
+import type { NodeProps, Node } from '@xyflow/react';
 
-export function ForEachNode({ data, selected }: NodeProps) {
+export function ForEachNode(props: NodeProps) {
+  const { data, id, type, selected } = props;
   const label = typeof data?.label === 'string' ? data.label : 'For Each';
   const arrayPath = typeof data?.arrayPath === 'string' ? data.arrayPath : 'No array path set';
+
+  const safeData = (data || {}) as any;
+  const node: Node = {
+    id: id || '',
+    type: type || 'foreach',
+    data: safeData,
+    position: { x: (props as any).xPos || 0, y: (props as any).yPos || 0 },
+  };
 
   return (
     <BaseNode
@@ -25,6 +34,10 @@ export function ForEachNode({ data, selected }: NodeProps) {
       subtitle={`Array: ${arrayPath.substring(0, 25)}${arrayPath.length > 25 ? '...' : ''}`}
       hasInput={true}
       hasOutput={true}
+      node={node}
+      onUpdateComment={safeData.onUpdateComment as ((nodeId: string, comment: string) => void) | undefined}
+      showInfoOverlay={(safeData.showInfoOverlay as boolean | undefined) ?? true}
+      secrets={(safeData.secrets as Array<{ key: string; isActive: boolean }>) || []}
       additionalHandles={[
         {
           id: 'loop',

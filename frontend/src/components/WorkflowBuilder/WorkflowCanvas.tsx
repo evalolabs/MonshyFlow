@@ -60,6 +60,7 @@ import type { EdgeChange } from '@xyflow/react';
 import type { WorkflowNode, WorkflowEdge } from '../../types/workflow';
 import { computeReconnectForRemovedSet } from './utils/reconnectEdges';
 import { expandPositionChangesWithGroupedChildren } from './utils/groupDrag';
+import { ENABLE_LAYOUT_LOCK } from '../../utils/layoutLock';
 
 // Constants
 import {
@@ -826,6 +827,22 @@ export function WorkflowCanvas({
     onNodesChange: setNodes,
     onEdgesChange: setEdges,
   });
+
+  const hasLayoutLocks = useMemo(() => {
+    if (!ENABLE_LAYOUT_LOCK) return false;
+    return nodes.some(n => Boolean((n.data as any)?.layoutLocked));
+  }, [nodes]);
+
+  const unlockAllLayoutLocks = useCallback(() => {
+    if (!ENABLE_LAYOUT_LOCK) return;
+    setNodes(prev =>
+      prev.map(n => {
+        if (!Boolean((n.data as any)?.layoutLocked)) return n;
+        return { ...n, data: { ...n.data, layoutLocked: false } };
+      })
+    );
+    triggerImmediateSave();
+  }, [setNodes, triggerImmediateSave]);
 
   // Node selector hook
   const {
@@ -1660,6 +1677,8 @@ export function WorkflowCanvas({
       onAutoLayout={applyLayout}
       autoLayoutEnabled={autoLayoutEnabled}
       onToggleAutoLayout={toggleAutoLayout}
+      hasLayoutLocks={hasLayoutLocks}
+      onUnlockAllLayoutLocks={ENABLE_LAYOUT_LOCK ? unlockAllLayoutLocks : undefined}
       onFitView={handleFitView}
       onUndo={undo}
       onRedo={redo}

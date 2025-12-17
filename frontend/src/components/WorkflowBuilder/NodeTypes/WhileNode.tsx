@@ -11,12 +11,21 @@
 
 import { Position } from '@xyflow/react';
 import { BaseNode } from './BaseNode';
-import type { NodeProps } from '@xyflow/react';
+import type { NodeProps, Node } from '@xyflow/react';
 
-export function WhileNode({ data, selected }: NodeProps) {
+export function WhileNode(props: NodeProps) {
+  const { data, id, type, selected } = props;
   const label = typeof data?.label === 'string' ? data.label : 'While Loop';
   const condition = typeof data?.condition === 'string' ? data.condition : 'No condition set';
   const maxIterations = typeof data?.maxIterations === 'number' ? data.maxIterations : 100;
+
+  const safeData = (data || {}) as any;
+  const node: Node = {
+    id: id || '',
+    type: type || 'while',
+    data: safeData,
+    position: { x: (props as any).xPos || 0, y: (props as any).yPos || 0 },
+  };
 
   return (
     <BaseNode
@@ -27,6 +36,10 @@ export function WhileNode({ data, selected }: NodeProps) {
       badge={`Max: ${maxIterations.toString()}`}
       hasInput={true}
       hasOutput={true}
+      node={node}
+      onUpdateComment={safeData.onUpdateComment as ((nodeId: string, comment: string) => void) | undefined}
+      showInfoOverlay={(safeData.showInfoOverlay as boolean | undefined) ?? true}
+      secrets={(safeData.secrets as Array<{ key: string; isActive: boolean }>) || []}
       additionalHandles={[
         {
           id: 'loop',

@@ -73,6 +73,10 @@ interface ResizableWorkflowLayoutProps {
   executing: boolean;
   autoSaving?: boolean;
   publishing?: boolean;
+
+  // Layout lock
+  hasLayoutLocks?: boolean;
+  onUnlockAllLayoutLocks?: () => void;
   
   // Node operations
   onUpdateNode: (nodeId: string, data: any) => void;
@@ -140,6 +144,8 @@ export function ResizableWorkflowLayout({
   onAutoLayout,
   autoLayoutEnabled,
   onToggleAutoLayout,
+  hasLayoutLocks,
+  onUnlockAllLayoutLocks,
   onFitView,
   onToggleDebug,
   showOverlays,
@@ -392,6 +398,8 @@ export function ResizableWorkflowLayout({
                 onFitView={onFitView}
                 autoLayoutEnabled={autoLayoutEnabled}
                 onToggleAutoLayout={onToggleAutoLayout}
+                hasLayoutLocks={hasLayoutLocks}
+                onUnlockAllLayoutLocks={onUnlockAllLayoutLocks}
                 showOverlays={showOverlays}
                 onToggleOverlays={onToggleOverlays}
                 onUndo={onUndo}

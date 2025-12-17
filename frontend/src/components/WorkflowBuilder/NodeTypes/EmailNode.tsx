@@ -4,10 +4,11 @@
  * Node for sending emails via SMTP
  */
 
-import type { NodeProps } from '@xyflow/react';
+import type { NodeProps, Node } from '@xyflow/react';
 import { BaseNode } from './BaseNode';
 
-export function EmailNode({ data, selected }: NodeProps) {
+export function EmailNode(props: NodeProps) {
+  const { data, id, type, selected } = props;
   const safeData = data || {};
   const label = (safeData.label as string) || 'Email';
   const to = (safeData.to || '') as string;
@@ -26,6 +27,13 @@ export function EmailNode({ data, selected }: NodeProps) {
     return 'Configure email';
   };
 
+  const node: Node = {
+    id: id || '',
+    type: type || 'email',
+    data: safeData,
+    position: { x: (props as any).xPos || 0, y: (props as any).yPos || 0 },
+  };
+
   return (
     <BaseNode
       label={label}
@@ -36,6 +44,10 @@ export function EmailNode({ data, selected }: NodeProps) {
       hasOutput={true}
       isAnimating={isAnimating}
       executionStatus={executionStatus}
+      node={node}
+      onUpdateComment={(safeData as any).onUpdateComment as ((nodeId: string, comment: string) => void) | undefined}
+      showInfoOverlay={((safeData as any).showInfoOverlay as boolean | undefined) ?? true}
+      secrets={((safeData as any).secrets as Array<{ key: string; isActive: boolean }>) || []}
       selected={selected}
     />
   );

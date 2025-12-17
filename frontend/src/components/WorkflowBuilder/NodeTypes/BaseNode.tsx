@@ -6,10 +6,11 @@
  */
 
 import { useState } from 'react';
-import { Handle, Position } from '@xyflow/react';
+import { Handle, Position, useReactFlow } from '@xyflow/react';
 import type { ApiIntegrationColor } from '../../../types/apiIntegrations';
 import type { Node } from '@xyflow/react';
 import { NodeInfoOverlay } from './NodeInfoOverlay';
+import { ENABLE_LAYOUT_LOCK } from '../../../utils/layoutLock';
 
 export interface BaseNodeProps {
   // Core
@@ -107,6 +108,7 @@ export function BaseNode({
   secrets = [],
 }: BaseNodeProps) {
   const [isNodeHovered, setIsNodeHovered] = useState(false); // Track hover state of the node itself
+  const { setNodes } = useReactFlow();
 
   // Use custom color if provided, otherwise use category default
   const colors = color || CATEGORY_COLORS[category];
@@ -154,6 +156,43 @@ export function BaseNode({
       onMouseEnter={() => setIsNodeHovered(true)} // Set hovered state on node
       onMouseLeave={() => setIsNodeHovered(false)} // Reset hovered state on node
     >
+      {/* Layout Lock (pin) */}
+      {ENABLE_LAYOUT_LOCK && node?.id && (
+        <button
+          type="button"
+          className={`
+            absolute top-2 right-2 z-10
+            inline-flex items-center justify-center
+            w-7 h-7 rounded-md
+            border border-gray-200 bg-white/90 backdrop-blur
+            text-gray-600 hover:text-gray-900 hover:bg-white
+            shadow-sm
+            transition-all duration-200
+            ${Boolean((node.data as any)?.layoutLocked) ? 'text-red-700 border-red-200 bg-red-50/90' : 'text-gray-500'}
+            ${isNodeHovered || Boolean((node.data as any)?.layoutLocked) ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+          `}
+          title={Boolean((node.data as any)?.layoutLocked) ? 'Unlock position (Auto-Layout can move this node)' : 'Lock position (Auto-Layout will not move this node)'}
+          onMouseDown={(e) => {
+            // Prevent starting a drag from this button
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setNodes(prev =>
+              prev.map(n => {
+                if (n.id !== node.id) return n;
+                const locked = Boolean((n.data as any)?.layoutLocked);
+                return { ...n, data: { ...n.data, layoutLocked: !locked } };
+              })
+            );
+          }}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-9 4h10a2 2 0 012 2v5a2 2 0 01-2 2H7a2 2 0 01-2-2v-5a2 2 0 012-2z" />
+          </svg>
+        </button>
+      )}
+
       {/* Node Info Overlay */}
       {showInfoOverlay && node && (
         <NodeInfoOverlay

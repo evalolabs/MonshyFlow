@@ -4,10 +4,11 @@
  * Node for transforming or extracting data from previous nodes
  */
 
-import type { NodeProps } from '@xyflow/react';
+import type { NodeProps, Node } from '@xyflow/react';
 import { BaseNode } from './BaseNode';
 
-export function TransformNode({ data, selected }: NodeProps) {
+export function TransformNode(props: NodeProps) {
+  const { data, id, type, selected } = props;
   const safeData = data || {};
   const label = (safeData.label as string) || 'Transform';
   const transformMode = (safeData.transformMode || 'extract_path') as string;
@@ -26,6 +27,13 @@ export function TransformNode({ data, selected }: NodeProps) {
     return 'Full NodeData';
   };
 
+  const node: Node = {
+    id: id || '',
+    type: type || 'transform',
+    data: safeData,
+    position: { x: (props as any).xPos || 0, y: (props as any).yPos || 0 },
+  };
+
   return (
     <BaseNode
       label={label}
@@ -34,6 +42,10 @@ export function TransformNode({ data, selected }: NodeProps) {
       subtitle={getSubtitle()}
       hasInput={true}
       hasOutput={true}
+      node={node}
+      onUpdateComment={(safeData as any).onUpdateComment as ((nodeId: string, comment: string) => void) | undefined}
+      showInfoOverlay={((safeData as any).showInfoOverlay as boolean | undefined) ?? true}
+      secrets={((safeData as any).secrets as Array<{ key: string; isActive: boolean }>) || []}
       selected={selected}
     />
   );

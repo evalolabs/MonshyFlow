@@ -6,8 +6,9 @@
  * Tools can only connect to Agent Tool handles.
  */
 
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react';
 import { getToolDefinition } from '../../../types/toolCatalog';
+import { ENABLE_LAYOUT_LOCK } from '../../../utils/layoutLock';
 
 interface ToolNodeData {
   label?: string;
@@ -30,9 +31,10 @@ const colorClasses: Record<string, { bg: string; border: string; text: string }>
   yellow: { bg: 'bg-yellow-500', border: 'border-yellow-600', text: 'text-white' },
 };
 
-export function ToolNodeComponent({ data, selected }: ToolNodeProps) {
+export function ToolNodeComponent({ data, selected, id }: ToolNodeProps) {
   const safeData = data || {};
   const toolId = safeData.toolId || safeData.type || '';
+  const { setNodes } = useReactFlow();
   
   // Get tool definition
   const toolDef = getToolDefinition(toolId);
@@ -48,7 +50,40 @@ export function ToolNodeComponent({ data, selected }: ToolNodeProps) {
   const size = 80;
 
   return (
-    <div className="relative">
+    <div className="relative group">
+      {/* Layout Lock (pin) */}
+      {ENABLE_LAYOUT_LOCK && id && (
+        <button
+          type="button"
+          className={`
+            absolute -top-2 -right-2 z-10
+            inline-flex items-center justify-center
+            w-7 h-7 rounded-md
+            border border-gray-200 bg-white/90 backdrop-blur
+            text-gray-600 hover:text-gray-900 hover:bg-white
+            shadow-sm
+            transition-all duration-200
+            ${Boolean((safeData as any)?.layoutLocked) ? 'text-red-700 border-red-200 bg-red-50/90 opacity-100' : 'text-gray-500 opacity-0 group-hover:opacity-100'}
+          `}
+          title={Boolean((safeData as any)?.layoutLocked) ? 'Unlock position (Auto-Layout can move this node)' : 'Lock position (Auto-Layout will not move this node)'}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            setNodes(prev =>
+              prev.map(n => {
+                if (n.id !== id) return n;
+                const locked = Boolean((n.data as any)?.layoutLocked);
+                return { ...n, data: { ...n.data, layoutLocked: !locked } };
+              })
+            );
+          }}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-9 4h10a2 2 0 012 2v5a2 2 0 01-2 2H7a2 2 0 01-2-2v-5a2 2 0 012-2z" />
+          </svg>
+        </button>
+      )}
+
       {/* Output Handle - Top side (ONLY connects to Agent Tool input) */}
       <Handle
         type="source"

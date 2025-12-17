@@ -11,11 +11,20 @@
 
 import { Position } from '@xyflow/react';
 import { BaseNode } from './BaseNode';
-import type { NodeProps } from '@xyflow/react';
+import type { NodeProps, Node } from '@xyflow/react';
 
-export function IfElseNode({ data, selected }: NodeProps) {
+export function IfElseNode(props: NodeProps) {
+  const { data, id, type, selected } = props;
   const label = typeof data?.label === 'string' ? data.label : 'If / Else';
   const condition = typeof data?.condition === 'string' ? data.condition : 'No condition set';
+
+  const safeData = (data || {}) as any;
+  const node: Node = {
+    id: id || '',
+    type: type || 'ifelse',
+    data: safeData,
+    position: { x: (props as any).xPos || 0, y: (props as any).yPos || 0 },
+  };
 
   return (
     <BaseNode
@@ -25,6 +34,10 @@ export function IfElseNode({ data, selected }: NodeProps) {
       subtitle={`Condition: ${condition.substring(0, 30)}${condition.length > 30 ? '...' : ''}`}
       hasInput={true}
       hasOutput={false}
+      node={node}
+      onUpdateComment={safeData.onUpdateComment as ((nodeId: string, comment: string) => void) | undefined}
+      showInfoOverlay={(safeData.showInfoOverlay as boolean | undefined) ?? true}
+      secrets={(safeData.secrets as Array<{ key: string; isActive: boolean }>) || []}
       additionalHandles={[
         {
           id: 'true',

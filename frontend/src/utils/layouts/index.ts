@@ -8,6 +8,7 @@
 import type { Node, Edge } from '@xyflow/react';
 import type { LayoutStrategy, LayoutStrategyOptions, LayoutVersion, LayoutResult } from './types';
 import { getLayout, getDefaultLayout, registerLayout, getAllLayouts, hasLayout } from './LayoutRegistry';
+import { mergeLayoutWithLockedPositions } from '../layoutLock';
 
 /**
  * Apply a layout to nodes and edges
@@ -25,7 +26,11 @@ export function applyLayout(
   options?: LayoutStrategyOptions
 ): LayoutResult {
   const layout = getLayout(version) || getDefaultLayout();
-  return layout.apply(nodes, edges, options);
+  const result = layout.apply(nodes, edges, options);
+  return {
+    ...result,
+    nodes: mergeLayoutWithLockedPositions(nodes, result.nodes, edges),
+  };
 }
 
 /**
