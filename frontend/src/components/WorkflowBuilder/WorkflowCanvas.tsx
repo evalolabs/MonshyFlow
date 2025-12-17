@@ -59,6 +59,7 @@ import type { NodeChange } from '@xyflow/react';
 import type { EdgeChange } from '@xyflow/react';
 import type { WorkflowNode, WorkflowEdge } from '../../types/workflow';
 import { computeReconnectForRemovedSet } from './utils/reconnectEdges';
+import { expandPositionChangesWithGroupedChildren } from './utils/groupDrag';
 
 // Constants
 import {
@@ -236,6 +237,11 @@ export function WorkflowCanvas({
         changes = [...changes, ...additionalSelectChanges];
       }
     }
+
+    // --------------------------------------------------------------------------
+    // Group-drag: moving a parent moves its children by same delta (loops/ifelse/tools).
+    // --------------------------------------------------------------------------
+    changes = expandPositionChangesWithGroupedChildren(changes, nodes, edges);
 
     // Find all nodes that are being removed
     const nodesToRemove = new Set<string>();
