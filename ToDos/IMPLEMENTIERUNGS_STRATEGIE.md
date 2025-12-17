@@ -1061,10 +1061,14 @@ export interface NodeMetadata {
 
 ## 📈 Test-Statistiken
 
-- **Test-Dateien:** 6 (4 Unit-Tests + 2 Integration-Tests)
-- **Tests:** 51 (29 Unit-Tests + 22 Integration-Tests)
-- **Coverage:** Grundlagen abgedeckt
+- **Test-Dateien:** 8 (6 Unit-Tests + 2 Integration-Tests)
+- **Tests:** 69 (47 Unit-Tests + 22 Integration-Tests)
+- **Coverage:** Grundlagen abgedeckt, Copy/Paste Szenarien getestet
 - **Status:** ✅ Alle Tests bestanden
+- **Neue Tests:**
+  - `useClipboard.test.ts`: 18 Tests (Copy/Paste mit verschiedenen Szenarien)
+  - `multiSelect.test.tsx`: 3 Tests
+  - `deleteKeyShortcut.test.tsx`: 3 Tests
 
 **Detaillierte Test-Dokumentation:** 
 - `Documentation/TESTING_GUIDE.md` - Test-System Übersicht
