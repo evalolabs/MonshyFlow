@@ -16,6 +16,7 @@ import { workflowService } from '../../services/workflowService';
 import type { Node } from '@xyflow/react';
 import { InputSchemaFormModal } from './InputSchemaFormModal';
 import { testInputStorage } from '../../utils/testInputStorage';
+import { NODE_METADATA_REGISTRY } from '../WorkflowBuilder/nodeRegistry/nodeMetadata';
 
 // Simple JSON syntax highlighter component
 const JsonHighlighter = ({ children }: { children: string | undefined | null }) => {
@@ -82,6 +83,61 @@ interface DebugNodeProps {
   onTestStart?: (nodeId: string, step: ExecutionStep) => void; // Called immediately when Play button is clicked
   nodes?: Node[]; // Workflow nodes to access node configs
 }
+
+// Helper function to get node metadata
+const getNodeMetadata = (nodeType: string, nodes?: Node[]): { icon: string; category: string; name: string } => {
+  const nodeMetadata = NODE_METADATA_REGISTRY[nodeType];
+  if (nodeMetadata) {
+    return {
+      icon: nodeMetadata.icon || '📦',
+      category: nodeMetadata.category || 'utility',
+      name: nodeMetadata.name || formatNodeType(nodeType),
+    };
+  }
+  if (nodes) {
+    const node = nodes.find(n => n.type === nodeType);
+    if (node?.data?.icon) {
+      return {
+        icon: String(node.data.icon),
+        category: (node.data.category as string) || 'utility',
+        name: (typeof node.data.label === 'string' ? node.data.label : formatNodeType(nodeType)),
+      };
+    }
+  }
+  return {
+    icon: '📦',
+    category: 'utility',
+    name: formatNodeType(nodeType),
+  };
+};
+
+// Category color mapping
+const getCategoryColor = (category: string) => {
+  const colors: Record<string, { bg: string; border: string; text: string }> = {
+    core: { bg: 'bg-gray-100', border: 'border-gray-300', text: 'text-gray-700' },
+    ai: { bg: 'bg-indigo-100', border: 'border-indigo-300', text: 'text-indigo-700' },
+    logic: { bg: 'bg-amber-100', border: 'border-amber-300', text: 'text-amber-700' },
+    data: { bg: 'bg-blue-100', border: 'border-blue-300', text: 'text-blue-700' },
+    integration: { bg: 'bg-green-100', border: 'border-green-300', text: 'text-green-700' },
+    utility: { bg: 'bg-slate-100', border: 'border-slate-300', text: 'text-slate-700' },
+    tools: { bg: 'bg-yellow-100', border: 'border-yellow-300', text: 'text-yellow-700' },
+  };
+  return colors[category] || colors.utility;
+};
+
+// Format node type for display (needed by getNodeMetadata)
+const formatNodeType = (nodeType: string): string => {
+  if (nodeType === 'ifelse') return 'IfElse';
+  if (nodeType === 'llm') return 'LLM';
+  if (nodeType === 'api') return 'API';
+  if (nodeType.includes('-')) {
+    return nodeType
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+  return nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
+};
 
 function DebugNode({ step, isExpanded, onToggle, workflowId, onStepUpdate, onTestResult, onTestStart, nodes }: DebugNodeProps) {
   const [showRawData, setShowRawData] = useState(false);
@@ -166,24 +222,20 @@ function DebugNode({ step, isExpanded, onToggle, workflowId, onStepUpdate, onTes
     return nodeId.length > 15 ? `${nodeId.slice(0, 12)}...` : nodeId;
   };
 
-  // Format node type for display (e.g., "ifelse" -> "IfElse", "set-state" -> "Set State")
-  const formatNodeType = (nodeType: string): string => {
-    // Handle special cases
-    if (nodeType === 'ifelse') return 'IfElse';
-    if (nodeType === 'llm') return 'LLM';
-    if (nodeType === 'api') return 'API';
-    
-    // Handle kebab-case (e.g., "set-state" -> "Set State")
-    if (nodeType.includes('-')) {
-      return nodeType
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-    }
-    
-    // Handle camelCase or single word (e.g., "start" -> "Start")
-    return nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
-  };
+  // Get node metadata for icon and category
+  const nodeMetadata = getNodeMetadata(step.nodeType, nodes);
+  const categoryColors = getCategoryColor(nodeMetadata.category || 'utility');
+
+  // Get the actual node label from nodes array (prioritize this over step.nodeLabel)
+  const actualNode = nodes?.find(n => n.id === step.nodeId);
+  const nodeLabelFromData = actualNode?.data?.label;
+  const displayLabel = typeof nodeLabelFromData === 'string' && nodeLabelFromData.trim() 
+    ? nodeLabelFromData.trim() 
+    : (step.nodeLabel || nodeMetadata.name);
+  
+  // Determine if we should show the ID more prominently (when no custom label)
+  const hasCustomLabel = typeof nodeLabelFromData === 'string' && nodeLabelFromData.trim() && 
+                         nodeLabelFromData.trim() !== nodeMetadata.name;
 
   // Find start node with webhook schema
   const findStartNodeWithWebhookSchema = (): { node: Node | null; nodeId: string | null } => {
@@ -579,69 +631,76 @@ function DebugNode({ step, isExpanded, onToggle, workflowId, onStepUpdate, onTes
         </div>
       )}
       
-      {/* Node Header */}
+      {/* Kompaktes Node Header - alle Verbesserungen in kompakter Form */}
       <div 
-        className="flex items-center justify-between p-2.5 cursor-pointer hover:bg-gray-50 transition-colors"
+        className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50 transition-colors"
         onClick={onToggle}
-        title={step.nodeId} // Show full ID on hover
+        title={step.nodeId}
       >
-        <div className="flex items-center space-x-2 min-w-0 flex-1">
+        <div className="flex items-center space-x-1.5 min-w-0 flex-1">
+          {/* Expand/Collapse */}
           {isExpanded ? (
-            <ChevronDown className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+            <ChevronDown className="w-3 h-3 text-gray-400 flex-shrink-0" />
           ) : (
-            <ChevronRight className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+            <ChevronRight className="w-3 h-3 text-gray-400 flex-shrink-0" />
           )}
           
-          <div className="flex items-center space-x-1.5 min-w-0 flex-1">
-            {getStatusIcon(step.status)}
-            {step.nodeLabel ? (
-              <span className="font-medium text-gray-900 text-sm truncate">
-                {step.nodeLabel}
-              </span>
-            ) : (
-              <span className="font-medium text-gray-900 text-sm truncate">
-                {formatNodeType(step.nodeType)}
-              </span>
-            )}
-            {step.nodeLabel && (
-              <span className="text-xs text-gray-400 truncate">
-                ({formatNodeType(step.nodeType)})
-              </span>
-            )}
-            <span className="text-xs text-gray-400 truncate">
+          {/* Node Icon mit Kategorie-Farbe - kompakt */}
+          <div className={`flex-shrink-0 w-5 h-5 rounded ${categoryColors.bg} ${categoryColors.border} border flex items-center justify-center text-[10px] leading-none`}>
+            {nodeMetadata.icon}
+          </div>
+
+          {/* Status Icon */}
+          {getStatusIcon(step.status)}
+
+          {/* Name/Label und Typ - kompakt in einer Zeile */}
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            {/* Display Label/Name - prominent */}
+            <span className="font-medium text-gray-900 text-xs truncate" title={displayLabel}>
+              {displayLabel}
+            </span>
+            {/* Node Type Badge mit Kategorie-Farbe - sehr kompakt */}
+            <span className={`px-1 py-0.5 text-[9px] font-medium rounded ${categoryColors.bg} ${categoryColors.text} border ${categoryColors.border} flex-shrink-0 whitespace-nowrap`}>
+              {formatNodeType(step.nodeType)}
+            </span>
+            {/* Node ID - immer sichtbar, etwas prominenter wenn kein custom label */}
+            <span className={`text-[9px] truncate max-w-[80px] ${hasCustomLabel ? 'text-gray-400' : 'text-gray-500 font-medium'}`} title={step.nodeId}>
               {shortenNodeId(step.nodeId)}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
-          <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded border ${getStatusColor(step.status)}`}>
-            {step.status.slice(0, 1).toUpperCase()}
+        {/* Right Side - kompakt in einer Zeile */}
+        <div className="flex items-center space-x-1 flex-shrink-0 ml-1.5">
+          {/* Status Badge mit Symbol - kompakt */}
+          <span className={`px-1 py-0.5 text-[9px] font-semibold rounded border ${getStatusColor(step.status)} whitespace-nowrap`}>
+            {step.status === 'completed' ? '✓' : step.status === 'failed' ? '✗' : step.status === 'running' ? '⟳' : '○'}
           </span>
           
-          <div className="flex items-center space-x-1 text-[10px] text-gray-500">
-            <Database className="w-2.5 h-2.5" />
+          {/* Metriken - sehr kompakt in einer Zeile */}
+          <div className="flex items-center space-x-0.5 text-[9px] text-gray-500">
+            <Database className="w-2.5 h-2.5 flex-shrink-0" />
             <span className="whitespace-nowrap">{formatBytes(step.debugInfo?.size || 0)}</span>
             <span>•</span>
-            <Clock className="w-2.5 h-2.5" />
+            <Clock className="w-2.5 h-2.5 flex-shrink-0" />
             <span className="whitespace-nowrap">{formatDuration(step.duration || 0)}</span>
           </div>
           
-          {/* Play Button - ganz rechts */}
+          {/* Play Button - kleiner */}
           {workflowId && (
             <button
               onClick={handlePlayNode}
               disabled={isRunning}
-              className={`p-1 rounded hover:bg-gray-100 transition-colors ${
-                isRunning ? 'cursor-not-allowed' : ''
+              className={`p-0.5 rounded hover:bg-gray-100 transition-colors ${
+                isRunning ? 'cursor-not-allowed opacity-50' : ''
               }`}
               title={`Test ${step.nodeLabel || formatNodeType(step.nodeType)} node`}
               aria-label="Play node"
             >
               {isRunning ? (
-                <Clock className="w-3.5 h-3.5 text-blue-700 animate-spin" />
+                <Clock className="w-3 h-3 text-blue-600 animate-spin" />
               ) : (
-                <Play className="w-3.5 h-3.5 text-blue-500" />
+                <Play className="w-3 h-3 text-blue-600" />
               )}
             </button>
           )}
