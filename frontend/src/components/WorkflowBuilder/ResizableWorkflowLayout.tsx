@@ -12,6 +12,7 @@ import { ExecutionMonitor } from '../ExecutionMonitor/ExecutionMonitor';
 import { NodeSelectorPopup } from './NodeSelectorPopup';
 import { CombinedNodeSelectorModal } from './CombinedNodeSelectorModal';
 import { AddNodeButton } from './AddNodeButton';
+import { LoopBracketOverlay } from './LoopBracketOverlay';
 
 interface ResizableWorkflowLayoutProps {
   // Canvas props
@@ -464,7 +465,11 @@ export function ResizableWorkflowLayout({
                 <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
 
                 {/* Loop bracket overlay (visual grouping for loop pairs) */}
-                
+                <LoopBracketOverlay
+                  nodes={nodes}
+                  edges={edges}
+                />
+
                 {/* Add-Node Buttons */}
                 {nodesWithAddButtons.map(({ nodeId, sourceHandle }) => (
                   <AddNodeButton

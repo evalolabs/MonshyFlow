@@ -26,46 +26,52 @@ export const AddNodeButton: React.FC<AddNodeButtonProps> = ({ nodeId, sourceHand
   }
   
   // Get actual node dimensions from ReactFlow (measured after render)
-  const nodeWidth = sourceNode.width || 220;
-  const nodeHeight = sourceNode.height || 100;
+  const nodeWidth =
+    sourceNode.measured?.width ?? (sourceNode.data as any)?.widthPx ?? (sourceNode as any)?.width ?? 220;
+  const nodeHeight =
+    sourceNode.measured?.height ?? (sourceNode.data as any)?.heightPx ?? (sourceNode as any)?.height ?? 100;
+
+  // Prefer absolute position when available (important for grouped/parented nodes)
+  const baseX = (sourceNode as any).positionAbsolute?.x ?? sourceNode.position.x;
+  const baseY = (sourceNode as any).positionAbsolute?.y ?? sourceNode.position.y;
   
   let nodeRelativeX, nodeRelativeY;
   
   // Parallel Node - Multiple outputs at different positions
   if (sourceHandle?.startsWith('output-')) {
-    nodeRelativeX = sourceNode.position.x + nodeWidth + 25;
+    nodeRelativeX = baseX + nodeWidth + 25;
     
     if (sourceHandle === 'output-1') {
-      nodeRelativeY = sourceNode.position.y + nodeHeight * 0.25; // 25% from top
+      nodeRelativeY = baseY + nodeHeight * 0.25; // 25% from top
     } else if (sourceHandle === 'output-2') {
-      nodeRelativeY = sourceNode.position.y + nodeHeight * 0.50; // 50% from top (middle)
+      nodeRelativeY = baseY + nodeHeight * 0.50; // 50% from top (middle)
     } else if (sourceHandle === 'output-3') {
-      nodeRelativeY = sourceNode.position.y + nodeHeight * 0.75; // 75% from top
+      nodeRelativeY = baseY + nodeHeight * 0.75; // 75% from top
     } else if (sourceHandle === 'output-bottom') {
-      nodeRelativeX = sourceNode.position.x + nodeWidth / 2;
-      nodeRelativeY = sourceNode.position.y + nodeHeight + 25; // Below node
+      nodeRelativeX = baseX + nodeWidth / 2;
+      nodeRelativeY = baseY + nodeHeight + 25; // Below node
     } else {
-      nodeRelativeY = sourceNode.position.y + nodeHeight / 2;
+      nodeRelativeY = baseY + nodeHeight / 2;
     }
   }
   // IfElse Node - true/false handles
   else if (sourceHandle === 'true') {
-    nodeRelativeX = sourceNode.position.x + nodeWidth + 25;
-    nodeRelativeY = sourceNode.position.y + nodeHeight * 0.35; // 35% from top
+    nodeRelativeX = baseX + nodeWidth + 25;
+    nodeRelativeY = baseY + nodeHeight * 0.35; // 35% from top
   }
   else if (sourceHandle === 'false') {
-    nodeRelativeX = sourceNode.position.x + nodeWidth / 2;
-    nodeRelativeY = sourceNode.position.y + nodeHeight + 25; // Below node
+    nodeRelativeX = baseX + nodeWidth / 2;
+    nodeRelativeY = baseY + nodeHeight + 25; // Below node
   }
   // While Node - loop and back handles (bottom)
   else if (sourceHandle === 'loop' || sourceHandle === 'back') {
-    nodeRelativeX = sourceNode.position.x + nodeWidth * (sourceHandle === 'loop' ? 0.35 : 0.65);
-    nodeRelativeY = sourceNode.position.y + nodeHeight + 25; // Below node
+    nodeRelativeX = baseX + nodeWidth * (sourceHandle === 'loop' ? 0.35 : 0.65);
+    nodeRelativeY = baseY + nodeHeight + 25; // Below node
   }
   // Normal nodes - default center position
   else {
-    nodeRelativeX = sourceNode.position.x + nodeWidth + 25;
-    nodeRelativeY = sourceNode.position.y + 50; // Exact center (50px for 100px height nodes)
+    nodeRelativeX = baseX + nodeWidth + 25;
+    nodeRelativeY = baseY + nodeHeight / 2; // true vertical center for any node height
   }
   
   // Apply ReactFlow viewport transformation

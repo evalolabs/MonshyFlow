@@ -456,9 +456,15 @@ export function useNodeSelector({
     const outgoingSourceHandle = getSourceHandle(nodeType);
 
     // Calculate position
+    // Special case: inserting into the Loop -> End-loop "body edge" should place the node INSIDE the loop body,
+    // not on the midpoint line between the two nodes (which looks wrong with the bracket UX).
+    const isLoopPairBodyEdge = sourceNode.type === 'loop' && targetNode.type === 'end-loop';
+    const midpoint = calculateMidpoint(sourceNode, targetNode);
     const position = autoLayoutEnabled
       ? { x: 400, y: 200 } // Temporary, will be repositioned by auto-layout
-      : calculateMidpoint(sourceNode, targetNode);
+      : isLoopPairBodyEdge
+        ? { x: midpoint.x, y: midpoint.y + VERTICAL_SPACING }
+        : midpoint;
 
     const newNode = createNode(nodeType, position);
 
@@ -732,9 +738,13 @@ export function useNodeSelector({
     }
 
     // Calculate position
+    const isLoopPairBodyEdge = sourceNode.type === 'loop' && targetNode.type === 'end-loop';
+    const midpoint = calculateMidpoint(sourceNode, targetNode);
     const position = autoLayoutEnabled
       ? { x: 400, y: 200 } // Temporary, will be repositioned by auto-layout
-      : calculateMidpoint(sourceNode, targetNode);
+      : isLoopPairBodyEdge
+        ? { x: midpoint.x, y: midpoint.y + VERTICAL_SPACING }
+        : midpoint;
     newNode.position = position;
 
     // Update nodes

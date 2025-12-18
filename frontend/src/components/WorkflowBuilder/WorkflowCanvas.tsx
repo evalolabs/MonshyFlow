@@ -237,6 +237,64 @@ export function WorkflowCanvas({
     // --------------------------------------------------------------------------
     changes = expandPositionChangesWithGroupedChildren(changes, nodes, edges);
 
+    // --------------------------------------------------------------------------
+    // Loop-pair: allow moving loop/end-loop markers vertically, but ALWAYS as a pair.
+    // If user drags either marker, apply the same Δy to its paired node (via pairId).
+    // --------------------------------------------------------------------------
+    const nodeById = new Map(nodes.map(n => [n.id, n]));
+    const pairIndex = new Map<string, { loop?: string; end?: string }>();
+    nodes.forEach(n => {
+      const pid = (n.data as any)?.pairId;
+      if (!pid) return;
+      if (n.type !== 'loop' && n.type !== 'end-loop') return;
+      const key = String(pid);
+      const cur = pairIndex.get(key) ?? {};
+      if (n.type === 'loop') cur.loop = n.id;
+      else cur.end = n.id;
+      pairIndex.set(key, cur);
+    });
+
+    const extraPositionChanges: NodeChange[] = [];
+    const alreadyPaired = new Set<string>(); // pairKey|dy signature
+
+    changes.forEach((c) => {
+      if (c.type !== 'position') return;
+      const id = (c as any).id as string;
+      const nextPos = (c as any).position as { x: number; y: number } | undefined;
+      if (!nextPos) return;
+
+      const n = nodeById.get(id);
+      if (!n) return;
+      if (n.type !== 'loop' && n.type !== 'end-loop') return;
+      const pid = (n.data as any)?.pairId;
+      if (!pid) return;
+
+      const dy = nextPos.y - n.position.y;
+      if (!Number.isFinite(dy) || dy === 0) return;
+
+      const pair = pairIndex.get(String(pid));
+      if (!pair) return;
+      const otherId = n.type === 'loop' ? pair.end : pair.loop;
+      if (!otherId) return;
+
+      const other = nodeById.get(otherId);
+      if (!other) return;
+
+      const sig = `${pid}|${dy}`;
+      if (alreadyPaired.has(sig)) return;
+      alreadyPaired.add(sig);
+
+      extraPositionChanges.push({
+        id: otherId,
+        type: 'position',
+        position: { x: other.position.x, y: other.position.y + dy },
+      } as any);
+    });
+
+    if (extraPositionChanges.length > 0) {
+      changes = [...changes, ...extraPositionChanges];
+    }
+
     // Find all nodes that are being removed
     const nodesToRemove = new Set<string>();
     

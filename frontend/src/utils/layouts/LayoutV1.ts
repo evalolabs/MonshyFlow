@@ -117,6 +117,15 @@ export const LayoutV1: LayoutStrategy = {
     const rankSep = spacing.horizontal ?? 180;  // Horizontal spacing between levels
     const nodeSep = spacing.vertical ?? 120;   // Vertical spacing between parallel nodes
 
+    // Node dimension helper (keeps auto-layout visually aligned for non-standard node sizes)
+    const getNodeDims = (node: Node): { w: number; h: number } => {
+      // Loop-pair markers are rendered as pills (smaller than standard nodes)
+      if (node.type === 'loop' || node.type === 'end-loop') {
+        return { w: 96, h: 32 };
+      }
+      return { w: nodeWidth, h: nodeHeight };
+    };
+
     // Create a new directed graph
     const dagreGraph = new dagre.graphlib.Graph();
     dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -160,9 +169,10 @@ export const LayoutV1: LayoutStrategy = {
       if (!isToolNode(node) && 
           !isToolWithRelativePosition(node, edges) &&
           !loopNodeSet.has(node.id)) {
+        const { w, h } = getNodeDims(node);
         dagreGraph.setNode(node.id, {
-          width: nodeWidth,
-          height: nodeHeight,
+          width: w,
+          height: h,
         });
       }
     });
@@ -280,9 +290,9 @@ export const LayoutV1: LayoutStrategy = {
         // Node not in graph (shouldn't happen, but fallback)
         return node;
       }
-      
-      const x = nodeWithPosition.x - nodeWidth / 2;
-      const y = nodeWithPosition.y - nodeHeight / 2;
+      const { w, h } = getNodeDims(node);
+      const x = nodeWithPosition.x - w / 2;
+      const y = nodeWithPosition.y - h / 2;
       
       return {
         ...node,

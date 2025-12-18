@@ -14,6 +14,49 @@
 import type { Node, Edge } from '@xyflow/react';
 
 /**
+ * Loop-pair (Loop -> End-loop): find the paired end-loop node by pairId.
+ */
+function findEndLoopForPair(loopNodeId: string, nodes: Node[]): string | null {
+  const loopNode = nodes.find(n => n.id === loopNodeId);
+  if (!loopNode) return null;
+  const pairId = (loopNode.data as any)?.pairId;
+  if (!pairId) return null;
+  const end = nodes.find(n => n.type === 'end-loop' && (n.data as any)?.pairId === pairId);
+  return end?.id ?? null;
+}
+
+/**
+ * Loop-pair (Loop -> End-loop): collect all nodes reachable from loop until end-loop (exclusive).
+ * This models the loop "body" between the two anchors.
+ */
+function findLoopPairBodyNodes(loopNodeId: string, endLoopNodeId: string, edges: Edge[]): string[] {
+  const lookup = new Map<string, string[]>();
+  edges.forEach(e => {
+    if (!lookup.has(e.source)) lookup.set(e.source, []);
+    lookup.get(e.source)!.push(e.target);
+  });
+
+  const visited = new Set<string>();
+  const body = new Set<string>();
+  const queue: string[] = [loopNodeId];
+
+  while (queue.length) {
+    const cur = queue.shift()!;
+    if (visited.has(cur)) continue;
+    visited.add(cur);
+    if (cur === endLoopNodeId) continue;
+    if (cur !== loopNodeId) body.add(cur);
+    const nexts = lookup.get(cur) || [];
+    nexts.forEach(n => {
+      if (!visited.has(n)) queue.push(n);
+    });
+  }
+
+  body.delete(endLoopNodeId);
+  return Array.from(body);
+}
+
+/**
  * Check if an edge connects to an agent's bottom input handle
  */
 function isAgentBottomInputEdge(edge: Edge): boolean {
@@ -177,7 +220,8 @@ export function isParentNode(node: Node, edges: Edge[]): boolean {
   const nodeType = (node.type || '').toLowerCase();
   
   // Known parent types (hardcoded for performance)
-  const knownParents = ['agent', 'while', 'foreach', 'ifelse'];
+  // loop = Loop-pair anchor (Loop -> End-loop)
+  const knownParents = ['agent', 'while', 'foreach', 'ifelse', 'loop'];
   if (knownParents.includes(nodeType)) {
     return true;
   }
@@ -225,6 +269,16 @@ export function findAllChildNodes(
     case 'agent':
       childIds.push(...findToolNodesForAgent(parentNodeId, edges));
       break;
+      
+    case 'loop': {
+      // Loop-pair (Loop -> End-loop): children = body nodes between + end-loop anchor
+      const endLoopId = findEndLoopForPair(parentNodeId, nodes);
+      if (endLoopId) {
+        childIds.push(...findLoopPairBodyNodes(parentNodeId, endLoopId, edges));
+        childIds.push(endLoopId);
+      }
+      break;
+    }
       
     case 'while':
     case 'foreach':

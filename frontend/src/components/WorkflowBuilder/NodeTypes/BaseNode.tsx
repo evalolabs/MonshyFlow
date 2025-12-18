@@ -47,6 +47,16 @@ export interface BaseNodeProps {
   onUpdateComment?: (nodeId: string, comment: string) => void;
   showInfoOverlay?: boolean;
   secrets?: Array<{ key: string; isActive: boolean }>; // Secrets for validation
+
+  // Optional sizing overrides (defaults keep current look)
+  widthPx?: number;
+  heightPx?: number;
+
+  // Visual variant overrides (useful for special UX nodes like loop markers)
+  shape?: 'card' | 'pill';
+  compact?: boolean;
+  hideLabel?: boolean;
+  hideSubtitle?: boolean;
 }
 
 const CATEGORY_COLORS = {
@@ -106,6 +116,12 @@ export function BaseNode({
   onUpdateComment,
   showInfoOverlay = true,
   secrets = [],
+  widthPx,
+  heightPx,
+  shape = 'card',
+  compact = false,
+  hideLabel = false,
+  hideSubtitle = false,
 }: BaseNodeProps) {
   const [isNodeHovered, setIsNodeHovered] = useState(false); // Track hover state of the node itself
   const { setNodes } = useReactFlow();
@@ -141,18 +157,22 @@ export function BaseNode({
     <div 
         className={`
           relative w-[220px] h-[100px] 
-          px-4 py-3 
-          rounded-lg shadow-md hover:shadow-lg
+          ${shape === 'pill' ? 'px-3 py-1 rounded-full' : 'px-4 py-3 rounded-lg'}
+          shadow-md hover:shadow-lg
           bg-gradient-to-br ${bgGradient}
           ${getBorderColor()}
           transition-all duration-200
-          flex flex-col justify-center
+          ${shape === 'pill' ? 'flex flex-row items-center' : 'flex flex-col justify-center'}
           overflow-visible
           ${selected ? 'ring-4 ring-blue-400 ring-offset-2' : ''}
           ${isAnimating && executionStatus === 'running' 
             ? 'ring-4 ring-emerald-400 ring-opacity-60 scale-105 animate-pulse' 
             : ''}
         `}
+      style={{
+        width: widthPx ? `${widthPx}px` : undefined,
+        height: heightPx ? `${heightPx}px` : undefined,
+      }}
       onMouseEnter={() => setIsNodeHovered(true)} // Set hovered state on node
       onMouseLeave={() => setIsNodeHovered(false)} // Reset hovered state on node
     >
@@ -232,9 +252,9 @@ export function BaseNode({
       )}
 
       {/* Content */}
-      <div className="flex flex-col gap-1">
+      <div className={shape === 'pill' ? 'flex flex-row items-center gap-2 min-w-0' : 'flex flex-col gap-1'}>
         {/* Main Row: Icon + Label */}
-        <div className="flex items-center gap-2.5">
+        <div className={shape === 'pill' ? 'flex items-center gap-2 min-w-0' : 'flex items-center gap-2.5'}>
           {icon && (
             <div className={`text-lg ${colors.icon} flex-shrink-0 relative`}>
               {/* Normal Icon */}
@@ -286,13 +306,15 @@ export function BaseNode({
               )}
             </div>
           )}
-          <div className="font-semibold text-sm text-gray-800 truncate flex-1">
-            {label}
-          </div>
+          {!hideLabel && (
+            <div className={`${compact || shape === 'pill' ? 'text-xs' : 'text-sm'} font-semibold text-gray-800 truncate flex-1`}>
+              {label}
+            </div>
+          )}
         </div>
 
         {/* Subtitle */}
-        {subtitle && (
+        {!hideSubtitle && subtitle && shape !== 'pill' && (
           <div className="text-[11px] text-gray-600 truncate">
             {subtitle}
           </div>

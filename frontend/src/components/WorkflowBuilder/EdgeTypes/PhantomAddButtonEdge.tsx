@@ -12,37 +12,33 @@ interface PhantomAddButtonEdgeProps extends Omit<EdgeProps, 'data'> {
 }
 
 export const PhantomAddButtonEdge: React.FC<PhantomAddButtonEdgeProps> = (props) => {
-  const { source, sourceHandle, data } = props;
+  const { source, data } = props;
   const { getNode } = useReactFlow();
   
   // Get the actual node to calculate button position
   const sourceNode = getNode(source);
-  
-  console.log('🔍 PhantomAddButtonEdge rendering:', { 
-    source, 
-    sourceHandle,
-    sourceNode: sourceNode ? { id: sourceNode.id, position: sourceNode.position } : 'NOT FOUND',
-    hasData: !!data,
-    hasOnAddNode: !!data?.onAddNode
-  });
-  
+
   if (!sourceNode) {
-    console.warn('⚠️ PhantomAddButtonEdge: Source node not found!', source);
     return null; // Node not found, don't render
   }
   
   // Calculate button position based on node position and type
-  let buttonX, buttonY;
-  
-  // Node dimensions (approximate - standard node size)
-  const nodeWidth = 220;
-  const nodeHeight = 100;
-  
-  // Normal nodes: position to the right (horizontal layout)
-  buttonX = sourceNode.position.x + nodeWidth + 40;
-  buttonY = sourceNode.position.y + nodeHeight / 2;
-  
-  console.log('✅ PhantomAddButtonEdge button position:', { buttonX, buttonY });
+  // Use measured dimensions when available (handles pill/compact nodes correctly)
+  const measuredWidth =
+    sourceNode.measured?.width ?? (sourceNode.data as any)?.widthPx ?? (sourceNode as any)?.width ?? 220;
+  const measuredHeight =
+    sourceNode.measured?.height ?? (sourceNode.data as any)?.heightPx ?? (sourceNode as any)?.height ?? 100;
+
+  // Prefer absolute position when available (ReactFlow internal), fallback to position
+  const baseX = (sourceNode as any).positionAbsolute?.x ?? sourceNode.position.x;
+  const baseY = (sourceNode as any).positionAbsolute?.y ?? sourceNode.position.y;
+
+  // Keep the phantom "+" close to the node output (avoid drifting far right on long empty lanes)
+  // Slightly larger offset helps avoid overlapping the node border/handle.
+  const offsetX = 24;
+
+  const buttonX = baseX + measuredWidth + offsetX;
+  const buttonY = baseY + measuredHeight / 2;
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -59,9 +55,7 @@ export const PhantomAddButtonEdge: React.FC<PhantomAddButtonEdgeProps> = (props)
         <div
           style={{
             position: 'absolute',
-            left: buttonX,
-            top: buttonY,
-            transform: 'translate(-50%, -50%)',
+            transform: `translate(-50%, -50%) translate(${buttonX}px,${buttonY}px)`,
             pointerEvents: 'all',
             zIndex: 1000, // Ensure button is visible above other elements
           }}

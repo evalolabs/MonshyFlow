@@ -146,6 +146,12 @@ describe('nodeGroupingUtils', () => {
 
       expect(isParentNode(node, edges)).toBe(false);
     });
+
+    it('should identify loop (loop-pair) as parent', () => {
+      const node: Node = { id: 'loop-1', type: 'loop', position: { x: 0, y: 0 }, data: { pairId: 'p1' } };
+      const edges: Edge[] = [];
+      expect(isParentNode(node, edges)).toBe(true);
+    });
   });
 
   describe('findAllChildNodes', () => {
@@ -199,6 +205,27 @@ describe('nodeGroupingUtils', () => {
       const result = findAllChildNodes('ifelse-1', 'ifelse', edges, nodes);
       expect(result).toContain('node-true-1');
       expect(result).toContain('node-false-1');
+    });
+
+    it('should find all children for a loop-pair (loop -> end-loop) including end-loop', () => {
+      const nodes: Node[] = [
+        { id: 'loop-1', type: 'loop', position: { x: 0, y: 0 }, data: { pairId: 'p1' } },
+        { id: 'a', type: 'transform', position: { x: 0, y: 0 }, data: {} },
+        { id: 'b', type: 'transform', position: { x: 0, y: 0 }, data: {} },
+        { id: 'end-1', type: 'end-loop', position: { x: 0, y: 0 }, data: { pairId: 'p1' } },
+      ];
+
+      const edges: Edge[] = [
+        { id: 'e1', source: 'loop-1', target: 'a' },
+        { id: 'e2', source: 'a', target: 'b' },
+        { id: 'e3', source: 'b', target: 'end-1' },
+      ];
+
+      const result = findAllChildNodes('loop-1', 'loop', edges, nodes);
+      expect(result).toContain('a');
+      expect(result).toContain('b');
+      expect(result).toContain('end-1');
+      expect(result).not.toContain('loop-1');
     });
   });
 

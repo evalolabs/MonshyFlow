@@ -27,8 +27,7 @@ import { ForEachNode } from '../NodeTypes/ForEachNode';
 import { IfElseNode } from '../NodeTypes/IfElseNode';
 import { ToolNodeComponent } from '../ToolNodes/ToolNodeComponent';
 import { BaseNode } from '../NodeTypes/BaseNode';
-import { getNodeMetadata } from './nodeMetadata';
-import { GENERATED_NODE_METADATA } from './generatedMetadata';
+import { getAllNodeTypes, getNodeMetadata } from './nodeMetadata';
 
 /**
  * Component mapping for regular nodes
@@ -102,6 +101,14 @@ function createDefaultNodeComponent(nodeType: string): ComponentType<any> | unde
     
     // Ensure category is valid (BaseNode might not accept all NodeCategoryId values)
     const category = (metadata.category === 'tools' ? 'utility' : metadata.category) || 'utility';
+
+    // Sizing overrides for specific node types (UX tuning)
+    const isLoopMarker = nodeType === 'loop' || nodeType === 'end-loop';
+    const widthPx = isLoopMarker ? 96 : undefined;
+    const heightPx = isLoopMarker ? 32 : undefined;
+    const shape = isLoopMarker ? 'pill' : undefined;
+    const compact = isLoopMarker ? true : undefined;
+    const hideSubtitle = isLoopMarker ? true : undefined;
     
     return React.createElement(BaseNode, {
       label,
@@ -113,6 +120,11 @@ function createDefaultNodeComponent(nodeType: string): ComponentType<any> | unde
       executionStatus,
       hasInput: metadata.hasInput !== false,
       hasOutput: metadata.hasOutput !== false,
+      widthPx,
+      heightPx,
+      shape,
+      compact,
+      hideSubtitle,
       node,
       onUpdateComment,
       showInfoOverlay,
@@ -246,9 +258,11 @@ export function createNodeTypesMap(
     };
   });
   
-  // Auto-register nodes from generatedMetadata that don't have explicit components
-  // This ensures nodes defined in registry.json are automatically rendered with BaseNode
-  Object.keys(GENERATED_NODE_METADATA).forEach((nodeType) => {
+  // Auto-register nodes from the full registry (manual + generated + discovered)
+  // that don't have explicit components.
+  // This ensures nodes defined in `nodeMetadata.ts` (manual), `registry.json` (generated),
+  // or discovered at runtime are automatically rendered with BaseNode.
+  getAllNodeTypes().forEach((nodeType) => {
     // Skip if already registered with explicit component
     if (nodeType in nodeTypes) {
       return;
