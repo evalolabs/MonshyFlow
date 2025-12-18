@@ -462,6 +462,8 @@ export function ResizableWorkflowLayout({
                   style={{ width: 200, height: 150 }}
                 />
                 <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+
+                {/* Loop bracket overlay (visual grouping for loop pairs) */}
                 
                 {/* Add-Node Buttons */}
                 {nodesWithAddButtons.map(({ nodeId, sourceHandle }) => (
