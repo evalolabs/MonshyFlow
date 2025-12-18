@@ -53,13 +53,16 @@ export function generateNodeCategories(): NodeCategory[] {
       name: categoryInfo.name,
       icon: categoryInfo.icon,
       color: categoryInfo.color,
-      nodes: nodes.map((node: NodeMetadata) => ({
-        id: node.id,
-        name: node.name,
-        icon: node.icon,
-        color: categoryInfo.color,
-        description: node.description,
-      })),
+      nodes: nodes
+        // No legacy workflows: hide old loop nodes in UI
+        .filter((node: NodeMetadata) => node.id !== 'while' && node.id !== 'foreach')
+        .map((node: NodeMetadata) => ({
+          id: node.id,
+          name: node.name,
+          icon: node.icon,
+          color: categoryInfo.color,
+          description: node.description,
+        })),
     };
   }).filter(category => category.nodes.length > 0); // Only include categories with nodes
 }

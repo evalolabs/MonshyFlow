@@ -146,6 +146,136 @@ export function useNodeSelector({
 
     logger.info('Node type selected', { nodeType, popup: activePopup, hasCombinedPopup: !!combinedPopup });
 
+    // SPECIAL: Loop (Pair) macro — creates Loop + End Loop nodes with shared pairId
+    if (nodeType === 'loop-pair') {
+      const pairId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+      // Case 1: Adding from node output (no target node)
+      if (!activePopup.targetNode) {
+        const sourceNode = nodes.find(n => n.id === activePopup.sourceNode);
+        if (!sourceNode) {
+          logger.warn('Source node not found', { sourceNodeId: activePopup.sourceNode });
+          if (combinedPopup) setCombinedPopup(null);
+          else setPopup(null);
+          return;
+        }
+
+        const sourceHandle =
+          activePopup.sourceHandle !== undefined && activePopup.sourceHandle !== null
+            ? activePopup.sourceHandle
+            : getSourceHandle(sourceNode.type);
+
+        const loopPos = calculateRelativePosition(sourceNode, 'right', HORIZONTAL_SPACING);
+        const loopNode = createNode('loop', loopPos, { pairId });
+        const endLoopNode = createNode(
+          'end-loop',
+          { x: loopPos.x + HORIZONTAL_SPACING, y: loopPos.y },
+          { pairId }
+        );
+
+        onNodesChange([...nodes, loopNode, endLoopNode]);
+
+        const newEdges: Edge[] = [];
+        // Source -> Loop
+        newEdges.push(
+          createButtonEdge(
+            sourceNode.id,
+            loopNode.id,
+            (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+            sourceHandle,
+            getTargetHandle('loop')
+          )
+        );
+        // Loop -> EndLoop (body insertion edge)
+        newEdges.push(
+          createButtonEdge(
+            loopNode.id,
+            endLoopNode.id,
+            (edgeId, src, tgt) => openPopupBetweenNodes(edgeId, src, tgt),
+            getSourceHandle('loop'),
+            getTargetHandle('end-loop')
+          )
+        );
+
+        onEdgesChange([...edges, ...newEdges]);
+
+        if (combinedPopup) setCombinedPopup(null);
+        else setPopup(null);
+        return;
+      }
+
+      // Case 2: Adding between two nodes
+      const { edgeId, sourceNode: sourceNodeId, targetNode: targetNodeId } = activePopup;
+      if (!edgeId) return;
+
+      const edge = edges.find(e => e.id === edgeId);
+      const sourceNode = nodes.find(n => n.id === sourceNodeId);
+      const targetNode = nodes.find(n => n.id === targetNodeId);
+      if (!edge || !sourceNode || !targetNode) return;
+
+      const basePos = autoLayoutEnabled ? { x: 400, y: 200 } : calculateMidpoint(sourceNode, targetNode);
+
+      const loopNode = createNode('loop', basePos, { pairId });
+      const endLoopNode = createNode(
+        'end-loop',
+        { x: basePos.x + HORIZONTAL_SPACING, y: basePos.y },
+        { pairId }
+      );
+
+      // Update nodes (with optional downstream shifting if auto-layout is disabled)
+      if (!autoLayoutEnabled) {
+        const downstreamNodes = findDownstreamNodes(targetNode.id, edges);
+        const shiftedNodes = shiftNodesVertically(nodes, downstreamNodes, VERTICAL_SPACING);
+        onNodesChange([...shiftedNodes, loopNode, endLoopNode]);
+      } else {
+        onNodesChange([...nodes, loopNode, endLoopNode]);
+      }
+
+      // Preserve handles from original edge
+      const preservedSourceHandle = edge.sourceHandle || undefined;
+      const preservedTargetHandle = edge.targetHandle || undefined;
+
+      // Replace old edge with: source->loop, loop->end-loop, end-loop->target
+      const filteredEdges = edges.filter(e => e.id !== edge.id);
+      const newEdges: Edge[] = [];
+
+      newEdges.push(
+        createButtonEdge(
+          sourceNode.id,
+          loopNode.id,
+          (edgeId2, src, tgt) => openPopupBetweenNodes(edgeId2, src, tgt),
+          preservedSourceHandle,
+          getTargetHandle('loop')
+        )
+      );
+
+      newEdges.push(
+        createButtonEdge(
+          loopNode.id,
+          endLoopNode.id,
+          (edgeId2, src, tgt) => openPopupBetweenNodes(edgeId2, src, tgt),
+          getSourceHandle('loop'),
+          getTargetHandle('end-loop')
+        )
+      );
+
+      newEdges.push(
+        createButtonEdge(
+          endLoopNode.id,
+          targetNode.id,
+          (edgeId2, src, tgt) => openPopupBetweenNodes(edgeId2, src, tgt),
+          getSourceHandle('end-loop'),
+          preservedTargetHandle
+        )
+      );
+
+      onEdgesChange([...filteredEdges, ...newEdges]);
+
+      if (combinedPopup) setCombinedPopup(null);
+      else setPopup(null);
+      return;
+    }
+
     // Validate Start node
     if (nodeType === 'start' && hasStartNode(nodes)) {
       alert(VALIDATION_MESSAGES.MULTIPLE_START_NODES);

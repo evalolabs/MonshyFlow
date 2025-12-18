@@ -211,6 +211,42 @@ export const NODE_METADATA_REGISTRY: Record<string, NodeMetadata> = {
   },
   
   // Logic Nodes
+  'loop-pair': {
+    id: 'loop-pair',
+    name: 'Loop (Pair)',
+    icon: '🔁',
+    description: 'Adds a Loop and End Loop pair (block container)',
+    category: 'logic',
+    component: () => null,
+    hasInput: true,
+    hasOutput: true,
+  },
+  loop: {
+    id: 'loop',
+    name: 'Loop',
+    icon: '🔁',
+    description: 'Start of a loop block',
+    category: 'logic',
+    component: () => null,
+    hasInput: true,
+    hasOutput: true,
+    fields: {
+      label: { type: 'text', placeholder: 'Loop Name' },
+    },
+  },
+  'end-loop': {
+    id: 'end-loop',
+    name: 'End Loop',
+    icon: '🔚',
+    description: 'End of a loop block',
+    category: 'logic',
+    component: () => null,
+    hasInput: true,
+    hasOutput: true,
+    fields: {
+      label: { type: 'text', placeholder: 'End Loop' },
+    },
+  },
   while: {
     id: 'while',
     name: 'While Loop',
