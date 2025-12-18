@@ -15,6 +15,7 @@ import { TransformNodeConfigForm } from './NodeConfigForms/TransformNodeConfigFo
 import { SchemaBuilderModal } from './NodeConfigPanel/SchemaBuilderModal';
 import { getNodeMetadata } from './nodeRegistry/nodeMetadata';
 import { validateNode } from './utils/nodeValidation';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface NodeConfigPanelProps {
   selectedNode: Node | null;
@@ -28,6 +29,8 @@ interface NodeConfigPanelProps {
 }
 
 export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteNode: _onDeleteNode, workflowId, nodes = [], edges = [], debugSteps = [] }: NodeConfigPanelProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [config, setConfig] = useState<any>({});
   const [validationResult, setValidationResult] = useState<{ isValid: boolean; errors: string[]; warnings: string[] } | null>(null);
   const [showInputSchemaModal, setShowInputSchemaModal] = useState(false);
@@ -136,6 +139,30 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
       currentNodeId: selectedNode?.id || '',
       debugSteps,
     });
+  };
+
+  const returnTo = useMemo(() => `${location.pathname}${location.search || ''}`, [location.pathname, location.search]);
+  const parseMissingSecretKey = (message: string): string | null => {
+    if (!message) return null;
+    const match = message.match(/Secret "([^"]+)"/);
+    return match?.[1] || null;
+  };
+
+  const openCreateSecret = (secretKey: string, provider?: string) => {
+    const params = new URLSearchParams({
+      create: '1',
+      name: secretKey,
+      type: 'ApiKey',
+      provider: provider || '',
+      returnTo,
+    });
+    const url = `/admin/secrets?${params.toString()}`;
+    // Open in a new tab so the config panel/workflow remains open and the user can easily return.
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const openSecrets = () => {
+    navigate('/admin/secrets');
   };
 
 
@@ -1136,13 +1163,69 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                   {validationResult.errors.map((error, idx) => (
                     <div key={idx} className="flex items-start gap-1.5 text-xs">
                       <span className="text-red-600 mt-0.5">●</span>
-                      <span className="text-red-700">{error}</span>
+                      <span className="text-red-700">
+                        {error}
+                        {parseMissingSecretKey(error) && (
+                          <>
+                            {' '}
+                            <button
+                              type="button"
+                              className="text-red-700 underline underline-offset-2 hover:text-red-900"
+                              onClick={() => {
+                                const key = parseMissingSecretKey(error);
+                                if (key) openCreateSecret(key, 'HTTP Request');
+                              }}
+                              title="Secret anlegen"
+                            >
+                              Secret anlegen
+                            </button>
+                            {' '}
+                            <span className="text-red-400">·</span>{' '}
+                            <button
+                              type="button"
+                              className="text-red-700 underline underline-offset-2 hover:text-red-900"
+                              onClick={openSecrets}
+                              title="Secrets öffnen"
+                            >
+                              Secrets
+                            </button>
+                          </>
+                        )}
+                      </span>
                     </div>
                   ))}
                   {validationResult.warnings.map((warning, idx) => (
                     <div key={idx} className="flex items-start gap-1.5 text-xs">
                       <span className="text-amber-600 mt-0.5">●</span>
-                      <span className="text-amber-700">{warning}</span>
+                      <span className="text-amber-700">
+                        {warning}
+                        {parseMissingSecretKey(warning) && (
+                          <>
+                            {' '}
+                            <button
+                              type="button"
+                              className="text-amber-700 underline underline-offset-2 hover:text-amber-900"
+                              onClick={() => {
+                                const key = parseMissingSecretKey(warning);
+                                if (key) openCreateSecret(key, 'HTTP Request');
+                              }}
+                              title="Secret anlegen"
+                            >
+                              Secret anlegen
+                            </button>
+                            {' '}
+                            <span className="text-amber-400">·</span>{' '}
+                            <button
+                              type="button"
+                              className="text-amber-700 underline underline-offset-2 hover:text-amber-900"
+                              onClick={openSecrets}
+                              title="Secrets öffnen"
+                            >
+                              Secrets
+                            </button>
+                          </>
+                        )}
+                      </span>
                     </div>
                   ))}
                 </div>

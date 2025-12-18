@@ -8,6 +8,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import type { Node } from '@xyflow/react';
 import { getNodeMetadata } from '../nodeRegistry/nodeMetadata';
 import { validateNode } from '../utils/nodeValidation';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface NodeInfoOverlayProps {
   node: Node;
@@ -24,6 +25,8 @@ export function NodeInfoOverlay({
   secrets = [],
   parentHovered = false,
 }: NodeInfoOverlayProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [comment, setComment] = useState((node.data?.comment as string) || '');
@@ -45,6 +48,32 @@ export function NodeInfoOverlay({
   const errors = validation.issues.filter(i => i.type === 'error');
   const warnings = validation.issues.filter(i => i.type === 'warning');
   const infos = validation.issues.filter(i => i.type === 'info');
+
+  const returnTo = useMemo(() => `${location.pathname}${location.search || ''}`, [location.pathname, location.search]);
+
+  const parseMissingSecretKey = (message: string): string | null => {
+    if (!message) return null;
+    const match = message.match(/Secret "([^"]+)"/);
+    return match?.[1] || null;
+  };
+
+  const createMissingSecret = (secretKey: string) => {
+    if (!secretKey) return;
+    const params = new URLSearchParams({
+      create: '1',
+      name: secretKey,
+      type: 'ApiKey',
+      provider: (metadata?.name || node.type || 'Provider'),
+      returnTo,
+    });
+    const url = `/admin/secrets?${params.toString()}`;
+    // Open in a new tab so the workflow remains open and the user can easily return.
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const goToSecrets = () => {
+    navigate('/admin/secrets');
+  };
 
   // Auto-resize textarea
   useEffect(() => {
@@ -109,13 +138,77 @@ export function NodeInfoOverlay({
             {errors.map((issue, idx) => (
               <div key={idx} className="flex items-start gap-1.5 text-[10px]">
                 <span className="text-red-600 mt-0.5">●</span>
-                <span className="text-red-700">{issue.message}</span>
+                <span className="text-red-700">
+                  {issue.message}
+                  {parseMissingSecretKey(issue.message) && (
+                    <>
+                      {' '}
+                      <button
+                        type="button"
+                        className="text-red-700 underline underline-offset-2 hover:text-red-900"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const key = parseMissingSecretKey(issue.message);
+                          if (key) createMissingSecret(key);
+                        }}
+                        title="Secret anlegen"
+                      >
+                        Secret anlegen
+                      </button>
+                      {' '}
+                      <span className="text-red-400">·</span>{' '}
+                    {/*   <button
+                        type="button"
+                        className="text-red-700 underline underline-offset-2 hover:text-red-900"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          goToSecrets();
+                        }}
+                        title="Secrets öffnen"
+                      >
+                        Secrets
+                      </button> */}
+                    </>
+                  )}
+                </span>
               </div>
             ))}
             {warnings.map((issue, idx) => (
               <div key={idx} className="flex items-start gap-1.5 text-[10px]">
                 <span className="text-amber-600 mt-0.5">●</span>
-                <span className="text-amber-700">{issue.message}</span>
+                <span className="text-amber-700">
+                  {issue.message}
+                  {parseMissingSecretKey(issue.message) && (
+                    <>
+                      {' '}
+                      <button
+                        type="button"
+                        className="text-amber-700 underline underline-offset-2 hover:text-amber-900"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const key = parseMissingSecretKey(issue.message);
+                          if (key) createMissingSecret(key);
+                        }}
+                        title="Secret anlegen"
+                      >
+                        Secret anlegen
+                      </button>
+                      {' '}
+                      <span className="text-amber-400">·</span>{' '}
+                      <button
+                        type="button"
+                        className="text-amber-700 underline underline-offset-2 hover:text-amber-900"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          goToSecrets();
+                        }}
+                        title="Secrets öffnen"
+                      >
+                        Secrets
+                      </button>
+                    </>
+                  )}
+                </span>
               </div>
             ))}
             {infos.map((issue, idx) => (

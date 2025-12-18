@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface ProviderSetupGuideProps {
   name: string;
@@ -8,6 +9,17 @@ interface ProviderSetupGuideProps {
   setupInstructions?: string;
 }
 
+type SecretTypeQuery = 'ApiKey' | 'Password' | 'Token' | 'Generic' | 'Smtp';
+
+function guessSecretTypeFromName(secretName: string): SecretTypeQuery {
+  const s = (secretName || '').toUpperCase();
+  if (s.includes('SMTP')) return 'Smtp';
+  if (s.includes('PASSWORD') || s.endsWith('_PASS') || s.endsWith('_PWD')) return 'Password';
+  if (s.includes('TOKEN')) return 'Token';
+  if (s.includes('KEY')) return 'ApiKey';
+  return 'ApiKey';
+}
+
 export const ProviderSetupGuide: React.FC<ProviderSetupGuideProps> = ({
   name,
   requiredSecrets = [],
@@ -15,9 +27,33 @@ export const ProviderSetupGuide: React.FC<ProviderSetupGuideProps> = ({
   apiKeyUrl,
   setupInstructions,
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const returnTo = useMemo(() => {
+    // Keep user on the current page after creating the secret (workflow editor / config panel)
+    return `${location.pathname}${location.search || ''}`;
+  }, [location.pathname, location.search]);
+
   if (requiredSecrets.length === 0 && !docsUrl && !apiKeyUrl && !setupInstructions) {
     return null;
   }
+
+  const goToSecrets = () => {
+    navigate('/admin/secrets');
+  };
+
+  const createSecret = (secretName: string) => {
+    const type = guessSecretTypeFromName(secretName);
+    const params = new URLSearchParams({
+      create: '1',
+      name: secretName,
+      type,
+      provider: name,
+      returnTo,
+    });
+    navigate(`/admin/secrets?${params.toString()}`);
+  };
 
   return (
     <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mt-3">
@@ -30,10 +66,19 @@ export const ProviderSetupGuide: React.FC<ProviderSetupGuideProps> = ({
           <div className="text-[11px] font-medium text-blue-700 mb-1">
             Benötigte Secrets:
           </div>
-          <ul className="text-[11px] text-blue-600 space-y-0.5 list-disc list-inside ml-1">
+          <ul className="text-[11px] text-blue-600 space-y-1 list-disc list-inside ml-1">
             {requiredSecrets.map((secretName) => (
-              <li key={secretName}>
+              <li key={secretName} className="flex items-center gap-2">
                 <span className="font-mono">{secretName}</span>
+                <span className="text-blue-300">·</span>
+                <button
+                  type="button"
+                  onClick={() => createSecret(secretName)}
+                  className="text-blue-700 hover:text-blue-900 underline underline-offset-2 text-[10px]"
+                  title={`Secret "${secretName}" anlegen`}
+                >
+                  anlegen
+                </button>
               </li>
             ))}
           </ul>
@@ -88,9 +133,19 @@ export const ProviderSetupGuide: React.FC<ProviderSetupGuideProps> = ({
 
       {requiredSecrets.length > 0 && (
         <div className="mt-2 pt-2 border-t border-blue-200">
-          <p className="text-[11px] text-blue-600">
-            💡 <strong>Tipp:</strong> Lege die Secrets im Bereich „Secrets" an, damit {name} funktioniert.
-          </p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[11px] text-blue-600">
+              💡 <strong>Tipp:</strong> Lege die Secrets im Bereich „Secrets" an, damit {name} funktioniert.
+            </p>
+            <button
+              type="button"
+              onClick={goToSecrets}
+              className="text-blue-700 hover:text-blue-900 underline underline-offset-2 text-[10px] whitespace-nowrap"
+              title="Zur Secrets-Seite"
+            >
+              Secrets öffnen
+            </button>
+          </div>
         </div>
       )}
     </div>

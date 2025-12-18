@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { secretsService, type SecretResponse, type CreateSecretRequest, type UpdateSecretRequest, SecretType, SecretTypeLabels, type DecryptedSecretResponse } from '../services/secretsService';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { Plus, Edit, Trash2, Eye, EyeOff, Search, Copy, Check } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export function SecretsManagementPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [secrets, setSecrets] = useState<SecretResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -13,10 +17,42 @@ export function SecretsManagementPage() {
   const [decryptedSecret, setDecryptedSecret] = useState<DecryptedSecretResponse | null>(null);
   const [showDecrypted, setShowDecrypted] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [prefillCreate, setPrefillCreate] = useState<SecretCreatePrefill | null>(null);
+  const [returnTo, setReturnTo] = useState<string | null>(null);
+
+  const deepLink = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    const create = params.get('create') === '1';
+    const name = params.get('name') || '';
+    const type = params.get('type') || '';
+    const provider = params.get('provider') || '';
+    const description = params.get('description') || '';
+    const rt = params.get('returnTo') || '';
+    return { create, name, type, provider, description, returnTo: rt };
+  }, [location.search]);
 
   useEffect(() => {
     loadSecrets();
   }, []);
+
+  // Deep-link: /admin/secrets?create=1&name=OPENAI_API_KEY&type=ApiKey&provider=OpenAI&returnTo=/workflow/123
+  useEffect(() => {
+    if (!deepLink.create) {
+      return;
+    }
+
+    const mappedType = mapSecretTypeFromQuery(deepLink.type);
+    setEditingSecret(null);
+    setPrefillCreate({
+      name: deepLink.name,
+      secretType: mappedType,
+      provider: deepLink.provider,
+      description: deepLink.description,
+    });
+    setReturnTo(deepLink.returnTo || null);
+    setShowModal(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepLink.create]);
 
   const loadSecrets = async () => {
     try {
@@ -35,11 +71,15 @@ export function SecretsManagementPage() {
 
   const handleCreate = () => {
     setEditingSecret(null);
+    setPrefillCreate(null);
+    setReturnTo(null);
     setShowModal(true);
   };
 
   const handleEdit = (secret: SecretResponse) => {
     setEditingSecret(secret);
+    setPrefillCreate(null);
+    setReturnTo(null);
     setShowModal(true);
   };
 
@@ -84,7 +124,19 @@ export function SecretsManagementPage() {
         await secretsService.createSecret(secretData as CreateSecretRequest);
       }
       setShowModal(false);
+      setEditingSecret(null);
+      setPrefillCreate(null);
+      const rt = returnTo;
+      setReturnTo(null);
       await loadSecrets();
+
+      // If user came here from a deep-link, return them to the workflow.
+      if (!editingSecret && rt) {
+        navigate(rt);
+      } else if (!editingSecret && deepLink.create) {
+        // Clear query params after a deep-link create to avoid re-opening the modal on refresh.
+        navigate('/admin/secrets', { replace: true });
+      }
     } catch (err: any) {
         alert(err.response?.data?.error || err.response?.data?.message || err.message || `Failed to ${editingSecret ? 'update' : 'create'} secret`);
     }
@@ -234,6 +286,7 @@ export function SecretsManagementPage() {
         {showModal && (
           <SecretModal
             secret={editingSecret}
+            prefill={prefillCreate}
             onClose={() => setShowModal(false)}
             onSave={handleSave}
           />
@@ -245,8 +298,26 @@ export function SecretsManagementPage() {
 
 interface SecretModalProps {
   secret: SecretResponse | null;
+  prefill?: SecretCreatePrefill | null;
   onClose: () => void;
   onSave: (data: CreateSecretRequest | UpdateSecretRequest) => void;
+}
+
+interface SecretCreatePrefill {
+  name?: string;
+  description?: string;
+  secretType?: number;
+  provider?: string;
+}
+
+function mapSecretTypeFromQuery(value: string): number {
+  const v = (value || '').toLowerCase();
+  if (v === 'apikey' || v === 'api_key' || v === 'api-key') return SecretType.ApiKey;
+  if (v === 'password') return SecretType.Password;
+  if (v === 'token') return SecretType.Token;
+  if (v === 'generic') return SecretType.Generic;
+  if (v === 'smtp') return SecretType.Smtp;
+  return SecretType.ApiKey;
 }
 
 const DEFAULT_SMTP_CONFIG = {
@@ -295,11 +366,12 @@ const SMTP_PROVIDERS = {
 
 type ProviderName = keyof typeof SMTP_PROVIDERS;
 
-function SecretModal({ secret, onClose, onSave }: SecretModalProps) {
-  const [name, setName] = useState(secret?.name || '');
-  const [description, setDescription] = useState(secret?.description || '');
-  const [secretType, setSecretType] = useState<number>(secret?.secretType ?? SecretType.ApiKey);
-  const [provider, setProvider] = useState(secret?.provider || '');
+function SecretModal({ secret, prefill, onClose, onSave }: SecretModalProps) {
+  const isCreate = !secret;
+  const [name, setName] = useState(secret?.name || prefill?.name || '');
+  const [description, setDescription] = useState(secret?.description || prefill?.description || '');
+  const [secretType, setSecretType] = useState<number>(secret?.secretType ?? prefill?.secretType ?? SecretType.ApiKey);
+  const [provider, setProvider] = useState(secret?.provider || prefill?.provider || '');
   const [value, setValue] = useState('');
   const [isActive, setIsActive] = useState(secret?.isActive ?? true);
   const [showValue, setShowValue] = useState(false);
@@ -308,6 +380,17 @@ function SecretModal({ secret, onClose, onSave }: SecretModalProps) {
   const [smtpLoadError, setSmtpLoadError] = useState<string | null>(null);
   const [selectedProviderTemplate, setSelectedProviderTemplate] = useState<ProviderName | ''>('');
   const isSmtpType = secretType === SecretType.Smtp;
+
+  // If prefill changes while creating (deep-link), update fields once.
+  useEffect(() => {
+    if (!isCreate) return;
+    if (!prefill) return;
+    if (prefill.name !== undefined) setName(prefill.name);
+    if (prefill.description !== undefined) setDescription(prefill.description);
+    if (prefill.secretType !== undefined) setSecretType(prefill.secretType);
+    if (prefill.provider !== undefined) setProvider(prefill.provider);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCreate, prefill?.name, prefill?.description, prefill?.secretType, prefill?.provider]);
 
   useEffect(() => {
     let isMounted = true;
