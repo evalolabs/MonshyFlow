@@ -183,12 +183,13 @@ plugins:
       preflight_continue: false  # Kong behandelt OPTIONS automatisch
 
   # Rate Limiting für öffentliche Auth Routes
+  # Erhöht für E2E-Tests und Development
   - name: rate-limiting
     service: auth-service
     route: auth-login
     config:
-      minute: 10  # Erhöht von 5 auf 10 (für bessere UX)
-      hour: 100   # Erhöht von 50 auf 100
+      minute: 1000  # Erhöht für E2E-Tests (Standard: 10)
+      hour: 10000   # Erhöht für E2E-Tests (Standard: 100)
       policy: local
       hide_client_headers: false  # Zeige Rate-Limit-Header (Standard: true)
       limit_by: ip  # Limit pro IP-Adresse
@@ -196,8 +197,8 @@ plugins:
     service: auth-service
     route: auth-register
     config:
-      minute: 10  # Erhöht von 5 auf 10
-      hour: 100   # Erhöht von 50 auf 100
+      minute: 1000  # Erhöht für E2E-Tests (Standard: 10)
+      hour: 10000   # Erhöht für E2E-Tests (Standard: 100)
       policy: local
       hide_client_headers: false
       limit_by: ip
@@ -206,9 +207,21 @@ plugins:
   - name: rate-limiting
     service: api-service
     config:
-      minute: 100
-      hour: 1000
+      minute: 1000
+      hour: 10000
       policy: local
+
+  # Rate Limiting für Secrets Service
+  # Erhöht für E2E-Tests und Development
+  - name: rate-limiting
+    service: secrets-service
+    route: secrets-routes
+    config:
+      minute: 2000  # Sehr hoch für E2E-Tests (6 parallele Workers)
+      hour: 20000   # Sehr hoch für E2E-Tests
+      policy: local
+      hide_client_headers: false
+      limit_by: ip
 
   # Request ID Plugin (für Tracing)
   - name: correlation-id

@@ -41,6 +41,18 @@ export class AuthService {
 
     const token = this.jwtService.generateToken(user);
 
+    // Get tenant name if tenantId exists
+    let tenantName: string | undefined;
+    if (user.tenantId) {
+      try {
+        const tenant = await this.tenantRepo.findById(user.tenantId);
+        tenantName = tenant?.name;
+      } catch (error) {
+        logger.warn({ err: error, tenantId: user.tenantId }, 'Failed to fetch tenant name');
+        // Continue without tenantName if lookup fails
+      }
+    }
+
     logger.info({ userId: user._id.toString(), email: user.email }, 'User logged in');
 
     return {
@@ -52,6 +64,7 @@ export class AuthService {
         lastName: user.lastName,
         roles: user.roles,
         tenantId: user.tenantId,
+        tenantName,
       },
     };
   }
@@ -90,6 +103,18 @@ export class AuthService {
 
     logger.info({ userId: user._id.toString(), email: user.email }, 'User registered');
 
+    // Get tenant name if tenantId exists
+    let tenantName: string | undefined;
+    if (user.tenantId) {
+      try {
+        const tenant = await this.tenantRepo.findById(user.tenantId);
+        tenantName = tenant?.name;
+      } catch (error) {
+        logger.warn({ err: error, tenantId: user.tenantId }, 'Failed to fetch tenant name');
+        // Continue without tenantName if lookup fails
+      }
+    }
+
     return {
       token,
       user: {
@@ -99,6 +124,7 @@ export class AuthService {
         lastName: user.lastName,
         roles: user.roles,
         tenantId: user.tenantId,
+        tenantName,
       },
     };
   }

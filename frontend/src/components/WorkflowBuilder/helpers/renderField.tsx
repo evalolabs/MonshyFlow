@@ -29,10 +29,13 @@ interface RenderFieldProps {
   max?: number;
   step?: number;
   placeholder?: string;
+  helpText?: string; // Help text for fields (especially secrets)
   // For secret fields
   secretType?: 'ApiKey' | 'Password' | 'Token' | 'Generic' | 'Smtp';
   secrets?: SecretResponse[];
   secretsLoading?: boolean;
+  defaultSecretName?: string; // Default secret name (e.g., from API integration)
+  showAdvanced?: boolean; // Show advanced override options
   reloadSecrets?: () => Promise<void>;
 }
 
@@ -51,9 +54,13 @@ export function renderField({
   min,
   max,
   step,
+  placeholder,
+  helpText,
   secretType,
   secrets = [],
   secretsLoading = false,
+  defaultSecretName,
+  showAdvanced = false,
   reloadSecrets,
 }: RenderFieldProps) {
   const fieldConfig = getFieldConfig(nodeType, fieldName);
@@ -80,9 +87,11 @@ export function renderField({
           value={String(value || '')}
           onChange={onChange}
           secretType={effectiveSecretType as 'ApiKey' | 'Password' | 'Token' | 'Generic' | 'Smtp'}
-          helpText={fieldConfig?.placeholder}
+          helpText={helpText || fieldConfig?.placeholder}
           secrets={secrets}
           secretsLoading={secretsLoading}
+          defaultSecretName={defaultSecretName}
+          showAdvanced={showAdvanced}
         />
       </div>
     );
@@ -100,7 +109,7 @@ export function renderField({
         <ExpressionEditor
           value={String(value || '')}
           onChange={onChange}
-          placeholder={fieldConfig.placeholder}
+          placeholder={placeholder || fieldConfig.placeholder}
           multiline={fieldConfig.multiline}
           rows={fieldConfig.rows}
           nodes={nodes}
@@ -108,6 +117,7 @@ export function renderField({
           currentNodeId={currentNodeId}
           previewSource={previewSource}
           debugSteps={debugSteps}
+          secrets={secrets}
         />
       </div>
     );

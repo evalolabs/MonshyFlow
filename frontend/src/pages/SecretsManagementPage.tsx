@@ -3,10 +3,12 @@ import { secretsService, type SecretResponse, type CreateSecretRequest, type Upd
 import { PageHeader } from '../components/Layout/PageHeader';
 import { Plus, Edit, Trash2, Eye, EyeOff, Search, Copy, Check } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export function SecretsManagementPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [secrets, setSecrets] = useState<SecretResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -173,6 +175,18 @@ export function SecretsManagementPage() {
         }
       />
       <div className="p-8" style={{ paddingTop: '80px' }}>
+        {/* Tenant Badge */}
+        {user?.tenantName && (
+          <div className="mb-4 flex items-center gap-2">
+            <span className="px-3 py-1.5 text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-lg">
+              🏢 Tenant: {user.tenantName}
+            </span>
+            <span className="text-xs text-gray-500">
+              Only secrets from this tenant are shown
+            </span>
+          </div>
+        )}
+
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
             {error}

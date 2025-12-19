@@ -1,0 +1,18 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:5173",
+      "localStorage": [
+        {
+          "name": "auth_token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTM4MTJjYWIwODMwMGE3NGY3MzZhODgiLCJ0ZW5hbnRJZCI6IjY5MzgxMmNhYjA4MzAwYTc0ZjczNmE3MCIsImVtYWlsIjoiYWRtaW5AYWNtZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NjYxNDIyOTYsImV4cCI6MTc2NjIyODY5NiwiYXVkIjoibW9uc2h5LXNlcnZpY2VzIiwiaXNzIjoibW9uc2h5LWF1dGgtc2VydmljZSJ9.syXmHr5drXQAzGnBVKjSfnF3mqQU65nXP2ZGaxuTptY"
+        },
+        {
+          "name": "auth_user",
+          "value": "{\"id\":\"693812cab08300a74f736a88\",\"email\":\"admin@acme.com\",\"firstName\":\"Admin\",\"lastName\":\"User\",\"roles\":[\"admin\",\"user\"],\"tenantId\":\"693812cab08300a74f736a70\",\"tenantName\":\"Acme Corporation\"}"
+        }
+      ]
+    }
+  ]
+}

@@ -232,20 +232,22 @@ export function validateHttpRequestNode(
     if (apiIntegration?.authentication) {
       const auth = apiIntegration.authentication;
       const requiredSecretKey = auth.secretKey;
+      const providerName = apiIntegration.name || 'API';
       
       if (requiredSecretKey) {
         // Check if secret exists
         const secretExists = hasSecret(secrets, requiredSecretKey);
         
         if (!secretExists) {
+          // Use provider context for better UX: "OpenAI API Key fehlt" instead of "Secret X missing"
           issues.push({
             type: 'error',
-            message: `Secret "${requiredSecretKey}" is missing or inactive`,
+            message: `${providerName} API Key "${requiredSecretKey}" is missing or inactive`,
           });
         } else {
           issues.push({
             type: 'info',
-            message: `Secret "${requiredSecretKey}" is configured`,
+            message: `${providerName} API Key "${requiredSecretKey}" is configured`,
           });
         }
       }
@@ -257,7 +259,7 @@ export function validateHttpRequestNode(
         if (!usernameSecretExists) {
           issues.push({
             type: 'warning',
-            message: `Username secret "${auth.usernameSecretKey}" is missing`,
+            message: `${providerName} username secret "${auth.usernameSecretKey}" is missing`,
           });
         }
       }

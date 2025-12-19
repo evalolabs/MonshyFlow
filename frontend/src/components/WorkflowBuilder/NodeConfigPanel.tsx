@@ -6,7 +6,6 @@ import type { StartNodeConfig } from '../../types/startNode';
 import { DEFAULT_START_NODE_CONFIG } from '../../types/startNode';
 import { StartNodeValidator } from '../../utils/startNodeValidator';
 import { useNodeCatalogs, useSecrets, useNodeConfigAutoSave } from './hooks';
-import { SecretSelector } from './NodeConfigPanel/SecretSelector';
 import { ProviderSetupGuide } from './NodeConfigPanel/ProviderSetupGuide';
 import { computeEffectiveNodeType, normalizeToolLabel, isWebSearchNodeType } from './utils/nodeConfigUtils';
 import { StartNodeConfigForm } from './NodeConfigForms/StartNodeConfigForm';
@@ -16,6 +15,51 @@ import { SchemaBuilderModal } from './NodeConfigPanel/SchemaBuilderModal';
 import { getNodeMetadata } from './nodeRegistry/nodeMetadata';
 import { validateNode } from './utils/nodeValidation';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { getApiIntegration } from '../../config/apiIntegrations';
+
+type SecretTypeQuery = 'ApiKey' | 'Password' | 'Token' | 'Generic' | 'Smtp';
+
+/**
+ * Guess secret type from node context (API integration, node type, secret name)
+ */
+function guessSecretTypeFromContext(
+  node: Node | null,
+  secretKey: string
+): SecretTypeQuery {
+  if (!node) {
+    // Fallback: guess from name
+    const s = (secretKey || '').toUpperCase();
+    if (s.includes('SMTP')) return 'Smtp';
+    if (s.includes('PASSWORD') || s.endsWith('_PASS') || s.endsWith('_PWD')) return 'Password';
+    if (s.includes('TOKEN')) return 'Token';
+    if (s.includes('KEY')) return 'ApiKey';
+    return 'ApiKey';
+  }
+  
+  const data = node.data || {};
+  
+  // 1. Try to get from API Integration metadata
+  if (data.apiId && typeof data.apiId === 'string') {
+    const apiIntegration = getApiIntegration(data.apiId);
+    if (apiIntegration?.authentication) {
+      const auth = apiIntegration.authentication;
+      if (auth.usernameSecretKey === secretKey) {
+        return 'Password';
+      }
+      return 'ApiKey';
+    }
+  }
+  
+  // 2. Guess from secret name (fallback)
+  const s = (secretKey || '').toUpperCase();
+  if (s.includes('SMTP')) return 'Smtp';
+  if (s.includes('PASSWORD') || s.endsWith('_PASS') || s.endsWith('_PWD')) return 'Password';
+  if (s.includes('TOKEN')) return 'Token';
+  if (s.includes('KEY')) return 'ApiKey';
+  
+  // 3. Default
+  return 'ApiKey';
+}
 
 interface NodeConfigPanelProps {
   selectedNode: Node | null;
@@ -131,29 +175,86 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
   });
 
   // Helper to call renderField with common props including debugSteps
-  const renderFieldWithDebug = (props: Omit<Parameters<typeof renderField>[0], 'nodes' | 'edges' | 'currentNodeId' | 'debugSteps'>) => {
+  // Helper to get default secret name from API integration
+  const getDefaultSecretName = (fieldName: string): string | undefined => {
+    if (!selectedNode) return undefined;
+    const data = selectedNode.data || {};
+    const apiId = data.apiId as string | undefined;
+    
+    if (!apiId) return undefined;
+    
+    const apiIntegration = getApiIntegration(apiId);
+    if (!apiIntegration?.authentication) return undefined;
+    
+    const auth = apiIntegration.authentication;
+    
+    // Map common field names to secret keys
+    if (fieldName === 'apiKeySecret' || fieldName === 'secretKey' || fieldName === 'authSecret') {
+      return auth.secretKey;
+    }
+    if (fieldName === 'usernameSecret' || fieldName === 'emailSecret') {
+      return auth.usernameSecretKey || auth.emailSecretKey;
+    }
+    if (fieldName === 'accessKeyIdSecret') {
+      return auth.accessKeyIdSecretKey;
+    }
+    if (fieldName === 'regionSecret') {
+      return auth.regionSecretKey;
+    }
+    
+    // Default: use secretKey
+    return auth.secretKey;
+  };
+
+  const renderFieldWithDebug = (props: Omit<Parameters<typeof renderField>[0], 'nodes' | 'edges' | 'currentNodeId' | 'debugSteps' | 'secrets' | 'secretsLoading' | 'reloadSecrets'> & { defaultSecretName?: string; showAdvanced?: boolean }) => {
     return renderField({
       ...props,
       nodes,
       edges,
       currentNodeId: selectedNode?.id || '',
       debugSteps,
+      secrets,
+      secretsLoading,
+      defaultSecretName: props.defaultSecretName || (props.secretType ? getDefaultSecretName(props.fieldName) : undefined),
+      showAdvanced: props.showAdvanced ?? true, // Default to showing advanced options
+      reloadSecrets,
     });
   };
 
   const returnTo = useMemo(() => `${location.pathname}${location.search || ''}`, [location.pathname, location.search]);
   const parseMissingSecretKey = (message: string): string | null => {
     if (!message) return null;
-    const match = message.match(/Secret "([^"]+)"/);
+    // Match both old format: "Secret \"X\"" and new format: "Provider API Key \"X\""
+    const match = message.match(/(?:Secret|API Key) "([^"]+)"/);
     return match?.[1] || null;
   };
 
   const openCreateSecret = (secretKey: string, provider?: string) => {
+    if (!secretKey) return;
+    
+    // Get better context for provider and type
+    const data = selectedNode?.data || {};
+    let finalProvider = provider || '';
+    if (!finalProvider) {
+      const metadata = getNodeMetadata(selectedNode?.type || '');
+      finalProvider = metadata?.name || selectedNode?.type || 'Provider';
+    }
+    
+    // Try to get provider from API Integration if available
+    if (data.apiId && typeof data.apiId === 'string') {
+      const apiIntegration = getApiIntegration(data.apiId);
+      if (apiIntegration?.name) {
+        finalProvider = apiIntegration.name;
+      }
+    }
+    
+    const secretType = guessSecretTypeFromContext(selectedNode, secretKey);
+    
     const params = new URLSearchParams({
       create: '1',
       name: secretKey,
-      type: 'ApiKey',
-      provider: provider || '',
+      type: secretType,
+      provider: finalProvider,
       returnTo,
     });
     const url = `/admin/secrets?${params.toString()}`;
@@ -1089,15 +1190,17 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               max: 2,
               step: 0.1,
             })}
-            <SecretSelector
-              label="OpenAI API Key Secret"
-              value={config.apiKeySecret || ''}
-              onChange={(v) => setConfig({ ...config, apiKeySecret: v })}
-              secretType="ApiKey"
-              helpText="Select a secret to use for this API key"
-              secrets={secrets}
-              secretsLoading={secretsLoading}
-            />
+            {renderFieldWithDebug({
+              nodeType: 'llm',
+              fieldName: 'apiKeySecret',
+              label: 'OpenAI API Key Secret',
+              value: config.apiKeySecret || '',
+              onChange: (v) => setConfig({ ...config, apiKeySecret: v }),
+              secretType: 'ApiKey',
+              helpText: 'Select a secret to use for this API key',
+              defaultSecretName: 'OPENAI_API_KEY', // Common default for LLM nodes
+              showAdvanced: true,
+            })}
           </div>
         );
 

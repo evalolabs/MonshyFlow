@@ -148,6 +148,11 @@ export function Navigation() {
                 {user.roles.join(', ')}
               </p>
             )}
+            {user?.tenantName && (
+              <p className="text-xs text-blue-600 truncate mt-1 font-medium">
+                🏢 {user.tenantName}
+              </p>
+            )}
           </div>
         </div>
         <button

@@ -9,6 +9,45 @@ import type { Node } from '@xyflow/react';
 import { getNodeMetadata } from '../nodeRegistry/nodeMetadata';
 import { validateNode } from '../utils/nodeValidation';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { getApiIntegration } from '../../../config/apiIntegrations';
+
+type SecretTypeQuery = 'ApiKey' | 'Password' | 'Token' | 'Generic' | 'Smtp';
+
+/**
+ * Guess secret type from node context (API integration, node type, secret name)
+ * This provides better defaults than just guessing from the name
+ */
+function guessSecretTypeFromContext(
+  node: Node,
+  secretKey: string
+): SecretTypeQuery {
+  const data = node.data || {};
+  
+  // 1. Try to get from API Integration metadata
+  if (data.apiId && typeof data.apiId === 'string') {
+    const apiIntegration = getApiIntegration(data.apiId);
+    if (apiIntegration?.authentication) {
+      // Most API integrations use ApiKey, but we can be smarter
+      const auth = apiIntegration.authentication;
+      // If it's a username secret, it's likely a Password
+      if (auth.usernameSecretKey === secretKey) {
+        return 'Password';
+      }
+      // Default for API integrations is ApiKey
+      return 'ApiKey';
+    }
+  }
+  
+  // 2. Guess from secret name (fallback)
+  const s = (secretKey || '').toUpperCase();
+  if (s.includes('SMTP')) return 'Smtp';
+  if (s.includes('PASSWORD') || s.endsWith('_PASS') || s.endsWith('_PWD')) return 'Password';
+  if (s.includes('TOKEN')) return 'Token';
+  if (s.includes('KEY')) return 'ApiKey';
+  
+  // 3. Default
+  return 'ApiKey';
+}
 
 interface NodeInfoOverlayProps {
   node: Node;
@@ -53,17 +92,31 @@ export function NodeInfoOverlay({
 
   const parseMissingSecretKey = (message: string): string | null => {
     if (!message) return null;
-    const match = message.match(/Secret "([^"]+)"/);
+    // Match both old format: "Secret \"X\"" and new format: "Provider API Key \"X\""
+    const match = message.match(/(?:Secret|API Key) "([^"]+)"/);
     return match?.[1] || null;
   };
 
   const createMissingSecret = (secretKey: string) => {
     if (!secretKey) return;
+    
+    // Get better context for provider and type
+    const data = node.data || {};
+    let provider = metadata?.name || node.type || 'Provider';
+    if (data.apiId && typeof data.apiId === 'string') {
+      const apiIntegration = getApiIntegration(data.apiId);
+      if (apiIntegration?.name) {
+        provider = apiIntegration.name;
+      }
+    }
+    
+    const secretType = guessSecretTypeFromContext(node, secretKey);
+    
     const params = new URLSearchParams({
       create: '1',
       name: secretKey,
-      type: 'ApiKey',
-      provider: (metadata?.name || node.type || 'Provider'),
+      type: secretType,
+      provider,
       returnTo,
     });
     const url = `/admin/secrets?${params.toString()}`;
