@@ -19,11 +19,77 @@ interface TreeNodeProps {
   keyName: string;
   value: any;
   onPick: (path: string) => void;
+  searchTerm?: string;
+  onFocus?: (focusId: string) => void;
+  focusId?: string;
 }
 
-const TreeNode: React.FC<TreeNodeProps> = ({ path, keyName, value, onPick }) => {
-  // Default: collapsed (closed)
-  const [open, setOpen] = useState(false);
+// Helper function to check if a value matches search term
+const matchesSearch = (searchTerm: string, keyName: string, value: any): boolean => {
+  if (!searchTerm) return true;
+  const lowerSearch = searchTerm.toLowerCase();
+  
+  // Check keyName
+  if (keyName.toLowerCase().includes(lowerSearch)) return true;
+  
+  // Check value preview
+  const isArray = Array.isArray(value);
+  const isObject = !isArray && typeof value === 'object' && value !== null;
+  const isPrimitive = value === null || value === undefined || (typeof value !== 'object' && typeof value !== 'function');
+  
+  if (isArray) {
+    const preview = `[${value.length} items]`;
+    if (preview.toLowerCase().includes(lowerSearch)) return true;
+  } else if (isObject) {
+    const preview = `{${Object.keys(value).length} keys}`;
+    if (preview.toLowerCase().includes(lowerSearch)) return true;
+  } else if (isPrimitive) {
+    const str = String(value);
+    if (str.toLowerCase().includes(lowerSearch)) return true;
+  }
+  
+  return false;
+};
+
+// Helper function to check if a TreeNode or any of its children match search
+const treeNodeMatchesSearch = (searchTerm: string, path: string, keyName: string, value: any): boolean => {
+  if (!searchTerm) return true;
+  
+  // Check current node
+  if (matchesSearch(searchTerm, keyName, value)) return true;
+  
+  // Check children recursively
+  const isArray = Array.isArray(value);
+  const isObject = !isArray && typeof value === 'object' && value !== null;
+  const isPrimitive = value === null || value === undefined || (typeof value !== 'object' && typeof value !== 'function');
+  const isString = typeof value === 'string';
+  
+  if (!isPrimitive && !isString && (isObject || isArray)) {
+    if (isArray) {
+      return value.some((item: any, index: number) => 
+        treeNodeMatchesSearch(searchTerm, path, `[${index}]`, item)
+      );
+    } else if (isObject) {
+      return Object.entries(value).some(([k, v]) => 
+        treeNodeMatchesSearch(searchTerm, path, k, v)
+      );
+    }
+  }
+  
+  return false;
+};
+
+const TreeNode: React.FC<TreeNodeProps> = ({ path, keyName, value, onPick, searchTerm = '', onFocus, focusId }) => {
+  // Auto-expand if matches search (depth <= 1)
+  const shouldAutoExpand = searchTerm && treeNodeMatchesSearch(searchTerm, path, keyName, value);
+  const [open, setOpen] = useState(shouldAutoExpand);
+  
+  // Update open state when searchTerm changes
+  useEffect(() => {
+    if (shouldAutoExpand) {
+      setOpen(true);
+    }
+  }, [shouldAutoExpand]);
   // Build full path: handle both workflow-style ($node["NodeName"].json.field) and legacy (steps.nodeId.json.field)
   // For array indices like [0], [1], append directly without a dot
   const fullPath = path 
@@ -87,8 +153,14 @@ const TreeNode: React.FC<TreeNodeProps> = ({ path, keyName, value, onPick }) => 
         )}
         <button
           type="button"
-          className="flex-1 px-2 py-1.5 rounded-md hover:bg-blue-50 hover:border-blue-200 border border-transparent text-left transition-all duration-150 min-w-0 group/item"
+          className="flex-1 px-2 py-1.5 rounded-md hover:bg-blue-50 hover:border-blue-200 border border-transparent text-left transition-all duration-150 min-w-0 group/item focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
           onClick={() => onPick(fullPath)}
+          onFocus={() => {
+            const id = focusId || fullPath || keyName;
+            onFocus?.(id);
+          }}
+          data-focus-id={focusId || fullPath || keyName}
+          tabIndex={0}
           title={`Click to insert {{${getDisplayPath()}}}`}
         >
           <div className="flex items-center gap-2 min-w-0">
@@ -106,24 +178,50 @@ const TreeNode: React.FC<TreeNodeProps> = ({ path, keyName, value, onPick }) => 
           {isArray ? (
             // For arrays, show all items with index notation [0], [1], etc.
             value.length > 0 ? (
-              value.map((item: any, index: number) => (
+              value
+                .map((item: any, index: number) => ({
+                  item,
+                  index,
+                  matches: searchTerm ? treeNodeMatchesSearch(searchTerm, fullPath, `[${index}]`, item) : true
+                }))
+                .filter(({ matches }) => matches)
+                .map(({ item, index }) => (
                 <TreeNode 
                   key={index} 
                   path={fullPath} 
                   keyName={`[${index}]`} 
                   value={item} 
-                  onPick={onPick} 
+                  onPick={onPick}
+                  searchTerm={searchTerm}
+                  onFocus={onFocus}
+                  focusId={`${fullPath}[${index}]`}
                 />
-              ))
+                ))
             ) : (
               // Empty array
               <div className="text-xs text-gray-400 italic">Empty array</div>
             )
           ) : (
             // For objects, show all keys
-            Object.entries(value).map(([k, v]) => (
-              <TreeNode key={k} path={fullPath} keyName={k} value={v} onPick={onPick} />
-            ))
+            Object.entries(value)
+              .map(([k, v]) => ({
+                key: k,
+                value: v,
+                matches: searchTerm ? treeNodeMatchesSearch(searchTerm, fullPath, k, v) : true
+              }))
+              .filter(({ matches }) => matches)
+              .map(({ key, value: v }) => (
+                <TreeNode 
+                  key={key} 
+                  path={fullPath} 
+                  keyName={key} 
+                  value={v} 
+                  onPick={onPick}
+                  searchTerm={searchTerm}
+                  onFocus={onFocus}
+                  focusId={fullPath ? `${fullPath}.${key}` : key}
+                />
+              ))
           )}
         </div>
       )}
@@ -149,6 +247,13 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
   
   // Expanded nodes within sections - default: all collapsed
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  
+  // Search functionality
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Keyboard navigation
+  const [focusedElementId, setFocusedElementId] = useState<string | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   // Toggle section (Start, Guaranteed, Conditional)
   const toggleSection = (sectionId: string) => {
@@ -582,6 +687,82 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
   const guaranteed = useMemo(() => upstreamNodes.filter(n => guaranteedIds.has(n.id) && n.type !== 'start'), [upstreamNodes, guaranteedIds]);
   const conditional = useMemo(() => upstreamNodes.filter(n => !guaranteedIds.has(n.id) && n.type !== 'start'), [upstreamNodes, guaranteedIds]);
 
+  // Filter nodes based on search term
+  const nodeMatchesSearch = (node: any, searchTerm: string): boolean => {
+    if (!searchTerm) return true;
+    const lowerSearch = searchTerm.toLowerCase();
+    
+    // Check node label/name
+    const nodeLabel = node.data?.label || node.type || '';
+    if (nodeLabel.toLowerCase().includes(lowerSearch)) return true;
+    
+    // Check node output data
+    const debugStep = debugSteps.find(s => s.nodeId === node.id);
+    const nodeOutput = debugStep?.output;
+    if (nodeOutput) {
+      // Check if any field in output matches
+      const checkValue = (val: any): boolean => {
+        if (val === null || val === undefined) return false;
+        if (typeof val === 'string' && val.toLowerCase().includes(lowerSearch)) return true;
+        if (typeof val === 'object') {
+          if (Array.isArray(val)) {
+            return val.some(item => checkValue(item));
+          } else {
+            return Object.entries(val).some(([k, v]) => 
+              k.toLowerCase().includes(lowerSearch) || checkValue(v)
+            );
+          }
+        }
+        return String(val).toLowerCase().includes(lowerSearch);
+      };
+      
+      if (checkValue(nodeOutput.json) || checkValue(nodeOutput.data) || checkValue(nodeOutput.metadata)) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
+
+  // Filter nodes based on search
+  const filteredStartNodes = useMemo(() => {
+    if (!searchTerm) return startNodes;
+    return startNodes.filter(n => nodeMatchesSearch(n, searchTerm));
+  }, [startNodes, searchTerm]);
+
+  const filteredGuaranteed = useMemo(() => {
+    if (!searchTerm) return guaranteed;
+    return guaranteed.filter(n => nodeMatchesSearch(n, searchTerm));
+  }, [guaranteed, searchTerm]);
+
+  const filteredConditional = useMemo(() => {
+    if (!searchTerm) return conditional;
+    return conditional.filter(n => nodeMatchesSearch(n, searchTerm));
+  }, [conditional, searchTerm]);
+
+  // Auto-expand nodes when searching (depth <= 1)
+  useEffect(() => {
+    if (searchTerm) {
+      const nodesToExpand = new Set<string>();
+      [...startNodes, ...guaranteed, ...conditional].forEach(n => {
+        if (nodeMatchesSearch(n, searchTerm)) {
+          nodesToExpand.add(n.id);
+        }
+      });
+      setExpandedNodes(nodesToExpand);
+      // Also expand all sections when searching
+      const sectionsToExpand = new Set<string>();
+      if (currentInput) sectionsToExpand.add('currentInput');
+      if (filteredStartNodes.length > 0) sectionsToExpand.add('start');
+      if (filteredGuaranteed.length > 0) sectionsToExpand.add('guaranteed');
+      if (filteredConditional.length > 0) sectionsToExpand.add('conditional');
+      setExpandedSections(sectionsToExpand);
+    } else {
+      // Reset to default when search is cleared
+      setExpandedNodes(new Set());
+    }
+  }, [searchTerm]);
+
   // Get current node's input from debugSteps (contains loop context if in a loop)
   // OR derive loop context from parent loop node's output if node hasn't been executed yet
   const currentInput = useMemo(() => {
@@ -686,6 +867,159 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
     return null;
   }, [currentNodeId, nodes, edges, debugSteps]);
 
+  // Collect all focusable elements (TreeNodes and Node buttons)
+  const focusableElements = useMemo(() => {
+    const elements: Array<{ id: string; type: 'node' | 'treeNode'; path?: string }> = [];
+    
+    // Add current input elements if available
+    if (currentInput) {
+      if (currentInput.loop?.current !== undefined) {
+        elements.push({ id: 'loop.current', type: 'treeNode', path: 'loop.current' });
+      }
+      if (currentInput.current !== undefined && !currentInput.loop) {
+        elements.push({ id: 'current', type: 'treeNode', path: 'current' });
+      }
+      if (currentInput.loop?.index !== undefined) {
+        elements.push({ id: 'loop.index', type: 'treeNode', path: 'loop.index' });
+      }
+      if (currentInput.index !== undefined && !currentInput.loop) {
+        elements.push({ id: 'index', type: 'treeNode', path: 'index' });
+      }
+    }
+    
+    // Add nodes from all sections
+    [...filteredStartNodes, ...filteredGuaranteed, ...filteredConditional].forEach(n => {
+      elements.push({ id: `node.${n.id}`, type: 'node' });
+      const debugStep = debugSteps.find(s => s.nodeId === n.id);
+      const nodeOutput = debugStep?.output;
+      if (nodeOutput && expandedNodes.has(n.id)) {
+        if (nodeOutput.json !== undefined) {
+          elements.push({ id: `node.${n.id}.json`, type: 'treeNode', path: `steps.${n.id}.json` });
+        }
+        if (nodeOutput.data !== undefined && nodeOutput.data !== nodeOutput.json) {
+          elements.push({ id: `node.${n.id}.data`, type: 'treeNode', path: `steps.${n.id}.data` });
+        }
+        if (nodeOutput.metadata) {
+          elements.push({ id: `node.${n.id}.metadata`, type: 'treeNode', path: `steps.${n.id}.metadata` });
+        }
+        if (nodeOutput.error) {
+          elements.push({ id: `node.${n.id}.error`, type: 'treeNode', path: `steps.${n.id}.error` });
+        }
+      }
+    });
+    
+    return elements;
+  }, [currentInput, filteredStartNodes, filteredGuaranteed, filteredConditional, debugSteps, expandedNodes]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't handle if user is typing in search input
+      if (searchInputRef.current && document.activeElement === searchInputRef.current) {
+        // Allow Escape to close even when in search
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          onClose();
+        }
+        // Allow Arrow Down to move focus from search to first element
+        if (e.key === 'ArrowDown' && focusableElements.length > 0) {
+          e.preventDefault();
+          setFocusedElementId(focusableElements[0].id);
+          const element = document.querySelector(`[data-focus-id="${focusableElements[0].id}"]`) as HTMLElement;
+          element?.focus();
+        }
+        return;
+      }
+
+      const currentIndex = focusedElementId 
+        ? focusableElements.findIndex((el: { id: string }) => el.id === focusedElementId)
+        : -1;
+
+      switch (e.key) {
+        case 'Escape':
+          e.preventDefault();
+          onClose();
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          if (currentIndex > 0) {
+            const prevId = focusableElements[currentIndex - 1].id;
+            setFocusedElementId(prevId);
+            const element = document.querySelector(`[data-focus-id="${prevId}"]`) as HTMLElement;
+            element?.focus();
+          }
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          if (currentIndex < focusableElements.length - 1) {
+            const nextId = focusableElements[currentIndex + 1].id;
+            setFocusedElementId(nextId);
+            const element = document.querySelector(`[data-focus-id="${nextId}"]`) as HTMLElement;
+            element?.focus();
+          } else if (currentIndex === -1 && focusableElements.length > 0) {
+            // If nothing focused, focus first element
+            const firstId = focusableElements[0].id;
+            setFocusedElementId(firstId);
+            const element = document.querySelector(`[data-focus-id="${firstId}"]`) as HTMLElement;
+            element?.focus();
+          }
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          // Collapse if focused on a node
+          if (focusedElementId?.startsWith('node.')) {
+            const nodeId = focusedElementId.replace('node.', '').split('.')[0];
+            if (expandedNodes.has(nodeId)) {
+              toggleNode(nodeId);
+            }
+          }
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          // Expand if focused on a node
+          if (focusedElementId?.startsWith('node.')) {
+            const nodeId = focusedElementId.replace('node.', '').split('.')[0];
+            const node = [...filteredStartNodes, ...filteredGuaranteed, ...filteredConditional].find(n => n.id === nodeId);
+            if (node && !expandedNodes.has(nodeId)) {
+              const debugStep = debugSteps.find(s => s.nodeId === node.id);
+              const nodeOutput = debugStep?.output;
+              const hasOutput = nodeOutput && (
+                (nodeOutput.json !== undefined && nodeOutput.json !== null) ||
+                (nodeOutput.data !== undefined && nodeOutput.data !== nodeOutput.json) ||
+                nodeOutput.metadata ||
+                nodeOutput.error
+              );
+              if (hasOutput) {
+                toggleNode(nodeId);
+              }
+            }
+          }
+          break;
+        case 'Enter':
+        case ' ':
+          e.preventDefault();
+          // Select/Insert variable
+          if (focusedElementId) {
+            const element = focusableElements.find((el: { id: string }) => el.id === focusedElementId);
+            if (element?.path) {
+              onPick(element.path);
+            } else if (element?.type === 'node') {
+              // If it's a node button, toggle it
+              const nodeId = focusedElementId.replace('node.', '').split('.')[0];
+              toggleNode(nodeId);
+            }
+          }
+          break;
+        case 'Tab':
+          // Allow default Tab behavior for navigation between sections
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, onPick, focusedElementId, focusableElements, expandedNodes, filteredStartNodes, filteredGuaranteed, filteredConditional, debugSteps, toggleNode]);
+
   // No schema suggestions - we only show what's actually in debugStep.output
   // This ensures the Variable Popup matches exactly what's shown in the Debug Console
 
@@ -726,10 +1060,13 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
 
   if (!anchorEl) return null;
 
-  const hasStartNodes = startNodes.length > 0;
-  const hasGuaranteedNodes = guaranteed.length > 0;
-  const hasConditionalNodes = conditional.length > 0;
+  const hasStartNodes = filteredStartNodes.length > 0;
+  const hasGuaranteedNodes = filteredGuaranteed.length > 0;
+  const hasConditionalNodes = filteredConditional.length > 0;
   const hasFallbackData = (!currentNodeId || upstreamNodes.length === 0) && data && typeof data === 'object';
+  
+  // Check if search has no results
+  const hasSearchResults = hasStartNodes || hasGuaranteedNodes || hasConditionalNodes || (currentInput && searchTerm ? treeNodeMatchesSearch(searchTerm, '', 'currentInput', currentInput) : !!currentInput) || hasFallbackData;
 
   const content = (
     <div
@@ -746,6 +1083,7 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
       }}
       className="bg-white border border-gray-300 rounded-lg shadow-2xl flex flex-col overflow-hidden"
       onClick={(e) => e.stopPropagation()}
+      tabIndex={-1}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50">
@@ -792,6 +1130,47 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
+        </div>
+      </div>
+
+      {/* Search Input */}
+      <div className="px-4 py-2 border-b border-gray-200 bg-gray-50">
+        <div className="relative">
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Search variables..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 pl-9 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            autoFocus={false}
+            onKeyDown={(e) => {
+              // Allow Escape to close even when in search
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                onClose();
+              }
+            }}
+          />
+          <svg 
+            className="absolute left-2.5 top-2.5 w-4 h-4 text-gray-400" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-2.5 top-2.5 w-4 h-4 text-gray-400 hover:text-gray-600"
+              title="Clear search"
+            >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 
@@ -844,7 +1223,10 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
                       path="loop" 
                       keyName="current" 
                       value={currentInput.loop.current} 
-                      onPick={onPick} 
+                      onPick={onPick}
+                      searchTerm={searchTerm}
+                      onFocus={setFocusedElementId}
+                      focusId="loop.current"
                     />
                   </div>
                 )}
@@ -858,7 +1240,10 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
                       path="" 
                       keyName="current" 
                       value={currentInput.current} 
-                      onPick={onPick} 
+                      onPick={onPick}
+                      searchTerm={searchTerm}
+                      onFocus={setFocusedElementId}
+                      focusId="current"
                     />
                   </div>
                 )}
@@ -898,7 +1283,10 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
                       path="loop" 
                       keyName="array" 
                       value={currentInput.loop.array} 
-                      onPick={onPick} 
+                      onPick={onPick}
+                      searchTerm={searchTerm}
+                      onFocus={setFocusedElementId}
+                      focusId="loop.array"
                     />
                   </div>
                 )}
@@ -906,7 +1294,7 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
                 {/* Show other input fields if available */}
                 {Object.entries(currentInput).filter(([k]) => k !== 'loop' && k !== 'current' && k !== 'index').map(([k, v]) => (
                   <div key={k} className="border-l-2 border-purple-300 pl-2 py-1">
-                    <TreeNode path="" keyName={k} value={v} onPick={onPick} />
+                    <TreeNode path="" keyName={k} value={v} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={k} />
                   </div>
                 ))}
               </div>
@@ -936,74 +1324,80 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
             </button>
             {expandedSections.has('start') && (
               <div className="p-2 bg-white space-y-2 transition-all duration-200 ease-out">
-                {startNodes.map(n => {
-                  const debugStep = debugSteps.find(s => s.nodeId === n.id);
-                  // Use exactly what's in debugStep.output - no fallbacks, no special logic
-                  const nodeOutput = debugStep?.output;
-                  // Check if output has any meaningful data (json, data, metadata, error)
-                  const hasOutput = nodeOutput && (
-                    (nodeOutput.json !== undefined && nodeOutput.json !== null) ||
-                    (nodeOutput.data !== undefined && nodeOutput.data !== null) ||
-                    nodeOutput.metadata ||
-                    nodeOutput.error
-                  );
-                  const isNodeExpanded = expandedNodes.has(n.id);
-                  
-                  return (
-                    <div key={n.id} className="border-l-2 border-blue-300 pl-2 py-1">
-                      <button
-                        onClick={() => toggleNode(n.id)}
-                        className="w-full text-left flex items-center gap-2 mb-1 hover:bg-gray-50 rounded px-1 py-1 transition-colors"
-                        disabled={!hasOutput}
-                      >
-                        <svg 
-                          className={`w-3 h-3 text-gray-600 transition-transform flex-shrink-0 ${isNodeExpanded ? 'rotate-90' : ''} ${!hasOutput ? 'opacity-30' : ''}`}
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
+                {filteredStartNodes.length === 0 && searchTerm ? (
+                  <div className="text-center py-4 text-gray-400 text-xs">
+                    No matching variables in Start nodes
+                  </div>
+                ) : (
+                  filteredStartNodes.map(n => {
+                    const debugStep = debugSteps.find(s => s.nodeId === n.id);
+                    // Use exactly what's in debugStep.output - no fallbacks, no special logic
+                    const nodeOutput = debugStep?.output;
+                    // Check if output has any meaningful data (json, data, metadata, error)
+                    const hasOutput = nodeOutput && (
+                      (nodeOutput.json !== undefined && nodeOutput.json !== null) ||
+                      (nodeOutput.data !== undefined && nodeOutput.data !== null) ||
+                      nodeOutput.metadata ||
+                      nodeOutput.error
+                    );
+                    const isNodeExpanded = expandedNodes.has(n.id);
+                    
+                    return (
+                      <div key={n.id} className="border-l-2 border-blue-300 pl-2 py-1">
+                        <button
+                          onClick={() => toggleNode(n.id)}
+                          className="w-full text-left flex items-center gap-2 mb-1 hover:bg-gray-50 rounded px-1 py-1 transition-colors"
+                          disabled={!hasOutput}
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                        <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>
-                        <span className="text-xs font-semibold text-gray-800 truncate flex-1">
-                          {n.data?.label || 'Start'}
-                        </span>
-                        {hasOutput && (
-                          <span className="text-xs text-gray-400">
-                            {(() => {
-                              let count = 0;
-                              if (nodeOutput?.json !== undefined && nodeOutput.json !== null) count++;
-                              if (nodeOutput?.data !== undefined && nodeOutput.data !== null && nodeOutput.data !== nodeOutput.json) count++;
-                              if (nodeOutput?.metadata) count++;
-                              if (nodeOutput?.error) count++;
-                              return `${count} ${count === 1 ? 'field' : 'fields'}`;
-                            })()}
+                          <svg 
+                            className={`w-3 h-3 text-gray-600 transition-transform flex-shrink-0 ${isNodeExpanded ? 'rotate-90' : ''} ${!hasOutput ? 'opacity-30' : ''}`}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                          <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>
+                          <span className="text-xs font-semibold text-gray-800 truncate flex-1">
+                            {n.data?.label || 'Start'}
                           </span>
-                        )}
-                      </button>
-                      {isNodeExpanded && hasOutput && (
-                        <div className="space-y-0.5 ml-6 mt-1 border-l-2 border-blue-200 pl-2">
-                          {/* Show exactly what's in output - no special handling */}
+                          {hasOutput && (
+                            <span className="text-xs text-gray-400">
+                              {(() => {
+                                let count = 0;
+                                if (nodeOutput?.json !== undefined && nodeOutput.json !== null) count++;
+                                if (nodeOutput?.data !== undefined && nodeOutput.data !== null && nodeOutput.data !== nodeOutput.json) count++;
+                                if (nodeOutput?.metadata) count++;
+                                if (nodeOutput?.error) count++;
+                                return `${count} ${count === 1 ? 'field' : 'fields'}`;
+                              })()}
+                            </span>
+                          )}
+                        </button>
+                        {isNodeExpanded && hasOutput && (
+                          <div className="space-y-0.5 ml-6 mt-1 border-l-2 border-blue-200 pl-2">
+                            {/* Show exactly what's in output - no special handling */}
                           {nodeOutput?.json !== undefined && (
-                            <TreeNode key="json" path="input" keyName="json" value={nodeOutput.json} onPick={onPick} />
+                            <TreeNode key="json" path="input" keyName="json" value={nodeOutput.json} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`input.json`} />
                           )}
                           {nodeOutput?.data !== undefined && nodeOutput.data !== nodeOutput.json && (
-                            <TreeNode key="data" path="input" keyName="data" value={nodeOutput.data} onPick={onPick} />
+                            <TreeNode key="data" path="input" keyName="data" value={nodeOutput.data} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`input.data`} />
                           )}
                           {nodeOutput?.metadata && (
-                            <TreeNode key="metadata" path="input" keyName="metadata" value={nodeOutput.metadata} onPick={onPick} />
+                            <TreeNode key="metadata" path="input" keyName="metadata" value={nodeOutput.metadata} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`input.metadata`} />
                           )}
                           {nodeOutput?.error && (
-                            <TreeNode key="error" path="input" keyName="error" value={nodeOutput.error} onPick={onPick} />
+                            <TreeNode key="error" path="input" keyName="error" value={nodeOutput.error} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`input.error`} />
                           )}
-                        </div>
-                      )}
-                      {isNodeExpanded && !hasOutput && (
-                        <div className="text-xs text-gray-400 italic ml-6">No output data. Test the node to see output.</div>
-                      )}
-                    </div>
-                  );
-                })}
+                          </div>
+                        )}
+                        {isNodeExpanded && !hasOutput && (
+                          <div className="text-xs text-gray-400 italic ml-6">No output data. Test the node to see output.</div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             )}
           </div>
@@ -1032,74 +1426,83 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
             </button>
             {expandedSections.has('guaranteed') && (
               <div className="p-2 bg-white space-y-2 transition-all duration-200 ease-out">
-                {guaranteed.map(n => {
-                  const debugStep = debugSteps.find(s => s.nodeId === n.id);
-                  // Use exactly what's in debugStep.output - no fallbacks, no special logic
-                  const nodeOutput = debugStep?.output;
-                  // Check if output has any meaningful data (json, data, metadata, error)
-                  const hasOutput = nodeOutput && (
-                    (nodeOutput.json !== undefined && nodeOutput.json !== null) ||
-                    (nodeOutput.data !== undefined && nodeOutput.data !== null) ||
-                    nodeOutput.metadata ||
-                    nodeOutput.error
-                  );
-                  const isNodeExpanded = expandedNodes.has(n.id);
-                  
-                  return (
-                    <div key={n.id} className="border-l-2 border-green-300 pl-2 py-1">
-                      <button
-                        onClick={() => toggleNode(n.id)}
-                        className="w-full text-left flex items-center gap-2 mb-1 hover:bg-gray-50 rounded px-1 py-1 transition-colors"
-                        disabled={!hasOutput}
-                      >
-                        <svg 
-                          className={`w-3 h-3 text-green-600 transition-transform flex-shrink-0 ${isNodeExpanded ? 'rotate-90' : ''} ${!hasOutput ? 'opacity-30' : ''}`}
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
+                {filteredGuaranteed.length === 0 && searchTerm ? (
+                  <div className="text-center py-4 text-gray-400 text-xs">
+                    No matching variables in Guaranteed nodes
+                  </div>
+                ) : (
+                  filteredGuaranteed.map(n => {
+                    const debugStep = debugSteps.find(s => s.nodeId === n.id);
+                    // Use exactly what's in debugStep.output - no fallbacks, no special logic
+                    const nodeOutput = debugStep?.output;
+                    // Check if output has any meaningful data (json, data, metadata, error)
+                    const hasOutput = nodeOutput && (
+                      (nodeOutput.json !== undefined && nodeOutput.json !== null) ||
+                      (nodeOutput.data !== undefined && nodeOutput.data !== null) ||
+                      nodeOutput.metadata ||
+                      nodeOutput.error
+                    );
+                    const isNodeExpanded = expandedNodes.has(n.id);
+                    
+                    return (
+                      <div key={n.id} className="border-l-2 border-green-300 pl-2 py-1">
+                        <button
+                          onClick={() => toggleNode(n.id)}
+                          onFocus={() => setFocusedElementId(`node.${n.id}`)}
+                          data-focus-id={`node.${n.id}`}
+                          tabIndex={0}
+                          className="w-full text-left flex items-center gap-2 mb-1 hover:bg-gray-50 rounded px-1 py-1 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+                          disabled={!hasOutput}
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                        <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></span>
-                        <span className="text-xs font-semibold text-gray-800 truncate flex-1">
-                          {n.data?.label || n.type}
-                        </span>
-                        {hasOutput && (
-                          <span className="text-xs text-green-600">
-                            {(() => {
-                              let count = 0;
-                              if (nodeOutput?.json !== undefined && nodeOutput.json !== null) count++;
-                              if (nodeOutput?.data !== undefined && nodeOutput.data !== null && nodeOutput.data !== nodeOutput.json) count++;
-                              if (nodeOutput?.metadata) count++;
-                              if (nodeOutput?.error) count++;
-                              return `${count} ${count === 1 ? 'field' : 'fields'}`;
-                            })()}
+                          <svg 
+                            className={`w-3 h-3 text-green-600 transition-transform flex-shrink-0 ${isNodeExpanded ? 'rotate-90' : ''} ${!hasOutput ? 'opacity-30' : ''}`}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                          <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></span>
+                          <span className="text-xs font-semibold text-gray-800 truncate flex-1">
+                            {n.data?.label || n.type}
                           </span>
-                        )}
-                      </button>
-                      {isNodeExpanded && hasOutput && (
-                        <div className="space-y-0.5 ml-6 mt-1 border-l-2 border-green-200 pl-2">
-                          {/* Show exactly what's in output - no special handling */}
+                          {hasOutput && (
+                            <span className="text-xs text-green-600">
+                              {(() => {
+                                let count = 0;
+                                if (nodeOutput?.json !== undefined && nodeOutput.json !== null) count++;
+                                if (nodeOutput?.data !== undefined && nodeOutput.data !== null && nodeOutput.data !== nodeOutput.json) count++;
+                                if (nodeOutput?.metadata) count++;
+                                if (nodeOutput?.error) count++;
+                                return `${count} ${count === 1 ? 'field' : 'fields'}`;
+                              })()}
+                            </span>
+                          )}
+                        </button>
+                        {isNodeExpanded && hasOutput && (
+                          <div className="space-y-0.5 ml-6 mt-1 border-l-2 border-green-200 pl-2">
+                            {/* Show exactly what's in output - no special handling */}
                           {nodeOutput?.json !== undefined && (
-                            <TreeNode key="json" path={`steps.${n.id}`} keyName="json" value={nodeOutput.json} onPick={onPick} />
+                            <TreeNode key="json" path={`steps.${n.id}`} keyName="json" value={nodeOutput.json} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`steps.${n.id}.json`} />
                           )}
                           {nodeOutput?.data !== undefined && nodeOutput.data !== nodeOutput.json && (
-                            <TreeNode key="data" path={`steps.${n.id}`} keyName="data" value={nodeOutput.data} onPick={onPick} />
+                            <TreeNode key="data" path={`steps.${n.id}`} keyName="data" value={nodeOutput.data} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`steps.${n.id}.data`} />
                           )}
                           {nodeOutput?.metadata && (
-                            <TreeNode key="metadata" path={`steps.${n.id}`} keyName="metadata" value={nodeOutput.metadata} onPick={onPick} />
+                            <TreeNode key="metadata" path={`steps.${n.id}`} keyName="metadata" value={nodeOutput.metadata} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`steps.${n.id}.metadata`} />
                           )}
                           {nodeOutput?.error && (
-                            <TreeNode key="error" path={`steps.${n.id}`} keyName="error" value={nodeOutput.error} onPick={onPick} />
+                            <TreeNode key="error" path={`steps.${n.id}`} keyName="error" value={nodeOutput.error} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`steps.${n.id}.error`} />
                           )}
-                        </div>
-                      )}
-                      {isNodeExpanded && !hasOutput && (
-                        <div className="text-xs text-gray-400 italic ml-6">No output data. Test the node to see output.</div>
-                      )}
-                    </div>
-                  );
-                })}
+                          </div>
+                        )}
+                        {isNodeExpanded && !hasOutput && (
+                          <div className="text-xs text-gray-400 italic ml-6">No output data. Test the node to see output.</div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             )}
           </div>
@@ -1128,74 +1531,80 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
             </button>
             {expandedSections.has('conditional') && (
               <div className="p-2 bg-white space-y-2 transition-all duration-200 ease-out">
-                {conditional.map(n => {
-                  const debugStep = debugSteps.find(s => s.nodeId === n.id);
-                  // Use exactly what's in debugStep.output - no fallbacks, no special logic
-                  const nodeOutput = debugStep?.output;
-                  // Check if output has any meaningful data (json, data, metadata, error)
-                  const hasOutput = nodeOutput && (
-                    (nodeOutput.json !== undefined && nodeOutput.json !== null) ||
-                    (nodeOutput.data !== undefined && nodeOutput.data !== null) ||
-                    nodeOutput.metadata ||
-                    nodeOutput.error
-                  );
-                  const isNodeExpanded = expandedNodes.has(n.id);
-                  
-                  return (
-                    <div key={n.id} className="border-l-2 border-amber-300 pl-2 py-1">
-                      <button
-                        onClick={() => toggleNode(n.id)}
-                        className="w-full text-left flex items-center gap-2 mb-1 hover:bg-gray-50 rounded px-1 py-1 transition-colors"
-                        disabled={!hasOutput}
-                      >
-                        <svg 
-                          className={`w-3 h-3 text-amber-600 transition-transform flex-shrink-0 ${isNodeExpanded ? 'rotate-90' : ''} ${!hasOutput ? 'opacity-30' : ''}`}
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
+                {filteredConditional.length === 0 && searchTerm ? (
+                  <div className="text-center py-4 text-gray-400 text-xs">
+                    No matching variables in Conditional nodes
+                  </div>
+                ) : (
+                  filteredConditional.map(n => {
+                    const debugStep = debugSteps.find(s => s.nodeId === n.id);
+                    // Use exactly what's in debugStep.output - no fallbacks, no special logic
+                    const nodeOutput = debugStep?.output;
+                    // Check if output has any meaningful data (json, data, metadata, error)
+                    const hasOutput = nodeOutput && (
+                      (nodeOutput.json !== undefined && nodeOutput.json !== null) ||
+                      (nodeOutput.data !== undefined && nodeOutput.data !== null) ||
+                      nodeOutput.metadata ||
+                      nodeOutput.error
+                    );
+                    const isNodeExpanded = expandedNodes.has(n.id);
+                    
+                    return (
+                      <div key={n.id} className="border-l-2 border-amber-300 pl-2 py-1">
+                        <button
+                          onClick={() => toggleNode(n.id)}
+                          className="w-full text-left flex items-center gap-2 mb-1 hover:bg-gray-50 rounded px-1 py-1 transition-colors"
+                          disabled={!hasOutput}
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                        <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>
-                        <span className="text-xs font-semibold text-gray-800 truncate flex-1">
-                          {n.data?.label || n.type}
-                        </span>
-                        {hasOutput && (
-                          <span className="text-xs text-amber-600">
-                            {(() => {
-                              let count = 0;
-                              if (nodeOutput?.json !== undefined && nodeOutput.json !== null) count++;
-                              if (nodeOutput?.data !== undefined && nodeOutput.data !== null && nodeOutput.data !== nodeOutput.json) count++;
-                              if (nodeOutput?.metadata) count++;
-                              if (nodeOutput?.error) count++;
-                              return `${count} ${count === 1 ? 'field' : 'fields'}`;
-                            })()}
+                          <svg 
+                            className={`w-3 h-3 text-amber-600 transition-transform flex-shrink-0 ${isNodeExpanded ? 'rotate-90' : ''} ${!hasOutput ? 'opacity-30' : ''}`}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                          <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>
+                          <span className="text-xs font-semibold text-gray-800 truncate flex-1">
+                            {n.data?.label || n.type}
                           </span>
-                        )}
-                      </button>
-                      {isNodeExpanded && hasOutput && (
-                        <div className="space-y-0.5 ml-6 mt-1 border-l-2 border-amber-200 pl-2">
-                          {/* Show exactly what's in output - no special handling */}
+                          {hasOutput && (
+                            <span className="text-xs text-amber-600">
+                              {(() => {
+                                let count = 0;
+                                if (nodeOutput?.json !== undefined && nodeOutput.json !== null) count++;
+                                if (nodeOutput?.data !== undefined && nodeOutput.data !== null && nodeOutput.data !== nodeOutput.json) count++;
+                                if (nodeOutput?.metadata) count++;
+                                if (nodeOutput?.error) count++;
+                                return `${count} ${count === 1 ? 'field' : 'fields'}`;
+                              })()}
+                            </span>
+                          )}
+                        </button>
+                        {isNodeExpanded && hasOutput && (
+                          <div className="space-y-0.5 ml-6 mt-1 border-l-2 border-amber-200 pl-2">
+                            {/* Show exactly what's in output - no special handling */}
                           {nodeOutput?.json !== undefined && (
-                            <TreeNode key="json" path={`steps.${n.id}`} keyName="json" value={nodeOutput.json} onPick={onPick} />
+                            <TreeNode key="json" path={`steps.${n.id}`} keyName="json" value={nodeOutput.json} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`steps.${n.id}.json`} />
                           )}
                           {nodeOutput?.data !== undefined && nodeOutput.data !== nodeOutput.json && (
-                            <TreeNode key="data" path={`steps.${n.id}`} keyName="data" value={nodeOutput.data} onPick={onPick} />
+                            <TreeNode key="data" path={`steps.${n.id}`} keyName="data" value={nodeOutput.data} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`steps.${n.id}.data`} />
                           )}
                           {nodeOutput?.metadata && (
-                            <TreeNode key="metadata" path={`steps.${n.id}`} keyName="metadata" value={nodeOutput.metadata} onPick={onPick} />
+                            <TreeNode key="metadata" path={`steps.${n.id}`} keyName="metadata" value={nodeOutput.metadata} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`steps.${n.id}.metadata`} />
                           )}
                           {nodeOutput?.error && (
-                            <TreeNode key="error" path={`steps.${n.id}`} keyName="error" value={nodeOutput.error} onPick={onPick} />
+                            <TreeNode key="error" path={`steps.${n.id}`} keyName="error" value={nodeOutput.error} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`steps.${n.id}.error`} />
                           )}
-                        </div>
-                      )}
-                      {isNodeExpanded && !hasOutput && (
-                        <div className="text-xs text-gray-400 italic ml-6">No output data. Test the node to see output.</div>
-                      )}
-                    </div>
-                  );
-                })}
+                          </div>
+                        )}
+                        {isNodeExpanded && !hasOutput && (
+                          <div className="text-xs text-gray-400 italic ml-6">No output data. Test the node to see output.</div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             )}
           </div>
@@ -1207,14 +1616,25 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
             <div className="text-xs font-semibold text-gray-700 mb-2">Input Data</div>
             <div className="space-y-0.5">
               {Object.entries(data).map(([k, v]) => (
-                <TreeNode key={k} path="input" keyName={k} value={v} onPick={onPick} />
+                <TreeNode key={k} path="input" keyName={k} value={v} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`input.${k}`} />
               ))}
             </div>
           </div>
         )}
 
-        {/* Empty state */}
-        {!currentInput && !hasStartNodes && !hasGuaranteedNodes && !hasConditionalNodes && !hasFallbackData && (
+        {/* Empty state - No search results */}
+        {searchTerm && !hasSearchResults && (
+          <div className="text-center py-8 text-gray-400 text-sm">
+            <svg className="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <p className="font-semibold">No matching data</p>
+            <p className="text-xs mt-1">Try adjusting your search</p>
+          </div>
+        )}
+
+        {/* Empty state - No variables available */}
+        {!searchTerm && !currentInput && !hasStartNodes && !hasGuaranteedNodes && !hasConditionalNodes && !hasFallbackData && (
           <div className="text-center py-8 text-gray-400 text-sm">
             <svg className="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
