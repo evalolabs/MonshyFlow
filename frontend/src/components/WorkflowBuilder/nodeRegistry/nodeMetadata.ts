@@ -221,32 +221,8 @@ export const NODE_METADATA_REGISTRY: Record<string, NodeMetadata> = {
     hasInput: true,
     hasOutput: true,
   },
-  loop: {
-    id: 'loop',
-    name: 'Loop',
-    icon: '🔁',
-    description: 'Start of a loop block',
-    category: 'logic',
-    component: () => null,
-    hasInput: true,
-    hasOutput: true,
-    fields: {
-      label: { type: 'text', placeholder: 'Loop Name' },
-    },
-  },
-  'end-loop': {
-    id: 'end-loop',
-    name: 'End Loop',
-    icon: '🔚',
-    description: 'End of a loop block',
-    category: 'logic',
-    component: () => null,
-    hasInput: true,
-    hasOutput: true,
-    fields: {
-      label: { type: 'text', placeholder: 'End Loop' },
-    },
-  },
+  // Note: 'loop' and 'end-loop' are now defined in shared/registry.json
+  // They will be loaded from GENERATED_NODE_METADATA
   while: {
     id: 'while',
     name: 'While Loop',

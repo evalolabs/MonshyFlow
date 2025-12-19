@@ -4,7 +4,7 @@
  * This file is generated from shared/registry.json
  * Run: npm run generate:registry
  * 
- * Last generated: 2025-12-13T09:16:17.526Z
+ * Last generated: 2025-12-19T16:15:51.211Z
  */
 
 import type { NodeCategoryId } from './nodeMetadata';
@@ -744,6 +744,112 @@ export const GENERATED_NODE_METADATA = {
                   }
             }
       },
+  },
+  'loop': {
+    id: 'loop',
+    name: 'Loop',
+    icon: '🔁',
+    description: 'Start of a loop block (container for loop body)',
+    category: 'logic' as NodeCategoryId,
+    animationSpeed: 'slow',
+    component: () => null, // Will be lazy-loaded
+    hasConfigForm: true,
+    useAutoConfigForm: true,
+    
+    
+    hasInput: true,
+    hasOutput: true,
+    fields: {
+              "label": {
+                      "type": "text",
+                      "placeholder": "Loop Name"
+              },
+              "loopType": {
+                      "type": "select",
+                      "options": [
+                              {
+                                      "value": "while",
+                                      "label": "While Loop (condition-based)"
+                              },
+                              {
+                                      "value": "foreach",
+                                      "label": "For Each (array iteration)"
+                              }
+                      ],
+                      "default": "while",
+                      "required": true
+              },
+              "condition": {
+                      "type": "expression",
+                      "multiline": false,
+                      "placeholder": "Enter condition (e.g., {{steps.nodeId.count}} < 10)",
+                      "required": true,
+                      "displayCondition": {
+                              "field": "loopType",
+                              "operator": "equals",
+                              "value": "while"
+                      }
+              },
+              "arrayPath": {
+                      "type": "expression",
+                      "multiline": false,
+                      "placeholder": "Enter array path (e.g., {{steps.nodeId.data}} or {{steps.nodeId.json.items}})",
+                      "required": true,
+                      "displayCondition": {
+                              "field": "loopType",
+                              "operator": "equals",
+                              "value": "foreach"
+                      }
+              },
+              "maxIterations": {
+                      "type": "number",
+                      "placeholder": "Maximum iterations (safety limit)",
+                      "default": 100,
+                      "min": 1,
+                      "max": 10000,
+                      "required": true
+              }
+      },
+    inputSchema: {
+            "type": "object",
+            "description": "Accepts any input. Loop type determines iteration behavior.",
+            "additionalProperties": true
+      },
+    outputSchema: {
+            "type": "object",
+            "properties": {
+                  "iterations": {
+                        "type": "number",
+                        "description": "Number of loop iterations executed"
+                  },
+                  "finalOutput": {
+                        "description": "Output from the last iteration"
+                  }
+            }
+      },
+  },
+  'end-loop': {
+    id: 'end-loop',
+    name: 'End Loop',
+    icon: '🔚',
+    description: 'End of a loop block (paired with Loop node)',
+    category: 'logic' as NodeCategoryId,
+    animationSpeed: 'fast',
+    component: () => null, // Will be lazy-loaded
+    hasConfigForm: true,
+    useAutoConfigForm: true,
+    
+    
+    hasInput: true,
+    hasOutput: true,
+    fields: {
+              "label": {
+                      "type": "text",
+                      "placeholder": "End Loop"
+              }
+      },
+    
+    
   },
   'ifelse': {
     id: 'ifelse',
