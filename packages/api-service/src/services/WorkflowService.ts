@@ -1,5 +1,6 @@
 import { injectable, inject } from 'tsyringe';
 import { WorkflowRepository } from '../repositories/WorkflowRepository';
+import { logger } from '@monshy/core';
 
 export interface CreateWorkflowDto {
   name: string;
@@ -90,9 +91,52 @@ export class WorkflowService {
     // Convert Mongoose document to plain object if needed
     const workflowObj = workflow.toObject ? workflow.toObject() : workflow;
 
-    // Find the node
-    const nodeIndex = workflowObj.nodes.findIndex((n: any) => n.id === nodeId);
+    // Log debugging information
+    logger.info({
+      workflowId,
+      nodeId,
+      nodeCount: workflowObj.nodes?.length || 0,
+      nodeIds: workflowObj.nodes?.map((n: any) => n.id) || [],
+      searchingFor: nodeId,
+    }, 'Attempting to update node');
+
+    // Ensure nodes array exists
+    if (!workflowObj.nodes || !Array.isArray(workflowObj.nodes)) {
+      logger.error({ workflowId, nodeId }, 'Workflow has no nodes array');
+      throw new Error('Workflow has no nodes');
+    }
+
+    // Find the node - try multiple ID field variations
+    let nodeIndex = workflowObj.nodes.findIndex((n: any) => n.id === nodeId);
+    
+    // Fallback: try _id if id doesn't match (Mongoose might add _id)
     if (nodeIndex === -1) {
+      nodeIndex = workflowObj.nodes.findIndex((n: any) => 
+        (n._id && n._id.toString() === nodeId) || 
+        (n._id && String(n._id) === nodeId)
+      );
+    }
+    
+    // Fallback: try case-insensitive match
+    if (nodeIndex === -1) {
+      nodeIndex = workflowObj.nodes.findIndex((n: any) => 
+        n.id && String(n.id).toLowerCase() === String(nodeId).toLowerCase()
+      );
+    }
+    
+    if (nodeIndex === -1) {
+      logger.error({
+        workflowId,
+        nodeId,
+        nodeIdType: typeof nodeId,
+        availableNodeIds: workflowObj.nodes.map((n: any) => ({
+          id: n.id,
+          idType: typeof n.id,
+          _id: n._id,
+          type: n.type,
+        })),
+        nodeCount: workflowObj.nodes.length,
+      }, 'Node not found in workflow');
       throw new Error('Node not found');
     }
 

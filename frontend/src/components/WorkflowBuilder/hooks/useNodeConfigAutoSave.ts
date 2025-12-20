@@ -18,6 +18,7 @@ interface UseNodeConfigAutoSaveProps {
   config: any;
   workflowId?: string;
   onUpdateNode: (nodeId: string, data: any) => void;
+  nodes?: Node[]; // Optional: to check if node exists locally
 }
 
 interface UseNodeConfigAutoSaveResult {
@@ -33,11 +34,14 @@ export function useNodeConfigAutoSave({
   config,
   workflowId,
   onUpdateNode,
+  nodes = [],
 }: UseNodeConfigAutoSaveProps): UseNodeConfigAutoSaveResult {
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstRenderRef = useRef(true);
   const lastSavedConfigRef = useRef<string>('');
+  const retryCountRef = useRef(0);
+  const pendingSaveRef = useRef<{ nodeId: string; config: any; type: string } | null>(null);
 
   // Debounced auto-save effect
   useEffect(() => {
@@ -70,11 +74,15 @@ export function useNodeConfigAutoSave({
       autoSaveLogger.info('Auto-saving node configuration');
       setIsAutoSaving(true);
       
+      // Prepare config for saving (needed for retry logic)
+      let plainConfig: any = null;
+      let sanitizedConfig: StartNodeConfig | null = null;
+      
       try {
         // Save to backend first (without updating local state to avoid circular updates)
         if (selectedNode.type === 'start') {
           // Sanitize and validate before saving
-          const sanitizedConfig = StartNodeValidator.sanitize(config as StartNodeConfig);
+          sanitizedConfig = StartNodeValidator.sanitize(config as StartNodeConfig);
           const validation = StartNodeValidator.validate(sanitizedConfig);
           
           if (!validation.isValid) {
@@ -132,9 +140,103 @@ export function useNodeConfigAutoSave({
         lastSavedConfigRef.current = JSON.stringify(config);
         
         autoSaveLogger.info('Node configuration auto-saved successfully');
-      } catch (error) {
-        autoSaveLogger.error('Auto-save failed', error);
-        console.error('Auto-save error:', error);
+        // Reset retry count on successful save
+        retryCountRef.current = 0;
+        pendingSaveRef.current = null;
+      } catch (error: any) {
+        // Handle "Node not found" error gracefully
+        // This can happen if the node was just created and the workflow hasn't been saved yet
+        const isNodeNotFoundError = error?.response?.data?.error === 'Node not found' || 
+            error?.message === 'Node not found' ||
+            (error?.response?.status === 500 && error?.response?.data?.error?.includes('Node not found'));
+        
+        if (isNodeNotFoundError) {
+          // Check if node exists locally (in the nodes array)
+          const nodeExistsLocally = nodes.some(n => n.id === selectedNode.id);
+          
+          if (nodeExistsLocally && retryCountRef.current < 3) {
+            // Node exists locally but not in backend - workflow save might be in progress
+            // Retry after a short delay (workflow save usually completes quickly)
+            retryCountRef.current += 1;
+            // Prepare config for retry
+            const retryConfig = selectedNode.type === 'start' 
+              ? (sanitizedConfig || config)
+              : (plainConfig || JSON.parse(JSON.stringify(config)));
+            
+            pendingSaveRef.current = {
+              nodeId: selectedNode.id,
+              config: retryConfig,
+              type: selectedNode.type || 'unknown'
+            };
+            
+            autoSaveLogger.info(`Node not found in backend but exists locally - retrying (attempt ${retryCountRef.current}/3)`, {
+              nodeId: selectedNode.id,
+              workflowId,
+              retryCount: retryCountRef.current
+            });
+            
+            // Retry after 500ms * retry count (exponential backoff)
+            setTimeout(async () => {
+              if (pendingSaveRef.current) {
+                try {
+                  if (pendingSaveRef.current.type === 'start') {
+                    const retrySanitizedConfig = StartNodeValidator.sanitize(pendingSaveRef.current.config as StartNodeConfig);
+                    await workflowService.updateStartNode(workflowId!, pendingSaveRef.current.nodeId, retrySanitizedConfig);
+                    onUpdateNode(pendingSaveRef.current.nodeId, retrySanitizedConfig);
+                  } else {
+                    await workflowService.updateNode(workflowId!, pendingSaveRef.current.nodeId, {
+                      type: pendingSaveRef.current.type,
+                      data: pendingSaveRef.current.config
+                    });
+                    onUpdateNode(pendingSaveRef.current.nodeId, pendingSaveRef.current.config);
+                  }
+                  autoSaveLogger.info('Node configuration auto-saved successfully after retry');
+                  retryCountRef.current = 0;
+                  pendingSaveRef.current = null;
+                  lastSavedConfigRef.current = JSON.stringify(config);
+                } catch (retryError: any) {
+                  const isRetryNodeNotFound = retryError?.response?.data?.error === 'Node not found' || 
+                      retryError?.message === 'Node not found' ||
+                      (retryError?.response?.status === 500 && retryError?.response?.data?.error?.includes('Node not found'));
+                  
+                  if (isRetryNodeNotFound && retryCountRef.current < 3) {
+                    // Will retry again on next config change
+                    autoSaveLogger.warn(`Retry ${retryCountRef.current} failed - node still not found, will retry on next change`, {
+                      nodeId: pendingSaveRef.current.nodeId,
+                      workflowId,
+                      retryCount: retryCountRef.current
+                    });
+                  } else {
+                    autoSaveLogger.warn('Node not found after retries - workflow may need to be saved first', {
+                      nodeId: pendingSaveRef.current.nodeId,
+                      workflowId,
+                      retryCount: retryCountRef.current,
+                      error: retryError.message
+                    });
+                    retryCountRef.current = 0;
+                    pendingSaveRef.current = null;
+                  }
+                }
+              }
+            }, 500 * retryCountRef.current);
+          } else {
+            // Node doesn't exist locally or max retries reached
+            autoSaveLogger.warn('Node not found in backend - workflow may need to be saved first', {
+              nodeId: selectedNode.id,
+              workflowId,
+              nodeExistsLocally,
+              retryCount: retryCountRef.current,
+              error: error.message
+            });
+            retryCountRef.current = 0;
+            pendingSaveRef.current = null;
+          }
+        } else {
+          autoSaveLogger.error('Auto-save failed', error);
+          console.error('Auto-save error:', error);
+          retryCountRef.current = 0;
+          pendingSaveRef.current = null;
+        }
       } finally {
         setIsAutoSaving(false);
       }

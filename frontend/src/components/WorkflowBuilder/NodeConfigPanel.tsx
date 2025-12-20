@@ -172,6 +172,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
     config,
     workflowId,
     onUpdateNode,
+    nodes, // Pass nodes array to check if node exists locally
   });
 
   // Helper to call renderField with common props including debugSteps
