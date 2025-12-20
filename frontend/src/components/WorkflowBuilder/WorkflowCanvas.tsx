@@ -1660,7 +1660,7 @@ export function WorkflowCanvas({
         return { parentNodes, nodes, edges };
       };
       
-      console.log('💡 Test function available: window.testNodeGrouping()');
+     
     }
   }, [nodes, edges]);
 
