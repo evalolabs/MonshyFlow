@@ -23,8 +23,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  // Reduce workers to avoid rate limiting (6 parallel tests can trigger 429 errors)
-  workers: process.env.CI ? 1 : 2, // Reduced from 6 to 2 for local development
+  // Reduce workers to avoid rate limiting - use 1 worker for more stable tests
+  workers: process.env.CI ? 1 : 1, // Reduced to 1 for stable test execution
   reporter: [
     ['html'],
     ['json', { outputFile: 'test-results/results.json' }],
@@ -44,6 +44,9 @@ export default defineConfig({
     actionTimeout: 10000,
     navigationTimeout: 30000,
   },
+  
+  // Increase test timeout to handle rate limiting retries and cleanup
+  timeout: 60000, // 60 seconds (was 30s default)
   
   // Exclude Vitest test files and source files
   testIgnore: [

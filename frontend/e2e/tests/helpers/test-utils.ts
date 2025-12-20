@@ -204,9 +204,10 @@ export async function createTestSecret(
       if (response && response.status() === 429) {
         retryCount++;
         if (retryCount < maxRetries) {
-          // Get retry-after header or use default wait time
-          const retryAfter = response.headers()['retry-after'] || '60';
-          const waitTime = Math.min(parseInt(retryAfter, 10) * 1000, 60000); // Max 60 seconds
+          // Get retry-after header or use shorter default wait time for tests
+          const retryAfter = response.headers()['retry-after'] || '10';
+          // Use shorter wait time for tests (10-15 seconds max instead of 60)
+          const waitTime = Math.min(parseInt(retryAfter, 10) * 1000, 15000); // Max 15 seconds
           console.log(`⚠️ Rate limited (429). Waiting ${waitTime}ms before retry ${retryCount}/${maxRetries}...`);
           await page.waitForTimeout(waitTime);
           // Close modal if still open
@@ -238,7 +239,7 @@ export async function createTestSecret(
             retryCount++;
             if (retryCount < maxRetries) {
               console.log(`⚠️ Rate limited. Retrying ${retryCount}/${maxRetries}...`);
-              await page.waitForTimeout(60000); // Wait 60 seconds
+              await page.waitForTimeout(15000); // Wait 15 seconds (reduced from 60s for tests)
               await page.click('button:has-text("Cancel")').catch(() => {});
               continue; // Retry
             }
@@ -259,7 +260,7 @@ export async function createTestSecret(
         retryCount++;
         if (retryCount < maxRetries) {
           console.log(`⚠️ Rate limited. Retrying ${retryCount}/${maxRetries}...`);
-          await page.waitForTimeout(60000); // Wait 60 seconds
+          await page.waitForTimeout(15000); // Wait 15 seconds (reduced from 60s for tests)
           await page.click('button:has-text("Cancel")').catch(() => {});
           continue; // Retry
         }
@@ -344,27 +345,126 @@ export async function deleteTestSecret(page: Page, secretName: string) {
 
 /**
  * Cleanup: Delete all test secrets
+ * Supports multiple prefixes and handles dialog confirmation
+ * Optimized for speed - minimal delays, parallel where possible
+ * 
+ * SAFETY: Only deletes secrets that match test patterns (prefix + timestamp)
+ * This prevents accidental deletion of user-created secrets
  */
-export async function cleanupTestSecrets(page: Page, prefix: string = 'test-') {
-  await page.goto('/admin/secrets');
+export async function cleanupTestSecrets(page: Page, prefix: string | string[] = 'test-') {
+  const prefixes = Array.isArray(prefix) ? prefix : [prefix];
   
-  // Get all secret rows
-  const rows = page.locator('tbody tr');
-  const count = await rows.count();
+  // Pattern to match test secrets: prefix followed by timestamp (numbers)
+  // Examples: "test-secret-1234567890", "OPENAI_API_KEY_1234567890", "DEEP_LINK_SECRET_1234567890"
+  // This ensures we only delete test secrets, not user secrets like "test-api-key" or "OPENAI_API_KEY_production"
+  // Pattern: ends with separator (_ or -) followed by 10+ digits (timestamp from Date.now())
+  const testSecretPattern = /^(.+)[_-]\d{10,}$/; // Ends with underscore or dash + 10+ digits (timestamp)
   
-  for (let i = 0; i < count; i++) {
-    const row = rows.nth(i);
-    const nameCell = row.locator('td').first();
-    const secretName = await nameCell.textContent();
+  try {
+    await page.goto('/admin/secrets', { waitUntil: 'domcontentloaded', timeout: 10000 });
+    await page.waitForTimeout(200); // Minimal wait for list to render
     
-    if (secretName?.startsWith(prefix)) {
-      const deleteButton = row.locator('button[title*="Delete"]');
-      if (await deleteButton.count() > 0) {
-        await deleteButton.click();
-        await page.click('button:has-text("Confirm")').catch(() => {});
-        await page.waitForTimeout(500);
+    // Get all secret rows
+    const rows = page.locator('tbody tr');
+    const count = await rows.count();
+    
+    if (count === 0) {
+      return; // No secrets to clean up
+    }
+    
+    // Handle dialog confirmation (set up once for all deletions)
+    page.on('dialog', async dialog => {
+      await dialog.accept();
+    });
+    
+    let deletedCount = 0;
+    const secretsToDelete: string[] = [];
+    
+    // First pass: collect all secrets to delete (only test secrets with timestamp pattern)
+    for (let i = 0; i < count; i++) {
+      const row = rows.nth(i);
+      const nameCell = row.locator('td').first();
+      const secretName = await nameCell.textContent().catch(() => null);
+      
+      if (!secretName) continue;
+      
+      const trimmedName = secretName.trim();
+      
+      // Check if secret matches a test prefix
+      const matchesPrefix = prefixes.some(p => trimmedName.startsWith(p));
+      
+      if (matchesPrefix) {
+        // SAFETY CHECK: Only delete if it matches test pattern (has timestamp)
+        // This prevents deleting user secrets like "test-api-key" or "OPENAI_API_KEY_production"
+        if (testSecretPattern.test(trimmedName)) {
+          secretsToDelete.push(trimmedName);
+        } else {
+          // Log warning if we find a secret that matches prefix but not pattern
+          // This helps identify potential issues
+          console.warn(`⚠️ Skipping secret "${trimmedName}" - matches test prefix but not test pattern (no timestamp)`);
+        }
       }
     }
+    
+    if (secretsToDelete.length === 0) {
+      return; // No matching test secrets
+    }
+    
+    // Second pass: delete secrets (from bottom to top to avoid index shifting)
+    for (let i = count - 1; i >= 0; i--) {
+      const row = rows.nth(i);
+      const nameCell = row.locator('td').first();
+      const secretName = await nameCell.textContent().catch(() => null);
+      
+      if (!secretName) continue;
+      
+      const trimmedName = secretName.trim();
+      
+      // Double-check: only delete if it's in our safe-to-delete list
+      if (!secretsToDelete.includes(trimmedName)) {
+        continue;
+      }
+      
+      try {
+        // Find delete button (trash icon)
+        const deleteButton = row.locator('button').filter({ 
+          has: page.locator('svg.lucide-trash-2') 
+        }).first();
+        
+        if (await deleteButton.count() > 0) {
+          // Wait for DELETE API response with shorter timeout
+          const [response] = await Promise.all([
+            page.waitForResponse(resp => {
+              const method = resp.request().method();
+              const url = resp.url();
+              const status = resp.status();
+              return method === 'DELETE' && 
+                     (url.includes('/api/secrets/') || url.includes('/secrets/')) && 
+                     (status === 204 || status === 200);
+            }, { timeout: 3000 }).catch(() => null),
+            deleteButton.click()
+          ]);
+          
+          if (response) {
+            deletedCount++;
+            // Minimal delay - only if we have many secrets
+            if (secretsToDelete.length > 5) {
+              await page.waitForTimeout(100); // Very short delay for many secrets
+            }
+          }
+        }
+      } catch (error) {
+        // Continue with next secret if deletion fails
+        // Don't log to avoid noise in test output
+      }
+    }
+    
+    if (deletedCount > 0) {
+      console.log(`✅ Cleaned up ${deletedCount} test secret(s)`);
+    }
+  } catch (error) {
+    // Silently fail cleanup - don't break tests if cleanup fails
+    // This can happen if page is not accessible or network issues
   }
 }
 

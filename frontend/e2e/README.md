@@ -148,6 +148,23 @@ Automatisch in `test-results/` gespeichert
 pnpm exec playwright show-trace test-results/trace.zip
 ```
 
+## 🧹 Cleanup Test Secrets
+
+Falls Test-Secrets nach den Tests übrig bleiben, kannst du sie manuell aufräumen:
+
+```bash
+cd frontend/e2e
+pnpm cleanup
+```
+
+Das Script löscht automatisch alle Secrets mit folgenden Präfixen:
+- `test-`
+- `OPENAI_API_KEY_`
+- `DEEP_LINK_SECRET_`
+- `PIPEDRIVE_API_KEY`
+
+**Hinweis:** Die Tests sollten automatisch aufräumen (`afterEach`), aber falls Tests fehlschlagen oder unterbrochen werden, können Secrets übrig bleiben.
+
 ## 📋 Checkliste
 
 - [x] Playwright Setup

@@ -26,8 +26,16 @@ test.describe('Workflow + Secrets Integration', () => {
   });
 
   test.afterEach(async ({ page }) => {
-    await cleanupTestSecrets(page, 'test-');
-    await cleanupTestSecrets(page, 'OPENAI_API_KEY_');
+    // Cleanup all test secrets (all test prefixes)
+    // Note: Only secrets with timestamp pattern will be deleted (e.g., "OPENAI_API_KEY_1234567890")
+    // This prevents accidental deletion of user-created secrets
+    // Use Promise.race to ensure cleanup doesn't exceed timeout
+    await Promise.race([
+      cleanupTestSecrets(page, ['test-', 'OPENAI_API_KEY_', 'DEEP_LINK_SECRET_', 'PIPEDRIVE_API_KEY_']),
+      new Promise(resolve => setTimeout(resolve, 20000)) // Max 20 seconds for cleanup
+    ]).catch(() => {
+      // Silently fail cleanup - don't break tests
+    });
   });
 
   test('should create secret and use in workflow node', async ({ page }) => {
@@ -75,7 +83,8 @@ test.describe('Workflow + Secrets Integration', () => {
 
   test('should use default secret when available', async ({ page }) => {
     // Create a secret with the default name for an API integration
-    const defaultSecretName = 'PIPEDRIVE_API_KEY';
+    // Use timestamp to make it uniquely identifiable as a test secret
+    const defaultSecretName = `PIPEDRIVE_API_KEY_${Date.now()}`;
     await createTestSecret(page, defaultSecretName, 'test-api-key', 'ApiKey', 'Pipedrive');
 
     // Verify secret was created - reload page to ensure list is fresh

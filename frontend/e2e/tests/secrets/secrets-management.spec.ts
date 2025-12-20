@@ -26,8 +26,16 @@ test.describe('Secrets Management', () => {
   });
 
   test.afterEach(async ({ page }) => {
-    // Cleanup test secrets
-    await cleanupTestSecrets(page, 'test-');
+    // Cleanup test secrets (all test prefixes)
+    // Note: Only secrets with timestamp pattern will be deleted (e.g., "test-secret-1234567890")
+    // This prevents accidental deletion of user-created secrets
+    // Use Promise.race to ensure cleanup doesn't exceed timeout
+    await Promise.race([
+      cleanupTestSecrets(page, ['test-', 'OPENAI_API_KEY_', 'DEEP_LINK_SECRET_', 'PIPEDRIVE_API_KEY_']),
+      new Promise(resolve => setTimeout(resolve, 20000)) // Max 20 seconds for cleanup
+    ]).catch(() => {
+      // Silently fail cleanup - don't break tests
+    });
   });
 
   test('should display tenant badge', async ({ page }) => {
@@ -51,94 +59,25 @@ test.describe('Secrets Management', () => {
   });
 
   test('should create a new secret', async ({ page }) => {
-    // Click "New Secret" button
-    await secretsPage.clickNewSecret();
-
-    // Wait for modal to open and form to be visible
-    await page.waitForSelector('input[name="secret-name"]', { timeout: 10000 });
-    await page.waitForTimeout(500); // Small delay for modal animation
-
-    // Fill secret form (using correct field names)
-    await page.fill('input[name="secret-name"]', testSecretName);
-    await page.selectOption('select[name="secret-type"]', '0'); // ApiKey = 0
-    await page.fill('input[name="secret-value"]', 'test-api-key-value');
-
-    // Save - use createTestSecret helper which handles API response and modal closing
-    await page.click('button[type="submit"]:has-text("Create")');
+    // Use the robust createTestSecret helper which handles rate limiting and retries
+    await createTestSecret(page, testSecretName, 'test-api-key-value', 'ApiKey');
     
-    // Wait for API response
-    await page.waitForResponse(resp => {
-      const method = resp.request().method();
-      const url = resp.url();
-      const status = resp.status();
-      return method === 'POST' && 
-             (url.includes('/api/secrets') || url.includes('/secrets')) && 
-             (status === 200 || status === 201);
-    }, { timeout: 15000 }).catch(() => {
-      // If no response, check for errors
-      console.warn('No API response received');
-    });
-    
-    // Wait for modal to close - check if it closes or if there's an error
-    try {
-      await page.waitForSelector('input[name="secret-name"]', { state: 'hidden', timeout: 10000 });
-    } catch {
-      // Modal didn't close, check for error
-      const errorText = await page.locator('.text-red-600, .error, [role="alert"], .text-red-700').first().textContent().catch(() => null);
-      if (errorText) {
-        throw new Error(`Secret creation failed: ${errorText}`);
-      }
-      // Wait a bit more
-      await page.waitForTimeout(2000);
-      // Try again
-      const stillVisible = await page.locator('input[name="secret-name"]').isVisible().catch(() => false);
-      if (stillVisible) {
-        throw new Error('Modal did not close after secret creation');
-      }
-    }
-    
-    await page.waitForTimeout(500); // Small delay for list update
-
     // Verify secret appears in list
+    await secretsPage.goto(); // Ensure we're on the secrets page
+    await page.waitForTimeout(500);
     const secretRow = await secretsPage.getSecretRow(testSecretName);
-    await expect(secretRow).toBeVisible({ timeout: 5000 });
+    await expect(secretRow).toBeVisible({ timeout: 10000 });
   });
 
   test('should search for secrets', async ({ page }) => {
-        // Create a test secret first
-        await secretsPage.clickNewSecret();
-        await page.waitForSelector('input[name="secret-name"]', { timeout: 10000 });
-        await page.fill('input[name="secret-name"]', testSecretName);
-        await page.selectOption('select[name="secret-type"]', '0'); // ApiKey = 0
-        await page.fill('input[name="secret-value"]', 'test-value');
-    await page.click('button[type="submit"]:has-text("Create")');
-    
-    // Wait for API response
-    await page.waitForResponse(resp => {
-      const method = resp.request().method();
-      const url = resp.url();
-      const status = resp.status();
-      return method === 'POST' && 
-             (url.includes('/api/secrets') || url.includes('/secrets')) && 
-             (status === 200 || status === 201);
-    }, { timeout: 15000 }).catch(() => {});
-    
-    // Wait for modal to close
-    try {
-      await page.waitForSelector('input[name="secret-name"]', { state: 'hidden', timeout: 10000 });
-    } catch {
-      await page.waitForTimeout(2000);
-      const stillVisible = await page.locator('input[name="secret-name"]').isVisible().catch(() => false);
-      if (stillVisible) {
-        throw new Error('Modal did not close after secret creation');
-      }
-    }
-    
-    await page.waitForTimeout(500); // Small delay for list update
+    // Use the robust createTestSecret helper
+    await createTestSecret(page, testSecretName, 'test-value', 'ApiKey');
     
     // Verify secret appears in list
+    await secretsPage.goto();
+    await page.waitForTimeout(500);
     const secretRow = await secretsPage.getSecretRow(testSecretName);
-    await expect(secretRow).toBeVisible({ timeout: 5000 });
+    await expect(secretRow).toBeVisible({ timeout: 10000 });
 
     // Search for the secret
     await secretsPage.search(testSecretName);

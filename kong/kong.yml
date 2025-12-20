@@ -212,13 +212,13 @@ plugins:
       policy: local
 
   # Rate Limiting für Secrets Service
-  # Erhöht für E2E-Tests und Development
+  # Sehr hoch für E2E-Tests und Development
   - name: rate-limiting
     service: secrets-service
     route: secrets-routes
     config:
-      minute: 2000  # Sehr hoch für E2E-Tests (6 parallele Workers)
-      hour: 20000   # Sehr hoch für E2E-Tests
+      minute: 5000  # Sehr hoch für E2E-Tests (erhöht von 2000)
+      hour: 50000   # Sehr hoch für E2E-Tests (erhöht von 20000)
       policy: local
       hide_client_headers: false
       limit_by: ip
