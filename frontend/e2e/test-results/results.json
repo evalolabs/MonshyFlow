@@ -11,7 +11,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 2
+      "actualWorkers": 1
     },
     "preserveOutput": "always",
     "reporter": [
@@ -41,7 +41,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "chromium",
         "name": "chromium",
@@ -56,7 +56,7 @@
         "testMatch": [
           "/.*\\.spec\\.ts$/"
         ],
-        "timeout": 30000
+        "timeout": 60000
       }
     ],
     "shard": null,
@@ -64,7 +64,7 @@
     "updateSnapshots": "missing",
     "updateSourceMethod": "patch",
     "version": "1.57.0",
-    "workers": 2,
+    "workers": 1,
     "webServer": {
       "command": "pnpm --filter frontend dev",
       "cwd": "C:\\Users\\hizad\\source\\repos\\MonshyFlow",
@@ -74,6 +74,320 @@
     }
   },
   "suites": [
+    {
+      "title": "secrets\\multi-tenant-isolation.spec.ts",
+      "file": "secrets/multi-tenant-isolation.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Multi-Tenant Secret Isolation",
+          "file": "secrets/multi-tenant-isolation.spec.ts",
+          "line": 14,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should display tenant badge in secrets page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 8300,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-20T10:02:54.077Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e4f81e483ea306637f19-47f41dd8517bd67ef9cb",
+              "file": "secrets/multi-tenant-isolation.spec.ts",
+              "line": 24,
+              "column": 3
+            },
+            {
+              "title": "should only show secrets from current tenant",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1928,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-20T10:03:02.622Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e4f81e483ea306637f19-792ca73616fcbdc77fbb",
+              "file": "secrets/multi-tenant-isolation.spec.ts",
+              "line": 48,
+              "column": 3
+            },
+            {
+              "title": "should filter secrets correctly when tenant context changes",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1805,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-20T10:03:04.599Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e4f81e483ea306637f19-64dcdc4e7b638c121442",
+              "file": "secrets/multi-tenant-isolation.spec.ts",
+              "line": 64,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "secrets\\secrets-management.spec.ts",
+      "file": "secrets/secrets-management.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Secrets Management",
+          "file": "secrets/secrets-management.spec.ts",
+          "line": 17,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should display tenant badge",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4398,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-20T10:03:06.468Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4ed180c8b842338fa41a-547e64df9480383ae512",
+              "file": "secrets/secrets-management.spec.ts",
+              "line": 41,
+              "column": 3
+            },
+            {
+              "title": "should create a new secret",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5152,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Cleaned up 1 test secret(s)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-20T10:03:10.891Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4ed180c8b842338fa41a-7379d801374f40ae9a57",
+              "file": "secrets/secrets-management.spec.ts",
+              "line": 61,
+              "column": 3
+            },
+            {
+              "title": "should search for secrets",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5620,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Cleaned up 1 test secret(s)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-20T10:03:16.064Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4ed180c8b842338fa41a-e3a6e51fc1f5308f5803",
+              "file": "secrets/secrets-management.spec.ts",
+              "line": 72,
+              "column": 3
+            },
+            {
+              "title": "should delete a secret",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7042,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-20T10:03:21.713Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4ed180c8b842338fa41a-e378cffc2464e50a3633",
+              "file": "secrets/secrets-management.spec.ts",
+              "line": 90,
+              "column": 3
+            },
+            {
+              "title": "should filter secrets by tenant",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2911,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-20T10:03:28.789Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4ed180c8b842338fa41a-c5bcdca86d550143b44f",
+              "file": "secrets/secrets-management.spec.ts",
+              "line": 127,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
     {
       "title": "secrets\\workflow-secrets-integration.spec.ts",
       "file": "secrets/workflow-secrets-integration.spec.ts",
@@ -93,30 +407,28 @@
               "tags": [],
               "tests": [
                 {
-                  "timeout": 30000,
+                  "timeout": 60000,
                   "annotations": [],
                   "expectedStatus": "passed",
                   "projectId": "chromium",
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 3,
+                      "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 20221,
+                      "duration": 14057,
                       "errors": [],
-                      "stdout": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Cleaned up 1 test secret(s)\n"
+                        }
+                      ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-12-19T12:46:57.269Z",
+                      "startTime": "2025-12-20T10:03:31.755Z",
                       "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\hizad\\source\\repos\\MonshyFlow\\frontend\\e2e\\test-results\\secrets-workflow-secrets-i-b7dd4-et-and-use-in-workflow-node-chromium\\trace.zip"
-                        }
-                      ]
+                      "attachments": []
                     }
                   ],
                   "status": "expected"
@@ -124,7 +436,7 @@
               ],
               "id": "59ac26d15ec4acfe37e4-f77fda127ed78dfd65d7",
               "file": "secrets/workflow-secrets-integration.spec.ts",
-              "line": 33,
+              "line": 41,
               "column": 3
             },
             {
@@ -133,30 +445,24 @@
               "tags": [],
               "tests": [
                 {
-                  "timeout": 30000,
+                  "timeout": 60000,
                   "annotations": [],
                   "expectedStatus": "passed",
                   "projectId": "chromium",
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 4,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4637,
+                      "duration": 2361,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-12-19T12:46:57.269Z",
+                      "startTime": "2025-12-20T10:03:45.854Z",
                       "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\hizad\\source\\repos\\MonshyFlow\\frontend\\e2e\\test-results\\secrets-workflow-secrets-i-1f7bc-on-error-for-missing-secret-chromium\\trace.zip"
-                        }
-                      ]
+                      "attachments": []
                     }
                   ],
                   "status": "expected"
@@ -164,7 +470,7 @@
               ],
               "id": "59ac26d15ec4acfe37e4-0446f97182839d8b7718",
               "file": "secrets/workflow-secrets-integration.spec.ts",
-              "line": 51,
+              "line": 59,
               "column": 3
             },
             {
@@ -173,34 +479,28 @@
               "tags": [],
               "tests": [
                 {
-                  "timeout": 30000,
+                  "timeout": 60000,
                   "annotations": [],
                   "expectedStatus": "passed",
                   "projectId": "chromium",
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 4,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 10202,
+                      "duration": 6465,
                       "errors": [],
-                      "stdout": [],
-                      "stderr": [
+                      "stdout": [
                         {
-                          "text": "Secret 'PIPEDRIVE_API_KEY' already exists. Skipping creation.\n"
+                          "text": "✅ Cleaned up 1 test secret(s)\n"
                         }
                       ],
+                      "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-12-19T12:47:02.705Z",
+                      "startTime": "2025-12-20T10:03:48.254Z",
                       "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\hizad\\source\\repos\\MonshyFlow\\frontend\\e2e\\test-results\\secrets-workflow-secrets-i-5bedf-fault-secret-when-available-chromium\\trace.zip"
-                        }
-                      ]
+                      "attachments": []
                     }
                   ],
                   "status": "expected"
@@ -208,7 +508,7 @@
               ],
               "id": "59ac26d15ec4acfe37e4-a4d71ca89ac005ea135a",
               "file": "secrets/workflow-secrets-integration.spec.ts",
-              "line": 76,
+              "line": 84,
               "column": 3
             },
             {
@@ -217,30 +517,28 @@
               "tags": [],
               "tests": [
                 {
-                  "timeout": 30000,
+                  "timeout": 60000,
                   "annotations": [],
                   "expectedStatus": "passed",
                   "projectId": "chromium",
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 4,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 8419,
+                      "duration": 4698,
                       "errors": [],
-                      "stdout": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Cleaned up 1 test secret(s)\n"
+                        }
+                      ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-12-19T12:47:13.778Z",
+                      "startTime": "2025-12-20T10:03:54.758Z",
                       "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\hizad\\source\\repos\\MonshyFlow\\frontend\\e2e\\test-results\\secrets-workflow-secrets-i-266ce-ep-linking-to-create-secret-chromium\\trace.zip"
-                        }
-                      ]
+                      "attachments": []
                     }
                   ],
                   "status": "expected"
@@ -248,7 +546,7 @@
               ],
               "id": "59ac26d15ec4acfe37e4-12778027819f40e5f34a",
               "file": "secrets/workflow-secrets-integration.spec.ts",
-              "line": 114,
+              "line": 123,
               "column": 3
             }
           ]
@@ -258,9 +556,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2025-12-19T12:46:53.638Z",
-    "duration": 29550.209999999963,
-    "expected": 4,
+    "startTime": "2025-12-20T10:02:50.977Z",
+    "duration": 68775.93400000001,
+    "expected": 12,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0
