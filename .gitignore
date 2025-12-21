@@ -150,6 +150,8 @@ dist
 # Project-specific ignores
 uploads/
 Monshy/
+strategy/
+analysis/
 
 # Build outputs
 [Dd]ebug/
