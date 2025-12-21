@@ -1,8 +1,25 @@
 {
-  "name": "frontend",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@monshyflow/frontend",
+  "version": "0.1.0-alpha",
   "type": "module",
+  "description": "MonshyFlow Frontend - AI-First Workflow Automation Platform",
+  "author": "MonshyFlow Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/evalolabs/MonshyFlow.git",
+    "directory": "frontend"
+  },
+  "keywords": [
+    "workflow",
+    "automation",
+    "ai",
+    "react",
+    "typescript",
+    "workflow-builder",
+    "node-based",
+    "visual-programming"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

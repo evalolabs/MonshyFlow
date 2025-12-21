@@ -1,4 +1,6 @@
-# Agent Builder Frontend
+# MonshyFlow Frontend
+
+AI-First Workflow Automation Platform - Frontend
 
 React + TypeScript + React Flow Workflow Builder
 
@@ -6,13 +8,16 @@ React + TypeScript + React Flow Workflow Builder
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
+
+# Copy environment variables
+cp .env.example .env
 
 # Start development server
-npm run dev
+pnpm dev
 
 # Build for production
-npm run build
+pnpm build
 ```
 
 ## 📦 Tech Stack
@@ -26,11 +31,15 @@ npm run build
 
 ## 🌐 Environment Variables
 
-Create a `.env` file:
+Copy `.env.example` to `.env` and adjust the values:
 
 ```env
 VITE_API_URL=http://localhost:5000
+VITE_DEBUG=false
+VITE_LOG_LEVEL=info
 ```
+
+See `.env.example` for all available options.
 
 ## 📁 Project Structure
 
@@ -56,10 +65,14 @@ src/
 ## 🎨 Features
 
 - ✅ Drag & Drop Workflow Builder
-- ✅ Custom Node Types (Start, Agent, If/Else, Tool, Note)
-- ✅ Real-time Workflow Editing
-- ✅ Workflow Execution
-- ✅ Workflow Management (CRUD)
+- ✅ 13+ Node Types (Start, Agent, LLM, HTTP, If/Else, While, ForEach, etc.)
+- ✅ Real-time Workflow Execution Monitoring (SSE)
+- ✅ Debug Panel with Variable Tree
+- ✅ Expression Editor with Template Engine
+- ✅ Auto-Layout & Auto-Save
+- ✅ Multi-Select, Copy/Paste, Undo/Redo
+- ✅ Secrets Management Integration
+- ✅ Multi-Tenant Support
 - ✅ Beautiful UI with Tailwind CSS
 
 ## 🔗 API Integration
@@ -76,7 +89,25 @@ Frontend connects to the backend API gateway at `http://localhost:5000`:
 
 The app runs on http://localhost:5173 in development mode.
 
+## 🧪 Testing
+
+```bash
+# Unit tests
+pnpm test
+
+# E2E tests
+pnpm test:e2e
+
+# Test coverage
+pnpm test:coverage
+```
+
 ## 📝 Notes
 
 - Make sure the backend services are running before starting the frontend
-- The API URL can be configured via environment variables
+- The API URL can be configured via `VITE_API_URL` environment variable
+- See `e2e/README.md` for E2E test setup instructions
+
+## 📄 License
+
+MIT License - see LICENSE file for details
