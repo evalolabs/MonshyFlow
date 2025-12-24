@@ -1,6 +1,6 @@
 # MonshyFlow Frontend
 
-AI-First Workflow Automation Platform - Frontend
+AI-Powered Workflow Automation Platform - Frontend
 
 React + TypeScript + React Flow Workflow Builder
 

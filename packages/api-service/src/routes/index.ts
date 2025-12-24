@@ -2,7 +2,9 @@ import { Express, Request, Response } from 'express';
 import { DependencyContainer } from 'tsyringe';
 import { WorkflowController } from '../controllers/WorkflowController';
 import { AdminController } from '../controllers/AdminController';
+import { TenantController } from '../controllers/TenantController';
 import { authMiddleware } from '../middleware/authMiddleware';
+import { serviceKeyMiddleware } from '../middleware/serviceKeyMiddleware';
 import { logger } from '@monshy/core';
 import axios from 'axios';
 import { config } from '../config';
@@ -44,9 +46,11 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
   // Register Controllers
   container.register('WorkflowController', { useClass: WorkflowController });
   container.register('AdminController', { useClass: AdminController });
+  container.register('TenantController', { useClass: TenantController });
   
   const workflowController = container.resolve(WorkflowController);
   const adminController = container.resolve(AdminController);
+  const tenantController = container.resolve(TenantController);
   
   // ============================================
   // Workflow Routes (direkt im API Service)
@@ -78,6 +82,16 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
   app.post('/api/workflows', authMiddleware, (req, res) => workflowController.create(req, res));
   app.put('/api/workflows/:id', authMiddleware, (req, res) => workflowController.update(req, res));
   app.delete('/api/workflows/:id', authMiddleware, (req, res) => workflowController.delete(req, res));
+  
+  // Workflow Execution (authenticated)
+  // POST /api/workflows/:workflowId/execute
+  app.post('/api/workflows/:workflowId/execute', authMiddleware, (req, res) => workflowController.execute(req, res));
+
+  // ============================================
+  // Tenant Routes (für normale User)
+  // ============================================
+  // Tenant Info abrufen (User kann nur eigenen Tenant abrufen)
+  app.get('/api/tenants/:tenantId', authMiddleware, (req, res) => tenantController.getTenantById(req, res));
   
   // Workflow Node Testing Route (proxies to execution-service)
   // TEST ENDPOINT: Check if body parsing works at all
@@ -275,11 +289,18 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
   app.get('/api/admin/roles', authMiddleware, (req, res) => adminController.getRoles(req, res));
   
   // ============================================
+  // Internal Routes (Service-to-Service)
+  // ============================================
+  // Internal workflow endpoint (für execution-service)
+  // GET /api/internal/workflows/:workflowId
+  app.get('/api/internal/workflows/:workflowId', serviceKeyMiddleware, (req, res) => workflowController.getByIdInternal(req, res));
+  
+  // ============================================
   // Webhook Routes (öffentlich, keine Auth erforderlich)
   // ============================================
   // Webhook-Endpoint für Workflow-Execution
-  // POST /api/webhook/:workflowId
-  app.post('/api/webhook/:workflowId', async (req: Request, res: Response) => {
+  // POST /api/webhooks/:workflowId (Plural für Konsistenz)
+  app.post('/api/webhooks/:workflowId', async (req: Request, res: Response) => {
     try {
       const { workflowId } = req.params;
       const input = req.body || {};

@@ -11,10 +11,16 @@ class WorkflowService {
 
     async getWorkflowById(workflowId: string): Promise<Workflow | null> {
         try {
-            // Use internal endpoint for service-to-service communication (no auth required)
-            const url = `${this.baseUrl}/api/workflows/internal/${workflowId}`;
+            // Use internal endpoint for service-to-service communication (requires service key)
+            const url = `${this.baseUrl}/api/internal/workflows/${workflowId}`;
+            const serviceKey = process.env.INTERNAL_SERVICE_KEY || 'internal-service-key-change-in-production';
+            
             console.log(`[WorkflowService] Fetching workflow ${workflowId} from: ${url}`);
-            const response = await axios.get(url);
+            const response = await axios.get(url, {
+                headers: {
+                    'X-Service-Key': serviceKey
+                }
+            });
             console.log(`[WorkflowService] Successfully fetched workflow ${workflowId}`);
             return response.data;
         } catch (error: any) {

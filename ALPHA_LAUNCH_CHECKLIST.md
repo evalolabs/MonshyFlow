@@ -120,7 +120,7 @@ Diese Checkliste führt uns durch alle notwendigen Schritte für den Alpha-Launc
   - [ ] Known Limitations Sektion
 
 - [ ] **USP klar kommunizieren**
-  - [ ] "AI-First Workflow Platform"
+  - [ ] "AI-Powered Workflow Platform"
   - [ ] "Native AI Agent Orchestration"
   - [ ] "Azure-Optimized"
   - [ ] Vergleichstabelle (vs. n8n/Zapier/Make.com)
@@ -177,7 +177,7 @@ Diese Checkliste führt uns durch alle notwendigen Schritte für den Alpha-Launc
 ### 4.1 Repository-Vorbereitung
 - [ ] **GitHub Repository erstellen**
   - [ ] Repository-Name: `monshyflow` oder `monshy-flow`?
-  - [ ] Description: "AI-First Workflow Automation Platform"
+  - [ ] Description: "AI-Powered Workflow Automation Platform"
   - [ ] Topics/Keywords setzen
   - [ ] Website URL (wenn vorhanden)
 

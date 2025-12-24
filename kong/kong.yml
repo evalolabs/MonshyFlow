@@ -36,11 +36,26 @@ services:
         methods:
           - GET
         strip_path: false
-      - name: api-webhook
+      - name: api-webhooks
         paths:
-          - /api/webhook
+          - /api/webhooks
         methods:
           - POST
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: api-internal
+        paths:
+          - /api/internal
+        methods:
+          - GET
+          - POST
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: api-tenants
+        paths:
+          - /api/tenants
+        methods:
+          - GET
           - OPTIONS  # CORS Preflight
         strip_path: false
 
@@ -61,6 +76,22 @@ services:
           - /api/auth/register
         methods:
           - POST
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      # Token Validation (öffentlich, validiert selbst)
+      - name: auth-validate
+        paths:
+          - /api/auth/validate
+        methods:
+          - GET
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      # User Info (benötigt JWT)
+      - name: auth-me
+        paths:
+          - /api/auth/me
+        methods:
+          - GET
           - OPTIONS  # CORS Preflight
         strip_path: false
       # Geschützte Auth Routes (benötigen JWT)
@@ -105,7 +136,9 @@ services:
   - name: execution-service
     url: http://execution-service:5004
     routes:
-      - name: execution-execute
+      # NOTE: /api/execute routes are now handled by API-Service
+      # This route is kept for backward compatibility and internal service calls
+      - name: execution-execute-internal
         paths:
           - /api/execute
         methods:
@@ -235,4 +268,5 @@ plugins:
     config:
       path: /dev/stdout
       reopen: true
+
 

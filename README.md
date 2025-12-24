@@ -1,6 +1,6 @@
 # 🚀 MonshyFlow
 
-**AI-First Workflow Automation Platform**
+**AI-Powered Workflow Automation Platform**
 
 MonshyFlow is an open-source, visual workflow automation platform that combines the power of AI agents with traditional workflow automation. Build complex workflows using a drag-and-drop interface, integrate with 50+ APIs, and leverage AI agents to automate your business processes.
 

@@ -2,7 +2,7 @@
   "name": "monshyflow",
   "version": "1.0.0",
   "private": true,
-  "description": "MonshyFlow - Professional Node.js-Only Workflow Automation Platform",
+  "description": "MonshyFlow - AI-Powered Workflow Automation Platform",
   "workspaces": [
     "packages/*",
     "frontend",

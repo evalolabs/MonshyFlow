@@ -1,5 +1,6 @@
 import { injectable, inject } from 'tsyringe';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/UserRepository';
 import { TenantRepository } from '../repositories/TenantRepository';
 import { JwtService } from './JwtService';
@@ -127,6 +128,91 @@ export class AuthService {
         tenantName,
       },
     };
+  }
+
+  async getCurrentUser(userId: string): Promise<any> {
+    const user = await this.userRepo.findById(userId);
+    
+    if (!user || !user.isActive) {
+      throw new UnauthorizedError('User not found or inactive');
+    }
+
+    // Get tenant name if tenantId exists
+    let tenantName: string | undefined;
+    if (user.tenantId) {
+      try {
+        const tenant = await this.tenantRepo.findById(user.tenantId);
+        tenantName = tenant?.name;
+      } catch (error) {
+        logger.warn({ err: error, tenantId: user.tenantId }, 'Failed to fetch tenant name');
+      }
+    }
+
+    return {
+      id: user._id.toString(),
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      roles: user.roles,
+      tenantId: user.tenantId,
+      tenantName,
+    };
+  }
+
+  async validateToken(token: string): Promise<{ valid: boolean; user?: any; expiresAt?: string; error?: string }> {
+    try {
+      const payload = this.jwtService.verifyToken(token);
+      
+      // Extract expiration from token (decode without verification to get exp)
+      let expiresAt: string | undefined;
+      try {
+        const decoded = jwt.decode(token) as any;
+        expiresAt = decoded?.exp ? new Date(decoded.exp * 1000).toISOString() : undefined;
+      } catch {
+        // Ignore decode errors
+      }
+      
+      // Get user from database to check if still active
+      const user = await this.userRepo.findById(payload.userId);
+      
+      if (!user || !user.isActive) {
+        return {
+          valid: false,
+          error: 'User not found or inactive',
+        };
+      }
+
+      // Get tenant name if tenantId exists
+      let tenantName: string | undefined;
+      if (user.tenantId) {
+        try {
+          const tenant = await this.tenantRepo.findById(user.tenantId);
+          tenantName = tenant?.name;
+        } catch (error) {
+          logger.warn({ err: error, tenantId: user.tenantId }, 'Failed to fetch tenant name');
+        }
+      }
+
+      return {
+        valid: true,
+        user: {
+          id: user._id.toString(),
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          roles: user.roles,
+          tenantId: user.tenantId,
+          tenantName,
+        },
+        expiresAt,
+      };
+    } catch (error) {
+      logger.warn({ err: error }, 'Token validation failed');
+      return {
+        valid: false,
+        error: error instanceof Error ? error.message : 'Invalid or expired token',
+      };
+    }
   }
 }
 

@@ -14,6 +14,10 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
   app.post('/api/auth/login', (req, res) => authController.login(req, res));
   app.post('/api/auth/register', (req, res) => authController.register(req, res));
   
+  // Protected routes - Token validation endpoints
+  app.get('/api/auth/me', authMiddleware, (req, res) => authController.me(req, res));
+  app.get('/api/auth/validate', (req, res) => authController.validate(req, res));
+  
   // API Key validation endpoint (für Gateway)
   app.post('/api/auth/validate-apikey', async (req, res) => {
     try {

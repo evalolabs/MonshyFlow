@@ -103,7 +103,7 @@ export const workflowService = {
 
   // Execute workflow
   async executeWorkflow(workflowId: string, request: ExecutionRequest): Promise<ExecutionResponse> {
-    const response = await api.post<ExecutionResponse>(`/api/execute/${workflowId}`, request);
+    const response = await api.post<ExecutionResponse>(`/api/workflows/${workflowId}/execute`, request);
     return response.data;
   },
 
@@ -167,8 +167,8 @@ export const workflowService = {
     console.log('input:', input);
     
     try {
-      // Use executionApi (now routes through Kong Gateway on Port 5000)
-      const response = await executionApi.post(`/api/execute/${workflowId}`, {
+      // Use new endpoint: /api/workflows/:id/execute (authenticated)
+      const response = await api.post(`/api/workflows/${workflowId}/execute`, {
         input: input || {}
       });
       console.log('✅ startExecution response:', response.data);

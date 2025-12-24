@@ -318,23 +318,57 @@ class ExecutionService {
         if (startNode?.data?.inputSchema && !isScheduledExecution) {
             try {
                 // Prefer _originalInput (original request body) over transformed input for validation
-                const dataToValidate = request.input?._originalInput || request.input;
+                let dataToValidate = request.input?._originalInput || request.input;
+                
+                // Get the schema
+                const schema = startNode.data.inputSchema;
+                
+                // Check if schema expects a nested structure with "input" property
+                // If schema has properties.input, it expects { input: {...} } format
+                // Otherwise, it expects the input data directly
+                const schemaExpectsNestedInput = schema?.properties?.input && typeof schema.properties.input === 'object';
                 
                 console.log('[ExecutionService] Validating input against schema');
-                console.log('[ExecutionService] Schema:', JSON.stringify(startNode.data.inputSchema, null, 2));
-                console.log('[ExecutionService] Data to validate:', JSON.stringify(dataToValidate, null, 2));
+                console.log('[ExecutionService] Schema:', JSON.stringify(schema, null, 2));
+                console.log('[ExecutionService] Schema expects nested input:', schemaExpectsNestedInput);
+                console.log('[ExecutionService] Original dataToValidate:', JSON.stringify(dataToValidate, null, 2));
+                
+                // If schema expects nested structure but we have direct input, wrap it
+                if (schemaExpectsNestedInput && dataToValidate && typeof dataToValidate === 'object' && !dataToValidate.input) {
+                    console.log('[ExecutionService] Schema expects nested input, wrapping data');
+                    dataToValidate = { input: dataToValidate };
+                }
+                // If schema expects direct input but we have nested structure, extract it
+                else if (!schemaExpectsNestedInput && dataToValidate && typeof dataToValidate === 'object' && dataToValidate.input && Object.keys(dataToValidate).length === 1) {
+                    console.log('[ExecutionService] Schema expects direct input, extracting from nested structure');
+                    dataToValidate = dataToValidate.input;
+                }
+                
+                console.log('[ExecutionService] Data to validate (final):', JSON.stringify(dataToValidate, null, 2));
                 console.log('[ExecutionService] Has _originalInput:', !!request.input?._originalInput);
                 console.log('[ExecutionService] Full request.input:', JSON.stringify(request.input, null, 2));
                 
-                const validation = schemaValidationService.validate(startNode.data.inputSchema, dataToValidate);
+                const validation = schemaValidationService.validate(schema, dataToValidate);
                 
                 console.log('[ExecutionService] Validation result:', validation.valid, validation.errors);
                 
                 if (!validation.valid) {
-                    throw new Error(`Input validation failed: ${validation.errors?.join(', ')}`);
+                    // Provide more detailed error message
+                    const errorDetails = validation.errors?.join('; ') || 'Unknown validation error';
+                    console.error('[ExecutionService] Validation failed:', {
+                        schema: schema,
+                        data: dataToValidate,
+                        errors: validation.errors,
+                        schemaExpectsNestedInput
+                    });
+                    throw new Error(`Input validation failed: ${errorDetails}`);
                 }
             } catch (error: any) {
                 console.error('[ExecutionService] Schema validation error:', error);
+                // Preserve original error message if it's already a validation error
+                if (error.message && error.message.includes('validation failed')) {
+                    throw error;
+                }
                 throw new Error(`Input validation failed: ${error.message}`);
             }
         } else {
