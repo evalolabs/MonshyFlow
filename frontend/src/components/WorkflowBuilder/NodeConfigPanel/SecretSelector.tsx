@@ -39,9 +39,10 @@ export function SecretSelector({
 }: SecretSelectorProps) {
   const filteredSecrets = secrets.filter(secret => secret.secretType === SECRET_TYPE_MAP[secretType]);
   
-  // Check if default secret exists
+  // Check if default secret exists - check in ALL secrets, not just filtered ones
+  // This is important because the secret might have a different type than expected
   const defaultSecretExists = defaultSecretName 
-    ? filteredSecrets.some(s => s.name === defaultSecretName)
+    ? secrets.some(s => s.name === defaultSecretName && s.isActive)
     : false;
   
   // Determine if current value is the default
@@ -109,6 +110,14 @@ export function SecretSelector({
             {secret.name} {secret.provider ? `(${secret.provider})` : ''}
           </option>
         ))}
+            </optgroup>
+          )}
+          {/* Show default secret in available secrets if it exists but has different type */}
+          {defaultSecretName && defaultSecretExists && !filteredSecrets.some(s => s.name === defaultSecretName) && (
+            <optgroup label="Available Secrets">
+              <option value={defaultSecretName}>
+                {defaultSecretName} {secrets.find(s => s.name === defaultSecretName)?.provider ? `(${secrets.find(s => s.name === defaultSecretName)?.provider})` : ''}
+              </option>
             </optgroup>
           )}
       </select>

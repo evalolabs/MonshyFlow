@@ -231,36 +231,89 @@ export function validateHttpRequestNode(
     
     if (apiIntegration?.authentication) {
       const auth = apiIntegration.authentication;
-      const requiredSecretKey = auth.secretKey;
       const providerName = apiIntegration.name || 'API';
       
-      if (requiredSecretKey) {
+      // Check main secret key
+      if (auth.secretKey) {
+        // First check if it's configured in node data (from ApiAuthConfig)
+        const authFieldKey = `auth_${auth.secretKey}`;
+        const configuredSecretName = data[authFieldKey] as string | undefined;
+        const secretKeyToCheck = configuredSecretName || auth.secretKey;
+        
         // Check if secret exists
-        const secretExists = hasSecret(secrets, requiredSecretKey);
+        const secretExists = hasSecret(secrets, secretKeyToCheck);
         
         if (!secretExists) {
-          // Use provider context for better UX: "OpenAI API Key fehlt" instead of "Secret X missing"
           issues.push({
             type: 'error',
-            message: `${providerName} API Key "${requiredSecretKey}" is missing or inactive`,
+            message: `${providerName} API Key "${secretKeyToCheck}" is missing or inactive`,
           });
         } else {
           issues.push({
             type: 'info',
-            message: `${providerName} API Key "${requiredSecretKey}" is configured`,
+            message: `${providerName} API Key "${secretKeyToCheck}" is configured`,
           });
         }
       }
 
       // Check for username secret if needed
       if (auth.usernameSecretKey) {
-        const usernameSecretExists = hasSecret(secrets, auth.usernameSecretKey);
+        const authUsernameFieldKey = `auth_${auth.usernameSecretKey}`;
+        const configuredUsernameSecretName = data[authUsernameFieldKey] as string | undefined;
+        const usernameSecretKeyToCheck = configuredUsernameSecretName || auth.usernameSecretKey;
+        const usernameSecretExists = hasSecret(secrets, usernameSecretKeyToCheck);
         
         if (!usernameSecretExists) {
           issues.push({
             type: 'warning',
-            message: `${providerName} username secret "${auth.usernameSecretKey}" is missing`,
+            message: `${providerName} username secret "${usernameSecretKeyToCheck}" is missing`,
           });
+        }
+      }
+
+      // Check for email secret if needed
+      if (auth.emailSecretKey) {
+        const authEmailFieldKey = `auth_${auth.emailSecretKey}`;
+        const configuredEmailSecretName = data[authEmailFieldKey] as string | undefined;
+        const emailSecretKeyToCheck = configuredEmailSecretName || auth.emailSecretKey;
+        const emailSecretExists = hasSecret(secrets, emailSecretKeyToCheck);
+        
+        if (!emailSecretExists) {
+          issues.push({
+            type: 'warning',
+            message: `${providerName} email secret "${emailSecretKeyToCheck}" is missing`,
+          });
+        }
+      }
+
+      // Check for AWS-specific secrets
+      if (auth.type === 'aws') {
+        if (auth.accessKeyIdSecretKey) {
+          const authAccessKeyFieldKey = `auth_${auth.accessKeyIdSecretKey}`;
+          const configuredAccessKeyName = data[authAccessKeyFieldKey] as string | undefined;
+          const accessKeyToCheck = configuredAccessKeyName || auth.accessKeyIdSecretKey;
+          const accessKeyExists = hasSecret(secrets, accessKeyToCheck);
+          
+          if (!accessKeyExists) {
+            issues.push({
+              type: 'error',
+              message: `${providerName} AWS Access Key ID "${accessKeyToCheck}" is missing`,
+            });
+          }
+        }
+        
+        if (auth.regionSecretKey) {
+          const authRegionFieldKey = `auth_${auth.regionSecretKey}`;
+          const configuredRegionName = data[authRegionFieldKey] as string | undefined;
+          const regionKeyToCheck = configuredRegionName || auth.regionSecretKey;
+          const regionExists = hasSecret(secrets, regionKeyToCheck);
+          
+          if (!regionExists) {
+            issues.push({
+              type: 'warning',
+              message: `${providerName} AWS Region secret "${regionKeyToCheck}" is missing`,
+            });
+          }
         }
       }
     }
@@ -289,6 +342,56 @@ export function validateHttpRequestNode(
       type: 'warning',
       message: `HTTP method "${method}" may not be supported`,
     });
+  }
+
+  // Check required body fields for API-integrated requests
+  if (apiId && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+    const apiIntegration = getApiIntegration(apiId);
+    const endpointId = data.endpointId as string | undefined;
+    
+    if (apiIntegration && endpointId) {
+      const endpoint = apiIntegration.endpoints?.find(e => e.id === endpointId);
+      
+      if (endpoint?.bodySchema?.required && endpoint.bodySchema.required.length > 0) {
+        const body = (data.body || '') as string;
+        let bodyObj: any = {};
+        
+        // Try to parse body JSON
+        if (body && body.trim() !== '') {
+          try {
+            bodyObj = JSON.parse(body);
+          } catch (e) {
+            // Body is not valid JSON, might be empty or malformed
+            issues.push({
+              type: 'warning',
+              message: 'Request body is not valid JSON or is empty',
+            });
+          }
+        }
+        
+        // Check each required field
+        for (const requiredField of endpoint.bodySchema.required) {
+          const fieldValue = bodyObj[requiredField];
+          // A field is considered empty if:
+          // - undefined or null
+          // - empty string (after trimming)
+          // - empty array
+          // - empty object (no keys)
+          const isEmpty = fieldValue === undefined || 
+                         fieldValue === null || 
+                         (typeof fieldValue === 'string' && fieldValue.trim() === '') ||
+                         (Array.isArray(fieldValue) && fieldValue.length === 0) ||
+                         (typeof fieldValue === 'object' && !Array.isArray(fieldValue) && Object.keys(fieldValue).length === 0);
+          
+          if (isEmpty) {
+            issues.push({
+              type: 'error',
+              message: `Required field "${requiredField}" is missing or empty in request body`,
+            });
+          }
+        }
+      }
+    }
   }
 
   return {

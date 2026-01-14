@@ -103,7 +103,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ path, keyName, value, onPick, searc
   const isObject = !isPrimitive && !isString && typeof value === 'object' && !Array.isArray(value);
   const isArray = Array.isArray(value);
   const hasChildren = !isPrimitive && !isString && (isObject || isArray) && (
-    isArray ? (value.length > 0 && value[0] && typeof value[0] === 'object') : 
+    isArray ? value.length > 0 : 
     isObject ? Object.keys(value).length > 0 : false
   );
 
@@ -1032,6 +1032,39 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
     if (conditional.length > 0) sections.add('conditional');
     setExpandedSections(sections);
   }, [currentInput, startNodes.length, guaranteed.length, conditional.length]);
+
+  // Auto-expand nodes when debugSteps are updated (e.g., after Play button click)
+  // This ensures that newly executed nodes with output are automatically visible
+  useEffect(() => {
+    if (!debugSteps || debugSteps.length === 0) return;
+    
+    const nodesToExpand = new Set<string>();
+    
+    // Check all nodes for new output data
+    [...startNodes, ...guaranteed, ...conditional].forEach(n => {
+      const debugStep = debugSteps.find(s => s.nodeId === n.id);
+      const nodeOutput = debugStep?.output;
+      
+      // Auto-expand if node has output data
+      if (nodeOutput && (
+        (nodeOutput.json !== undefined && nodeOutput.json !== null) ||
+        (nodeOutput.data !== undefined && nodeOutput.data !== nodeOutput.json) ||
+        nodeOutput.metadata ||
+        nodeOutput.error
+      )) {
+        nodesToExpand.add(n.id);
+      }
+    });
+    
+    // Update expanded nodes (merge with existing, don't collapse already expanded ones)
+    if (nodesToExpand.size > 0) {
+      setExpandedNodes(prev => {
+        const newSet = new Set(prev);
+        nodesToExpand.forEach(id => newSet.add(id));
+        return newSet;
+      });
+    }
+  }, [debugSteps, startNodes, guaranteed, conditional]);
 
   // Optional: fetch sample outputs for API upstreams to populate tree keys
   const [upstreamPreview, setUpstreamPreview] = useState<Record<string, any>>({});

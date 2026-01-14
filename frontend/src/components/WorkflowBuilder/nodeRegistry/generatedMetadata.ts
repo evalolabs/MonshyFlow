@@ -4,7 +4,7 @@
  * This file is generated from shared/registry.json
  * Run: npm run generate:registry
  * 
- * Last generated: 2025-12-19T16:15:51.211Z
+ * Last generated: 2025-12-26T15:05:55.701Z
  */
 
 import type { NodeCategoryId } from './nodeMetadata';
@@ -546,6 +546,12 @@ export const GENERATED_NODE_METADATA = {
                                       "label": "No"
                               }
                       ]
+              },
+              "headers": {
+                      "type": "expression",
+                      "multiline": true,
+                      "rows": 4,
+                      "placeholder": "{\"Content-Type\": \"application/json\", \"Authorization\": \"Bearer {{secrets.TOKEN}}\"} or leave empty for auto-generation"
               },
               "body": {
                       "type": "expression",

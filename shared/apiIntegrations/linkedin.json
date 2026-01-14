@@ -12,12 +12,15 @@
   },
   "authentication": {
     "type": "oauth2",
+    "authorizationUrl": "https://www.linkedin.com/oauth/v2/authorization",
+    "tokenUrl": "https://www.linkedin.com/oauth/v2/accessToken",
     "headerName": "Authorization",
     "headerFormat": "Bearer {accessToken}",
     "secretKey": "LINKEDIN_ACCESS_TOKEN",
-    "tokenUrl": "https://www.linkedin.com/oauth/v2/accessToken",
     "clientIdSecretKey": "LINKEDIN_CLIENT_ID",
-    "clientSecretSecretKey": "LINKEDIN_CLIENT_SECRET"
+    "clientSecretSecretKey": "LINKEDIN_CLIENT_SECRET",
+    "scope": "r_liteprofile r_emailaddress w_member_social",
+    "refreshTokenSecretKey": "LINKEDIN_REFRESH_TOKEN"
   },
   "endpoints": [
     {

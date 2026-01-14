@@ -175,14 +175,20 @@ export function createApiHttpRequestNode(
     ...endpoint.headers,
   };
 
-  // Add authentication (header or query parameter)
+  // Add authentication (header, query parameter, or URL placeholder)
   if (apiIntegration.authentication) {
     const auth = apiIntegration.authentication;
+    
+    // Check if authentication is in URL (e.g., Telegram: /bot{token}/)
+    const useUrlAuth = auth.urlPlaceholder !== undefined;
     
     // Check if authentication should be in query parameter
     const useQueryAuth = auth.location === 'query' || auth.queryParamName;
     
-    if (useQueryAuth) {
+    if (useUrlAuth) {
+      // URL authentication (e.g., Telegram: token in URL path)
+      // Token will be replaced in URL below, no header needed
+    } else if (useQueryAuth) {
       // Query parameter authentication (e.g., Pipedrive: ?api_token=..., Hunter.io: ?api_key=...)
       // Will be added to URL below
     } else {
@@ -197,7 +203,18 @@ export function createApiHttpRequestNode(
 
   // Build URL - replace placeholders with expression syntax
   let url = endpoint.urlTemplate || `${apiIntegration.baseUrl}${endpoint.path}`;
-  // Replace {placeholder} with {{expression}} syntax for user input
+  
+  // Handle URL placeholder for authentication (e.g., Telegram: {token} in URL)
+  if (apiIntegration.authentication?.urlPlaceholder) {
+    const placeholder = apiIntegration.authentication.urlPlaceholder;
+    const placeholderPattern = placeholder.startsWith('{') && placeholder.endsWith('}') 
+      ? placeholder 
+      : `{${placeholder}}`;
+    // Replace URL placeholder with secret reference BEFORE other placeholders
+    url = url.replace(new RegExp(placeholderPattern.replace(/[{}]/g, '\\$&'), 'g'), `{{secrets.${apiIntegration.authentication.secretKey}}}`);
+  }
+  
+  // Replace other {placeholder} with {{expression}} syntax for user input
   url = url.replace(/\{(\w+)\}/g, '{{$1}}');
   
   // Add query parameters from endpoint definition
@@ -244,14 +261,25 @@ export function createApiHttpRequestNode(
       Object.entries(endpoint.bodySchema.properties).forEach(([key, prop]: [string, any]) => {
         if (prop.default !== undefined) {
           bodyTemplate[key] = prop.default;
-        } else if (prop.type === 'string') {
-          bodyTemplate[key] = '';
-        } else if (prop.type === 'number') {
-          bodyTemplate[key] = 0;
-        } else if (prop.type === 'array') {
-          bodyTemplate[key] = [];
-        } else if (prop.type === 'object') {
-          bodyTemplate[key] = {};
+        } else {
+          // Handle type as string or array of types (e.g., ["string", "number"])
+          const types = Array.isArray(prop.type) ? prop.type : [prop.type];
+          const primaryType = types[0] || 'string';
+          
+          if (primaryType === 'string') {
+            bodyTemplate[key] = '';
+          } else if (primaryType === 'number' || primaryType === 'integer') {
+            bodyTemplate[key] = 0;
+          } else if (primaryType === 'boolean') {
+            bodyTemplate[key] = false;
+          } else if (primaryType === 'array') {
+            bodyTemplate[key] = [];
+          } else if (primaryType === 'object') {
+            bodyTemplate[key] = {};
+          } else {
+            // Default to empty string for unknown types
+            bodyTemplate[key] = '';
+          }
         }
       });
     }

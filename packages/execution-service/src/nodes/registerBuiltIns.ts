@@ -475,6 +475,8 @@ registerNodeProcessor({
     name: 'HTTP Request Node',
     description: 'Send HTTP request to external URL (useful for testing scheduled workflows)',
     processNodeData: async (node, input, context) => {
+        // Import OAuth2TokenRefreshService for token refresh
+        const { OAuth2TokenRefreshService } = await import('../services/OAuth2TokenRefreshService');
         const nodeData = node.data || {};
         let url = nodeData.url || nodeData.endpoint;
         
@@ -568,12 +570,104 @@ registerNodeProcessor({
             console.log(`[HTTP Request Node] Final body (first 200 chars): ${body.substring(0, 200)}`);
         }
         
-        try {
-            const response = await fetch(url, {
-                method,
-                headers: resolvedHeaders,
-                body: method !== 'GET' && method !== 'HEAD' ? body : undefined,
+        // Helper function to make HTTP request with OAuth2 token refresh retry
+        const makeRequestWithTokenRefresh = async (
+            requestUrl: string,
+            requestMethod: string,
+            requestHeaders: Record<string, string>,
+            requestBody: string | undefined,
+            retryCount = 0
+        ): Promise<Response> => {
+            const response = await fetch(requestUrl, {
+                method: requestMethod,
+                headers: requestHeaders,
+                body: requestMethod !== 'GET' && requestMethod !== 'HEAD' ? requestBody : undefined,
             });
+
+            // Check if token expired (401 Unauthorized) and we can retry
+            if (response.status === 401 && retryCount === 0) {
+                const apiId = nodeData.apiId as string | undefined;
+                
+                // Try to refresh OAuth2 token if this is an OAuth2 API
+                if (apiId) {
+                    try {
+                        const fs = require('fs');
+                        const path = require('path');
+                        
+                        // Load API integration
+                        const apiIntegrationPath = path.join(__dirname, '../../../../shared/apiIntegrations', `${apiId}.json`);
+                        if (fs.existsSync(apiIntegrationPath)) {
+                            const apiIntegration = JSON.parse(fs.readFileSync(apiIntegrationPath, 'utf-8'));
+                            const auth = apiIntegration?.authentication;
+                            
+                            // Check if OAuth2 and has refresh token
+                            if (auth?.type === 'oauth2' && auth.refreshTokenSecretKey && auth.tokenUrl) {
+                                const refreshToken = secrets[auth.refreshTokenSecretKey];
+                                const clientId = auth.clientIdSecretKey ? secrets[auth.clientIdSecretKey] : null;
+                                const clientSecret = auth.clientSecretSecretKey ? secrets[auth.clientSecretSecretKey] : undefined;
+                                
+                                if (refreshToken && clientId) {
+                                    console.log(`[HTTP Request Node] Token expired (401), attempting refresh for ${apiId}`);
+                                    
+                                    // Refresh token
+                                    const refreshResult = await OAuth2TokenRefreshService.refreshToken(
+                                        {
+                                            apiId,
+                                            tokenUrl: auth.tokenUrl,
+                                            clientId,
+                                            clientSecret,
+                                            scope: auth.scope,
+                                            refreshTokenSecretKey: auth.refreshTokenSecretKey,
+                                            accessTokenSecretKey: auth.secretKey
+                                        },
+                                        refreshToken,
+                                        null, // secretsService not available here, will update in workflow context
+                                        context.workflow?.tenantId || ''
+                                    );
+                                    
+                                    // Update secrets in context for retry
+                                    if (secrets) {
+                                        secrets[auth.secretKey] = refreshResult.accessToken;
+                                        if (refreshResult.refreshToken) {
+                                            secrets[auth.refreshTokenSecretKey] = refreshResult.refreshToken;
+                                        }
+                                    }
+                                    
+                                    // Update headers with new token
+                                    const newHeaders = { ...requestHeaders };
+                                    if (auth.headerFormat) {
+                                        const headerValue = auth.headerFormat
+                                            .replace('{accessToken}', refreshResult.accessToken)
+                                            .replace('{apiKey}', refreshResult.accessToken);
+                                        newHeaders[auth.headerName || 'Authorization'] = headerValue;
+                                    } else {
+                                        newHeaders[auth.headerName || 'Authorization'] = `Bearer ${refreshResult.accessToken}`;
+                                    }
+                                    
+                                    console.log(`[HTTP Request Node] Token refreshed, retrying request`);
+                                    
+                                    // Retry request with new token
+                                    return makeRequestWithTokenRefresh(requestUrl, requestMethod, newHeaders, requestBody, retryCount + 1);
+                                }
+                            }
+                        }
+                    } catch (refreshError: any) {
+                        console.error('[HTTP Request Node] Token refresh failed:', refreshError);
+                        // Continue with original response
+                    }
+                }
+            }
+            
+            return response;
+        };
+        
+        try {
+            const response = await makeRequestWithTokenRefresh(
+                url,
+                method,
+                resolvedHeaders,
+                method !== 'GET' && method !== 'HEAD' ? body : undefined
+            );
 
             const responseText = await response.text();
             

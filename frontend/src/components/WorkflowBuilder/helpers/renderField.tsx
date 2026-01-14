@@ -117,7 +117,6 @@ export function renderField({
           currentNodeId={currentNodeId}
           previewSource={previewSource}
           debugSteps={debugSteps}
-          secrets={secrets}
         />
       </div>
     );

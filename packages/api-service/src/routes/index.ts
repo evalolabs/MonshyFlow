@@ -3,6 +3,7 @@ import { DependencyContainer } from 'tsyringe';
 import { WorkflowController } from '../controllers/WorkflowController';
 import { AdminController } from '../controllers/AdminController';
 import { TenantController } from '../controllers/TenantController';
+import { OAuth2Controller } from '../controllers/OAuth2Controller';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { serviceKeyMiddleware } from '../middleware/serviceKeyMiddleware';
 import { logger } from '@monshy/core';
@@ -47,10 +48,12 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
   container.register('WorkflowController', { useClass: WorkflowController });
   container.register('AdminController', { useClass: AdminController });
   container.register('TenantController', { useClass: TenantController });
+  container.register('OAuth2Controller', { useClass: OAuth2Controller });
   
   const workflowController = container.resolve(WorkflowController);
   const adminController = container.resolve(AdminController);
   const tenantController = container.resolve(TenantController);
+  const oauth2Controller = container.resolve(OAuth2Controller);
   
   // ============================================
   // Workflow Routes (direkt im API Service)

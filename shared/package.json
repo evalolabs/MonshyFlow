@@ -6,6 +6,7 @@
     "generate:registry": "ts-node scripts/generateRegistry.ts",
     "validate:registry": "ts-node scripts/validateRegistry.ts",
     "check:consistency": "ts-node scripts/registryConsistencyCheck.ts",
+    "categorize:apis": "ts-node scripts/categorizeApiAuth.ts",
     "prebuild": "npm run validate:registry && npm run check:consistency"
   },
   "devDependencies": {

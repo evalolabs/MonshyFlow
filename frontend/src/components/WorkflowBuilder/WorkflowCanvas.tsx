@@ -681,6 +681,40 @@ export function WorkflowCanvas({
       hasOutput: clickedNode?.data?.hasOutput
     });
     
+    // Initialize debugSteps for animation - create steps for all nodes in path
+    const testNodeIndex = fullOrder.findIndex(n => n.id === nodeId);
+    const pathNodes = testNodeIndex >= 0 ? fullOrder.slice(0, testNodeIndex + 1) : (clickedNode ? [clickedNode] : []);
+    
+    // Only initialize debug steps if we have nodes in the path
+    if (pathNodes.length > 0) {
+      // Create initial debug steps for all nodes in the path
+      const initialDebugSteps = pathNodes.map((node, index) => {
+        const isFirst = index === 0;
+        return {
+          nodeId: node.id,
+          nodeType: node.type || step?.nodeType || 'unknown',
+          nodeLabel: node.data?.label || step?.nodeLabel || node.type || node.id,
+          status: isFirst ? 'running' : 'pending', // First node starts as 'running' to trigger animation
+          input: step?.input || null,
+          output: null,
+          startedAt: isFirst ? new Date().toISOString() : null,
+          completedAt: null,
+          duration: 0,
+          debugInfo: {
+            inputSchema: null,
+            outputSchema: null,
+            inputPreview: '',
+            outputPreview: '',
+            dataType: 'unknown',
+            size: 0
+          }
+        };
+      });
+      
+      // Set debug steps immediately to start animation
+      setDebugSteps(initialDebugSteps);
+    }
+    
     setTestingNodeId(nodeId);
     
     // Create SSE connection for real-time events (if not already connected)
@@ -696,8 +730,7 @@ export function WorkflowCanvas({
     // Calculate animation duration based on number of nodes in the path
     // This is a fallback estimate - actual duration comes from SSE events
     // fullOrder is already defined above for LOG 1
-    const testNodeIndex = fullOrder.findIndex(n => n.id === nodeId);
-    const nodesInPath = testNodeIndex >= 0 ? testNodeIndex + 1 : 1;
+    const nodesInPath = pathNodes.length > 0 ? pathNodes.length : 1;
     
     // Calculate duration: fast nodes (200ms) + slow nodes (will use real duration from SSE)
     // For node tests with SSE, slow nodes will wait for real events
@@ -707,7 +740,6 @@ export function WorkflowCanvas({
     const slowNodeTypes = ['agent', 'llm', 'http-request', 'api', 'email', 'tool'];
     let fastCount = 0;
     let slowCount = 0;
-    const pathNodes = fullOrder.slice(0, testNodeIndex + 1);
     pathNodes.forEach(node => {
       if (node.type && fastNodeTypes.includes(node.type)) {
         fastCount++;

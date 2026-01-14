@@ -1,4 +1,4 @@
-import { api, executionApi } from './api';
+import { api } from './api';
 import type { Workflow, CreateWorkflowRequest, ExecutionRequest, ExecutionResponse, Execution } from '../types/workflow';
 import type { StartNodeUpdateRequest } from '../types/startNode';
 

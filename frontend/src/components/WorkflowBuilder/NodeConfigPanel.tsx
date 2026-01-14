@@ -16,6 +16,7 @@ import { getNodeMetadata } from './nodeRegistry/nodeMetadata';
 import { validateNode } from './utils/nodeValidation';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getApiIntegration } from '../../config/apiIntegrations';
+import { ApiAuthConfig } from './NodeConfigPanel/ApiAuthConfig';
 
 type SecretTypeQuery = 'ApiKey' | 'Password' | 'Token' | 'Generic' | 'Smtp';
 
@@ -1205,7 +1206,12 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
           </div>
         );
 
-      case 'http-request':
+      case 'http-request': {
+        // Check if this is an API-integrated request
+        const apiId = config.apiId as string | undefined;
+        const apiIntegration = apiId ? getApiIntegration(apiId) : undefined;
+        const auth = apiIntegration?.authentication;
+
         return (
           <div className="space-y-3">
             {renderFieldWithDebug({
@@ -1237,6 +1243,34 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 { value: 'DELETE', label: 'DELETE' },
                 { value: 'PATCH', label: 'PATCH' },
               ],
+            })}
+
+            {/* API Authentication Configuration */}
+            {apiIntegration && auth && (
+              <ApiAuthConfig
+                apiIntegration={apiIntegration}
+                config={config}
+                setConfig={setConfig}
+                secrets={secrets}
+                secretsLoading={secretsLoading}
+                reloadSecrets={reloadSecrets}
+                nodes={nodes}
+                edges={edges}
+                currentNodeId={selectedNode?.id || ''}
+                workflowId={workflowId}
+                debugSteps={debugSteps}
+              />
+            )}
+
+            {/* Headers Field - automatically generated if API integration is active */}
+            {renderFieldWithDebug({
+              nodeType: 'http-request',
+              fieldName: 'headers',
+              label: apiIntegration && auth 
+                ? 'Request Headers (Auto-generated from Auth above)' 
+                : 'Request Headers (JSON)',
+              value: config.headers || '',
+              onChange: (value) => setConfig({ ...config, headers: value }),
             })}
             
             {renderFieldWithDebug({
@@ -1347,6 +1381,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
             </div>
           </div>
         );
+      }
 
       default:
         // Use metadata-driven config form for all unhandled node types

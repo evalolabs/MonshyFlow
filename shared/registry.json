@@ -363,6 +363,12 @@
               { "value": "false", "label": "No" }
             ]
           },
+          "headers": {
+            "type": "expression",
+            "multiline": true,
+            "rows": 4,
+            "placeholder": "{\"Content-Type\": \"application/json\", \"Authorization\": \"Bearer {{secrets.TOKEN}}\"} or leave empty for auto-generation"
+          },
           "body": {
             "type": "expression",
             "multiline": true,

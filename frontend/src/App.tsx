@@ -10,6 +10,7 @@ import { UserManagementPage } from './pages/UserManagementPage';
 import { SecretsManagementPage } from './pages/SecretsManagementPage';
 import { TenantManagementPage } from './pages/TenantManagementPage';
 import { ApiKeysManagementPage } from './pages/ApiKeysManagementPage';
+import { OAuth2CallbackPage } from './pages/OAuth2CallbackPage';
 import { NavigationWrapper } from './components/Navigation/NavigationWrapper';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
@@ -33,6 +34,7 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/oauth2/callback" element={<OAuth2CallbackPage />} />
           
           {/* Protected routes */}
           <Route

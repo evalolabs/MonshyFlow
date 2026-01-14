@@ -202,13 +202,13 @@ export function useNodeConfigAutoSave({
                   if (isRetryNodeNotFound && retryCountRef.current < 3) {
                     // Will retry again on next config change
                     autoSaveLogger.warn(`Retry ${retryCountRef.current} failed - node still not found, will retry on next change`, {
-                      nodeId: pendingSaveRef.current.nodeId,
+                      nodeId: pendingSaveRef.current?.nodeId,
                       workflowId,
                       retryCount: retryCountRef.current
                     });
                   } else {
                     autoSaveLogger.warn('Node not found after retries - workflow may need to be saved first', {
-                      nodeId: pendingSaveRef.current.nodeId,
+                      nodeId: pendingSaveRef.current?.nodeId,
                       workflowId,
                       retryCount: retryCountRef.current,
                       error: retryError.message

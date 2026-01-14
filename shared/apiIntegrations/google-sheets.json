@@ -13,9 +13,15 @@
   },
   "authentication": {
     "type": "oauth2",
+    "authorizationUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+    "tokenUrl": "https://oauth2.googleapis.com/token",
     "headerName": "Authorization",
     "headerFormat": "Bearer {accessToken}",
-    "secretKey": "GOOGLE_SHEETS_ACCESS_TOKEN"
+    "secretKey": "GOOGLE_SHEETS_ACCESS_TOKEN",
+    "clientIdSecretKey": "GOOGLE_SHEETS_CLIENT_ID",
+    "clientSecretSecretKey": "GOOGLE_SHEETS_CLIENT_SECRET",
+    "scope": "https://www.googleapis.com/auth/spreadsheets",
+    "refreshTokenSecretKey": "GOOGLE_SHEETS_REFRESH_TOKEN"
   },
   "endpoints": [
     {
