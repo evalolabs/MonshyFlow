@@ -91,20 +91,16 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
     [selectedNode?.id, selectedNode?.type, selectedNode?.data?.toolId, JSON.stringify(selectedNode?.data)]
   );
   
-  // Debug logging
+  // Debug logging (only when node selection changes, not on every config update)
   useEffect(() => {
     if (selectedNode) {
-      console.log('[NodeConfigPanel] Node catalog loading state:', {
+      console.log('[NodeConfigPanel] Node selected:', {
         selectedNodeType: selectedNode.type,
         effectiveNodeType,
-        selectedNodeData: selectedNode.data,
-        configToolId: config?.toolId,
-        configType: config?.type,
+        nodeId: selectedNode.id,
       });
-    } else {
-      console.log('[NodeConfigPanel] No node selected');
     }
-  }, [selectedNode, effectiveNodeType, config]);
+  }, [selectedNode?.id, selectedNode?.type, effectiveNodeType]);
   
   const {
     functionCatalog,
@@ -122,49 +118,38 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
     selectedNodeId: selectedNode?.id,
   });
   
-  // Debug logging for catalog data - ALWAYS log when node is selected
+  // Debug logging for catalog data - Only log when loading states change, not on every catalog update
   useEffect(() => {
     if (!selectedNode) return;
     
-    console.log('[NodeConfigPanel] Catalog loading states:', {
-      effectiveNodeType,
-      isFunctionNode: effectiveNodeType === 'tool-function',
-      isMcpNode: effectiveNodeType === 'tool-mcp-server',
-      isWebSearchNode: effectiveNodeType === 'tool-web-search',
-      functionCatalog: {
-        isLoading: isLoadingFunctionCatalog,
-        length: functionCatalog.length,
-        error: functionCatalogError,
-        items: functionCatalog.map(f => f.name),
-        fullCatalog: functionCatalog, // Show full catalog for debugging
-      },
-      mcpHandlers: {
-        isLoading: isLoadingMcpHandlers,
-        length: mcpHandlers.length,
-        error: mcpHandlersError,
-        items: mcpHandlers.map(h => h.name),
-        fullHandlers: mcpHandlers, // Show full handlers for debugging
-      },
-      webSearchHandlers: {
-        isLoading: isLoadingWebSearchHandlers,
-        length: webSearchHandlers.length,
-        error: webSearchHandlersError,
-        items: webSearchHandlers.map(h => h.name),
-        fullHandlers: webSearchHandlers, // Show full handlers for debugging
-      },
-    });
+    // Only log when loading states change or when catalogs are first loaded
+    if (isLoadingFunctionCatalog || isLoadingMcpHandlers || isLoadingWebSearchHandlers) {
+      return; // Don't log while loading
+    }
+    
+    // Only log once when catalogs are loaded (use ref to track if we've logged)
+    const shouldLog = 
+      (effectiveNodeType === 'tool-function' && functionCatalog.length > 0) ||
+      (effectiveNodeType === 'tool-mcp-server' && mcpHandlers.length > 0) ||
+      (effectiveNodeType === 'tool-web-search' && webSearchHandlers.length > 0);
+    
+    if (shouldLog) {
+      console.log('[NodeConfigPanel] Catalog loaded:', {
+        effectiveNodeType,
+        functionCatalogCount: functionCatalog.length,
+        mcpHandlersCount: mcpHandlers.length,
+        webSearchHandlersCount: webSearchHandlers.length,
+      });
+    }
   }, [
-    selectedNode,
+    selectedNode?.id,
     effectiveNodeType,
     isLoadingFunctionCatalog,
-    functionCatalog,
-    functionCatalogError,
     isLoadingMcpHandlers,
-    mcpHandlers,
-    mcpHandlersError,
     isLoadingWebSearchHandlers,
-    webSearchHandlers,
-    webSearchHandlersError,
+    functionCatalog.length,
+    mcpHandlers.length,
+    webSearchHandlers.length,
   ]);
 
   // Use the new auto-save hook

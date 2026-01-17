@@ -489,20 +489,6 @@ export function DebugNode({ step, isExpanded, onToggle, workflowId, onStepUpdate
 
   return (
     <div className="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
-      {/* Input Button for Start Node with Webhook Schema */}
-      {isStartNodeWithWebhookSchema() && workflowId && (
-        <div className="px-2 py-1 border-b border-blue-200 bg-blue-50/50">
-          <button
-            onClick={handleOpenInputModal}
-            className="w-full px-2 py-1 text-xs font-medium text-blue-700 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors flex items-center justify-center gap-1.5"
-            title="Configure test input for webhook"
-          >
-            <Database className="w-3.5 h-3.5" />
-            <span>Configure Test Input</span>
-          </button>
-        </div>
-      )}
-      
       {/* Node Header */}
       <div 
         className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50 transition-colors"

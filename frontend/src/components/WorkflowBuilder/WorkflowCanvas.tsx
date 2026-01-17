@@ -682,37 +682,61 @@ export function WorkflowCanvas({
     });
     
     // Initialize debugSteps for animation - create steps for all nodes in path
+    // IMPORTANT: Preserve all existing steps, only update/add steps for nodes in the path
     const testNodeIndex = fullOrder.findIndex(n => n.id === nodeId);
     const pathNodes = testNodeIndex >= 0 ? fullOrder.slice(0, testNodeIndex + 1) : (clickedNode ? [clickedNode] : []);
     
     // Only initialize debug steps if we have nodes in the path
     if (pathNodes.length > 0) {
-      // Create initial debug steps for all nodes in the path
-      const initialDebugSteps = pathNodes.map((node, index) => {
-        const isFirst = index === 0;
-        return {
-          nodeId: node.id,
-          nodeType: node.type || step?.nodeType || 'unknown',
-          nodeLabel: node.data?.label || step?.nodeLabel || node.type || node.id,
-          status: isFirst ? 'running' : 'pending', // First node starts as 'running' to trigger animation
-          input: step?.input || null,
-          output: null,
-          startedAt: isFirst ? new Date().toISOString() : null,
-          completedAt: null,
-          duration: 0,
-          debugInfo: {
-            inputSchema: null,
-            outputSchema: null,
-            inputPreview: '',
-            outputPreview: '',
-            dataType: 'unknown',
-            size: 0
+      // Update debug steps, preserving all existing steps (especially downstream nodes)
+      setDebugSteps(prevSteps => {
+        const existingStepsMap = new Map(prevSteps.map(s => [s.nodeId, s]));
+        const pathNodeIds = new Set(pathNodes.map(n => n.id));
+        
+        // Create/update steps for nodes in the path
+        const pathSteps = pathNodes.map((node, index) => {
+          const isFirst = index === 0;
+          const existingStep = existingStepsMap.get(node.id);
+          
+          // If step already exists and has been tested, preserve it but mark first node as running
+          if (existingStep && existingStep.status !== 'pending') {
+            return {
+              ...existingStep,
+              status: isFirst ? 'running' : existingStep.status,
+              startedAt: isFirst ? new Date().toISOString() : existingStep.startedAt,
+            };
           }
-        };
+          
+          // Create new step for nodes in path
+          // Only mark first node (start) as 'running' - animation will flow through via SSE events
+          return {
+            nodeId: node.id,
+            nodeType: node.type || step?.nodeType || 'unknown',
+            nodeLabel: node.data?.label || step?.nodeLabel || node.type || node.id,
+            status: isFirst ? 'running' : 'pending', // Only first node starts as 'running' - SSE events will animate the rest
+            input: step?.input || existingStep?.input || null,
+            output: existingStep?.output || null,
+            startedAt: isFirst ? new Date().toISOString() : existingStep?.startedAt || null,
+            completedAt: existingStep?.completedAt || null,
+            duration: existingStep?.duration || 0,
+            debugInfo: existingStep?.debugInfo || {
+              inputSchema: null,
+              outputSchema: null,
+              inputPreview: '',
+              outputPreview: '',
+              dataType: 'unknown',
+              size: 0
+            }
+          };
+        });
+        
+        // Combine: path steps (updated) + all other existing steps (preserved)
+        const pathStepsMap = new Map(pathSteps.map(s => [s.nodeId, s]));
+        const otherSteps = prevSteps.filter(s => !pathNodeIds.has(s.nodeId));
+        
+        // Return path steps first (in order), then all other steps
+        return [...pathSteps, ...otherSteps];
       });
-      
-      // Set debug steps immediately to start animation
-      setDebugSteps(initialDebugSteps);
     }
     
     setTestingNodeId(nodeId);
@@ -736,7 +760,7 @@ export function WorkflowCanvas({
     // For node tests with SSE, slow nodes will wait for real events
     // Estimate: 200ms for fast nodes, 1500ms for slow nodes (fallback), plus 1s buffer
     // Count fast vs slow nodes in path
-    const fastNodeTypes = ['start', 'end', 'transform'];
+    const fastNodeTypes = ['start', 'end', 'transform', 'code'];
     const slowNodeTypes = ['agent', 'llm', 'http-request', 'api', 'email', 'tool'];
     let fastCount = 0;
     let slowCount = 0;
@@ -831,6 +855,8 @@ export function WorkflowCanvas({
     });
     
     // Process the trace from the backend and update all relevant steps
+    // IMPORTANT: When testing a single node, only update that node and its dependencies
+    // Keep all other steps (especially downstream nodes) unchanged
     if (execution?.trace && Array.isArray(execution.trace)) {
       setDebugSteps(prevSteps => {
         const newStepsMap = new Map<string, any>();
@@ -838,7 +864,7 @@ export function WorkflowCanvas({
         // Create a map of existing steps
         const existingStepsMap = new Map(prevSteps.map(step => [step.nodeId, step]));
         
-        // Process each trace entry
+        // Process each trace entry - only update nodes that are in the trace
         execution.trace.forEach((traceEntry: any) => {
           const existingStep = existingStepsMap.get(traceEntry.nodeId);
           const outputPayload = traceEntry.output;
@@ -867,8 +893,18 @@ export function WorkflowCanvas({
           newStepsMap.set(derivedStep.nodeId, derivedStep);
         });
 
-        // Update existing steps and add new ones
-        const updatedSteps = prevSteps.map(step => newStepsMap.get(step.nodeId) || step);
+        // CRITICAL: Preserve ALL existing steps, only update those in the trace
+        // This ensures downstream nodes are not removed when testing a single node
+        const updatedSteps = prevSteps.map(step => {
+          // If this step is in the trace, use the updated version
+          if (newStepsMap.has(step.nodeId)) {
+            return newStepsMap.get(step.nodeId);
+          }
+          // Otherwise, keep the existing step unchanged
+          return step;
+        });
+        
+        // Add any new steps from trace that don't exist yet
         newStepsMap.forEach(newStep => {
           if (!updatedSteps.some(s => s.nodeId === newStep.nodeId)) {
             updatedSteps.push(newStep);
@@ -1343,9 +1379,11 @@ export function WorkflowCanvas({
       }
       
       const nodeLabel = event.data?.nodeLabel || event.data?.node_label || nodeId;
+      const nodeType = event.data?.nodeType || event.data?.node_type || 'unknown';
+      
       console.log(`[Animation] ⏹️ Node-Animation beendet: ${nodeLabel} (${nodeId})`, {
         nodeId,
-        nodeType: event.data?.nodeType || event.data?.node_type || 'unknown',
+        nodeType,
         nodeLabel,
         animationDuration: `${animationDuration}ms`,
         backendDuration: event.data?.duration ? `${event.data.duration}ms` : 'N/A',
@@ -1353,34 +1391,50 @@ export function WorkflowCanvas({
         timestamp: endTime
       });
 
-      // Update debugSteps in real-time - mark node as 'completed'
-      setDebugSteps(prevSteps => {
-        const existingIndex = prevSteps.findIndex(step => step.nodeId === nodeId);
-        if (existingIndex >= 0) {
-          // Update existing step
-          const newSteps = [...prevSteps];
-          newSteps[existingIndex] = {
-            ...newSteps[existingIndex],
-            status: 'completed',
-            output: event.data?.output,
-            completedAt: event.data?.completedAt || new Date().toISOString(),
-            duration: event.data?.duration || 0,
-          };
-          return newSteps;
-        } else {
-          // Add new step if it doesn't exist
-          return [...prevSteps, {
-            nodeId,
-            nodeType: event.data?.nodeType || event.data?.node_type || 'unknown',
-            nodeLabel: event.data?.nodeLabel || event.data?.node_label,
-            status: 'completed',
-            output: event.data?.output,
-            startedAt: event.data?.startedAt || new Date().toISOString(),
-            completedAt: event.data?.completedAt || new Date().toISOString(),
-            duration: event.data?.duration || 0,
-          }];
-        }
-      });
+      // For very fast nodes (especially code nodes), ensure minimum animation visibility
+      // If the node completed in less than 200ms, delay the status update to allow animation to be visible
+      const MIN_ANIMATION_DURATION = 200; // Minimum 200ms for animation visibility
+      const actualDuration = animationDuration || event.data?.duration || 0;
+      const needsMinDuration = actualDuration < MIN_ANIMATION_DURATION;
+
+      const updateStatusToCompleted = () => {
+        setDebugSteps(prevSteps => {
+          const existingIndex = prevSteps.findIndex(step => step.nodeId === nodeId);
+          if (existingIndex >= 0) {
+            // Update existing step
+            const newSteps = [...prevSteps];
+            newSteps[existingIndex] = {
+              ...newSteps[existingIndex],
+              status: 'completed',
+              output: event.data?.output,
+              completedAt: event.data?.completedAt || new Date().toISOString(),
+              duration: event.data?.duration || 0,
+            };
+            return newSteps;
+          } else {
+            // Add new step if it doesn't exist
+            return [...prevSteps, {
+              nodeId,
+              nodeType,
+              nodeLabel: event.data?.nodeLabel || event.data?.node_label,
+              status: 'completed',
+              output: event.data?.output,
+              startedAt: event.data?.startedAt || new Date().toISOString(),
+              completedAt: event.data?.completedAt || new Date().toISOString(),
+              duration: event.data?.duration || 0,
+            }];
+          }
+        });
+      };
+
+      if (needsMinDuration) {
+        // Delay status update to ensure animation is visible
+        const delay = MIN_ANIMATION_DURATION - actualDuration;
+        setTimeout(updateStatusToCompleted, delay);
+      } else {
+        // Update immediately for slower nodes
+        updateStatusToCompleted();
+      }
     };
 
     // Register SSE event handlers

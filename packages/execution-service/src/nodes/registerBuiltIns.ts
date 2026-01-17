@@ -1,6 +1,6 @@
 import { registerNodeProcessor } from './index';
 import type { NodeProcessorContext } from './index';
-import { createNodeData, extractData, type NodeData } from '../models/nodeData';
+import { createNodeData, extractData, createErrorNodeData, type NodeData } from '../models/nodeData';
 import { expressionResolutionService } from '../services/expressionResolutionService';
 
 /**
@@ -345,6 +345,176 @@ function evaluateCustomExpression(input: NodeData | null, expression: string, co
 
     return replaceExpressions(parsed);
 }
+
+// Code Node Processor
+registerNodeProcessor({
+    type: 'code',
+    name: 'Code Node',
+    description: 'Execute custom JavaScript code to transform data',
+    processNodeData: async (node, input, context) => {
+        const code = node.data?.code || '';
+
+        if (!code || !code.trim()) {
+            return createErrorNodeData(
+                'Code is required for the Code Node.',
+                node.id,
+                node.type || 'code'
+            );
+        }
+
+        try {
+            // Build steps object from execution trace for variable access
+            // Note: We don't resolve expressions here - the user's code will access the data directly
+            const steps: Record<string, any> = {};
+            if (context?.execution?.trace) {
+                for (const traceEntry of context.execution.trace) {
+                    if (traceEntry.nodeId && traceEntry.nodeId !== node.id) {
+                        // Use output directly without expression resolution
+                        // The user's code can access the data via $steps.nodeId.json, etc.
+                        steps[traceEntry.nodeId] = traceEntry.output || traceEntry.input;
+                    }
+                }
+            }
+
+            // Import vm module for safe code execution
+            const { createContext, Script } = await import('vm');
+
+            // Create VM context with input data and utilities
+            const vmContext = createContext({
+                // Input data from previous node (full NodeData object)
+                $input: input || null,
+                // Alias for $input.json
+                $json: input?.json || null,
+                // Outputs of previous nodes
+                $steps: steps,
+                // Resolved secrets
+                $secrets: context.secrets || {},
+                // Common JavaScript utilities
+                console: {
+                    log: (...args: any[]) => console.log(`[CodeNode:${node.id}]`, ...args),
+                    error: (...args: any[]) => console.error(`[CodeNode:${node.id}]`, ...args),
+                    warn: (...args: any[]) => console.warn(`[CodeNode:${node.id}]`, ...args),
+                },
+                JSON: JSON,
+                Math: Math,
+                Date: Date,
+                Array: Array,
+                Object: Object,
+                String: String,
+                Number: Number,
+                Boolean: Boolean,
+                RegExp: RegExp,
+                Error: Error,
+                TypeError: TypeError,
+                RangeError: RangeError,
+                // Async support
+                Promise: Promise,
+                setTimeout: (callback: (...args: any[]) => void, delay: number, ...args: any[]) => {
+                    // Use global setTimeout (available in Node.js)
+                    return global.setTimeout(callback, delay, ...args);
+                },
+                // Helper function for delays (returns a Promise)
+                delay: (ms: number) => {
+                    return new Promise(resolve => global.setTimeout(resolve, ms));
+                },
+            });
+
+            // Execute code in VM context
+            // Always wrap in async IIFE to support both sync and async code
+            // This allows users to use await without explicitly declaring async
+            const wrappedCode = `(async () => { ${code} })()`;
+            
+            const script = new Script(wrappedCode);
+            let result = script.runInContext(vmContext, {
+                timeout: 5000, // 5 second timeout
+                displayErrors: true,
+            });
+
+            // Result is always a Promise (because of async IIFE), so await it
+            result = await result;
+
+            // Create new NodeData with result
+            return createNodeData(
+                result,
+                node.id,
+                node.type || 'code',
+                input?.metadata?.nodeId
+            );
+        } catch (error: any) {
+            console.error(`[CodeNode:${node.id}] Code execution failed:`, error);
+            
+            // Return error NodeData
+            return createErrorNodeData(
+                `Code execution failed: ${error.message || 'Unknown error'}`,
+                node.id,
+                node.type || 'code',
+                'CODE_EXECUTION_ERROR',
+                { 
+                    error: error.message,
+                    stack: error.stack 
+                }
+            );
+        }
+    },
+    // Legacy method for backward compatibility
+    process: async (node, input, context) => {
+        const code = node.data?.code || '';
+
+        if (!code || !code.trim()) {
+            throw new Error('Code is required for Code Node');
+        }
+
+        try {
+            // Build steps object from execution trace
+            const steps: Record<string, any> = {};
+            if (context?.execution?.trace) {
+                for (const traceEntry of context.execution.trace) {
+                    if (traceEntry.nodeId && traceEntry.nodeId !== node.id) {
+                        steps[traceEntry.nodeId] = traceEntry.output || traceEntry.input;
+                    }
+                }
+            }
+
+            // Import vm module for safe code execution
+            const { createContext, Script } = await import('vm');
+
+            const vmContext = createContext({
+                $input: input || null,
+                $json: (input as any)?.json || input || null,
+                $steps: steps,
+                $secrets: context.secrets || {},
+                console: {
+                    log: (...args: any[]) => console.log(`[CodeNode:${node.id}]`, ...args),
+                    error: (...args: any[]) => console.error(`[CodeNode:${node.id}]`, ...args),
+                    warn: (...args: any[]) => console.warn(`[CodeNode:${node.id}]`, ...args),
+                },
+                JSON: JSON,
+                Math: Math,
+                Date: Date,
+            });
+
+            // Wrap code in an IIFE to support return statements
+            const wrappedCode = `(() => { ${code} })()`;
+            const script = new Script(wrappedCode);
+            const result = script.runInContext(vmContext, {
+                timeout: 5000,
+                displayErrors: true,
+            });
+
+            return result;
+        } catch (error: any) {
+            console.error(`[CodeNode:${node.id}] Error executing code:`, error);
+            throw error;
+        }
+    },
+    validate: (node) => {
+        const code = node.data?.code || '';
+        if (!code || !code.trim()) {
+            return { valid: false, error: 'Code is required' };
+        }
+        return { valid: true };
+    },
+});
 
 // LLM Node Processor
 registerNodeProcessor({

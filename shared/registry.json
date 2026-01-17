@@ -641,6 +641,47 @@
           }
         }
       }
+    },
+    {
+      "type": "code",
+      "name": "Code",
+      "icon": "💻",
+      "description": "Execute custom JavaScript code to transform data",
+      "category": "core",
+      "animationSpeed": "fast",
+      "typescriptProcessor": "./nodes/registerBuiltIns#code",
+      "inputSchema": {
+        "type": "object",
+        "description": "Accepts any input from previous nodes. Access via $input, $json, $steps, $secrets in code.",
+        "additionalProperties": true
+      },
+      "outputSchema": {
+        "type": "object",
+        "description": "Output depends on the code execution result",
+        "additionalProperties": true
+      },
+      "frontend": {
+        "hasConfigForm": true,
+        "useAutoConfigForm": false,
+        "isUnique": false,
+        "canDuplicate": true,
+        "hasInput": true,
+        "hasOutput": true,
+        "configFormComponent": "CodeNodeConfigForm",
+        "fields": {
+          "label": {
+            "type": "text",
+            "placeholder": "Code Node Name"
+          },
+          "code": {
+            "type": "expression",
+            "multiline": true,
+            "rows": 15,
+            "placeholder": "// Write your JavaScript code here\n// Access input data from previous nodes using variables\n// Example: const data = {{steps.start.json}};\n\n// Your code here\nreturn data;"
+          }
+        }
+      },
+      "note": "Code Node uses custom CodeNodeConfigForm with CodeMirror editor. Processor is implemented in registerBuiltIns.ts (outside AUTO-GENERATED section)."
     }
   ],
   "tools": [

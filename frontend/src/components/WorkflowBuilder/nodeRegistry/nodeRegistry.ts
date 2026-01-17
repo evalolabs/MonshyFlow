@@ -21,6 +21,7 @@ import { AgentNode } from '../NodeTypes/OptimizedNodes';
 import { LLMNode } from '../NodeTypes/OptimizedNodes';
 import { HttpRequestNode } from '../NodeTypes/OptimizedNodes';
 import { TransformNode } from '../NodeTypes/OptimizedNodes';
+import { CodeNode } from '../NodeTypes/CodeNode';
 import { EmailNode } from '../NodeTypes/OptimizedNodes';
 import { WhileNode } from '../NodeTypes/WhileNode';
 import { ForEachNode } from '../NodeTypes/ForEachNode';
@@ -36,6 +37,7 @@ const NODE_COMPONENTS: Record<string, ComponentType<any>> = {
   start: StartNode,
   end: EndNode,
   transform: TransformNode,
+  code: CodeNode,
   agent: AgentNode,
   llm: LLMNode,
   'http-request': HttpRequestNode,
@@ -233,7 +235,7 @@ export function createNodeTypesMap(
     // Wrap other nodes with execution status and animation
     // Use React.createElement since this is a .ts file (not .tsx)
     nodeTypes[nodeType] = (props: any) => {
-      const nodeId = props.data?.id;
+      const nodeId = props.data?.id || props.id;
       // Use isNodeAnimating function if available, otherwise fallback to simple comparison
       const isAnimating = typeof isNodeAnimating === 'function' 
         ? isNodeAnimating(nodeId)

@@ -146,6 +146,18 @@ export const NODE_METADATA_REGISTRY: Record<string, NodeMetadata> = {
       },
     },
   },
+  code: {
+    id: 'code',
+    name: 'Code',
+    icon: '💻',
+    description: 'Execute custom JavaScript code to transform data',
+    category: 'core',
+    animationSpeed: 'fast',
+    component: () => null, // Will be lazy-loaded
+    hasConfigForm: true,
+    hasInput: true,
+    hasOutput: true,
+  },
   
   // AI Nodes
   llm: {

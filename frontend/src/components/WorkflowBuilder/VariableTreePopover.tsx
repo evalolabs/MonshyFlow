@@ -914,6 +914,24 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't handle if user is typing in any input/textarea (not just search)
+      const activeElement = document.activeElement;
+      const isInputElement = activeElement && (
+        activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA' ||
+        (activeElement as HTMLElement).isContentEditable
+      );
+      
+      // If user is typing in an input/textarea, only handle Escape to close
+      if (isInputElement) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          onClose();
+        }
+        // Don't intercept any other keys when typing in input/textarea
+        return;
+      }
+      
       // Don't handle if user is typing in search input
       if (searchInputRef.current && document.activeElement === searchInputRef.current) {
         // Allow Escape to close even when in search

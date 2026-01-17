@@ -179,10 +179,10 @@ export function SecretsManagementPage() {
         {user?.tenantName && (
           <div className="mb-4 flex items-center gap-2">
             <span className="px-3 py-1.5 text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-lg">
-              🏢 Tenant: {user.tenantName}
+              🏢 {user.tenantName}
             </span>
             <span className="text-xs text-gray-500">
-              Only secrets from this tenant are shown
+              Showing secrets for your organization
             </span>
           </div>
         )}

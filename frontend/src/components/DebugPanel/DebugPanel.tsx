@@ -5,10 +5,12 @@
  */
 
 import React, { useState } from 'react';
-import { Code, Maximize2, Minimize2, Search, X } from 'lucide-react';
+import { Code, Maximize2, Minimize2, Search, X, Database } from 'lucide-react';
 import type { ExecutionStep } from '../../types/workflow';
 import type { Node, Edge } from '@xyflow/react';
 import { DebugNode } from './DebugNode';
+import { InputSchemaFormModal } from './InputSchemaFormModal';
+import { testInputStorage } from '../../utils/testInputStorage';
 
 interface DebugPanelProps {
   executionSteps: ExecutionStep[];
@@ -27,6 +29,7 @@ export function DebugPanel({ executionSteps, isVisible, onClose, workflowId, onS
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [localSteps, setLocalSteps] = useState<ExecutionStep[]>(executionSteps);
+  const [showInputModal, setShowInputModal] = useState(false);
 
   // Update local steps when executionSteps prop changes
   React.useEffect(() => {
@@ -148,6 +151,48 @@ export function DebugPanel({ executionSteps, isVisible, onClose, workflowId, onS
     return matchesSearch && matchesFilter;
   });
 
+  // Find start node with webhook entry type
+  const findStartNodeWithWebhook = (): { node: Node | null; nodeId: string | null } => {
+    if (!nodes) {
+      return { node: null, nodeId: null };
+    }
+    
+    const startNode = nodes.find(n => n.type === 'start');
+    if (!startNode) {
+      return { node: null, nodeId: null };
+    }
+    
+    const entryType = startNode.data?.entryType;
+    const hasWebhookEntryType = entryType === 'webhook';
+    
+    return hasWebhookEntryType ? { node: startNode, nodeId: startNode.id } : { node: null, nodeId: null };
+  };
+
+  const { node: startNodeWithWebhook, nodeId: startNodeId } = findStartNodeWithWebhook();
+  const hasStartNodeWithWebhook = !!startNodeWithWebhook && !!startNodeId;
+
+  // Get input schema for start node
+  const getStartNodeInputSchema = (): any => {
+    return startNodeWithWebhook?.data?.inputSchema || null;
+  };
+
+  // Get start node label
+  const getStartNodeLabel = (): string => {
+    if (startNodeWithWebhook) {
+      const label = startNodeWithWebhook.data?.label;
+      if (typeof label === 'string' && label.trim()) {
+        return label.trim();
+      }
+      return 'Start Node';
+    }
+    return 'Start Node';
+  };
+
+  // Handle opening input modal
+  const handleOpenInputModal = () => {
+    setShowInputModal(true);
+  };
+
   if (!isVisible) return null;
 
   return (
@@ -184,6 +229,20 @@ export function DebugPanel({ executionSteps, isVisible, onClose, workflowId, onS
           )}
         </div>
       </div>
+
+      {/* Configure Test Input Button for Webhook Start Node */}
+      {hasStartNodeWithWebhook && workflowId && (
+        <div className="px-3 py-2 border-b border-blue-200 bg-blue-50">
+          <button
+            onClick={handleOpenInputModal}
+            className="w-full px-3 py-2 text-sm font-medium text-blue-700 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors flex items-center justify-center gap-2"
+            title="Configure test input for webhook"
+          >
+            <Database className="w-4 h-4" />
+            <span>Configure Test Input</span>
+          </button>
+        </div>
+      )}
 
       {/* Search and Filter Bar */}
       <div className="p-2.5 border-b border-gray-200 bg-gray-50">
@@ -251,6 +310,19 @@ export function DebugPanel({ executionSteps, isVisible, onClose, workflowId, onS
           ))
         )}
       </div>
+
+      {/* Input Schema Form Modal for Start Node */}
+      {showInputModal && hasStartNodeWithWebhook && workflowId && startNodeId && (
+        <InputSchemaFormModal
+          isOpen={showInputModal}
+          onClose={() => setShowInputModal(false)}
+          schema={getStartNodeInputSchema()}
+          workflowId={workflowId}
+          nodeId={startNodeId}
+          nodeLabel={getStartNodeLabel()}
+          initialData={workflowId ? testInputStorage.load(workflowId, startNodeId) : undefined}
+        />
+      )}
     </div>
   );
 }
