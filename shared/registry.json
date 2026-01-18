@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "Central registry configuration for all nodes and tools. This is the single source of truth for both C# and TypeScript execution systems. API integrations are stored separately in shared/apiIntegrations/ directory.",
+  "description": "Central registry configuration for all nodes. This is the single source of truth for both C# and TypeScript execution systems. Tools are handled separately (manually registered in nodeRegistry.ts). API integrations are stored separately in shared/apiIntegrations/ directory.",
   "version": "2.0.0",
   "nodes": [
     {
@@ -682,93 +682,6 @@
         }
       },
       "note": "Code Node uses custom CodeNodeConfigForm with CodeMirror editor. Processor is implemented in registerBuiltIns.ts (outside AUTO-GENERATED section)."
-    }
-  ],
-  "tools": [
-    {
-      "type": "tool-mcp-server",
-      "name": "MCP Server Tool",
-      "icon": "🔌",
-      "description": "Tool from Model Context Protocol server",
-      "category": "tools",
-      "typescriptCreator": "./tools/registerBuiltIns#tool-mcp-server",
-      "frontend": {
-        "hasConfigForm": true,
-        "useAutoConfigForm": true
-      }
-    },
-    {
-      "type": "tool-web-search",
-      "name": "Web Search Tool",
-      "icon": "🔍",
-      "description": "Search the web for information",
-      "category": "tools",
-      "typescriptCreator": "./tools/registerBuiltIns#tool-web-search",
-      "frontend": {
-        "hasConfigForm": true,
-        "useAutoConfigForm": true
-      }
-    },
-    {
-      "type": "tool-file-search",
-      "name": "File Search Tool",
-      "icon": "📁",
-      "description": "Search for files",
-      "category": "tools",
-      "typescriptCreator": "./tools/registerBuiltIns#tool-file-search",
-      "frontend": {
-        "hasConfigForm": true,
-        "useAutoConfigForm": true
-      }
-    },
-    {
-      "type": "tool-code-interpreter",
-      "name": "Code Interpreter Tool",
-      "icon": "💻",
-      "description": "Execute Python code",
-      "category": "tools",
-      "typescriptCreator": "./tools/registerBuiltIns#tool-code-interpreter",
-      "frontend": {
-        "hasConfigForm": true,
-        "useAutoConfigForm": true
-      }
-    },
-    {
-      "type": "tool-client",
-      "name": "Client Tool",
-      "icon": "🖥️",
-      "description": "Client-side tool hook (ChatKit)",
-      "category": "tools",
-      "typescriptCreator": "./tools/registerBuiltIns#tool-client",
-      "frontend": {
-        "hasConfigForm": true,
-        "useAutoConfigForm": true
-      }
-    },
-    {
-      "type": "tool-custom",
-      "name": "Custom Tool",
-      "icon": "🔧",
-      "description": "Custom agent tool",
-      "category": "tools",
-      "typescriptCreator": "./tools/registerBuiltIns#tool-custom",
-      "frontend": {
-        "hasConfigForm": true,
-        "useAutoConfigForm": true
-      }
-    },
-    {
-      "type": "tool-function",
-      "name": "Function Tool",
-      "icon": "⚙️",
-      "description": "Custom function tool - uses legacy implementation",
-      "category": "tools",
-      "typescriptCreator": "./tools/registerBuiltIns#tool-function",
-      "frontend": {
-        "hasConfigForm": true,
-        "useAutoConfigForm": true
-      },
-      "note": "Uses legacy implementation in executionService.ts"
     }
   ]
 }

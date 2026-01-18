@@ -1672,7 +1672,8 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
 
           {/* Output Mapping Section - Available for all nodes (except start/end/transform) */}
           {/* Transform Node has its own transformation logic, so Output Mapping is not needed */}
-          {selectedNode && selectedNode.type !== 'start' && selectedNode.type !== 'end' && selectedNode.type !== 'transform' && (
+          {/* Tool Nodes don't need Output Mapping - they return data directly to the Agent */}
+          {selectedNode && selectedNode.type !== 'start' && selectedNode.type !== 'end' && selectedNode.type !== 'transform' && selectedNode.type !== 'tool' && (
             <div className="mt-6 pt-4 border-t border-gray-200">
               <div className="mb-3">
                 <h3 className="text-xs font-semibold text-gray-800 mb-1">🔀 Output Mapping</h3>

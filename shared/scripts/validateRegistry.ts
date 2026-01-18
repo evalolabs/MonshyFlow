@@ -28,11 +28,10 @@ interface RegistryNode {
 interface Registry {
   version: string;
   nodes: RegistryNode[];
-  tools: any[];
 }
 
 const REGISTRY_PATH = path.join(__dirname, '../registry.json');
-const REQUIRED_CATEGORIES = ['core', 'ai', 'logic', 'data', 'integration', 'utility', 'tools'];
+const REQUIRED_CATEGORIES = ['core', 'ai', 'logic', 'data', 'integration', 'utility'];
 
 function validateRegistry(): { valid: boolean; errors: string[]; warnings: string[] } {
   const errors: string[] = [];
@@ -49,10 +48,6 @@ function validateRegistry(): { valid: boolean; errors: string[]; warnings: strin
 
     if (!Array.isArray(registry.nodes)) {
       errors.push('Registry.nodes must be an array');
-    }
-
-    if (!Array.isArray(registry.tools)) {
-      errors.push('Registry.tools must be an array');
     }
 
     // Validate nodes
@@ -119,23 +114,6 @@ function validateRegistry(): { valid: boolean; errors: string[]; warnings: strin
       }
     });
 
-    // Validate tools
-    const toolTypes = new Set<string>();
-    registry.tools.forEach((tool, index) => {
-      const prefix = `Tool[${index}] (${tool.type || 'unknown'}):`;
-
-      if (!tool.type) {
-        errors.push(`${prefix} Missing type`);
-      } else if (toolTypes.has(tool.type)) {
-        errors.push(`${prefix} Duplicate type "${tool.type}"`);
-      } else {
-        toolTypes.add(tool.type);
-      }
-
-      if (!tool.typescriptCreator) {
-        warnings.push(`${prefix} No TypeScript creator defined`);
-      }
-    });
 
     return {
       valid: errors.length === 0,

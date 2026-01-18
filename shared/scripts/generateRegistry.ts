@@ -34,25 +34,9 @@ interface RegistryNode {
   note?: string;
 }
 
-interface RegistryTool {
-  type: string;
-  name: string;
-  icon: string;
-  description: string;
-  category: string;
-  typescriptCreator?: string;
-  frontend?: {
-    hasConfigForm?: boolean;
-    useAutoConfigForm?: boolean;
-    fields?: Record<string, any>;
-  };
-  note?: string;
-}
-
 interface Registry {
   version: string;
   nodes: RegistryNode[];
-  tools: RegistryTool[];
 }
 
 const REGISTRY_PATH = path.join(__dirname, '../registry.json');
@@ -543,7 +527,6 @@ function main() {
     const registry = loadRegistry();
     console.log(`📋 Loaded registry:`);
     console.log(`   - Nodes: ${registry.nodes.length}`);
-    console.log(`   - Tools: ${registry.tools.length}`);
     console.log(`   - Version: ${registry.version}\n`);
 
     // Validate registry
@@ -655,7 +638,6 @@ function main() {
     console.log(`   - Nodes with TypeScript processors: ${nodesWithProcessors.length}`);
     console.log(`   - Nodes with C# processors: ${registry.nodes.filter(n => n.csharpProcessor).length}`);
     console.log(`   - Nodes with auto-config forms: ${registry.nodes.filter(n => n.frontend?.useAutoConfigForm).length}`);
-    console.log(`   - Total tools: ${registry.tools.length}\n`);
 
     console.log('🎉 Registry code generation complete!');
   } catch (error: any) {
