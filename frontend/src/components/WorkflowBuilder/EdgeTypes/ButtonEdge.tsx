@@ -21,9 +21,7 @@ interface ButtonEdgeProps extends Omit<EdgeProps, 'data'> {
  * Tool edges should not have "+" buttons as they are static connections
  */
 function isToolEdge(targetHandle?: string | null): boolean {
-  return targetHandle === 'tool' || 
-         targetHandle === 'chat-model' || 
-         targetHandle === 'memory';
+  return targetHandle === 'tool';
 }
 
 export const ButtonEdge: React.FC<ButtonEdgeProps> = ({

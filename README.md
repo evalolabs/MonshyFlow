@@ -144,7 +144,14 @@ See [Analysis Documentation](./analysis/README.md) for detailed system analysis.
 
 ## 📚 Documentation
 
+### For Developers
+
+- **[Node Development Guide](./docs/NODE_DEVELOPMENT_GUIDE.md)** ⭐ **START HERE** - Complete guide for adding and modifying nodes
+- **[Documentation Index](./docs/README.md)** - Overview of all available documentation
 - **[Frontend README](./frontend/README.md)** - Frontend setup and development
+
+### System Documentation
+
 - **[Architecture](./ARCHITECTURE.md)** - System architecture overview
 - **[Security](./SECURITY.md)** - Security features and best practices
 - **[Deployment Guide](./azure-deployment/README.md)** - Deployment instructions

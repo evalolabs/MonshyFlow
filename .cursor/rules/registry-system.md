@@ -2,6 +2,8 @@
 
 **Kritische Regeln für das Single Source of Truth System**
 
+> 📚 **Für eine vollständige Anleitung siehe:** [Node Development Guide](../../docs/NODE_DEVELOPMENT_GUIDE.md)
+
 ---
 
 ## 🎯 Überblick
@@ -14,6 +16,16 @@ Das Registry-System ist die **Single Source of Truth** für alle Nodes und Tools
 3. **Code-Generierung** - Frontend/Backend Code wird automatisch generiert
 4. **Metadata-Driven** - UI wird aus Metadaten generiert
 5. **Validierung** - Registry wird vor jedem Build validiert
+
+**Wichtig für neue Entwickler:**
+- ⭐ **Lies zuerst:** [Node Development Guide](../../docs/NODE_DEVELOPMENT_GUIDE.md) für vollständige Schritt-für-Schritt-Anleitung
+- Diese Datei (`.cursor/rules/registry-system.md`) enthält die **kritischen Regeln** und wird von Cursor AI verwendet
+- Die vollständige Dokumentation mit Beispielen ist in `docs/NODE_DEVELOPMENT_GUIDE.md`
+
+**Wann welche Dokumentation verwenden:**
+- **Neuer Entwickler?** → Starte mit [Node Development Guide](../../docs/NODE_DEVELOPMENT_GUIDE.md)
+- **Schnelle Referenz?** → Diese Datei (kritische Regeln)
+- **Cursor AI Kontext?** → Diese Datei wird automatisch von Cursor verwendet
 
 ---
 
@@ -461,16 +473,49 @@ npm run check:consistency
 ```typescript
 // Nur wenn Custom UI nötig
 // frontend/src/components/WorkflowBuilder/NodeTypes/MyNewNode.tsx
-export function MyNewNode({ data }: BaseNodeProps) {
-  return <BaseNode label={data.label} icon="🎯" category="utility" />;
+import type { NodeProps } from '@xyflow/react';
+import { BaseNode } from '../BaseNode';
+
+export function MyNewNode(props: NodeProps) {
+  const { data, id, type, selected } = props;
+  const safeData = data || {};
+  const label = (safeData.label as string) || 'My New Node';
+
+  return (
+    <BaseNode
+      label={label}
+      icon="🎯"
+      category="utility"
+      hasInput={true}
+      hasOutput={true}
+      node={{
+        id: id || '',
+        type: type || 'my-new-node',
+        data: safeData,
+        position: { x: 0, y: 0 },
+      }}
+      selected={selected}
+      isAnimating={(safeData as any).isAnimating}
+      executionStatus={(safeData as any).executionStatus}
+    />
+  );
 }
 
 // In nodeRegistry.ts registrieren
-import { MyNewNode } from '../NodeTypes/OptimizedNodes';
-'my-new-node': MyNewNode,
+import { MyNewNode } from '../NodeTypes/MyNewNode';
+const NODE_COMPONENTS: Record<string, ComponentType<any>> = {
+  // ... existing components
+  'my-new-node': MyNewNode,
+};
 ```
 
+**Schritt 6: Custom Config Form (optional)**
+
+Nur wenn komplexe UI nötig ist (siehe [Node Development Guide](../../docs/NODE_DEVELOPMENT_GUIDE.md) für Details).
+
 **✅ Fertig!** Node ist jetzt überall verfügbar.
+
+> 💡 **Tipp:** Für vollständige Beispiele siehe [Node Development Guide](../../docs/NODE_DEVELOPMENT_GUIDE.md) - Abschnitt "Adding a New Node"
 
 ---
 
@@ -720,11 +765,19 @@ npm run generate:registry
 
 ## 📚 Weitere Ressourcen
 
-- `DeveloperRoom/REGISTRY_ARCHITECTURE.md` - Architektur-Übersicht
-- `DeveloperRoom/REGISTRY_QUICK_START.md` - 5-Minuten-Anleitung
-- `DeveloperRoom/HOW_TO_ADD_NODES_AND_TOOLS.md` - Detaillierte Anleitung
+### Dokumentation
+
+- **[Node Development Guide](../../docs/NODE_DEVELOPMENT_GUIDE.md)** ⭐ **HAUPTDOKUMENTATION** - Vollständige Anleitung für neue Entwickler
+- **[Documentation Index](../../docs/README.md)** - Übersicht aller verfügbaren Dokumentationen
+
+### Code-Referenzen
+
+- `shared/registry.json` - Die zentrale Registry-Datei
 - `shared/scripts/generateRegistry.ts` - Code-Generator
 - `shared/scripts/validateRegistry.ts` - Validator
+- `shared/scripts/registryConsistencyCheck.ts` - Konsistenz-Checker
+- `frontend/src/components/WorkflowBuilder/nodeRegistry/generatedMetadata.ts` - Generierte Frontend-Metadaten
+- `packages/execution-service/src/nodes/registerBuiltIns.ts` - Backend Processor-Registrierung
 
 ---
 
@@ -757,6 +810,54 @@ npm run generate:registry
 
 ---
 
-**Letzte Aktualisierung:** 15.12.2025  
+---
+
+## 🔄 Workflow für Node-Änderungen
+
+### Node anpassen (z.B. Agent Node)
+
+**Beispiel:** Agent Node wurde angepasst, um OpenAI's Agent Builder UI zu entsprechen:
+
+1. **Registry aktualisieren** (wenn Metadaten/Placeholder geändert werden):
+   ```json
+   // shared/registry.json
+   {
+     "type": "agent",
+     "frontend": {
+       "fields": {
+         "systemPrompt": {
+           "placeholder": "Enter instructions for the agent. Use {{variables}} for dynamic content"
+           // Geändert von "Enter system prompt..."
+         }
+       }
+     }
+   }
+   ```
+
+2. **Code generieren:**
+   ```bash
+   cd shared
+   npm run generate:registry
+   ```
+
+3. **Frontend Code anpassen** (wenn UI-Layout/Reihenfolge geändert wird):
+   - `frontend/src/components/WorkflowBuilder/NodeConfigPanel.tsx` - Custom Form
+   - Labels, Reihenfolge, Layout-Anpassungen
+
+4. **Validieren:**
+   ```bash
+   npm run validate:registry
+   ```
+
+**Wichtig:** 
+- Registry-Änderungen → Immer `npm run generate:registry` ausführen
+- Frontend-UI-Änderungen → Direkt im Code (Custom Forms)
+- Beide müssen synchron sein!
+
+---
+
+**Letzte Aktualisierung:** 17.01.2026  
 **Wichtig:** Registry ist Single Source of Truth. Änderungen müssen hier gemacht werden, nicht in generierten Dateien!
+
+**Für neue Entwickler:** Siehe [Node Development Guide](../../docs/NODE_DEVELOPMENT_GUIDE.md) für vollständige Anleitung.
 

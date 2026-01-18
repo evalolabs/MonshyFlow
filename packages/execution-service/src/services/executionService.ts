@@ -2530,6 +2530,67 @@ Use the available agents and tools as needed to complete the task.`;
                 serverLabel: 'dropbox',
                 allowedTools: ['upload_file', 'download_file', 'list_files', 'delete_file', 'search_files']
             },
+            // Third-Party MCP Connectors
+            'openai-box': {
+                connectorId: 'connector_box',
+                serverLabel: 'box',
+                allowedTools: ['upload_file', 'download_file', 'list_files', 'delete_file', 'search_files', 'create_folder']
+            },
+            'openai-zapier': {
+                connectorId: 'connector_zapier',
+                serverLabel: 'zapier',
+                allowedTools: ['trigger_zap', 'list_zaps', 'get_zap_status']
+            },
+            'openai-shopify': {
+                connectorId: 'connector_shopify',
+                serverLabel: 'shopify',
+                allowedTools: ['get_products', 'create_product', 'update_product', 'get_orders', 'get_customers', 'create_order']
+            },
+            'openai-intercom': {
+                connectorId: 'connector_intercom',
+                serverLabel: 'intercom',
+                allowedTools: ['list_conversations', 'get_conversation', 'create_conversation', 'list_contacts', 'get_contact']
+            },
+            'openai-stripe': {
+                connectorId: 'connector_stripe',
+                serverLabel: 'stripe',
+                allowedTools: ['create_payment', 'get_payment', 'list_payments', 'create_customer', 'get_customer', 'list_customers']
+            },
+            'openai-plaid': {
+                connectorId: 'connector_plaid',
+                serverLabel: 'plaid',
+                allowedTools: ['get_accounts', 'get_transactions', 'get_balance', 'exchange_public_token']
+            },
+            'openai-square': {
+                connectorId: 'connector_square',
+                serverLabel: 'square',
+                allowedTools: ['create_payment', 'get_payment', 'list_payments', 'create_customer', 'get_customer']
+            },
+            'openai-cloudflare-browser': {
+                connectorId: 'connector_cloudflare_browser',
+                serverLabel: 'cloudflare_browser',
+                allowedTools: ['browse_url', 'take_screenshot', 'extract_content']
+            },
+            'openai-hubspot': {
+                connectorId: 'connector_hubspot',
+                serverLabel: 'hubspot',
+                allowedTools: ['get_contacts', 'create_contact', 'update_contact', 'get_deals', 'create_deal', 'update_deal']
+            },
+            'openai-pipedream': {
+                connectorId: 'connector_pipedream',
+                serverLabel: 'pipedream',
+                allowedTools: ['trigger_workflow', 'get_workflow_status', 'list_workflows']
+            },
+            'openai-paypal': {
+                connectorId: 'connector_paypal',
+                serverLabel: 'paypal',
+                allowedTools: ['create_payment', 'get_payment', 'list_payments', 'capture_payment']
+            },
+            'openai-deepwiki': {
+                connectorId: 'connector_deepwiki',
+                serverLabel: 'deepwiki',
+                allowedTools: ['search', 'get_article', 'list_articles']
+            },
         };
 
         // Check if this is an OpenAI Connector
@@ -2545,6 +2606,32 @@ Use the available agents and tools as needed to complete the task.`;
                 oauthToken = secrets.microsoft_oauth_token || secrets.MICROSOFT_OAUTH_TOKEN;
             } else if (handlerId.startsWith('openai-dropbox')) {
                 oauthToken = secrets.dropbox_oauth_token || secrets.DROPBOX_OAUTH_TOKEN;
+            } else if (handlerId.startsWith('openai-box')) {
+                oauthToken = secrets.box_oauth_token || secrets.BOX_OAUTH_TOKEN;
+            } else if (handlerId.startsWith('openai-zapier')) {
+                oauthToken = secrets.zapier_api_key || secrets.ZAPIER_API_KEY;
+            } else if (handlerId.startsWith('openai-shopify')) {
+                oauthToken = secrets.shopify_access_token || secrets.SHOPIFY_ACCESS_TOKEN;
+            } else if (handlerId.startsWith('openai-intercom')) {
+                oauthToken = secrets.intercom_access_token || secrets.INTERCOM_ACCESS_TOKEN;
+            } else if (handlerId.startsWith('openai-stripe')) {
+                oauthToken = secrets.stripe_secret_key || secrets.STRIPE_SECRET_KEY;
+            } else if (handlerId.startsWith('openai-plaid')) {
+                // Plaid uses client_id and secret, we'll use secret as the token
+                oauthToken = secrets.plaid_secret || secrets.PLAID_SECRET;
+            } else if (handlerId.startsWith('openai-square')) {
+                oauthToken = secrets.square_access_token || secrets.SQUARE_ACCESS_TOKEN;
+            } else if (handlerId.startsWith('openai-cloudflare-browser')) {
+                oauthToken = secrets.cloudflare_api_token || secrets.CLOUDFLARE_API_TOKEN;
+            } else if (handlerId.startsWith('openai-hubspot')) {
+                oauthToken = secrets.hubspot_api_key || secrets.HUBSPOT_API_KEY;
+            } else if (handlerId.startsWith('openai-pipedream')) {
+                oauthToken = secrets.pipedream_api_key || secrets.PIPEDREAM_API_KEY;
+            } else if (handlerId.startsWith('openai-paypal')) {
+                // PayPal uses client_id and secret, we'll use secret as the token
+                oauthToken = secrets.paypal_secret || secrets.PAYPAL_SECRET;
+            } else if (handlerId.startsWith('openai-deepwiki')) {
+                oauthToken = secrets.deepwiki_api_key || secrets.DEEPWIKI_API_KEY;
             }
 
             if (!oauthToken) {

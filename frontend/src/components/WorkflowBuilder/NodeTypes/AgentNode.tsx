@@ -1,12 +1,12 @@
 /**
  * AgentNode Component
  * 
- * AI Agent node with specialized input handles for Chat Model, Memory, and Tools.
+ * AI Agent node with specialized input handle for Tools.
  * AI Agent architecture where tools are connected as inputs.
  * 
  * Structure:
  * - Input (left): Main workflow input (user prompt/data)
- * - Inputs (bottom): Chat Model, Memory (optional), Tools (multiple)
+ * - Input (bottom): Tools (multiple tool nodes can be connected)
  * - Output (right): Final agent response
  */
 
@@ -39,26 +39,12 @@ export function AgentNode({ data, id, type, selected, ...props }: NodeProps) {
     return 'AI Agent';
   };
 
-  // Bottom input handles configuration
+  // Bottom input handles configuration - only Tool handle
   const bottomInputs = [
-    {
-      id: 'chat-model',
-      label: 'Chat Model',
-      position: 30, // 30% from left
-      color: 'bg-indigo-500',
-      required: true,
-    },
-    {
-      id: 'memory',
-      label: 'Memory',
-      position: 50, // 50% from left
-      color: 'bg-purple-500',
-      required: false,
-    },
     {
       id: 'tool',
       label: 'Tool',
-      position: 70, // 70% from left
+      position: 50, // 50% from left (centered, since it's the only handle)
       color: 'bg-amber-500',
       required: false,
     },
@@ -205,7 +191,7 @@ export function AgentNode({ data, id, type, selected, ...props }: NodeProps) {
         </div>
       </div>
 
-      {/* Bottom Input Handles - Chat Model, Memory, Tool */}
+      {/* Bottom Input Handle - Tool */}
       {bottomInputs.map((input) => (
         <div key={input.id}>
           {/* Handle */}

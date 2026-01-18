@@ -148,7 +148,7 @@
             "type": "expression",
             "multiline": true,
             "rows": 4,
-            "placeholder": "Enter system prompt for the agent. Use {{variables}} for dynamic content"
+            "placeholder": "Enter instructions for the agent. Use {{variables}} for dynamic content"
           },
           "userPrompt": {
             "type": "expression",

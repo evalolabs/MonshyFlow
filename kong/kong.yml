@@ -167,6 +167,41 @@ services:
           - GET
           - OPTIONS  # CORS Preflight
         strip_path: false
+      - name: execution-mcp-handlers
+        paths:
+          - /api/mcp-handlers
+        methods:
+          - GET
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: execution-web-search-handlers
+        paths:
+          - /api/web-search-handlers
+        methods:
+          - GET
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: execution-functions
+        paths:
+          - /api/functions
+        methods:
+          - GET
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: execution-node-processors
+        paths:
+          - /api/node-processors
+        methods:
+          - GET
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: execution-tool-creators
+        paths:
+          - /api/tool-creators
+        methods:
+          - GET
+          - OPTIONS  # CORS Preflight
+        strip_path: false
 
   # Scheduler Service
   - name: scheduler-service

@@ -15,8 +15,8 @@ export interface FunctionDefinition {
 export const functionService = {
   async getAvailableFunctions(): Promise<FunctionDefinition[]> {
     try {
-      console.log('[functionService] Fetching functions from /api/execution/functions...');
-      const response = await api.get<FunctionDefinition[]>('/api/execution/functions', {
+      console.log('[functionService] Fetching functions from /api/functions...');
+      const response = await api.get<FunctionDefinition[]>('/api/functions', {
         params: {
           _t: Date.now(),
         },
@@ -35,7 +35,7 @@ export const functionService = {
           console.log('[functionService] Parsed string response, length:', parsed.length);
           return parsed;
         } catch (error) {
-          console.error('[functionService] Failed to parse string response from /api/execution/functions', error);
+          console.error('[functionService] Failed to parse string response from /api/functions', error);
           throw error;
         }
       }

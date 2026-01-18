@@ -16,12 +16,10 @@ interface UseAgentToolPositioningProps {
 }
 
 /**
- * Check if an edge connects to an agent's bottom input handle
+ * Check if an edge connects to an agent's bottom input handle (tool handle)
  */
 function isAgentBottomInputEdge(edge: Edge): boolean {
-  return edge.targetHandle === 'tool' || 
-         edge.targetHandle === 'chat-model' || 
-         edge.targetHandle === 'memory';
+  return edge.targetHandle === 'tool';
 }
 
 /**

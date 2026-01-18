@@ -17,8 +17,8 @@ export interface WebSearchHandlerSummary {
 export const webSearchService = {
   async getAvailableHandlers(): Promise<WebSearchHandlerSummary[]> {
     try {
-      console.log('[webSearchService] Fetching web search handlers from /api/execution/web-search-handlers...');
-      const response = await api.get<WebSearchHandlerSummary[]>('/api/execution/web-search-handlers', {
+      console.log('[webSearchService] Fetching web search handlers from /api/web-search-handlers...');
+      const response = await api.get<WebSearchHandlerSummary[]>('/api/web-search-handlers', {
         params: {
           _t: Date.now(),
         },

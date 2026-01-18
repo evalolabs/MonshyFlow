@@ -16,8 +16,8 @@ export interface McpHandlerSummary {
 export const mcpService = {
   async getAvailableHandlers(): Promise<McpHandlerSummary[]> {
     try {
-      console.log('[mcpService] Fetching MCP handlers from /api/execution/mcp-handlers...');
-      const response = await api.get<McpHandlerSummary[]>('/api/execution/mcp-handlers', {
+      console.log('[mcpService] Fetching MCP handlers from /api/mcp-handlers...');
+      const response = await api.get<McpHandlerSummary[]>('/api/mcp-handlers', {
         params: {
           // Bust cache
           _t: Date.now(),

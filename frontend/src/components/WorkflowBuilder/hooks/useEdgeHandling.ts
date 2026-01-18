@@ -37,7 +37,7 @@ export function useEdgeHandling({
 
     // Validation: Only tool nodes can connect to Agent Tool handles
     const targetHandle = connection.targetHandle;
-    const isAgentToolHandle = targetHandle === 'tool' || targetHandle === 'chat-model' || targetHandle === 'memory';
+    const isAgentToolHandle = targetHandle === 'tool';
     
     if (isAgentToolHandle && connection.source) {
       const sourceNode = nodes.find(n => n.id === connection.source);
@@ -70,7 +70,7 @@ export function useEdgeHandling({
         const existingAgentConnections = edges.filter(
           e =>
             e.source === connection.source &&
-            (e.targetHandle === 'tool' || e.targetHandle === 'chat-model' || e.targetHandle === 'memory')
+            e.targetHandle === 'tool'
         );
 
         const isAlreadyConnectedToOtherAgent = existingAgentConnections.some(e => e.target !== connection.target);
@@ -197,7 +197,7 @@ export function useEdgeHandling({
         }
         
         // Skip edges that are already correct
-        const isAgentToolHandle = targetHandle === 'tool' || targetHandle === 'chat-model' || targetHandle === 'memory';
+        const isAgentToolHandle = targetHandle === 'tool';
         const sourceNode = nodes.find(n => n.id === edge.source);
         const isSourceTool = sourceNode?.type === 'tool' || isToolNodeType(sourceNode?.type || '');
         
@@ -229,7 +229,7 @@ export function useEdgeHandling({
       // Check if it should be a tool edge but isn't
       if (edge.type === 'default') return false; // Already correct
       
-      const isAgentToolHandle = targetHandle === 'tool' || targetHandle === 'chat-model' || targetHandle === 'memory';
+      const isAgentToolHandle = targetHandle === 'tool';
       const sourceNode = nodes.find(n => n.id === edge.source);
       const isSourceTool = sourceNode?.type === 'tool' || isToolNodeType(sourceNode?.type || '');
       return isSourceTool && isAgentToolHandle;
@@ -276,7 +276,7 @@ export function useEdgeHandling({
         }
         
         // PRIORITY 2: Check if this should be a tool edge
-        const isAgentToolHandle = targetHandle === 'tool' || targetHandle === 'chat-model' || targetHandle === 'memory';
+        const isAgentToolHandle = targetHandle === 'tool';
         const sourceNode = nodes.find(n => n.id === edge.source);
         const isSourceTool = sourceNode?.type === 'tool' || isToolNodeType(sourceNode?.type || '');
         

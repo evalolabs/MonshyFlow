@@ -556,13 +556,6 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 placeholder="Enter agent name"
               />
             </div>
-            {renderFieldWithDebug({
-              nodeType: 'agent',
-              fieldName: 'systemPrompt',
-              label: 'System Prompt',
-              value: config.systemPrompt || '',
-              onChange: (v) => setConfig({ ...config, systemPrompt: v }),
-            })}
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
                 Model
@@ -572,6 +565,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 onChange={(e) => setConfig({ ...config, model: e.target.value })}
                 className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
+                <option value="gpt-5.2">GPT-5.2</option>
                 <option value="gpt-4o">GPT-4o (Recommended)</option>
                 <option value="gpt-4">GPT-4</option>
                 <option value="gpt-4-turbo">GPT-4 Turbo</option>
@@ -582,6 +576,20 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 Select the OpenAI model for this agent
               </p>
             </div>
+            {renderFieldWithDebug({
+              nodeType: 'agent',
+              fieldName: 'systemPrompt',
+              label: 'Instructions',
+              value: config.systemPrompt || '',
+              onChange: (v) => setConfig({ ...config, systemPrompt: v }),
+            })}
+            {renderFieldWithDebug({
+              nodeType: 'agent',
+              fieldName: 'userPrompt',
+              label: 'User Prompt',
+              value: config.userPrompt || '',
+              onChange: (v) => setConfig({ ...config, userPrompt: v }),
+            })}
 
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
@@ -600,82 +608,99 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 Controls the depth of reasoning (GPT-5 feature, may not apply to all models)
               </p>
             </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                Temperature
+            {/* Include Chat History */}
+            <div className="mb-2">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={config.includeChatHistory !== false}
+                  onChange={(e) => setConfig({ ...config, includeChatHistory: e.target.checked })}
+                  className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <span className="text-xs text-gray-700">
+                  Include chat history
+                </span>
               </label>
-              <input
-                type="range"
-                min="0"
-                max="2"
-                step="0.1"
-                value={config.temperature || 0.7}
-                onChange={(e) => setConfig({ ...config, temperature: parseFloat(e.target.value) })}
-                className="w-full"
-              />
-              <div className="text-xs text-gray-500">{config.temperature || 0.7}</div>
-              <p className="text-xs text-gray-500 mt-1">
-                Controls randomness: 0 = deterministic, 2 = very creative
-              </p>
+            </div>
+
+            {/* Tools Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-2.5">
+              <div className="flex items-start gap-2">
+                <span className="text-blue-600 text-sm mt-0.5">🔧</span>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-blue-900 mb-1">Tools</p>
+                  <p className="text-xs text-blue-700">
+                    Add tools by connecting Tool nodes from the <strong>Tools</strong> tab to the Agent's bottom <strong>"Tool"</strong> handle.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                Output Format
+                Output format
               </label>
               <select
                 value={config.outputFormat || 'auto'}
                 onChange={(e) => setConfig({ ...config, outputFormat: e.target.value })}
                 className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
+                <optgroup label="Direct">
+                  <option value="chatkit">ChatKit</option>
+                  <option value="client-tool">Client tool</option>
+                </optgroup>
+                <optgroup label="Hosted">
+                  <option value="mcp-server">MCP server</option>
+                  <option value="file-search">File search</option>
+                  <option value="web-search">Web search</option>
+                  <option value="code-interpreter">Code interpreter</option>
+                  <option value="image-generation">Image generation</option>
+                </optgroup>
+                <optgroup label="Local">
+                  <option value="function">Function</option>
+                  <option value="custom">Custom</option>
+                  <option value="dev-environment">Dev environment</option>
+                </optgroup>
                 <option value="auto">Auto (default)</option>
-                <option value="json">JSON</option>
-                <option value="text">Text</option>
-                <option value="string">String</option>
               </select>
               <p className="text-xs text-gray-500 mt-1">
-                Format the agent's output (JSON will parse, Text will stringify)
+                Format the agent's output
               </p>
             </div>
 
-            {/* User Prompt */}
-            <div className="border-t border-gray-200 pt-2 mt-2">
-              <h3 className="text-xs font-semibold text-gray-800 mb-1.5">💬 User Prompt</h3>
-              <p className="text-xs text-gray-500 mb-2">
-                Define the user message that will be sent to the agent. This field is required – the agent will not run without it.
-              </p>
-              {renderFieldWithDebug({
-                nodeType: 'agent',
-                fieldName: 'userPrompt',
-                label: undefined, // Label is already shown above
-                value: config.userPrompt || '',
-                onChange: (v) => setConfig({ ...config, userPrompt: v }),
-              })}
-            </div>
+            {/* Advanced Settings - Collapsible */}
+            <details className="border-t border-gray-200 pt-2 mt-2">
+              <summary className="text-xs font-semibold text-gray-800 cursor-pointer hover:text-gray-900">
+                ⚙️ Advanced Settings
+              </summary>
+              <div className="mt-2 space-y-3">
+                {/* Temperature */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                    Temperature
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="2"
+                    step="0.1"
+                    value={config.temperature || 0.7}
+                    onChange={(e) => setConfig({ ...config, temperature: parseFloat(e.target.value) })}
+                    className="w-full"
+                  />
+                  <div className="text-xs text-gray-500">{config.temperature || 0.7}</div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Controls randomness: 0 = deterministic, 2 = very creative
+                  </p>
+                </div>
+              </div>
+            </details>
 
             {/* Agents SDK Features */}
             <div className="border-t border-gray-200 pt-2 mt-2">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xs font-semibold text-gray-800">🤖 Agents SDK Features</h3>
                 <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">NEW</span>
-              </div>
-
-              {/* Include Chat History */}
-              <div className="mb-2">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={config.includeChatHistory !== false}
-                    onChange={(e) => setConfig({ ...config, includeChatHistory: e.target.checked })}
-                    className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <span className="text-xs text-gray-700">
-                    Include Chat History
-                  </span>
-                </label>
-                <p className="text-xs text-gray-500 mt-1 ml-6">
-                  Include previous conversation context in agent execution
-                </p>
               </div>
 
               {/* Enable Streaming */}
