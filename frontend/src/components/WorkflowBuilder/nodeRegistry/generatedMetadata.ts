@@ -4,7 +4,7 @@
  * This file is generated from shared/registry.json
  * Run: npm run generate:registry
  * 
- * Last generated: 2025-12-26T15:05:55.701Z
+ * Last generated: 2026-01-17T10:55:56.608Z
  */
 
 import type { NodeCategoryId } from './nodeMetadata';
@@ -903,6 +903,43 @@ export const GENERATED_NODE_METADATA = {
                         "description": "Output from the executed branch"
                   }
             }
+      },
+  },
+  'code': {
+    id: 'code',
+    name: 'Code',
+    icon: '💻',
+    description: 'Execute custom JavaScript code to transform data',
+    category: 'core' as NodeCategoryId,
+    animationSpeed: 'fast',
+    component: () => null, // Will be lazy-loaded
+    hasConfigForm: true,
+    useAutoConfigForm: false,
+    isUnique: false,
+    canDuplicate: true,
+    hasInput: true,
+    hasOutput: true,
+    fields: {
+              "label": {
+                      "type": "text",
+                      "placeholder": "Code Node Name"
+              },
+              "code": {
+                      "type": "expression",
+                      "multiline": true,
+                      "rows": 15,
+                      "placeholder": "// Write your JavaScript code here\n// Access input data from previous nodes using variables\n// Example: const data = {{steps.start.json}};\n\n// Your code here\nreturn data;"
+              }
+      },
+    inputSchema: {
+            "type": "object",
+            "description": "Accepts any input from previous nodes. Access via $input, $json, $steps, $secrets in code.",
+            "additionalProperties": true
+      },
+    outputSchema: {
+            "type": "object",
+            "description": "Output depends on the code execution result",
+            "additionalProperties": true
       },
   },
 };
