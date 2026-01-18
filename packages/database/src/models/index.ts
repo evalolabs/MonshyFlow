@@ -4,3 +4,5 @@ export * from './User';
 export * from './Tenant';
 export * from './ApiKey';
 export * from './Secret';
+export * from './AuditLog';
+export * from './SupportConsent';

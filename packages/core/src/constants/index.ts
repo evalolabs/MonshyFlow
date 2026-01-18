@@ -16,6 +16,7 @@ export const ROLES = {
   SUPERADMIN: 'superadmin',
   ADMIN: 'admin',
   USER: 'user',
+  SUPPORT: 'support',
 } as const;
 
 export const AUTH_METHODS = {

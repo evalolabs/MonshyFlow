@@ -295,8 +295,8 @@ function UserModal({ user, tenants, roles, isSuperAdmin, currentTenantId, onClos
       if (prev.includes(roleName)) {
         return prev.filter(r => r !== roleName);
       } else {
-        // Don't allow non-superadmin to select superadmin role
-        if (roleName === 'superadmin' && !isSuperAdmin) {
+        // Tenant-Admins dürfen keine system-internen Rollen vergeben
+        if (!isSuperAdmin && (roleName === 'superadmin' || roleName === 'support')) {
           return prev;
         }
         return [...prev, roleName];
@@ -304,9 +304,9 @@ function UserModal({ user, tenants, roles, isSuperAdmin, currentTenantId, onClos
     });
   };
 
-  // Filter out superadmin role if not superadmin
+  // Filter out system roles (superadmin/support) if not superadmin
   const availableRoles = roles.filter(role => {
-    if (role.name === 'superadmin' && !isSuperAdmin) {
+    if (!isSuperAdmin && (role.name === 'superadmin' || role.name === 'support')) {
       return false;
     }
     return true;

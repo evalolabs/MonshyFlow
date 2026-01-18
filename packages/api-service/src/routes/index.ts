@@ -4,6 +4,8 @@ import { WorkflowController } from '../controllers/WorkflowController';
 import { AdminController } from '../controllers/AdminController';
 import { TenantController } from '../controllers/TenantController';
 import { OAuth2Controller } from '../controllers/OAuth2Controller';
+import { AuditLogController } from '../controllers/AuditLogController';
+import { SupportConsentController } from '../controllers/SupportConsentController';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { serviceKeyMiddleware } from '../middleware/serviceKeyMiddleware';
 import { logger } from '@monshy/core';
@@ -49,11 +51,15 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
   container.register('AdminController', { useClass: AdminController });
   container.register('TenantController', { useClass: TenantController });
   container.register('OAuth2Controller', { useClass: OAuth2Controller });
+  container.register('AuditLogController', { useClass: AuditLogController });
+  container.register('SupportConsentController', { useClass: SupportConsentController });
   
   const workflowController = container.resolve(WorkflowController);
   const adminController = container.resolve(AdminController);
   const tenantController = container.resolve(TenantController);
   const oauth2Controller = container.resolve(OAuth2Controller);
+  const auditLogController = container.resolve(AuditLogController);
+  const supportConsentController = container.resolve(SupportConsentController);
   
   // ============================================
   // Workflow Routes (direkt im API Service)
@@ -290,6 +296,26 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
   
   // Roles
   app.get('/api/admin/roles', authMiddleware, (req, res) => adminController.getRoles(req, res));
+  
+  // ============================================
+  // Audit Log Routes (DSGVO-Konformität: Transparenz)
+  // ============================================
+  // Get audit logs for tenant (Tenants können ihre eigenen Logs sehen)
+  app.get('/api/audit-logs/tenant/:tenantId', authMiddleware, (req, res) => auditLogController.getTenantAuditLogs(req, res));
+  
+  // Get all superadmin access logs (nur für Superadmin)
+  app.get('/api/audit-logs/superadmin', authMiddleware, (req, res) => auditLogController.getSuperAdminAccessLogs(req, res));
+  
+  // Get audit logs for a specific resource
+  app.get('/api/audit-logs/resource/:resource/:resourceId', authMiddleware, (req, res) => auditLogController.getResourceAuditLogs(req, res));
+
+  // ============================================
+  // Support Consent Routes (Tenant-Admin Freigabe für Support)
+  // ============================================
+  // Tenant-Admin can grant time-limited access for support to view workflow CONTENT
+  app.post('/api/support-consents', authMiddleware, (req, res) => supportConsentController.create(req, res));
+  app.get('/api/support-consents', authMiddleware, (req, res) => supportConsentController.list(req, res));
+  app.delete('/api/support-consents/:id', authMiddleware, (req, res) => supportConsentController.revoke(req, res));
   
   // ============================================
   // Internal Routes (Service-to-Service)

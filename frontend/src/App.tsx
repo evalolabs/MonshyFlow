@@ -10,6 +10,8 @@ import { UserManagementPage } from './pages/UserManagementPage';
 import { SecretsManagementPage } from './pages/SecretsManagementPage';
 import { TenantManagementPage } from './pages/TenantManagementPage';
 import { ApiKeysManagementPage } from './pages/ApiKeysManagementPage';
+import { AuditLogsPage } from './pages/AuditLogsPage';
+import { SupportConsentsPage } from './pages/SupportConsentsPage';
 import { OAuth2CallbackPage } from './pages/OAuth2CallbackPage';
 import { NavigationWrapper } from './components/Navigation/NavigationWrapper';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -49,6 +51,8 @@ function App() {
                     <Route path="/admin/users" element={<ProtectedRoute><UserManagementPage /></ProtectedRoute>} />
                     <Route path="/admin/secrets" element={<ProtectedRoute><SecretsManagementPage /></ProtectedRoute>} />
                     <Route path="/admin/apikeys" element={<ProtectedRoute><ApiKeysManagementPage /></ProtectedRoute>} />
+                    <Route path="/admin/audit-logs" element={<ProtectedRoute><AuditLogsPage /></ProtectedRoute>} />
+                    <Route path="/admin/support-consents" element={<ProtectedRoute><SupportConsentsPage /></ProtectedRoute>} />
                     <Route path="/admin/tenants" element={<ProtectedRoute><TenantManagementPage /></ProtectedRoute>} />
                     <Route path="/workflow/:id" element={<ProtectedRoute><WorkflowEditorPage /></ProtectedRoute>} />
                     <Route path="/webhook-test/:workflowId" element={<ProtectedRoute><WebhookTestPage /></ProtectedRoute>} />

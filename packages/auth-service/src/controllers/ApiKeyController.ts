@@ -3,12 +3,26 @@ import { injectable, inject } from 'tsyringe';
 import { ApiKeyService } from '../services/ApiKeyService';
 import { NotFoundError } from '@monshy/core';
 import { logger } from '@monshy/core';
+import { ROLES } from '@monshy/core';
 
 @injectable()
 export class ApiKeyController {
   constructor(
     @inject('ApiKeyService') private apiKeyService: ApiKeyService
   ) {}
+
+  // Helper to check if user is superadmin
+  private isSuperAdmin(user: any): boolean {
+    if (!user) return false;
+    // Check if role is string or array
+    if (typeof user.role === 'string') {
+      return user.role === ROLES.SUPERADMIN;
+    }
+    if (Array.isArray(user.roles)) {
+      return user.roles.includes(ROLES.SUPERADMIN);
+    }
+    return false;
+  }
 
   async create(req: Request, res: Response): Promise<void> {
     try {
@@ -72,6 +86,28 @@ export class ApiKeyController {
   async revoke(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      const user = (req as any).user;
+      
+      // Check tenant access before revoke
+      const apiKey = await this.apiKeyService.findById(id);
+      if (!apiKey) {
+        throw new NotFoundError('ApiKey', id);
+      }
+      
+      // Security: Normal users can only revoke API keys from their own tenant
+      if (!this.isSuperAdmin(user) && apiKey.tenantId !== user.tenantId) {
+        logger.warn({ 
+          requestedApiKeyId: id, 
+          userTenantId: user.tenantId, 
+          apiKeyTenantId: apiKey.tenantId 
+        }, 'Forbidden: User tried to revoke API key from another tenant');
+        res.status(403).json({ 
+          success: false, 
+          error: 'Forbidden: You can only revoke API keys from your own tenant' 
+        });
+        return;
+      }
+      
       await this.apiKeyService.revoke(id);
       res.json({ success: true, message: 'API Key revoked' });
     } catch (error) {
@@ -90,6 +126,28 @@ export class ApiKeyController {
   async delete(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      const user = (req as any).user;
+      
+      // Check tenant access before delete
+      const apiKey = await this.apiKeyService.findById(id);
+      if (!apiKey) {
+        throw new NotFoundError('ApiKey', id);
+      }
+      
+      // Security: Normal users can only delete API keys from their own tenant
+      if (!this.isSuperAdmin(user) && apiKey.tenantId !== user.tenantId) {
+        logger.warn({ 
+          requestedApiKeyId: id, 
+          userTenantId: user.tenantId, 
+          apiKeyTenantId: apiKey.tenantId 
+        }, 'Forbidden: User tried to delete API key from another tenant');
+        res.status(403).json({ 
+          success: false, 
+          error: 'Forbidden: You can only delete API keys from your own tenant' 
+        });
+        return;
+      }
+      
       await this.apiKeyService.delete(id);
       res.status(204).send();
     } catch (error) {

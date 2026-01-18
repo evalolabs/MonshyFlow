@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Key, Building2, LogOut, Workflow, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, Key, Building2, LogOut, Workflow, Shield, Eye, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useIsSuperAdmin } from '../../utils/permissions';
+import { useIsSuperAdmin, useIsTenantAdmin } from '../../utils/permissions';
 
 export function Navigation() {
   const location = useLocation();
   const { user, logout } = useAuth();
   const isSuperAdmin = useIsSuperAdmin();
+  const isTenantAdmin = useIsTenantAdmin();
 
   // Don't show navigation in workflow editor
   const isWorkflowPage = location.pathname.startsWith('/workflow/') || location.pathname.startsWith('/webhook-test/');
@@ -56,6 +57,18 @@ export function Navigation() {
       path: '/admin/apikeys',
       icon: Shield,
       permission: null, // Always visible
+    },
+    {
+      name: 'Support-Freigaben',
+      path: '/admin/support-consents',
+      icon: ShieldCheck,
+      permission: 'admin', // Only tenant admins
+    },
+    {
+      name: 'Audit-Logs',
+      path: '/admin/audit-logs',
+      icon: Eye,
+      permission: null, // Always visible - Tenants können ihre Logs sehen
     },
     {
       name: 'Tenants',
@@ -110,6 +123,10 @@ export function Navigation() {
             .filter(item => {
               if (item.permission === 'superadmin') {
                 return isSuperAdmin;
+              }
+              if (item.permission === 'admin') {
+                // Tenant-Admin-only: Superadmin soll diesen Menüpunkt NICHT sehen (System Console vs Tenant Console)
+                return isTenantAdmin;
               }
               return true;
             })

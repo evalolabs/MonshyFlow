@@ -61,8 +61,11 @@ export interface Role {
 
 @injectable()
 export class AdminService {
-  async getStatistics(): Promise<Statistics> {
+  async getStatistics(tenantId?: string, userRole?: string): Promise<Statistics> {
     try {
+      const isSuperAdmin = userRole === ROLES.SUPERADMIN;
+      const tenantFilter = tenantId ? { tenantId } : {};
+      
       const [
         totalUsers,
         totalTenants,
@@ -74,15 +77,24 @@ export class AdminService {
         superAdmins,
         admins,
       ] = await Promise.all([
-        User.countDocuments(),
-        Tenant.countDocuments(),
-        Workflow.countDocuments(),
-        Secret.countDocuments(),
-        User.countDocuments({ isActive: true }),
-        Tenant.countDocuments({ isActive: true }),
-        Workflow.countDocuments({ isPublished: true }),
-        User.countDocuments({ roles: { $in: [ROLES.SUPERADMIN] } }),
-        User.countDocuments({ roles: { $in: [ROLES.ADMIN] } }),
+        // Users: Filter by tenant unless superadmin
+        User.countDocuments(isSuperAdmin ? {} : tenantFilter),
+        // Tenants: Only count if superadmin, otherwise 0
+        isSuperAdmin ? Tenant.countDocuments() : Promise.resolve(0),
+        // Workflows: Filter by tenant unless superadmin
+        Workflow.countDocuments(isSuperAdmin ? {} : tenantFilter),
+        // Secrets: Filter by tenant unless superadmin
+        Secret.countDocuments(isSuperAdmin ? {} : tenantFilter),
+        // Active users: Filter by tenant unless superadmin
+        User.countDocuments(isSuperAdmin ? { isActive: true } : { ...tenantFilter, isActive: true }),
+        // Active tenants: Only count if superadmin
+        isSuperAdmin ? Tenant.countDocuments({ isActive: true }) : Promise.resolve(0),
+        // Published workflows: Filter by tenant unless superadmin
+        Workflow.countDocuments(isSuperAdmin ? { isPublished: true } : { ...tenantFilter, isPublished: true }),
+        // Superadmins: Only count if superadmin
+        isSuperAdmin ? User.countDocuments({ roles: { $in: [ROLES.SUPERADMIN] } }) : Promise.resolve(0),
+        // Admins: Only count if superadmin
+        isSuperAdmin ? User.countDocuments({ roles: { $in: [ROLES.ADMIN] } }) : Promise.resolve(0),
       ]);
 
       return {
@@ -330,6 +342,15 @@ export class AdminService {
         name: 'admin',
         description: 'Administrator with tenant management access',
         permissions: ['users:read', 'users:write', 'tenants:read', 'tenants:write', 'workflows:read', 'workflows:write'],
+        isSystemRole: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'support',
+        name: 'support',
+        description: 'Support agent with restricted access (requires tenant consent for workflow content)',
+        permissions: ['workflows:read'], // content requires tenant-admin consent
         isSystemRole: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

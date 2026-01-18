@@ -58,6 +58,22 @@ services:
           - GET
           - OPTIONS  # CORS Preflight
         strip_path: false
+      - name: api-audit-logs
+        paths:
+          - /api/audit-logs
+        methods:
+          - GET
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: api-support-consents
+        paths:
+          - /api/support-consents
+        methods:
+          - GET
+          - POST
+          - DELETE
+          - OPTIONS  # CORS Preflight
+        strip_path: false
 
   # Auth Service
   - name: auth-service

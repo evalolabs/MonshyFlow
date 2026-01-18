@@ -61,6 +61,17 @@ export function useIsAdmin(): boolean {
   return user?.roles?.includes('admin') ?? false;
 }
 
+/**
+ * Tenant-Admin (nicht Superadmin).
+ * Wichtig: Superadmins können in der DB zusätzlich 'admin' haben,
+ * sollen aber NICHT als Tenant-Admin für Tenant-Console Features behandelt werden.
+ */
+export function useIsTenantAdmin(): boolean {
+  const { user } = useAuth();
+  const roles = user?.roles ?? [];
+  return roles.includes('admin') && !roles.includes('superadmin');
+}
+
 export function useCurrentUserTenantId(): string | undefined {
   const { user } = useAuth();
   return user?.tenantId;
