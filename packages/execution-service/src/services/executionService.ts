@@ -2163,6 +2163,8 @@ Use the available agents and tools as needed to complete the task.`;
 
             // Try to get tool creator from registry
             const toolCreator = getToolCreator(nodeType);
+            let toolCreated = false;
+            
             if (toolCreator) {
                 const secrets = this.normalizeSecrets(workflow?.secrets);
                 const context = {
@@ -2174,19 +2176,27 @@ Use the available agents and tools as needed to complete the task.`;
                 try {
                     const createdTools = await toolCreator.create({ ...toolNode, data: nodeData }, context);
                     
-                    // Handle both single tool and array of tools (e.g., MCP can return multiple)
-                    if (Array.isArray(createdTools)) {
+                    // If null is returned, fall back to legacy implementation
+                    if (createdTools === null) {
+                        console.log(`[AgentTools] ToolCreator returned null for ${nodeType}, falling back to legacy implementation`);
+                        // toolCreated remains false, will use switch statement
+                    } else if (Array.isArray(createdTools)) {
                         tools = tools.concat(createdTools.filter(t => t !== null));
-                    } else if (createdTools !== null && createdTools !== undefined) {
+                        toolCreated = true;
+                    } else if (createdTools !== undefined) {
                         tools.push(createdTools);
+                        toolCreated = true;
                     }
                 } catch (error: any) {
                     console.error(`[AgentTools] Error creating tool ${nodeType} for node ${toolNode.id}:`, error);
                     // Continue with other tools even if one fails
                 }
-            } else {
-                // Fallback to legacy methods for backward compatibility
-                // This allows gradual migration
+            }
+            
+            // Fallback to legacy methods for backward compatibility
+            // This allows gradual migration
+            // Also handles cases where ToolCreator returns null or doesn't exist
+            if (!toolCreated) {
             switch (nodeType) {
                 case 'tool-client':
                     tools.push(this.createClientTool({ ...toolNode, data: nodeData }));

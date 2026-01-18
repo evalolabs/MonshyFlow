@@ -1,7 +1,8 @@
 import { registerMcpHandler } from './index';
 import { genericMcpHandler } from './handlers/genericMcpHandler';
-import { openWeatherMcpHandler } from './handlers/openWeatherMcpHandler';
-import { emailMcpHandler } from './handlers/emailMcpHandler';
+
+// Note: openWeatherMcpHandler and emailMcpHandler have been migrated to Functions
+// They are now available as: get_weather_openweathermap and send_email_smtp
 
 // OpenAI MCP Connectors
 import { gmailMcpHandler } from './handlers/gmailMcpHandler';
@@ -29,9 +30,9 @@ import { deepwikiMcpHandler } from './handlers/deepwikiMcpHandler';
 
 export function registerBuiltInMcpHandlers() {
     // Built-in handlers
-    registerMcpHandler(genericMcpHandler);
-    registerMcpHandler(openWeatherMcpHandler);
-    registerMcpHandler(emailMcpHandler);
+    // Note: openWeatherMcpHandler and emailMcpHandler have been migrated to Functions
+    // They are now available as: get_weather_openweathermap and send_email_smtp
+    registerMcpHandler(genericMcpHandler); // Keep for external MCP servers
     
     // OpenAI MCP Connectors
     registerMcpHandler(gmailMcpHandler);

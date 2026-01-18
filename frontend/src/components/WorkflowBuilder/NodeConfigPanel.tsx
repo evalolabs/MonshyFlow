@@ -1046,6 +1046,35 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               />
             )}
 
+            {/* Server URL field - only shown for Custom MCP Server (generic handler) */}
+            {config.mcpHandlerId === 'generic' && (
+              <div className="space-y-2">
+                {renderFieldWithDebug({
+                  nodeType: 'tool-mcp-server',
+                  fieldName: 'serverUrl',
+                  label: 'Server URL',
+                  value: config.serverUrl || '',
+                  onChange: (v) => setConfig({ ...config, serverUrl: v }),
+                  placeholder: 'https://your-mcp-server.com',
+                })}
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-2">
+                  <div className="flex items-start">
+                    <span className="text-blue-600 mr-2">ℹ️</span>
+                    <div className="text-xs text-blue-800">
+                      <strong>Custom MCP Server:</strong>
+                      <p className="mt-1">
+                        Enter the URL of your MCP server. The server should expose:
+                      </p>
+                      <ul className="mt-1 ml-4 list-disc space-y-0.5">
+                        <li><code className="text-xs">GET /tools</code> - List available tools</li>
+                        <li><code className="text-xs">POST /invoke/:toolName</code> - Invoke a tool</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {renderFieldWithDebug({
               nodeType: 'tool-mcp-server',
               fieldName: 'label',
