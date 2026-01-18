@@ -157,55 +157,108 @@ registerToolCreator({
     description: 'Search the web for information',
     create: async (node, context) => {
         const nodeData = node.data || {};
-        const handlerId = nodeData.webSearchHandlerId || 'serper';
-        
-        const handler = getWebSearchHandler(handlerId);
-        if (!handler) {
-            console.warn(`[Tool Registry] Web search handler "${handlerId}" not found`);
-            return null;
-        }
-
-        const connection = await handler.connect(nodeData, {
-            workflow: context.workflow,
-            node,
-            secrets: context.secrets,
-        });
+        const defaultHandlerId = nodeData.webSearchHandlerId || 'serper';
 
         const parametersSchema = z.object({
-            query: z.string().describe('Search query to execute').nullish(),
-            maxResults: z.number().int().min(1).max(20).nullish(),
-            location: z.string().nullish(),
-            providerId: z.string().nullish(),
+            query: z.string().describe('The search query to execute. This is required when calling the tool.').nullish(),
+            maxResults: z.number().int().min(1).max(20).describe('Maximum number of search results to return (1-20)').nullish(),
+            location: z.string().describe('Geographic location for localized search results (e.g., "US", "Germany")').nullish(),
+            providerId: z.string().describe('Override the configured web search provider (currently only "serper" is supported)').nullish(),
             filters: z.object({
-                allowedDomains: z.array(z.string()).min(1).max(20).nullish(),
+                allowedDomains: z.array(z.string()).min(1).max(20).describe('Restrict search to specific domains (e.g., ["example.com", "wikipedia.org"])').nullish(),
             }).nullish(),
         });
 
         return tool({
             name: `web_search_${node.id}`,
-            description: 'Search the web for information',
+            description: 'Search the web for current information, news, facts, or any topic. Use this tool when you need up-to-date information that is not in your training data, or when the user asks about current events, recent news, or real-time data. Always use this tool when web search is requested - do not say you cannot access the internet.',
             parameters: parametersSchema,
             execute: async (args: any) => {
-                const query = args.query || nodeData.query;
-                if (!query) {
-                    throw new Error('Web search query is required');
+                // Determine which handler to use (override or default)
+                let handlerId = defaultHandlerId;
+                if (args.providerId && typeof args.providerId === 'string' && args.providerId.trim()) {
+                    handlerId = args.providerId.trim();
                 }
 
-                const searchRequest: any = { query };
-                if (args.maxResults) searchRequest.maxResults = args.maxResults;
-                if (args.location) searchRequest.location = args.location;
-                if (args.filters?.allowedDomains) {
-                    searchRequest.filters = { allowedDomains: args.filters.allowedDomains };
+                // Get handler
+                let handler = getWebSearchHandler(handlerId);
+                if (!handler && handlerId !== 'serper') {
+                    console.warn(`[Tool Registry] Web search handler "${handlerId}" not found, falling back to serper`);
+                    handler = getWebSearchHandler('serper');
                 }
 
-                const response = await connection.search(searchRequest);
-                return {
-                    provider: handlerId,
-                    query: response.query,
-                    results: response.results,
-                    message: `Web search executed using provider "${handlerId}"`,
-                    raw: response.raw,
-                };
+                if (!handler) {
+                    throw new Error(`Web search handler "${handlerId}" is not registered.`);
+                }
+
+                // Create connection for this search
+                let connection: any = null;
+                try {
+                    connection = await handler.connect(nodeData, {
+                        workflow: context.workflow,
+                        node,
+                        secrets: context.secrets,
+                    });
+                } catch (error: any) {
+                    console.error(`[Tool Registry] Failed to connect to web search handler "${handler.id}":`, error);
+                    throw new Error(`Failed to connect to web search provider: ${error.message || 'Unknown error'}`);
+                }
+
+                try {
+                    // Get query from args or node config
+                    const query = args.query || nodeData.query;
+                    if (!query || typeof query !== 'string' || !query.trim()) {
+                        throw new Error('Web search query is required. Provide a query parameter when calling this tool.');
+                    }
+
+                    // Build search request
+                    const searchRequest: any = { query: query.trim() };
+                    
+                    // Use node config as defaults, but allow args to override
+                    const maxResults = args.maxResults ?? nodeData.maxResults ?? handler.defaultConfig?.maxResults;
+                    if (maxResults !== undefined) {
+                        const parsedMax = Number(maxResults);
+                        if (!Number.isNaN(parsedMax) && parsedMax > 0 && parsedMax <= 20) {
+                            searchRequest.maxResults = parsedMax;
+                        }
+                    }
+
+                    if (args.location || nodeData.location) {
+                        searchRequest.location = (args.location || nodeData.location)?.trim();
+                    }
+
+                    if (args.filters?.allowedDomains || nodeData.allowedDomains) {
+                        const domains = args.filters?.allowedDomains || 
+                            (typeof nodeData.allowedDomains === 'string' 
+                                ? nodeData.allowedDomains.split(',').map((d: string) => d.trim()).filter(Boolean)
+                                : Array.isArray(nodeData.allowedDomains) ? nodeData.allowedDomains : []);
+                        
+                        if (domains.length > 0) {
+                            searchRequest.filters = { allowedDomains: domains };
+                        }
+                    }
+
+                    const response = await connection.search(searchRequest);
+                    return {
+                        provider: handler.id,
+                        query: response.query,
+                        results: response.results || [],
+                        message: `Web search executed using provider "${handler.id}". Found ${response.results?.length || 0} result(s).`,
+                        raw: response.raw,
+                    };
+                } catch (error: any) {
+                    console.error(`[Tool Registry] Web search failed:`, error);
+                    throw new Error(`Web search failed: ${error.message || 'Unknown error'}`);
+                } finally {
+                    // Always cleanup connection
+                    if (connection && typeof connection.dispose === 'function') {
+                        try {
+                            await connection.dispose();
+                        } catch (disposeError) {
+                            console.warn(`[Tool Registry] Error disposing web search connection:`, disposeError);
+                        }
+                    }
+                }
             },
         });
     },
