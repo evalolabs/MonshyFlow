@@ -218,6 +218,27 @@ services:
           - GET
           - OPTIONS  # CORS Preflight
         strip_path: false
+      - name: execution-openai-files-upload
+        paths:
+          - /api/openai/files/upload
+        methods:
+          - POST
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: execution-openai-files-info
+        paths:
+          - /api/openai/files/info
+        methods:
+          - POST
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: execution-openai-files-delete
+        paths:
+          - /api/openai/files/
+        methods:
+          - DELETE
+          - OPTIONS  # CORS Preflight
+        strip_path: false
 
   # Scheduler Service
   - name: scheduler-service

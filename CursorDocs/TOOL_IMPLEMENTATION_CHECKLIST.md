@@ -29,27 +29,23 @@ Diese Checkliste dokumentiert den Status aller Tool-Typen, die noch angepasst od
   - ✅ Unterstützung für maxResults, location, allowedDomains
   - ✅ Fallback auf 'serper' wenn Handler nicht gefunden
 
-## ❌ Stub-Implementierungen (müssen implementiert werden)
+## ✅ Abgeschlossen (Fortsetzung)
 
-- [ ] **tool-file-search** - File Search Tool
-  - ⚠️ **Status:** Stub-Implementierung (nur Beispiel-Daten)
-  - 📍 **Datei:** `packages/execution-service/src/tools/registerBuiltIns.ts` (Zeile 229-255)
-  - **Zu implementieren:**
-    - [ ] Echte File-Search-Funktionalität
-    - [ ] Integration mit File System oder File Service
-    - [ ] Parameter-Validierung
-    - [ ] Fehlerbehandlung
-    - [ ] UI-Konfiguration überprüfen/anpassen
+- [x] **tool-file-search** - File Search Tool
+  - ✅ Vollständige Implementierung mit OpenAI's `fileSearchTool`
+  - ✅ Unterstützt Vector Store IDs (komma-separiert oder Array)
+  - ✅ Max Results Konfiguration (1-100, Standard: 20)
+  - ✅ Vollständige Fehlerbehandlung
+  - ✅ UI-Konfiguration mit Vector Store IDs und Max Results Feldern
+  - ✅ Validierung: Mindestens eine Vector Store ID erforderlich
+  - 📍 **Datei:** `packages/execution-service/src/tools/registerBuiltIns.ts`
 
-- [ ] **tool-code-interpreter** - Code Interpreter Tool
-  - ⚠️ **Status:** Stub-Implementierung (nur "not yet implemented" Message)
-  - 📍 **Datei:** `packages/execution-service/src/tools/registerBuiltIns.ts` (Zeile 258-280)
-  - **Zu implementieren:**
-    - [ ] Python Code Execution in Sandbox
-    - [ ] Sicherheits-Isolation
-    - [ ] Timeout-Handling
-    - [ ] Output/Error-Capture
-    - [ ] UI-Konfiguration überprüfen/anpassen
+- [x] **tool-code-interpreter** - Code Interpreter Tool
+  - ✅ Vollständige Implementierung mit OpenAI's `codeInterpreterTool`
+  - ✅ Python Code Execution in OpenAI's sicherer Sandbox-Umgebung
+  - ✅ Automatische Datei-Integration (über Files-API)
+  - ✅ UI-Konfiguration vorhanden
+  - 📍 **Datei:** `packages/execution-service/src/tools/registerBuiltIns.ts`
 
 - [ ] **tool-client** - Client Tool (ChatKit)
   - ⚠️ **Status:** Stub-Implementierung (nur Warnung)
@@ -100,9 +96,11 @@ Diese erscheinen im Agent Node "Output Format" Dropdown, sind aber möglicherwei
 
 ## 🎯 Prioritäten
 
-1. **Hoch:** tool-file-search, tool-code-interpreter (wichtige Features)
+1. **Abgeschlossen:** 
+   - ✅ tool-web-search
+   - ✅ tool-file-search
+   - ✅ tool-code-interpreter
 2. **Mittel:** tool-client, tool-custom (spezielle Use Cases)
-3. **Abgeschlossen:** tool-web-search ✅
 
 ## 🧪 Testanleitung für tool-web-search
 

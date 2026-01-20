@@ -20,6 +20,14 @@ import { listNodeProcessors } from './nodes';
 import { listToolCreators } from './tools';
 // Load registry from shared/registry.json (automatic synchronization)
 import { loadAndRegisterFromSharedConfig } from './shared/registryLoader';
+import OpenAI from 'openai';
+import { File as NodeFile } from 'node:buffer';
+import axios from 'axios';
+
+// Set File as global for OpenAI SDK compatibility (required for file uploads)
+if (typeof globalThis.File === 'undefined') {
+    globalThis.File = NodeFile as any;
+}
 
 const app = express();
 
@@ -113,6 +121,339 @@ app.get('/api/tool-creators', (req, res) => {
         description: c.description,
     }));
     res.json(creators);
+});
+
+// OpenAI Files API - Upload file for Code Interpreter
+app.post('/api/openai/files/upload', async (req, res) => {
+    try {
+        const { fileName, fileContent, purpose = 'assistants', tenantId } = req.body;
+
+        if (!fileName || !fileContent) {
+            return res.status(400).json({
+                success: false,
+                error: 'fileName and fileContent are required'
+            });
+        }
+
+        if (!tenantId) {
+            return res.status(400).json({
+                success: false,
+                error: 'tenantId is required'
+            });
+        }
+
+        // Load secrets for the tenant
+        let secrets: Record<string, string> = {};
+        let openaiApiKey: string | undefined;
+        
+        try {
+            const secretsServiceUrl = process.env.SECRETS_SERVICE_URL || 'http://secrets-service:80';
+            const internalServiceKey = process.env.INTERNAL_SERVICE_KEY || 'internal-service-key';
+            
+            const secretsResponse = await axios.get(
+                `${secretsServiceUrl}/api/internal/secrets/tenant/${tenantId}`,
+                {
+                    headers: {
+                        'X-Service-Key': internalServiceKey,
+                        'Content-Type': 'application/json',
+                    },
+                    timeout: 5000,
+                }
+            );
+            
+            if (secretsResponse.data.success && Array.isArray(secretsResponse.data.data)) {
+                secrets = secretsResponse.data.data.reduce((acc: Record<string, string>, secret: any) => {
+                    if (secret && secret.name && secret.value) {
+                        acc[secret.name] = secret.value;
+                    }
+                    return acc;
+                }, {});
+                
+                // Try to find OpenAI API key in secrets (common names)
+                openaiApiKey = secrets.OPENAI_API_KEY || 
+                              secrets.openai_api_key || 
+                              secrets.openaiApiKey ||
+                              secrets['openai-api-key'];
+            }
+        } catch (secretsError: any) {
+            console.error('[OpenAI Files API] Failed to load secrets:', secretsError.message);
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to load secrets. Please ensure your OpenAI API key is stored in Secrets.'
+            });
+        }
+
+        if (!openaiApiKey || openaiApiKey.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                error: 'OpenAI API key not found in secrets. Please add your OpenAI API key to Secrets (name: OPENAI_API_KEY, openai_api_key, or openaiApiKey).'
+            });
+        }
+
+        // Initialize OpenAI client with user's API key
+        const openai = new OpenAI({
+            apiKey: openaiApiKey,
+        });
+
+        // Convert base64 to Buffer
+        const buffer = Buffer.from(fileContent, 'base64');
+
+        // Create a File object from the buffer (required by OpenAI SDK)
+        // Using globalThis.File which we set above from node:buffer
+        const file = new globalThis.File([buffer], fileName, {
+            type: 'application/octet-stream',
+        });
+
+        // Upload to OpenAI Files API
+        const uploadedFile = await openai.files.create({
+            file: file,
+            purpose: purpose,
+        });
+
+        res.json({
+            success: true,
+            file: {
+                id: uploadedFile.id,
+                object: uploadedFile.object,
+                bytes: uploadedFile.bytes,
+                created_at: uploadedFile.created_at,
+                filename: uploadedFile.filename,
+                purpose: uploadedFile.purpose,
+            }
+        });
+    } catch (error: any) {
+        console.error('[OpenAI Files API] Upload failed:', error);
+        
+        // Provide more specific error messages
+        let errorMessage = error.message || 'Failed to upload file to OpenAI';
+        
+        if (error.status === 401 || error.message?.includes('401') || error.message?.includes('Invalid authorization')) {
+            errorMessage = 'OpenAI API key is invalid or not configured. Please check your OPENAI_API_KEY environment variable.';
+        } else if (error.status === 429) {
+            errorMessage = 'OpenAI API rate limit exceeded. Please try again later.';
+        } else if (error.status === 400) {
+            errorMessage = `Invalid request to OpenAI API: ${error.message || 'Bad request'}`;
+        }
+        
+        res.status(500).json({
+            success: false,
+            error: errorMessage
+        });
+    }
+});
+
+// OpenAI Files API - Get file information
+app.post('/api/openai/files/info', async (req, res) => {
+    try {
+        const { fileIds, tenantId } = req.body;
+
+        if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'fileIds array is required'
+            });
+        }
+
+        if (!tenantId) {
+            return res.status(400).json({
+                success: false,
+                error: 'tenantId is required'
+            });
+        }
+
+        // Load secrets for the tenant
+        let secrets: Record<string, string> = {};
+        let openaiApiKey: string | undefined;
+        
+        try {
+            const secretsServiceUrl = process.env.SECRETS_SERVICE_URL || 'http://secrets-service:80';
+            const internalServiceKey = process.env.INTERNAL_SERVICE_KEY || 'internal-service-key';
+            
+            const secretsResponse = await axios.get(
+                `${secretsServiceUrl}/api/internal/secrets/tenant/${tenantId}`,
+                {
+                    headers: {
+                        'X-Service-Key': internalServiceKey,
+                        'Content-Type': 'application/json',
+                    },
+                    timeout: 5000,
+                }
+            );
+            
+            if (secretsResponse.data.success && Array.isArray(secretsResponse.data.data)) {
+                secrets = secretsResponse.data.data.reduce((acc: Record<string, string>, secret: any) => {
+                    if (secret && secret.name && secret.value) {
+                        acc[secret.name] = secret.value;
+                    }
+                    return acc;
+                }, {});
+                
+                // Try to find OpenAI API key in secrets (common names)
+                openaiApiKey = secrets.OPENAI_API_KEY || 
+                              secrets.openai_api_key || 
+                              secrets.openaiApiKey ||
+                              secrets['openai-api-key'];
+            }
+        } catch (secretsError: any) {
+            console.error('[OpenAI Files API] Failed to load secrets:', secretsError.message);
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to load secrets. Please ensure your OpenAI API key is stored in Secrets.'
+            });
+        }
+
+        if (!openaiApiKey || openaiApiKey.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                error: 'OpenAI API key not found in secrets. Please add your OpenAI API key to Secrets.'
+            });
+        }
+
+        // Initialize OpenAI client with user's API key
+        const openai = new OpenAI({
+            apiKey: openaiApiKey,
+        });
+
+        // Fetch file information for all file IDs
+        const filePromises = fileIds.map(async (fileId: string) => {
+            try {
+                const file = await openai.files.retrieve(fileId);
+                return {
+                    id: file.id,
+                    object: file.object,
+                    bytes: file.bytes,
+                    created_at: file.created_at,
+                    filename: file.filename,
+                    purpose: file.purpose,
+                };
+            } catch (error: any) {
+                console.error(`[OpenAI Files API] Failed to retrieve file ${fileId}:`, error.message);
+                // Return partial info if file doesn't exist or can't be retrieved
+                return {
+                    id: fileId,
+                    error: error.message || 'File not found or inaccessible',
+                };
+            }
+        });
+
+        const files = await Promise.all(filePromises);
+
+        res.json({
+            success: true,
+            files: files,
+        });
+    } catch (error: any) {
+        console.error('[OpenAI Files API] Get file info failed:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to retrieve file information from OpenAI'
+        });
+    }
+});
+
+// OpenAI Files API - Delete file
+app.delete('/api/openai/files/:fileId', async (req, res) => {
+    try {
+        const { fileId } = req.params;
+        const { tenantId } = req.body;
+
+        if (!fileId) {
+            return res.status(400).json({
+                success: false,
+                error: 'fileId is required'
+            });
+        }
+
+        if (!tenantId) {
+            return res.status(400).json({
+                success: false,
+                error: 'tenantId is required'
+            });
+        }
+
+        // Load secrets for the tenant
+        let secrets: Record<string, string> = {};
+        let openaiApiKey: string | undefined;
+        
+        try {
+            const secretsServiceUrl = process.env.SECRETS_SERVICE_URL || 'http://secrets-service:80';
+            const internalServiceKey = process.env.INTERNAL_SERVICE_KEY || 'internal-service-key';
+            
+            const secretsResponse = await axios.get(
+                `${secretsServiceUrl}/api/internal/secrets/tenant/${tenantId}`,
+                {
+                    headers: {
+                        'X-Service-Key': internalServiceKey,
+                        'Content-Type': 'application/json',
+                    },
+                    timeout: 5000,
+                }
+            );
+            
+            if (secretsResponse.data.success && Array.isArray(secretsResponse.data.data)) {
+                secrets = secretsResponse.data.data.reduce((acc: Record<string, string>, secret: any) => {
+                    if (secret && secret.name && secret.value) {
+                        acc[secret.name] = secret.value;
+                    }
+                    return acc;
+                }, {});
+                
+                // Try to find OpenAI API key in secrets (common names)
+                openaiApiKey = secrets.OPENAI_API_KEY || 
+                              secrets.openai_api_key || 
+                              secrets.openaiApiKey ||
+                              secrets['openai-api-key'];
+            }
+        } catch (secretsError: any) {
+            console.error('[OpenAI Files API] Failed to load secrets:', secretsError.message);
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to load secrets. Please ensure your OpenAI API key is stored in Secrets.'
+            });
+        }
+
+        if (!openaiApiKey || openaiApiKey.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                error: 'OpenAI API key not found in secrets. Please add your OpenAI API key to Secrets.'
+            });
+        }
+
+        // Initialize OpenAI client with user's API key
+        const openai = new OpenAI({
+            apiKey: openaiApiKey,
+        });
+
+        // Delete file from OpenAI
+        try {
+            const deletionStatus = await openai.files.delete(fileId);
+            
+            res.json({
+                success: true,
+                deleted: deletionStatus.deleted,
+                fileId: fileId,
+            });
+        } catch (error: any) {
+            // If file doesn't exist, that's okay - it's already deleted
+            if (error.status === 404 || error.message?.includes('No such file')) {
+                console.log(`[OpenAI Files API] File ${fileId} not found, considering it already deleted`);
+                res.json({
+                    success: true,
+                    deleted: true,
+                    fileId: fileId,
+                    message: 'File not found on OpenAI platform (may have been already deleted)',
+                });
+            } else {
+                throw error;
+            }
+        }
+    } catch (error: any) {
+        console.error('[OpenAI Files API] Delete file failed:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to delete file from OpenAI'
+        });
+    }
 });
 
 // Health check

@@ -501,6 +501,40 @@ function sanitizeToolNodeData(data: any, toolId: string): any {
       delete sanitized.maxResults;
       break;
       
+    case 'tool-code-interpreter':
+      // Only keep code interpreter-related fields
+      if (data.fileIds) sanitized.fileIds = data.fileIds;
+      if (data.memoryLimit) sanitized.memoryLimit = data.memoryLimit;
+      if (data.containerType) sanitized.containerType = data.containerType;
+      // Explicitly remove other tool fields
+      delete sanitized.functionName;
+      delete sanitized.functionDescription;
+      delete sanitized.functionParameters;
+      delete sanitized.webSearchHandlerId;
+      delete sanitized.maxResults;
+      delete sanitized.mcpHandlerId;
+      delete sanitized.serverUrl;
+      delete sanitized.requireApproval;
+      delete sanitized.vectorStoreIds;
+      break;
+      
+    case 'tool-file-search':
+      // Only keep file search-related fields
+      if (data.vectorStoreIds) sanitized.vectorStoreIds = data.vectorStoreIds;
+      if (data.maxResults !== undefined) sanitized.maxResults = data.maxResults;
+      // Explicitly remove other tool fields
+      delete sanitized.functionName;
+      delete sanitized.functionDescription;
+      delete sanitized.functionParameters;
+      delete sanitized.webSearchHandlerId;
+      delete sanitized.mcpHandlerId;
+      delete sanitized.serverUrl;
+      delete sanitized.requireApproval;
+      delete sanitized.fileIds;
+      delete sanitized.memoryLimit;
+      delete sanitized.containerType;
+      break;
+      
     default:
       // For unknown tool types, keep all fields but log a warning
       console.warn(`[WorkflowEditorPage] Unknown tool type: ${toolId}, keeping all fields`);

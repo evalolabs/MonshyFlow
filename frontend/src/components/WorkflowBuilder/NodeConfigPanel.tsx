@@ -17,6 +17,7 @@ import { validateNode } from './utils/nodeValidation';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getApiIntegration } from '../../config/apiIntegrations';
 import { ApiAuthConfig } from './NodeConfigPanel/ApiAuthConfig';
+import { CodeInterpreterFileUpload } from './NodeConfigPanel/CodeInterpreterFileUpload';
 
 type SecretTypeQuery = 'ApiKey' | 'Password' | 'Token' | 'Generic' | 'Smtp';
 
@@ -384,6 +385,15 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 if (clonedData.mcpHandlerId) sanitized.mcpHandlerId = clonedData.mcpHandlerId;
                 if (clonedData.serverUrl) sanitized.serverUrl = clonedData.serverUrl;
                 if (clonedData.requireApproval) sanitized.requireApproval = clonedData.requireApproval;
+                break;
+              case 'tool-code-interpreter':
+                if (clonedData.fileIds) sanitized.fileIds = clonedData.fileIds;
+                if (clonedData.memoryLimit) sanitized.memoryLimit = clonedData.memoryLimit;
+                if (clonedData.containerType) sanitized.containerType = clonedData.containerType;
+                break;
+              case 'tool-file-search':
+                if (clonedData.vectorStoreIds) sanitized.vectorStoreIds = clonedData.vectorStoreIds;
+                if (clonedData.maxResults !== undefined) sanitized.maxResults = clonedData.maxResults;
                 break;
             }
             
@@ -947,7 +957,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
             })}
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                Vector Store IDs (Komma-separiert)
+                Vector Store IDs <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -955,9 +965,27 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 onChange={(e) => setConfig({ ...config, vectorStoreIds: e.target.value })}
                 className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="vs_123, vs_456"
+                required
               />
               <p className="text-xs text-gray-500 mt-1">
-                Verwende IDs von Vector Stores, die du über die Files-API erstellt hast.
+                Komma-separierte Liste von Vector Store IDs, die du über die OpenAI Files-API erstellt hast.
+              </p>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                Max Results
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="100"
+                value={config.maxResults || 20}
+                onChange={(e) => setConfig({ ...config, maxResults: Number(e.target.value) || 20 })}
+                className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="20"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Maximale Anzahl von Suchergebnissen (1-100, Standard: 20)
               </p>
             </div>
           </div>
@@ -985,9 +1013,10 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               value: config.description || 'Execute Python code, analyse Dateien, generiere Diagramme',
               onChange: (v) => setConfig({ ...config, description: v }),
             })}
-            <div className="bg-gray-50 border border-gray-200 rounded-md p-2 text-xs text-gray-600">
-              📁 Dateiuploads erfolgen über den Start-Node / Files-API. Der Interpreter arbeitet automatisch damit.
-            </div>
+            <CodeInterpreterFileUpload
+              fileIds={Array.isArray(config.fileIds) ? config.fileIds : []}
+              onFilesChange={(fileIds) => setConfig({ ...config, fileIds })}
+            />
           </div>
         );
 

@@ -318,6 +318,40 @@ function sanitizeToolNodeConfig(config: any, toolId: string): any {
       delete sanitized.maxResults;
       break;
       
+    case 'tool-code-interpreter':
+      // Only keep code interpreter-related fields
+      if (config.fileIds) sanitized.fileIds = config.fileIds;
+      if (config.memoryLimit) sanitized.memoryLimit = config.memoryLimit;
+      if (config.containerType) sanitized.containerType = config.containerType;
+      // Remove other tool fields
+      delete sanitized.functionName;
+      delete sanitized.functionDescription;
+      delete sanitized.functionParameters;
+      delete sanitized.webSearchHandlerId;
+      delete sanitized.maxResults;
+      delete sanitized.mcpHandlerId;
+      delete sanitized.serverUrl;
+      delete sanitized.requireApproval;
+      delete sanitized.vectorStoreIds;
+      break;
+      
+    case 'tool-file-search':
+      // Only keep file search-related fields
+      if (config.vectorStoreIds) sanitized.vectorStoreIds = config.vectorStoreIds;
+      if (config.maxResults !== undefined) sanitized.maxResults = config.maxResults;
+      // Remove other tool fields
+      delete sanitized.functionName;
+      delete sanitized.functionDescription;
+      delete sanitized.functionParameters;
+      delete sanitized.webSearchHandlerId;
+      delete sanitized.mcpHandlerId;
+      delete sanitized.serverUrl;
+      delete sanitized.requireApproval;
+      delete sanitized.fileIds;
+      delete sanitized.memoryLimit;
+      delete sanitized.containerType;
+      break;
+      
     default:
       // For unknown tool types, keep all fields but log a warning
       autoSaveLogger.warn(`Unknown tool type: ${toolId}, keeping all fields`);
