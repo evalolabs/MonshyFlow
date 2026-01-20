@@ -3,7 +3,7 @@ import { getMcpHandler } from '../mcp';
 import { getWebSearchHandler } from '../webSearch';
 import { getFunctionHandler } from '../functions';
 import { z } from 'zod';
-import { tool, hostedMcpTool } from '@openai/agents';
+import { tool, hostedMcpTool, fileSearchTool, codeInterpreterTool } from '@openai/agents';
 import type { ToolCreatorContext } from './index';
 import axios, { Method } from 'axios';
 
@@ -282,28 +282,45 @@ registerToolCreator({
 registerToolCreator({
     type: 'tool-file-search',
     name: 'File Search Tool',
-    description: 'Search for files',
+    description: 'Search for files using vector stores',
     create: async (node, context) => {
         const nodeData = node.data || {};
         
-        return tool({
-            name: 'file_search',
-            description: 'Search for files',
-            parameters: z.object({
-                query: z.string().describe('Search query for files'),
-                path: z.string().optional(),
-            }),
-            execute: async ({ query, path = '/' }) => {
-                // This would search for files
-                return { 
-                    files: [
-                        { name: 'example.txt', path: '/example.txt', size: 1024 }
-                    ],
-                    query,
-                    message: 'File search completed'
-                };
-            },
-        });
+        // Get vector store IDs from node config
+        // Can be a single string, comma-separated string, or array
+        let vectorStoreIds: string[] = [];
+        
+        if (nodeData.vectorStoreIds) {
+            if (typeof nodeData.vectorStoreIds === 'string') {
+                // Handle comma-separated string
+                vectorStoreIds = nodeData.vectorStoreIds.split(',').map((id: string) => id.trim()).filter(Boolean);
+            } else if (Array.isArray(nodeData.vectorStoreIds)) {
+                vectorStoreIds = nodeData.vectorStoreIds.filter((id: any) => typeof id === 'string' && id.trim()).map((id: string) => id.trim());
+            }
+        }
+        
+        if (vectorStoreIds.length === 0) {
+            console.warn(`[Tool Registry] File Search Tool node ${node.id} has no vector store IDs configured`);
+            throw new Error('File Search Tool requires at least one vector store ID. Please configure vectorStoreIds in the node settings.');
+        }
+        
+        // Get maxNumResults from config (default: 20, max: 100 as per OpenAI docs)
+        const maxNumResults = nodeData.maxResults 
+            ? Math.min(Math.max(Number(nodeData.maxResults) || 20, 1), 100)
+            : 20;
+        
+        try {
+            // Use OpenAI's hosted fileSearchTool
+            const fileSearch = fileSearchTool(vectorStoreIds, {
+                maxNumResults,
+            });
+            
+            console.log(`[Tool Registry] Created File Search Tool for node ${node.id} with ${vectorStoreIds.length} vector store(s): ${vectorStoreIds.join(', ')}`);
+            return fileSearch;
+        } catch (error: any) {
+            console.error(`[Tool Registry] Failed to create File Search Tool:`, error);
+            throw new Error(`Failed to create File Search Tool: ${error.message || 'Unknown error'}`);
+        }
     },
 });
 
@@ -311,24 +328,50 @@ registerToolCreator({
 registerToolCreator({
     type: 'tool-code-interpreter',
     name: 'Code Interpreter Tool',
-    description: 'Execute Python code',
+    description: 'Execute Python code in a sandboxed environment',
     create: async (node, context) => {
         const nodeData = node.data || {};
         
-        return tool({
-            name: 'code_interpreter',
-            description: 'Execute Python code',
-            parameters: z.object({
-                code: z.string().describe('Python code to execute'),
-            }),
-            execute: async ({ code }) => {
-                // This would execute code in a sandbox
-                return { 
-                    output: 'Code execution not yet implemented',
-                    error: null 
-                };
-            },
-        });
+        // Get file IDs from node config (uploaded via UI)
+        const fileIds = Array.isArray(nodeData.fileIds) 
+            ? nodeData.fileIds.filter((id: any) => typeof id === 'string' && id.trim())
+            : [];
+        
+        // Get container configuration (memory_limit, etc.)
+        const memoryLimit = nodeData.memoryLimit || '4g'; // Default: 4GB as per OpenAI docs
+        const containerType = nodeData.containerType || 'auto'; // Default: auto
+        
+        try {
+            // Use OpenAI's hosted codeInterpreterTool
+            // This provides Python code execution in a secure sandbox
+            // Container configuration: type "auto" creates a new container for each execution
+            // memory_limit: Amount of RAM available (default: 4g, can be 1g, 2g, 4g, etc.)
+            // file_ids: Array of file IDs that should be available in the container
+            const codeInterpreterOptions: any = {
+                container: {
+                    type: containerType,
+                    memory_limit: memoryLimit,
+                },
+            };
+            
+            // Add file IDs if provided
+            if (fileIds.length > 0) {
+                codeInterpreterOptions.container.file_ids = fileIds;
+            }
+            
+            const codeInterpreter = codeInterpreterTool(codeInterpreterOptions);
+            
+            if (fileIds.length > 0) {
+                console.log(`[Tool Registry] Created Code Interpreter Tool for node ${node.id} with ${fileIds.length} file(s): ${fileIds.join(', ')}`);
+            } else {
+                console.log(`[Tool Registry] Created Code Interpreter Tool for node ${node.id}`);
+            }
+            
+            return codeInterpreter;
+        } catch (error: any) {
+            console.error(`[Tool Registry] Failed to create Code Interpreter Tool:`, error);
+            throw new Error(`Failed to create Code Interpreter Tool: ${error.message || 'Unknown error'}`);
+        }
     },
 });
 
