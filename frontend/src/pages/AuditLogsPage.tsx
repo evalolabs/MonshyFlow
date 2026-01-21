@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { auditLogService, type AuditLog } from '../services/auditLogService';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { useCurrentUserTenantId, useIsSuperAdmin } from '../utils/permissions';
-import { Search, Filter, Calendar, User, Shield, FileText, Eye } from 'lucide-react';
+import { Search, Calendar, User, Shield, FileText, Eye } from 'lucide-react';
 
 export function AuditLogsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -107,7 +107,6 @@ export function AuditLogsPage() {
       <PageHeader
         title="Audit-Logs"
         description="Einsehen aller Zugriffe auf Ihre Daten (DSGVO-Konformität: Transparenz)"
-        icon={Eye}
       />
 
       {/* Filter und Suche */}

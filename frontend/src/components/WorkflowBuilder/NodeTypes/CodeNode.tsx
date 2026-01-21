@@ -15,7 +15,7 @@ export function CodeNode(props: NodeProps) {
 
   // IMPORTANT: Use the same nodeId extraction logic as nodeRegistry.ts
   // This ensures the nodeId matches what's used in executionSteps
-  const nodeId = safeData.id || id || '';
+  const nodeId: string = (typeof safeData.id === 'string' ? safeData.id : id) || 'code-node';
 
   const getSubtitle = () => {
     if (codeMode === 'allItems') {

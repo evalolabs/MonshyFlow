@@ -456,6 +456,253 @@ app.delete('/api/openai/files/:fileId', async (req, res) => {
     }
 });
 
+// Helper function to load OpenAI API key from secrets
+async function loadOpenAIApiKey(tenantId: string): Promise<string> {
+    const secretsServiceUrl = process.env.SECRETS_SERVICE_URL || 'http://secrets-service:80';
+    const internalServiceKey = process.env.INTERNAL_SERVICE_KEY || 'internal-service-key';
+    
+    const secretsResponse = await axios.get(
+        `${secretsServiceUrl}/api/internal/secrets/tenant/${tenantId}`,
+        {
+            headers: {
+                'X-Service-Key': internalServiceKey,
+                'Content-Type': 'application/json',
+            },
+            timeout: 5000,
+        }
+    );
+    
+    if (!secretsResponse.data.success || !Array.isArray(secretsResponse.data.data)) {
+        throw new Error('Failed to load secrets');
+    }
+    
+    const secrets = secretsResponse.data.data.reduce((acc: Record<string, string>, secret: any) => {
+        if (secret && secret.name && secret.value) {
+            acc[secret.name] = secret.value;
+        }
+        return acc;
+    }, {});
+    
+    const openaiApiKey = secrets.OPENAI_API_KEY || 
+                          secrets.openai_api_key || 
+                          secrets.openaiApiKey ||
+                          secrets['openai-api-key'];
+    
+    if (!openaiApiKey || openaiApiKey.trim() === '') {
+        throw new Error('OpenAI API key not found in secrets');
+    }
+    
+    return openaiApiKey.trim();
+}
+
+// OpenAI Vector Stores API - Create vector store
+app.post('/api/openai/vector-stores/create', async (req, res) => {
+    try {
+        const { name, tenantId } = req.body;
+
+        if (!name || !tenantId) {
+            return res.status(400).json({
+                success: false,
+                error: 'name and tenantId are required'
+            });
+        }
+
+        const openaiApiKey = await loadOpenAIApiKey(tenantId);
+
+        // Use direct HTTP call to OpenAI API for vector stores (beta API)
+        const response = await axios.post(
+            'https://api.openai.com/v1/vector_stores',
+            { name: name },
+            {
+                headers: {
+                    'Authorization': `Bearer ${openaiApiKey}`,
+                    'Content-Type': 'application/json',
+                    'OpenAI-Beta': 'assistants=v2',
+                },
+            }
+        );
+
+        const vectorStore = response.data;
+
+        res.json({
+            success: true,
+            vectorStore: {
+                id: vectorStore.id,
+                name: vectorStore.name,
+                status: vectorStore.status,
+                created_at: vectorStore.created_at,
+                file_counts: vectorStore.file_counts,
+            }
+        });
+    } catch (error: any) {
+        console.error('[OpenAI Vector Stores API] Create failed:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to create vector store'
+        });
+    }
+});
+
+// OpenAI Vector Stores API - Add files to vector store
+app.post('/api/openai/vector-stores/:vectorStoreId/files', async (req, res) => {
+    try {
+        const { vectorStoreId } = req.params;
+        const { fileIds, tenantId } = req.body;
+
+        if (!vectorStoreId || !fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'vectorStoreId and fileIds array are required'
+            });
+        }
+
+        if (!tenantId) {
+            return res.status(400).json({
+                success: false,
+                error: 'tenantId is required'
+            });
+        }
+
+        const openaiApiKey = await loadOpenAIApiKey(tenantId);
+
+        // Add files to vector store using direct HTTP calls
+        const filePromises = fileIds.map(fileId =>
+            axios.post(
+                `https://api.openai.com/v1/vector_stores/${vectorStoreId}/files`,
+                { file_id: fileId },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${openaiApiKey}`,
+                        'Content-Type': 'application/json',
+                        'OpenAI-Beta': 'assistants=v2',
+                    },
+                }
+            )
+        );
+        
+        await Promise.all(filePromises);
+
+        // Get updated vector store info
+        const vectorStoreResponse = await axios.get(
+            `https://api.openai.com/v1/vector_stores/${vectorStoreId}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${openaiApiKey}`,
+                    'OpenAI-Beta': 'assistants=v2',
+                },
+            }
+        );
+        
+        const vectorStore = vectorStoreResponse.data;
+
+        res.json({
+            success: true,
+            vectorStore: {
+                id: vectorStore.id,
+                name: vectorStore.name,
+                status: vectorStore.status,
+                file_counts: vectorStore.file_counts,
+            },
+            filesAdded: fileIds.length,
+        });
+    } catch (error: any) {
+        console.error('[OpenAI Vector Stores API] Add files failed:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to add files to vector store'
+        });
+    }
+});
+
+// OpenAI Vector Stores API - Get vector store info
+app.get('/api/openai/vector-stores/:vectorStoreId', async (req, res) => {
+    try {
+        const { vectorStoreId } = req.params;
+        const tenantId = req.query.tenantId as string;
+
+        if (!vectorStoreId || !tenantId) {
+            return res.status(400).json({
+                success: false,
+                error: 'vectorStoreId and tenantId are required'
+            });
+        }
+
+        const openaiApiKey = await loadOpenAIApiKey(tenantId);
+
+        // Get vector store info using direct HTTP call
+        const response = await axios.get(
+            `https://api.openai.com/v1/vector_stores/${vectorStoreId}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${openaiApiKey}`,
+                    'OpenAI-Beta': 'assistants=v2',
+                },
+            }
+        );
+
+        const vectorStore = response.data;
+
+        res.json({
+            success: true,
+            vectorStore: {
+                id: vectorStore.id,
+                name: vectorStore.name,
+                status: vectorStore.status,
+                created_at: vectorStore.created_at,
+                file_counts: vectorStore.file_counts,
+            }
+        });
+    } catch (error: any) {
+        console.error('[OpenAI Vector Stores API] Get info failed:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to retrieve vector store information'
+        });
+    }
+});
+
+// OpenAI Vector Stores API - Delete vector store
+app.delete('/api/openai/vector-stores/:vectorStoreId', async (req, res) => {
+    try {
+        const { vectorStoreId } = req.params;
+        const { tenantId } = req.body;
+
+        if (!vectorStoreId || !tenantId) {
+            return res.status(400).json({
+                success: false,
+                error: 'vectorStoreId and tenantId are required'
+            });
+        }
+
+        const openaiApiKey = await loadOpenAIApiKey(tenantId);
+
+        // Delete vector store using direct HTTP call
+        const response = await axios.delete(
+            `https://api.openai.com/v1/vector_stores/${vectorStoreId}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${openaiApiKey}`,
+                    'OpenAI-Beta': 'assistants=v2',
+                },
+            }
+        );
+
+        const deletionStatus = response.data;
+
+        res.json({
+            success: true,
+            deleted: deletionStatus.deleted,
+            vectorStoreId: vectorStoreId,
+        });
+    } catch (error: any) {
+        console.error('[OpenAI Vector Stores API] Delete failed:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to delete vector store'
+        });
+    }
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.status(200).json({ 

@@ -186,11 +186,6 @@ export function DebugNode({ step, isExpanded, onToggle, workflowId, onStepUpdate
     return false;
   };
 
-  // Handle opening input modal for start node
-  const handleOpenInputModal = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowInputModal(true);
-  };
 
   // Get the input schema for this node (or start node if testing downstream)
   const getInputSchema = (): any => {

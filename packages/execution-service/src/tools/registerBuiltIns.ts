@@ -287,10 +287,15 @@ registerToolCreator({
         const nodeData = node.data || {};
         
         // Get vector store IDs from node config
-        // Can be a single string, comma-separated string, or array
+        // Support both vectorStoreId (single, new) and vectorStoreIds (legacy, comma-separated or array)
         let vectorStoreIds: string[] = [];
         
-        if (nodeData.vectorStoreIds) {
+        // Priority 1: vectorStoreId (single, new format)
+        if (nodeData.vectorStoreId && typeof nodeData.vectorStoreId === 'string' && nodeData.vectorStoreId.trim()) {
+            vectorStoreIds = [nodeData.vectorStoreId.trim()];
+        }
+        // Priority 2: vectorStoreIds (legacy format)
+        else if (nodeData.vectorStoreIds) {
             if (typeof nodeData.vectorStoreIds === 'string') {
                 // Handle comma-separated string
                 vectorStoreIds = nodeData.vectorStoreIds.split(',').map((id: string) => id.trim()).filter(Boolean);
@@ -300,8 +305,8 @@ registerToolCreator({
         }
         
         if (vectorStoreIds.length === 0) {
-            console.warn(`[Tool Registry] File Search Tool node ${node.id} has no vector store IDs configured`);
-            throw new Error('File Search Tool requires at least one vector store ID. Please configure vectorStoreIds in the node settings.');
+            console.warn(`[Tool Registry] File Search Tool node ${node.id} has no vector store ID configured`);
+            throw new Error('File Search Tool requires at least one vector store ID. Please upload files to create a vector store in the node settings.');
         }
         
         // Get maxNumResults from config (default: 20, max: 100 as per OpenAI docs)

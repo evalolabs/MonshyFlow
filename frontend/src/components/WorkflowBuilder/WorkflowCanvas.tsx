@@ -731,7 +731,7 @@ export function WorkflowCanvas({
         });
         
         // Combine: path steps (updated) + all other existing steps (preserved)
-        const pathStepsMap = new Map(pathSteps.map(s => [s.nodeId, s]));
+        // const pathStepsMap = new Map(pathSteps.map(s => [s.nodeId, s])); // Unused, keeping for potential future use
         const otherSteps = prevSteps.filter(s => !pathNodeIds.has(s.nodeId));
         
         // Return path steps first (in order), then all other steps

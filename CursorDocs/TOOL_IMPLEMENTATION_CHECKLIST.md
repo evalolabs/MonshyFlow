@@ -173,3 +173,91 @@ Der Agent sollte:
 - **Tool Output prüfen:** Im Debug Panel die Tool-Ausgabe ansehen
 - **Agent Trace:** Im Agent Output den `trace` ansehen, um Tool-Aufrufe zu sehen
 
+## 🧪 Testanleitung für tool-file-search
+
+### Voraussetzungen
+
+- OpenAI API Key als Secret konfiguriert (z.B. `OPENAI_API_KEY`)
+- Workflow Editor geöffnet
+- **Keine manuellen Schritte nötig!** Alles wird automatisch im Workflow erledigt.
+
+### Test-Schritte
+
+1. **Workflow erstellen/öffnen**
+   - Neuen Workflow erstellen oder bestehenden öffnen
+
+2. **Agent Node hinzufügen**
+   - Aus dem Node-Selector "Agent" auswählen
+   - Agent konfigurieren:
+     - Agent Name: z.B. "File Search Agent"
+     - Model: z.B. "gpt-4o" oder "gpt-4-turbo"
+     - Instructions: z.B. "Du bist ein Assistent, der Informationen aus hochgeladenen Dateien abrufen kann. Nutze das File Search Tool, wenn du Fragen zu den Dateien beantworten musst."
+
+3. **File Search Tool Node hinzufügen**
+   - Im **Tools Tab** "File Search Tool" auswählen
+   - Tool Node erscheint auf dem Canvas
+   - Tool konfigurieren:
+     - **Vector Store & Files:** 
+       - Klicke auf die Drag & Drop-Fläche oder den Upload-Button
+       - Wähle Dateien aus (z.B. PDF, TXT, DOCX, MD)
+       - **Ein Vector Store wird automatisch erstellt!**
+       - Die hochgeladenen Dateien werden automatisch zum Vector Store hinzugefügt
+       - Die Vector Store ID wird automatisch gespeichert
+     - **Max Results:** z.B. `20` (Standard: 20, Max: 100)
+     - **Display Name:** z.B. "Document Search"
+     - **Beschreibung:** z.B. "Zugriff auf Dokumente und Dateien"
+
+4. **Tool mit Agent verbinden**
+   - Vom **File Search Tool Node** eine Verbindung zum **Agent Node** ziehen
+   - Die Verbindung sollte am **unteren "Tool" Handle** des Agent Nodes enden
+
+5. **Start Node konfigurieren**
+   - Start Node öffnen
+   - Entry Type: "Manual" wählen
+   - User Prompt Feld: z.B. "Was steht in den Dokumenten über das Projekt X?" oder "Finde Informationen über [Thema] in den hochgeladenen Dateien"
+
+6. **Testen im Debug Panel**
+   - Debug Panel öffnen (rechts)
+   - Auf **"Play"** beim Start Node klicken
+   - Der Agent sollte:
+     - Die User-Anfrage erhalten
+     - Das File Search Tool erkennen und aufrufen
+     - Die Vector Store durchsuchen
+     - Die relevanten Dokumente/Dateien finden
+     - Eine Antwort mit den gefundenen Informationen zurückgeben
+
+### Erwartetes Ergebnis
+
+Der Agent sollte:
+- ✅ Das File Search Tool automatisch erkennen und verwenden
+- ✅ Die Vector Store durchsuchen
+- ✅ Relevante Dokumente/Dateien finden
+- ✅ Die gefundenen Informationen in seiner Antwort verwenden
+- ✅ Eine hilfreiche Antwort mit Zitaten aus den Dokumenten geben
+
+### Fehlerbehandlung testen
+
+1. **Ohne Dateien hochgeladen:**
+   - Keine Dateien hochladen
+   - Tool sollte eine Fehlermeldung zurückgeben: "File Search Tool requires at least one vector store ID. Please upload files to create a vector store in the node settings."
+
+2. **Ohne OpenAI API Key:**
+   - Secret entfernen
+   - Beim Upload sollte eine Fehlermeldung erscheinen
+
+3. **Leerer Vector Store:**
+   - Alle Dateien aus dem Vector Store entfernen
+   - Tool sollte keine Ergebnisse zurückgeben (aber keinen Fehler)
+
+4. **Ungültige Dateiformate:**
+   - Nicht unterstützte Dateiformate hochladen
+   - OpenAI sollte eine entsprechende Fehlermeldung zurückgeben
+
+### Debug-Tipps
+
+- **Console Logs prüfen:** Backend-Logs zeigen Vector Store IDs und Fehler
+- **Tool Output prüfen:** Im Debug Panel die Tool-Ausgabe ansehen (sollte relevante Dokumente enthalten)
+- **Agent Trace:** Im Agent Output den `trace` ansehen, um Tool-Aufrufe zu sehen
+- **Vector Store Status:** Prüfe auf https://platform.openai.com/storage/files, ob der Vector Store existiert und Dateien enthält
+- **Max Results:** Wenn zu viele/zu wenige Ergebnisse, `maxResults` anpassen (1-100)
+

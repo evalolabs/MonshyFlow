@@ -239,6 +239,34 @@ services:
           - DELETE
           - OPTIONS  # CORS Preflight
         strip_path: false
+      - name: execution-openai-vector-stores-create
+        paths:
+          - /api/openai/vector-stores/create
+        methods:
+          - POST
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: execution-openai-vector-stores-files
+        paths:
+          - /api/openai/vector-stores/
+        methods:
+          - POST
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: execution-openai-vector-stores-get
+        paths:
+          - /api/openai/vector-stores/
+        methods:
+          - GET
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+      - name: execution-openai-vector-stores-delete
+        paths:
+          - /api/openai/vector-stores/
+        methods:
+          - DELETE
+          - OPTIONS  # CORS Preflight
+        strip_path: false
 
   # Scheduler Service
   - name: scheduler-service

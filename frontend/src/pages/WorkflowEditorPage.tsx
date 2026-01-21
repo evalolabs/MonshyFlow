@@ -520,7 +520,8 @@ function sanitizeToolNodeData(data: any, toolId: string): any {
       
     case 'tool-file-search':
       // Only keep file search-related fields
-      if (data.vectorStoreIds) sanitized.vectorStoreIds = data.vectorStoreIds;
+      if (data.vectorStoreId) sanitized.vectorStoreId = data.vectorStoreId;
+      if (data.vectorStoreIds) sanitized.vectorStoreIds = data.vectorStoreIds; // Legacy support
       if (data.maxResults !== undefined) sanitized.maxResults = data.maxResults;
       // Explicitly remove other tool fields
       delete sanitized.functionName;

@@ -18,6 +18,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { getApiIntegration } from '../../config/apiIntegrations';
 import { ApiAuthConfig } from './NodeConfigPanel/ApiAuthConfig';
 import { CodeInterpreterFileUpload } from './NodeConfigPanel/CodeInterpreterFileUpload';
+import { FileSearchVectorStoreUpload } from './NodeConfigPanel/FileSearchVectorStoreUpload';
 
 type SecretTypeQuery = 'ApiKey' | 'Password' | 'Token' | 'Generic' | 'Smtp';
 
@@ -392,7 +393,8 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 if (clonedData.containerType) sanitized.containerType = clonedData.containerType;
                 break;
               case 'tool-file-search':
-                if (clonedData.vectorStoreIds) sanitized.vectorStoreIds = clonedData.vectorStoreIds;
+                if (clonedData.vectorStoreId) sanitized.vectorStoreId = clonedData.vectorStoreId;
+                if (clonedData.vectorStoreIds) sanitized.vectorStoreIds = clonedData.vectorStoreIds; // Legacy support
                 if (clonedData.maxResults !== undefined) sanitized.maxResults = clonedData.maxResults;
                 break;
             }
@@ -955,22 +957,17 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               value: config.description || 'Zugriff auf vektorbasierte Wissensspeicher',
               onChange: (v) => setConfig({ ...config, description: v }),
             })}
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                Vector Store IDs <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={config.vectorStoreIds || ''}
-                onChange={(e) => setConfig({ ...config, vectorStoreIds: e.target.value })}
-                className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="vs_123, vs_456"
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Komma-separierte Liste von Vector Store IDs, die du über die OpenAI Files-API erstellt hast.
-              </p>
-            </div>
+            <FileSearchVectorStoreUpload
+              vectorStoreId={config.vectorStoreId || config.vectorStoreIds}
+              onVectorStoreChange={(vectorStoreId) => {
+                // Support both vectorStoreId (single) and vectorStoreIds (legacy, comma-separated)
+                setConfig({ 
+                  ...config, 
+                  vectorStoreId: vectorStoreId || undefined,
+                  vectorStoreIds: vectorStoreId || undefined, // Keep for backward compatibility
+                });
+              }}
+            />
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1.5">
                 Max Results

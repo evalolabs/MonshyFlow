@@ -337,7 +337,8 @@ function sanitizeToolNodeConfig(config: any, toolId: string): any {
       
     case 'tool-file-search':
       // Only keep file search-related fields
-      if (config.vectorStoreIds) sanitized.vectorStoreIds = config.vectorStoreIds;
+      if (config.vectorStoreId) sanitized.vectorStoreId = config.vectorStoreId;
+      if (config.vectorStoreIds) sanitized.vectorStoreIds = config.vectorStoreIds; // Legacy support
       if (config.maxResults !== undefined) sanitized.maxResults = config.maxResults;
       // Remove other tool fields
       delete sanitized.functionName;

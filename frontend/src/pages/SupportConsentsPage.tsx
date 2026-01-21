@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PageHeader } from '../components/Layout/PageHeader';
-import { ShieldCheck, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { supportConsentService, type SupportConsent } from '../services/supportConsentService';
 import { useIsTenantAdmin } from '../utils/permissions';
 
@@ -72,7 +72,7 @@ export function SupportConsentsPage() {
   if (!isTenantAdmin) {
     return (
       <div className="p-6">
-        <PageHeader title="Support-Freigaben" description="Nur für Tenant-Admins" icon={ShieldCheck} />
+        <PageHeader title="Support-Freigaben" description="Nur für Tenant-Admins" />
         <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
           Forbidden: Nur Tenant-Admins dürfen Support-Freigaben verwalten.
         </div>
@@ -85,7 +85,6 @@ export function SupportConsentsPage() {
       <PageHeader
         title="Support-Freigaben"
         description="Workflow-Inhalte nur nach zeitlich begrenzter Freigabe (Secrets sind immer ausgeschlossen)"
-        icon={ShieldCheck}
       />
 
       {error && (

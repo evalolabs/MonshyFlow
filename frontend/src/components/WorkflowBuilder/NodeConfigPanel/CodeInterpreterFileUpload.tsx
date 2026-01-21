@@ -3,9 +3,6 @@ import { openaiFilesService, type OpenAIFile } from '../../../services/openaiFil
 import { X, Upload, File as FileIcon, Loader2, ExternalLink } from 'lucide-react';
 import { useCurrentUserTenantId } from '../../../utils/permissions';
 
-// Helper to create a stable string key from fileIds array
-const fileIdsKey = (ids: string[]) => ids.sort().join(',');
-
 interface CodeInterpreterFileUploadProps {
   fileIds: string[];
   onFilesChange: (fileIds: string[]) => void;
