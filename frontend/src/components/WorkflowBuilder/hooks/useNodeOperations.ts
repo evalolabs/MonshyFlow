@@ -23,6 +23,8 @@ import {
 import { findAllChildNodes } from '../../../utils/nodeGroupingUtils';
 import { VALIDATION_MESSAGES } from '../constants';
 import { nodeLogger as logger } from '../../../utils/logger';
+import { openaiVectorStoresService, openaiFilesService } from '../../../services/openaiFilesService';
+import { useCurrentUserTenantId } from '../../../utils/permissions';
 
 interface UseNodeOperationsProps {
   nodes: Node[];
@@ -43,6 +45,69 @@ export function useNodeOperations({
   onAddNodeCallback,
   deleteNodeFromBackend,
 }: UseNodeOperationsProps) {
+  const tenantId = useCurrentUserTenantId();
+  
+  // Helper function to cleanup resources for tool nodes when they are deleted
+  const cleanupToolNodeResources = useCallback(async (node: Node | undefined) => {
+    if (!node || !tenantId) return;
+    
+    const toolId = (node.data as any)?.toolId;
+    
+    // Cleanup Vector Store for File Search Tool nodes
+    if (toolId === 'tool-file-search') {
+      const vectorStoreId = (node.data as any)?.vectorStoreId;
+      if (!vectorStoreId) {
+        logger.debug(`File Search Tool node ${node.id} has no vectorStoreId, skipping cleanup`);
+        return;
+      }
+      
+      try {
+        logger.info(`Cleaning up Vector Store ${vectorStoreId} for deleted File Search Tool node ${node.id}`);
+        await openaiVectorStoresService.deleteVectorStore(vectorStoreId, tenantId);
+        logger.info(`Successfully deleted Vector Store ${vectorStoreId}`);
+      } catch (error: any) {
+        logger.error(`Failed to delete Vector Store ${vectorStoreId}:`, error);
+        // Don't block node deletion if Vector Store cleanup fails
+        // The Vector Store will remain on OpenAI platform, but that's acceptable
+      }
+    }
+    
+    // Cleanup Files for Code Interpreter Tool nodes
+    if (toolId === 'tool-code-interpreter') {
+      const fileIds = (node.data as any)?.fileIds;
+      logger.debug(`Code Interpreter Tool node ${node.id} - fileIds:`, fileIds);
+      
+      if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+        logger.debug(`Code Interpreter Tool node ${node.id} has no fileIds, skipping cleanup`);
+        return;
+      }
+      
+      logger.info(`Cleaning up ${fileIds.length} file(s) for deleted Code Interpreter Tool node ${node.id}`);
+      logger.debug(`File IDs to delete:`, fileIds);
+      
+      // Delete all files from OpenAI
+      const deletePromises = fileIds.map(async (fileId: string) => {
+        if (!fileId || typeof fileId !== 'string') {
+          logger.warn(`Invalid fileId in array:`, fileId);
+          return;
+        }
+        
+        try {
+          logger.debug(`Deleting file ${fileId} from OpenAI...`);
+          await openaiFilesService.deleteFile(fileId, tenantId);
+          logger.info(`Successfully deleted file ${fileId} from OpenAI`);
+        } catch (error: any) {
+          logger.error(`Failed to delete file ${fileId} from OpenAI:`, error);
+          // Continue deleting other files even if one fails
+        }
+      });
+      
+      const results = await Promise.allSettled(deletePromises);
+      const successful = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected').length;
+      logger.info(`Completed cleanup: ${successful} successful, ${failed} failed out of ${fileIds.length} file(s) for Code Interpreter Tool node ${node.id}`);
+    }
+  }, [tenantId]);
   
   // Add a new node
   const addNode = useCallback((type: string, position?: { x: number; y: number }) => {
@@ -107,6 +172,19 @@ export function useNodeOperations({
         }
       }
 
+      // Cleanup resources for tool nodes before deletion (Vector Stores, Files, etc.)
+      logger.debug(`Cleaning up resources for ${nodesToDelete.length} node(s) before deletion`);
+      for (const idToDelete of nodesToDelete) {
+        const nodeToCleanup = nodes.find(n => n.id === idToDelete);
+        if (nodeToCleanup) {
+          logger.debug(`Cleaning up resources for node ${idToDelete} (type: ${nodeToCleanup.type}, toolId: ${(nodeToCleanup.data as any)?.toolId})`);
+          logger.debug(`Node data for cleanup:`, nodeToCleanup.data);
+          await cleanupToolNodeResources(nodeToCleanup);
+        } else {
+          logger.warn(`Node ${idToDelete} not found for cleanup`);
+        }
+      }
+
       // Delete from backend if workflowId exists
       if (workflowId && deleteNodeFromBackend) {
         // Delete all nodes (agent + tools) from backend
@@ -147,7 +225,7 @@ export function useNodeOperations({
       logger.error('Failed to delete node', error);
       alert(VALIDATION_MESSAGES.DELETE_NODE_FAILED);
     }
-  }, [nodes, edges, workflowId, onNodesChange, onEdgesChange, onAddNodeCallback, deleteNodeFromBackend]);
+  }, [nodes, edges, workflowId, onNodesChange, onEdgesChange, onAddNodeCallback, deleteNodeFromBackend, cleanupToolNodeResources]);
 
   // Duplicate a node
   const duplicateNode = useCallback((node: Node) => {

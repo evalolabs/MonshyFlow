@@ -54,11 +54,9 @@ import { useSecrets } from './hooks/useSecrets';
 import { workflowService } from '../../services/workflowService';
 import { createSSEConnection, type SSEConnection } from '../../services/sseService';
 import { findAllChildNodes, isParentNode, getNodeGroup, findLoopBlockNodes } from '../../utils/nodeGroupingUtils';
-import { generateEdgeId } from '../../utils/edgeUtils';
 import type { NodeChange } from '@xyflow/react';
 import type { EdgeChange } from '@xyflow/react';
 import type { WorkflowNode, WorkflowEdge } from '../../types/workflow';
-import { computeReconnectForRemovedSet } from './utils/reconnectEdges';
 import { expandPositionChangesWithGroupedChildren } from './utils/groupDrag';
 import { ENABLE_LAYOUT_LOCK } from '../../utils/layoutLock';
 
@@ -1150,82 +1148,35 @@ export function WorkflowCanvas({
   useKeyboardShortcuts({
     enabled: true,
     shortcuts: {
-      // Delete/Backspace: custom delete to preserve linear chains (reconnect prev -> next)
-      delete: () => {
+      // Delete/Backspace: use deleteNode from useNodeOperations to ensure cleanup (Vector Stores, Files, etc.)
+      delete: async () => {
         const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
         if (selectedNodeIds.length === 0) return;
 
-        const selectedNodes = nodes.filter(n => selectedNodeIds.includes(n.id));
-        const idsToRemove = new Set<string>(selectedNodeIds);
-        for (const node of selectedNodes) {
-          const childIds = findAllChildNodes(node.id, node.type, edges, nodes);
-          childIds.forEach(id => idsToRemove.add(id));
+        // Delete each selected node using deleteNode, which handles cleanup
+        // This ensures Vector Stores and Files are properly deleted from OpenAI
+        for (const nodeId of selectedNodeIds) {
+          await deleteNode(nodeId);
         }
 
-        const reconnect = computeReconnectForRemovedSet(edges, idsToRemove);
-
-        const remainingNodes = nodes
-          .filter(n => !idsToRemove.has(n.id))
-          .map(n => ({ ...n, selected: false }));
-
-        const remainingEdges = edges.filter(e => !idsToRemove.has(e.source) && !idsToRemove.has(e.target));
-        const updatedEdges = reconnect
-          ? [
-              ...remainingEdges,
-              {
-                id: generateEdgeId(reconnect.source, reconnect.target),
-                source: reconnect.source,
-                target: reconnect.target,
-                type: 'buttonEdge',
-                data: {},
-              } as Edge,
-            ]
-          : remainingEdges;
-
-        setNodes(remainingNodes);
-        setEdges(updatedEdges);
-
+        // Clear selection and close panels after deletion
         setSelectedNode(null);
         setShowConfigPanel(false);
         setSelectedEdge(null);
         setContextMenu(null);
         setEdgeContextMenu(null);
       },
-      backspace: () => {
-        // same behavior as delete (but still blocked in input fields by useKeyboardShortcuts)
+      backspace: async () => {
+        // Same behavior as delete key
         const selectedNodeIds = nodes.filter(n => n.selected).map(n => n.id);
         if (selectedNodeIds.length === 0) return;
 
-        const selectedNodes = nodes.filter(n => selectedNodeIds.includes(n.id));
-        const idsToRemove = new Set<string>(selectedNodeIds);
-        for (const node of selectedNodes) {
-          const childIds = findAllChildNodes(node.id, node.type, edges, nodes);
-          childIds.forEach(id => idsToRemove.add(id));
+        // Delete each selected node using deleteNode, which handles cleanup
+        for (const nodeId of selectedNodeIds) {
+          await deleteNode(nodeId);
         }
 
-        const reconnect = computeReconnectForRemovedSet(edges, idsToRemove);
-
-        const remainingNodes = nodes
-          .filter(n => !idsToRemove.has(n.id))
-          .map(n => ({ ...n, selected: false }));
-
-        const remainingEdges = edges.filter(e => !idsToRemove.has(e.source) && !idsToRemove.has(e.target));
-        const updatedEdges = reconnect
-          ? [
-              ...remainingEdges,
-              {
-                id: generateEdgeId(reconnect.source, reconnect.target),
-                source: reconnect.source,
-                target: reconnect.target,
-                type: 'buttonEdge',
-                data: {},
-              } as Edge,
-            ]
-          : remainingEdges;
-
-        setNodes(remainingNodes);
-        setEdges(updatedEdges);
-
+        // Clear selection and close panels after deletion
         setSelectedNode(null);
         setShowConfigPanel(false);
         setSelectedEdge(null);
