@@ -253,13 +253,6 @@ services:
           - POST
           - OPTIONS  # CORS Preflight
         strip_path: false
-      - name: execution-openai-vector-stores-get
-        paths:
-          - /api/openai/vector-stores/
-        methods:
-          - GET
-          - OPTIONS  # CORS Preflight
-        strip_path: false
       - name: execution-openai-vector-stores-files-list
         paths:
           - /api/openai/vector-stores/
@@ -267,6 +260,16 @@ services:
           - GET
           - OPTIONS  # CORS Preflight
         strip_path: false
+        # This route handles /api/openai/vector-stores/:vectorStoreId/files
+        # Must come before the generic get route to match first
+      - name: execution-openai-vector-stores-get
+        paths:
+          - /api/openai/vector-stores/
+        methods:
+          - GET
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+        # This route handles /api/openai/vector-stores/:vectorStoreId (without /files)
       - name: execution-openai-vector-stores-delete
         paths:
           - /api/openai/vector-stores/

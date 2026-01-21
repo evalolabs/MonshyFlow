@@ -14,6 +14,7 @@ export function FileSearchVectorStoreUpload({ vectorStoreId, onVectorStoreChange
   const [uploadedFiles, setUploadedFiles] = useState<OpenAIFile[]>([]);
   const [vectorStore, setVectorStore] = useState<OpenAIVectorStore | null>(null);
   const [loadingVectorStore, setLoadingVectorStore] = useState(false);
+  const [loadingFiles, setLoadingFiles] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [vectorStoreName, setVectorStoreName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -53,8 +54,12 @@ export function FileSearchVectorStoreUpload({ vectorStoreId, onVectorStoreChange
     const loadVectorStoreFiles = async () => {
       if (!tenantId || !vectorStoreId) {
         setUploadedFiles([]);
+        setLoadingFiles(false);
         return;
       }
+
+      setLoadingFiles(true);
+      setError(null);
 
       try {
         console.log('[FileSearchVectorStoreUpload] Loading files from vector store:', vectorStoreId);
@@ -67,8 +72,10 @@ export function FileSearchVectorStoreUpload({ vectorStoreId, onVectorStoreChange
         setUploadedFiles(files);
       } catch (err: any) {
         console.error('[FileSearchVectorStoreUpload] Error loading files from vector store:', err);
-        // Don't show error to user, just log it
+        setError(`Failed to load files: ${err.message || 'Unknown error'}`);
         setUploadedFiles([]);
+      } finally {
+        setLoadingFiles(false);
       }
     };
 
@@ -378,6 +385,14 @@ export function FileSearchVectorStoreUpload({ vectorStoreId, onVectorStoreChange
         <div className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
           <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
           <p className="text-xs text-blue-700">Loading vector store information...</p>
+        </div>
+      )}
+
+      {/* Loading Files */}
+      {loadingFiles && (
+        <div className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+          <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
+          <p className="text-xs text-blue-700">Loading files from vector store...</p>
         </div>
       )}
 

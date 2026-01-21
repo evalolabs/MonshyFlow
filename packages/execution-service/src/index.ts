@@ -614,7 +614,99 @@ app.post('/api/openai/vector-stores/:vectorStoreId/files', async (req, res) => {
     }
 });
 
+// OpenAI Vector Stores API - List files in vector store
+// IMPORTANT: This route must come BEFORE the generic :vectorStoreId route
+// Express matches routes in order, so the more specific route must be first
+app.get('/api/openai/vector-stores/:vectorStoreId/files', async (req, res) => {
+    try {
+        const { vectorStoreId } = req.params;
+        const tenantId = req.query.tenantId as string;
+        const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+
+        if (!vectorStoreId || !tenantId) {
+            return res.status(400).json({
+                success: false,
+                error: 'vectorStoreId and tenantId are required'
+            });
+        }
+
+        const openaiApiKey = await loadOpenAIApiKey(tenantId);
+
+        // List files in vector store using direct HTTP call
+        const response = await axios.get(
+            `https://api.openai.com/v1/vector_stores/${vectorStoreId}/files`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${openaiApiKey}`,
+                    'OpenAI-Beta': 'assistants=v2',
+                },
+                params: {
+                    limit: limit,
+                },
+            }
+        );
+
+        const filesData = response.data;
+        console.log('[OpenAI Vector Stores API] Raw files data from OpenAI:', JSON.stringify(filesData, null, 2));
+        
+        // OpenAI returns files in response.data.data array
+        // Each file object has an "id" field (not "file_id") which is the file ID
+        const fileIds = filesData.data?.map((f: any) => f.id).filter((id: any) => id) || [];
+        console.log('[OpenAI Vector Stores API] Extracted file IDs:', fileIds);
+
+        if (fileIds.length === 0) {
+            console.log('[OpenAI Vector Stores API] No file IDs found in vector store response');
+            return res.json({
+                success: true,
+                files: [],
+            });
+        }
+
+        // Fetch file information for all file IDs
+        const openai = new OpenAI({ apiKey: openaiApiKey });
+        const filePromises = fileIds.map(async (fileId: string) => {
+            try {
+                const file = await openai.files.retrieve(fileId);
+                return {
+                    id: file.id,
+                    object: file.object,
+                    bytes: file.bytes,
+                    created_at: file.created_at,
+                    filename: file.filename,
+                    purpose: file.purpose,
+                };
+            } catch (error: any) {
+                console.error(`[OpenAI Vector Stores API] Failed to retrieve file ${fileId}:`, error.message);
+                return {
+                    id: fileId,
+                    error: error.message || 'File not found or inaccessible',
+                };
+            }
+        });
+
+        const files = await Promise.all(filePromises);
+        console.log('[OpenAI Vector Stores API] Files retrieved:', files.length);
+        console.log('[OpenAI Vector Stores API] Files with errors:', files.filter((f: any) => f.error).length);
+        
+        const validFiles = files.filter((f: any) => !f.error);
+        console.log('[OpenAI Vector Stores API] Valid files to return:', validFiles.length);
+
+        res.json({
+            success: true,
+            files: validFiles, // Filter out files with errors
+        });
+    } catch (error: any) {
+        console.error('[OpenAI Vector Stores API] List files failed:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to list files in vector store'
+        });
+    }
+});
+
 // OpenAI Vector Stores API - Get vector store info
+// IMPORTANT: This route must come AFTER the /files route
+// Express matches routes in order, so the generic route comes after the specific one
 app.get('/api/openai/vector-stores/:vectorStoreId', async (req, res) => {
     try {
         const { vectorStoreId } = req.params;
@@ -657,76 +749,6 @@ app.get('/api/openai/vector-stores/:vectorStoreId', async (req, res) => {
         res.status(500).json({
             success: false,
             error: error.message || 'Failed to retrieve vector store information'
-        });
-    }
-});
-
-// OpenAI Vector Stores API - List files in vector store
-app.get('/api/openai/vector-stores/:vectorStoreId/files', async (req, res) => {
-    try {
-        const { vectorStoreId } = req.params;
-        const tenantId = req.query.tenantId as string;
-        const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
-
-        if (!vectorStoreId || !tenantId) {
-            return res.status(400).json({
-                success: false,
-                error: 'vectorStoreId and tenantId are required'
-            });
-        }
-
-        const openaiApiKey = await loadOpenAIApiKey(tenantId);
-
-        // List files in vector store using direct HTTP call
-        const response = await axios.get(
-            `https://api.openai.com/v1/vector_stores/${vectorStoreId}/files`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${openaiApiKey}`,
-                    'OpenAI-Beta': 'assistants=v2',
-                },
-                params: {
-                    limit: limit,
-                },
-            }
-        );
-
-        const filesData = response.data;
-        const fileIds = filesData.data?.map((f: any) => f.file_id) || [];
-
-        // Fetch file information for all file IDs
-        const openai = new OpenAI({ apiKey: openaiApiKey });
-        const filePromises = fileIds.map(async (fileId: string) => {
-            try {
-                const file = await openai.files.retrieve(fileId);
-                return {
-                    id: file.id,
-                    object: file.object,
-                    bytes: file.bytes,
-                    created_at: file.created_at,
-                    filename: file.filename,
-                    purpose: file.purpose,
-                };
-            } catch (error: any) {
-                console.error(`[OpenAI Vector Stores API] Failed to retrieve file ${fileId}:`, error.message);
-                return {
-                    id: fileId,
-                    error: error.message || 'File not found or inaccessible',
-                };
-            }
-        });
-
-        const files = await Promise.all(filePromises);
-
-        res.json({
-            success: true,
-            files: files.filter((f: any) => !f.error), // Filter out files with errors
-        });
-    } catch (error: any) {
-        console.error('[OpenAI Vector Stores API] List files failed:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message || 'Failed to list files in vector store'
         });
     }
 });

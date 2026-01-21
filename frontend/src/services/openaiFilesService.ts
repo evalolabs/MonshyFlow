@@ -359,6 +359,7 @@ class OpenAIVectorStoresService {
       });
 
       console.log('[OpenAIVectorStoresService] API response:', response.data);
+      console.log('[OpenAIVectorStoresService] Files in response:', response.data.files);
 
       if (!response.data.success || !response.data.files) {
         throw new Error(response.data.error || 'Failed to list files in vector store');
