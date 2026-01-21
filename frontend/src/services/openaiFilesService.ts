@@ -378,6 +378,49 @@ class OpenAIVectorStoresService {
   }
 
   /**
+   * Remove a file from a vector store (without deleting the file itself)
+   * @param vectorStoreId - The vector store ID
+   * @param fileId - The file ID to remove
+   * @param tenantId - The tenant ID to load secrets from
+   * @returns True if the file was removed successfully
+   */
+  async removeFileFromVectorStore(vectorStoreId: string, fileId: string, tenantId: string): Promise<boolean> {
+    try {
+      console.log('[OpenAIVectorStoresService] removeFileFromVectorStore called:', { vectorStoreId, fileId, tenantId });
+      
+      if (!vectorStoreId || !fileId || !tenantId) {
+        throw new Error('vectorStoreId, fileId, and tenantId are required');
+      }
+
+      const response = await api.delete<{
+        success: boolean;
+        deleted?: boolean;
+        vectorStoreId?: string;
+        fileId?: string;
+        error?: string;
+      }>(`/api/openai/vector-stores/${vectorStoreId}/files/${fileId}`, {
+        params: { tenantId },
+      });
+
+      console.log('[OpenAIVectorStoresService] API response:', response.data);
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Failed to remove file from vector store');
+      }
+
+      return response.data.deleted !== false;
+    } catch (error: any) {
+      console.error('[OpenAIVectorStoresService] Error removing file from vector store:', {
+        error,
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+      throw new Error(error.response?.data?.error || error.message || 'Failed to remove file from vector store');
+    }
+  }
+
+  /**
    * Delete a vector store
    * @param vectorStoreId - The vector store ID
    * @param tenantId - The tenant ID to load secrets from

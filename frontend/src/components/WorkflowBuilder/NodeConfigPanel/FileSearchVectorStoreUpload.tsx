@@ -202,28 +202,52 @@ export function FileSearchVectorStoreUpload({ vectorStoreId, onVectorStoreChange
   };
 
   const handleRemoveFile = async (fileId: string) => {
-    if (!tenantId) {
-      setError('Tenant ID not found. Cannot remove file.');
+    if (!tenantId || !vectorStoreId) {
+      setError('Tenant ID or Vector Store ID not found. Cannot remove file.');
       return;
     }
 
-    // Remove from local state
+    // Optimistically remove from UI
     setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
     loadedFileIdsRef.current.delete(fileId);
 
-    // Delete from OpenAI in the background
+    // Remove from vector store and delete file from OpenAI
     try {
-      await openaiFilesService.deleteFile(fileId, tenantId);
-      console.log('[FileSearchVectorStoreUpload] File deleted from OpenAI:', fileId);
+      console.log('[FileSearchVectorStoreUpload] Removing file from vector store:', fileId);
+      // First, remove the file from the vector store
+      await openaiVectorStoresService.removeFileFromVectorStore(vectorStoreId, fileId, tenantId);
+      console.log('[FileSearchVectorStoreUpload] File removed from vector store:', fileId);
+      
+      // Then, delete the file from OpenAI (optional - file can remain on OpenAI platform)
+      try {
+        await openaiFilesService.deleteFile(fileId, tenantId);
+        console.log('[FileSearchVectorStoreUpload] File deleted from OpenAI:', fileId);
+      } catch (deleteErr: any) {
+        console.warn('[FileSearchVectorStoreUpload] Failed to delete file from OpenAI (file removed from vector store):', deleteErr);
+        // Continue even if file deletion fails - file is already removed from vector store
+      }
       
       // Reload vector store info to update file counts
-      if (vectorStoreId) {
-        const updated = await openaiVectorStoresService.getVectorStoreInfo(vectorStoreId, tenantId);
-        setVectorStore(updated);
-      }
+      const updated = await openaiVectorStoresService.getVectorStoreInfo(vectorStoreId, tenantId);
+      setVectorStore(updated);
+      
+      // Reload files list to reflect the removal
+      const files = await openaiVectorStoresService.listVectorStoreFiles(vectorStoreId, tenantId);
+      setUploadedFiles(files);
+      files.forEach(f => loadedFileIdsRef.current.add(f.id));
+      
+      console.log('[FileSearchVectorStoreUpload] Vector store and files list updated after removal');
     } catch (err: any) {
-      console.error('[FileSearchVectorStoreUpload] Failed to delete file:', err);
-      // Don't show error - file is already removed from UI
+      console.error('[FileSearchVectorStoreUpload] Failed to remove file:', err);
+      setError(`Failed to remove file: ${err.message || 'Unknown error'}`);
+      // Reload files list even if removal failed, to show current state
+      try {
+        const files = await openaiVectorStoresService.listVectorStoreFiles(vectorStoreId, tenantId);
+        setUploadedFiles(files);
+        files.forEach(f => loadedFileIdsRef.current.add(f.id));
+      } catch (reloadErr: any) {
+        console.error('[FileSearchVectorStoreUpload] Failed to reload files after removal error:', reloadErr);
+      }
     }
   };
 

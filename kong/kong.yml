@@ -253,6 +253,15 @@ services:
           - POST
           - OPTIONS  # CORS Preflight
         strip_path: false
+      - name: execution-openai-vector-stores-remove-file
+        paths:
+          - /api/openai/vector-stores/
+        methods:
+          - DELETE
+          - OPTIONS  # CORS Preflight
+        strip_path: false
+        # This route handles /api/openai/vector-stores/:vectorStoreId/files/:fileId
+        # Must come before the generic delete route to match first
       - name: execution-openai-vector-stores-files-list
         paths:
           - /api/openai/vector-stores/

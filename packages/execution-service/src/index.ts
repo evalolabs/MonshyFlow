@@ -753,6 +753,49 @@ app.get('/api/openai/vector-stores/:vectorStoreId', async (req, res) => {
     }
 });
 
+// OpenAI Vector Stores API - Remove file from vector store
+app.delete('/api/openai/vector-stores/:vectorStoreId/files/:fileId', async (req, res) => {
+    try {
+        const { vectorStoreId, fileId } = req.params;
+        const tenantId = req.query.tenantId as string;
+
+        if (!vectorStoreId || !fileId || !tenantId) {
+            return res.status(400).json({
+                success: false,
+                error: 'vectorStoreId, fileId, and tenantId are required'
+            });
+        }
+
+        const openaiApiKey = await loadOpenAIApiKey(tenantId);
+
+        // Remove file from vector store using direct HTTP call
+        const response = await axios.delete(
+            `https://api.openai.com/v1/vector_stores/${vectorStoreId}/files/${fileId}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${openaiApiKey}`,
+                    'OpenAI-Beta': 'assistants=v2',
+                },
+            }
+        );
+
+        const deletionStatus = response.data;
+
+        res.json({
+            success: true,
+            deleted: deletionStatus.deleted,
+            vectorStoreId: vectorStoreId,
+            fileId: fileId,
+        });
+    } catch (error: any) {
+        console.error('[OpenAI Vector Stores API] Remove file from vector store failed:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to remove file from vector store'
+        });
+    }
+});
+
 // OpenAI Vector Stores API - Delete vector store
 app.delete('/api/openai/vector-stores/:vectorStoreId', async (req, res) => {
     try {
