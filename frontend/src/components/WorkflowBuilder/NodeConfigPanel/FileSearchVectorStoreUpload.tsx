@@ -48,6 +48,33 @@ export function FileSearchVectorStoreUpload({ vectorStoreId, onVectorStoreChange
     loadVectorStoreInfo();
   }, [vectorStoreId, tenantId]);
 
+  // Load files from vector store when vectorStoreId changes
+  useEffect(() => {
+    const loadVectorStoreFiles = async () => {
+      if (!tenantId || !vectorStoreId) {
+        setUploadedFiles([]);
+        return;
+      }
+
+      try {
+        console.log('[FileSearchVectorStoreUpload] Loading files from vector store:', vectorStoreId);
+        const files = await openaiVectorStoresService.listVectorStoreFiles(vectorStoreId, tenantId);
+        console.log('[FileSearchVectorStoreUpload] Files loaded from vector store:', files);
+        
+        // Mark files as loaded
+        files.forEach(f => loadedFileIdsRef.current.add(f.id));
+        
+        setUploadedFiles(files);
+      } catch (err: any) {
+        console.error('[FileSearchVectorStoreUpload] Error loading files from vector store:', err);
+        // Don't show error to user, just log it
+        setUploadedFiles([]);
+      }
+    };
+
+    loadVectorStoreFiles();
+  }, [vectorStoreId, tenantId]);
+
   // Poll vector store status if it's in progress
   useEffect(() => {
     if (!tenantId || !vectorStoreId || !vectorStore) {
@@ -66,6 +93,13 @@ export function FileSearchVectorStoreUpload({ vectorStoreId, onVectorStoreChange
         const vs = await openaiVectorStoresService.getVectorStoreInfo(vectorStoreId, tenantId);
         console.log('[FileSearchVectorStoreUpload] Polled vector store status:', vs.status);
         setVectorStore(vs);
+        
+        // Reload files when status changes to completed
+        if (vs.status === 'completed') {
+          const files = await openaiVectorStoresService.listVectorStoreFiles(vectorStoreId, tenantId);
+          files.forEach(f => loadedFileIdsRef.current.add(f.id));
+          setUploadedFiles(files);
+        }
         
         // Stop polling if status changed to completed or failed
         if (vs.status === 'completed' || vs.status === 'failed') {

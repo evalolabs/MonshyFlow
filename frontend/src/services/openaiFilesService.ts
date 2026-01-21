@@ -336,6 +336,47 @@ class OpenAIVectorStoresService {
   }
 
   /**
+   * List files in a vector store
+   * @param vectorStoreId - The vector store ID
+   * @param tenantId - The tenant ID to load secrets from
+   * @param limit - Maximum number of files to retrieve (default: 100)
+   * @returns Array of file information
+   */
+  async listVectorStoreFiles(vectorStoreId: string, tenantId: string, limit: number = 100): Promise<OpenAIFile[]> {
+    try {
+      console.log('[OpenAIVectorStoresService] listVectorStoreFiles called:', { vectorStoreId, tenantId, limit });
+      
+      if (!vectorStoreId || !tenantId) {
+        throw new Error('vectorStoreId and tenantId are required');
+      }
+
+      const response = await api.get<{
+        success: boolean;
+        files?: OpenAIFile[];
+        error?: string;
+      }>(`/api/openai/vector-stores/${vectorStoreId}/files`, {
+        params: { tenantId, limit },
+      });
+
+      console.log('[OpenAIVectorStoresService] API response:', response.data);
+
+      if (!response.data.success || !response.data.files) {
+        throw new Error(response.data.error || 'Failed to list files in vector store');
+      }
+
+      return response.data.files;
+    } catch (error: any) {
+      console.error('[OpenAIVectorStoresService] Error listing vector store files:', {
+        error,
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+      throw new Error(error.response?.data?.error || error.message || 'Failed to list files in vector store');
+    }
+  }
+
+  /**
    * Delete a vector store
    * @param vectorStoreId - The vector store ID
    * @param tenantId - The tenant ID to load secrets from
