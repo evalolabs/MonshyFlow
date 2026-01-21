@@ -296,6 +296,9 @@ function sanitizeToolNodeConfig(config: any, toolId: string): any {
       // Only keep web search-related fields
       if (config.webSearchHandlerId) sanitized.webSearchHandlerId = config.webSearchHandlerId;
       if (config.maxResults !== undefined) sanitized.maxResults = config.maxResults;
+      if (config.location) sanitized.location = config.location;
+      if (config.allowedDomains) sanitized.allowedDomains = config.allowedDomains;
+      if (config.externalWebAccess !== undefined) sanitized.externalWebAccess = config.externalWebAccess;
       // Remove function and MCP fields
       delete sanitized.functionName;
       delete sanitized.functionDescription;

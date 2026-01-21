@@ -479,6 +479,9 @@ function sanitizeToolNodeData(data: any, toolId: string): any {
       // Only keep web search-related fields
       if (data.webSearchHandlerId) sanitized.webSearchHandlerId = data.webSearchHandlerId;
       if (data.maxResults !== undefined) sanitized.maxResults = data.maxResults;
+      if (data.location) sanitized.location = data.location;
+      if (data.allowedDomains) sanitized.allowedDomains = data.allowedDomains;
+      if (data.externalWebAccess !== undefined) sanitized.externalWebAccess = data.externalWebAccess;
       // Explicitly remove function and MCP fields
       delete sanitized.functionName;
       delete sanitized.functionDescription;

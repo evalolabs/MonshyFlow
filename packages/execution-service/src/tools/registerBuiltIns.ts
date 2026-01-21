@@ -3,7 +3,7 @@ import { getMcpHandler } from '../mcp';
 import { getWebSearchHandler } from '../webSearch';
 import { getFunctionHandler } from '../functions';
 import { z } from 'zod';
-import { tool, hostedMcpTool, fileSearchTool, codeInterpreterTool } from '@openai/agents';
+import { tool, hostedMcpTool, fileSearchTool, codeInterpreterTool, webSearchTool } from '@openai/agents';
 import type { ToolCreatorContext } from './index';
 import axios, { Method } from 'axios';
 
@@ -157,13 +157,57 @@ registerToolCreator({
     description: 'Search the web for information',
     create: async (node, context) => {
         const nodeData = node.data || {};
-        const defaultHandlerId = nodeData.webSearchHandlerId || 'serper';
+        const handlerId = nodeData.webSearchHandlerId || 'serper';
+
+        // OpenAI Hosted Web Search Tool
+        if (handlerId === 'openai') {
+            console.log(`[Tool Registry] Creating OpenAI Hosted Web Search Tool for node ${node.id}`);
+            
+            // Build options for webSearchTool
+            const options: any = {};
+            
+            // External web access (default: true for live web access)
+            if (nodeData.externalWebAccess !== undefined) {
+                options.external_web_access = Boolean(nodeData.externalWebAccess);
+            }
+            
+            // User location for regional search results
+            if (nodeData.location && typeof nodeData.location === 'string' && nodeData.location.trim()) {
+                options.user_location = nodeData.location.trim();
+            }
+            
+            // Domain filters (allowed domains)
+            if (nodeData.allowedDomains) {
+                const domains = typeof nodeData.allowedDomains === 'string'
+                    ? nodeData.allowedDomains.split(',').map((d: string) => d.trim()).filter(Boolean)
+                    : Array.isArray(nodeData.allowedDomains)
+                    ? nodeData.allowedDomains.filter((d: any) => typeof d === 'string' && d.trim()).map((d: string) => d.trim())
+                    : [];
+                
+                if (domains.length > 0) {
+                    options.filters = { allowed_domains: domains };
+                }
+            }
+            
+            try {
+                const openaiWebSearch = webSearchTool(Object.keys(options).length > 0 ? options : undefined);
+                console.log(`[Tool Registry] Created OpenAI Hosted Web Search Tool for node ${node.id}`);
+                return openaiWebSearch;
+            } catch (error: any) {
+                console.error(`[Tool Registry] Failed to create OpenAI Web Search Tool:`, error);
+                throw new Error(`Failed to create OpenAI Web Search Tool: ${error.message || 'Unknown error'}`);
+            }
+        }
+        
+        // Function Tool (Serper or other custom providers)
+        // This uses the handler system for custom web search providers
+        const defaultHandlerId = handlerId;
 
         const parametersSchema = z.object({
             query: z.string().describe('The search query to execute. This is required when calling the tool.').nullish(),
             maxResults: z.number().int().min(1).max(20).describe('Maximum number of search results to return (1-20)').nullish(),
             location: z.string().describe('Geographic location for localized search results (e.g., "US", "Germany")').nullish(),
-            providerId: z.string().describe('Override the configured web search provider (currently only "serper" is supported)').nullish(),
+            providerId: z.string().describe('Override the configured web search provider').nullish(),
             filters: z.object({
                 allowedDomains: z.array(z.string()).min(1).max(20).describe('Restrict search to specific domains (e.g., ["example.com", "wikipedia.org"])').nullish(),
             }).nullish(),
@@ -175,20 +219,20 @@ registerToolCreator({
             parameters: parametersSchema,
             execute: async (args: any) => {
                 // Determine which handler to use (override or default)
-                let handlerId = defaultHandlerId;
+                let currentHandlerId = defaultHandlerId;
                 if (args.providerId && typeof args.providerId === 'string' && args.providerId.trim()) {
-                    handlerId = args.providerId.trim();
+                    currentHandlerId = args.providerId.trim();
                 }
 
                 // Get handler
-                let handler = getWebSearchHandler(handlerId);
-                if (!handler && handlerId !== 'serper') {
-                    console.warn(`[Tool Registry] Web search handler "${handlerId}" not found, falling back to serper`);
+                let handler = getWebSearchHandler(currentHandlerId);
+                if (!handler && currentHandlerId !== 'serper') {
+                    console.warn(`[Tool Registry] Web search handler "${currentHandlerId}" not found, falling back to serper`);
                     handler = getWebSearchHandler('serper');
                 }
 
                 if (!handler) {
-                    throw new Error(`Web search handler "${handlerId}" is not registered.`);
+                    throw new Error(`Web search handler "${currentHandlerId}" is not registered.`);
                 }
 
                 // Create connection for this search

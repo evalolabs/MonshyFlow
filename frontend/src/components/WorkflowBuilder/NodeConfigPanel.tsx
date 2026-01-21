@@ -931,6 +931,96 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
               value: config.description || selectedWebSearchHandler?.description || '',
               onChange: (v) => setConfig({ ...config, description: v }),
             })}
+
+            {/* OpenAI Web Search specific options */}
+            {providerId === 'openai' && (
+              <div className="space-y-3 pt-3 border-t border-gray-200">
+                <h4 className="text-xs font-semibold text-gray-800">OpenAI Web Search Options</h4>
+                
+                {renderFieldWithDebug({
+                  nodeType: isToolNode ? 'tool-web-search' : 'web-search',
+                  fieldName: 'externalWebAccess',
+                  label: 'External Web Access',
+                  value: config.externalWebAccess !== undefined ? String(config.externalWebAccess) : 'true',
+                  onChange: (v) => setConfig({ ...config, externalWebAccess: v === 'true' }),
+                  options: [
+                    { value: 'true', label: 'Enabled (Live web access)' },
+                    { value: 'false', label: 'Disabled (Cached/indexed results only)' },
+                  ],
+                  helpText: 'Enable live web access or use cached/indexed results only. Preview models ignore this setting.',
+                })}
+
+                {renderFieldWithDebug({
+                  nodeType: isToolNode ? 'tool-web-search' : 'web-search',
+                  fieldName: 'location',
+                  label: 'User Location',
+                  value: config.location || '',
+                  onChange: (v) => setConfig({ ...config, location: v }),
+                  placeholder: 'e.g., US, Germany, Berlin',
+                  helpText: 'Geographic location for regional search results (country, city, or timezone).',
+                })}
+
+                {renderFieldWithDebug({
+                  nodeType: isToolNode ? 'tool-web-search' : 'web-search',
+                  fieldName: 'allowedDomains',
+                  label: 'Allowed Domains',
+                  value: Array.isArray(config.allowedDomains) 
+                    ? config.allowedDomains.join(', ')
+                    : (config.allowedDomains || ''),
+                  onChange: (v) => {
+                    const domains = typeof v === 'string' 
+                      ? v.split(',').map(d => d.trim()).filter(Boolean)
+                      : Array.isArray(v) ? v : [];
+                    setConfig({ ...config, allowedDomains: domains.length > 0 ? domains : undefined });
+                  },
+                  placeholder: 'e.g., pubmed.gov, cdc.gov, who.int',
+                  helpText: 'Comma-separated list of allowed domains. Restricts search to these domains only.',
+                })}
+              </div>
+            )}
+
+            {/* Serper and other Function Tool providers - show maxResults and location */}
+            {providerId !== 'openai' && (
+              <>
+                {renderFieldWithDebug({
+                  nodeType: isToolNode ? 'tool-web-search' : 'web-search',
+                  fieldName: 'maxResults',
+                  label: 'Max Results',
+                  value: String(config.maxResults || selectedWebSearchHandler?.defaultConfig?.maxResults || 5),
+                  onChange: (v) => setConfig({ ...config, maxResults: Number(v) || 5 }),
+                  min: 1,
+                  max: 20,
+                  helpText: 'Maximum number of search results to return (1-20).',
+                })}
+
+                {renderFieldWithDebug({
+                  nodeType: isToolNode ? 'tool-web-search' : 'web-search',
+                  fieldName: 'location',
+                  label: 'Location',
+                  value: config.location || '',
+                  onChange: (v) => setConfig({ ...config, location: v }),
+                  placeholder: 'e.g., US, Germany',
+                  helpText: 'Geographic location for localized search results.',
+                })}
+
+                {renderFieldWithDebug({
+                  nodeType: isToolNode ? 'tool-web-search' : 'web-search',
+                  fieldName: 'allowedDomains',
+                  label: 'Allowed Domains',
+                  value: Array.isArray(config.allowedDomains) 
+                    ? config.allowedDomains.join(', ')
+                    : (config.allowedDomains || ''),
+                  onChange: (v) => {
+                    const domains = typeof v === 'string' 
+                      ? v.split(',').map(d => d.trim()).filter(Boolean)
+                      : Array.isArray(v) ? v : [];
+                    setConfig({ ...config, allowedDomains: domains.length > 0 ? domains : undefined });
+                  },
+                  placeholder: 'e.g., example.com, wikipedia.org',
+                  helpText: 'Comma-separated list of allowed domains. Restricts search to these domains only.',
+                })}
+              </>
+            )}
           </div>
         );
       }
