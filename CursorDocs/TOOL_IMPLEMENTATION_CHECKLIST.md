@@ -20,7 +20,7 @@ Diese Checkliste dokumentiert den Status aller Tool-Typen, die noch angepasst od
 
 - [x] **tool-web-search** - Web Search Tool
   - ✅ Vollständige Implementierung in `packages/execution-service/src/tools/registerBuiltIns.ts`
-  - ✅ Unterstützt verschiedene Web Search Handler (Serper, Custom, Auto)
+  - ✅ Unterstützt Serper Web Search Handler (Auto und Custom wurden entfernt)
   - ✅ Verbesserte Tool-Beschreibung für bessere Agent-Erkennung
   - ✅ Vollständige Fehlerbehandlung mit try-catch-finally
   - ✅ Connection Cleanup (dispose) nach jeder Suche
@@ -28,6 +28,7 @@ Diese Checkliste dokumentiert den Status aller Tool-Typen, die noch angepasst od
   - ✅ Parameter-Validierung und -Beschreibungen
   - ✅ Unterstützung für maxResults, location, allowedDomains
   - ✅ Fallback auf 'serper' wenn Handler nicht gefunden
+  - ✅ Legacy-Implementierung entfernt (nur noch ToolCreator-System)
 
 ## ✅ Abgeschlossen (Fortsetzung)
 

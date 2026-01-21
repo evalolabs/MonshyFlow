@@ -5,8 +5,6 @@ import { z, type ZodTypeAny, type ZodObject } from 'zod';
 import { randomUUID } from 'crypto';
 import { getFunctionHandler } from '../functions';
 import { getMcpHandler } from '../mcp';
-import { getWebSearchHandler } from '../webSearch';
-import type { WebSearchQuery, WebSearchResponse } from '../webSearch';
 import { config } from '../config/config';
 import { Execution, ExecutionRequest } from '../models/execution';
 import { workflowService } from './workflowService';
@@ -2211,13 +2209,6 @@ Use the available agents and tools as needed to complete the task.`;
                 case 'tool-file-search':
                     tools.push(this.createFileSearchTool({ ...toolNode, data: nodeData }));
                     break;
-                case 'tool-web-search': {
-                    const webSearchTool = await this.createWebSearchTool({ ...toolNode, data: nodeData }, workflow);
-                    if (webSearchTool) {
-                        tools.push(webSearchTool);
-                    }
-                    break;
-                }
                 case 'tool-code-interpreter':
                     tools.push(this.createCodeInterpreterTool({ ...toolNode, data: nodeData }));
                     break;
@@ -2261,38 +2252,6 @@ Use the available agents and tools as needed to complete the task.`;
         });
     }
 
-
-    private async createWebSearchTool(node: any, workflow: any) {
-        const parametersSchema = z.object({
-            query: z.string().describe('Search query to execute').nullish(),
-            maxResults: z.number().int().min(1).max(20).nullish(),
-            location: z.string().nullish(),
-            providerId: z.string().describe('Override the configured web search provider').nullish(),
-            filters: z
-                .object({
-                    allowedDomains: z.array(z.string()).min(1).max(20).nullish(),
-                })
-                .nullish(),
-        });
-
-        return tool({
-            name: `web_search_${node.id}`,
-            description: 'Search the web for information',
-            parameters: parametersSchema,
-            execute: async (args: any) => {
-                const overrides = this.normalizeWebSearchArguments(args);
-                const { response, handlerId } = await this.performWebSearch(node, workflow, overrides);
-
-                return {
-                    provider: handlerId,
-                    query: response.query,
-                    results: response.results,
-                    message: `Web search executed using provider "${handlerId}"`,
-                    raw: response.raw,
-                };
-            },
-        });
-    }
 
     private createDatabaseTool(node: any) {
         const nodeData = node.data || {};
@@ -3289,133 +3248,6 @@ Use the available agents and tools as needed to complete the task.`;
         }
 
         return false;
-    }
-
-    private normalizeWebSearchArguments(args: any): { query?: string; maxResults?: number; location?: string; handlerId?: string; filters?: { allowedDomains?: string[] } } {
-        if (args == null) {
-            return {};
-        }
-
-        if (typeof args === 'string') {
-            return { query: args };
-        }
-
-        if (typeof args !== 'object') {
-            return {};
-        }
-
-        const allowedDomains = this.extractAllowedDomains(args.allowedDomains ?? args.filters?.allowedDomains);
-
-        return {
-            query: typeof args.query === 'string' ? args.query : undefined,
-            maxResults: args.maxResults != null ? Number(args.maxResults) : undefined,
-            location: typeof args.location === 'string' ? args.location : undefined,
-            handlerId: typeof args.providerId === 'string' ? args.providerId : undefined,
-            filters: allowedDomains ? { allowedDomains } : undefined,
-        };
-    }
-
-    private resolveWebSearchHandlerId(nodeData: any, overrideId?: string): string {
-        const candidates = [
-            overrideId,
-            nodeData?.webSearchHandlerId,
-            nodeData?.webSearchProviderId,
-            nodeData?.providerId,
-            nodeData?.searchProvider,
-            nodeData?.provider,
-        ];
-
-        for (const candidate of candidates) {
-            if (typeof candidate === 'string' && candidate.trim()) {
-                return candidate.trim();
-            }
-        }
-
-        return 'serper';
-    }
-
-    private extractAllowedDomains(value: any): string[] | undefined {
-        if (!value) {
-            return undefined;
-        }
-
-        if (Array.isArray(value)) {
-            const domains = value
-                .map(item => (typeof item === 'string' ? item.trim() : String(item).trim()))
-                .filter(Boolean);
-            return domains.length > 0 ? domains : undefined;
-        }
-
-        if (typeof value === 'string') {
-            const domains = value
-                .split(',')
-                .map(part => part.trim())
-                .filter(Boolean);
-            return domains.length > 0 ? domains : undefined;
-        }
-
-        return undefined;
-    }
-
-    private async performWebSearch(node: any, workflow: any, overrides: { query?: string; maxResults?: number; location?: string; filters?: { allowedDomains?: string[] }; handlerId?: string }): Promise<{ handlerId: string; response: WebSearchResponse }> {
-        const nodeData = node.data || {};
-        const handlerIdCandidate = this.resolveWebSearchHandlerId(nodeData, overrides.handlerId);
-
-        let handler = getWebSearchHandler(handlerIdCandidate);
-        if (!handler && handlerIdCandidate !== 'serper') {
-            handler = getWebSearchHandler('serper');
-        }
-
-        if (!handler) {
-            throw new Error(`Web search handler "${handlerIdCandidate}" is not registered.`);
-        }
-
-        const secrets = this.normalizeSecrets(workflow?.secrets);
-        const connection = await handler.connect(nodeData, {
-            workflow,
-            node,
-            secrets,
-        });
-
-        const queryText =
-            (typeof overrides.query === 'string' && overrides.query.trim()) ||
-            (typeof nodeData.query === 'string' && nodeData.query.trim());
-
-        if (!queryText) {
-            throw new Error('Web search query is required. Provide a query in the node configuration or when invoking the tool.');
-        }
-
-        const maxResultsCandidate = overrides.maxResults ?? nodeData.maxResults ?? handler.defaultConfig?.maxResults;
-        const allowedDomains = overrides.filters?.allowedDomains ?? this.extractAllowedDomains(nodeData.allowedDomains);
-
-        const searchRequest: WebSearchQuery = {
-            query: queryText,
-        };
-
-        if (maxResultsCandidate !== undefined) {
-            const parsedMax = Number(maxResultsCandidate);
-            if (!Number.isNaN(parsedMax) && parsedMax > 0) {
-                searchRequest.maxResults = parsedMax;
-            }
-        }
-
-        const locationCandidate = overrides.location ?? nodeData.location;
-        if (typeof locationCandidate === 'string' && locationCandidate.trim()) {
-            searchRequest.location = locationCandidate.trim();
-        }
-
-        if (allowedDomains && allowedDomains.length > 0) {
-            searchRequest.filters = { allowedDomains };
-        }
-
-        try {
-            const response = await connection.search(searchRequest);
-            return { handlerId: handler.id, response };
-        } finally {
-            if (typeof connection.dispose === 'function') {
-                await connection.dispose();
-            }
-        }
     }
 
     /**
