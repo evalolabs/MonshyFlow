@@ -389,7 +389,8 @@ registerNodeProcessor({
                 $steps: steps,
                 // Resolved secrets
                 $secrets: context.secrets || {},
-                // Workflow variables
+                // Workflow variables - provide direct reference so mutations work
+                // Note: Direct mutations to $vars.tester.push() will work, but setVar() is safer
                 $vars: context.variables || {},
                 vars: context.variables || {}, // Alias
                 // Helper function to set variables in code
@@ -398,6 +399,7 @@ registerNodeProcessor({
                         context.variables = {};
                     }
                     context.variables[name] = value;
+                    console.log(`[CodeNode:${node.id}] setVar('${name}',`, value, ')');
                 },
                 // Helper function to update a nested property in a variable
                 // Example: updateVar('test', '0.name', 'new name') - updates test[0].name
@@ -568,6 +570,48 @@ registerNodeProcessor({
         // Initialize variables in context if not exists
         if (!context.variables) {
             context.variables = {};
+        }
+        
+        // Check if variableValue is empty (read-only mode - just display current value)
+        const isReadOnly = variableValue === undefined || variableValue === null || variableValue === '';
+        
+        // If read-only, get current value from context and return it
+        if (isReadOnly) {
+            const currentValue = context.variables[variableName.trim()];
+            // Return current value of the variable
+            const inputData = input?.json || (input ? input : null);
+            const outputData = {
+                ...(inputData && typeof inputData === 'object' && !Array.isArray(inputData) ? inputData : {}),
+                // Add variable info with current value
+                _variableSet: {
+                    name: variableName.trim(),
+                    value: currentValue
+                }
+            };
+            
+            // If input is null/undefined/empty, return variable info as main data
+            if (!input || !input.json) {
+                return createNodeData(
+                    {
+                        variableSet: {
+                            name: variableName.trim(),
+                            value: currentValue
+                        },
+                        message: `Variable "${variableName.trim()}" current value`
+                    },
+                    node.id,
+                    'variable',
+                    input?.metadata?.nodeId
+                );
+            }
+            
+            // Otherwise return input with variable info
+            return createNodeData(
+                outputData,
+                node.id,
+                'variable',
+                input?.metadata?.nodeId
+            );
         }
         
         // Resolve expression if variableValue contains expressions
@@ -1739,6 +1783,61 @@ registerNodeProcessor({
             node.id,
             node.type || 'foreach',
             input?.metadata?.nodeId
+        );
+    },
+});
+
+// Loop Node Processor
+// Loop nodes are markers - actual execution is handled by ExecutionService
+registerNodeProcessor({
+    type: 'loop',
+    name: 'Loop',
+    description: 'Start of a loop block (container for loop body)',
+    processNodeData: async (node, input, context) => {
+        // Loop node is just a marker - it passes through input
+        // The actual loop execution is handled by ExecutionService.executeLoopPairBetweenMarkers
+        // This processor just validates the node and returns input
+        const nodeData = node.data || {};
+        const loopType = nodeData.loopType || 'while';
+        
+        if (loopType !== 'while' && loopType !== 'foreach') {
+            return createErrorNodeData(
+                `Loop Node: invalid loopType "${loopType}". Must be "while" or "foreach".`,
+                node.id,
+                'loop'
+            );
+        }
+        
+        // Return input as-is (loop execution happens in ExecutionService)
+        if (input) {
+            return input;
+        }
+        return createNodeData(
+            { message: 'Loop marker - execution handled by ExecutionService' },
+            node.id,
+            'loop',
+            undefined
+        );
+    },
+});
+
+// End-Loop Node Processor
+// End-Loop nodes are markers - actual execution is handled by ExecutionService
+registerNodeProcessor({
+    type: 'end-loop',
+    name: 'End Loop',
+    description: 'End of a loop block (paired with Loop node)',
+    processNodeData: async (node, input, context) => {
+        // End-Loop node is just a marker - it passes through input
+        // The actual loop execution is handled by ExecutionService.executeLoopPairBetweenMarkers
+        if (input) {
+            return input;
+        }
+        return createNodeData(
+            { message: 'End-Loop marker - execution handled by ExecutionService' },
+            node.id,
+            'end-loop',
+            undefined
         );
     },
 });

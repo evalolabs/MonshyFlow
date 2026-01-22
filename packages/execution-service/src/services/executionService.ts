@@ -17,7 +17,7 @@ import { getToolCreator } from '../tools';
 import { schemaValidationService } from './schemaValidationService';
 import { getInputSchemaJson, getOutputSchemaJson } from '../models/nodeSchemaRegistry';
 import { createErrorNodeData } from '../models/nodeData';
-import { ExpressionResolutionService } from './expressionResolutionService';
+import { ExpressionResolutionService, expressionResolutionService } from './expressionResolutionService';
 
 class ExecutionService {
     private openai: OpenAI;
@@ -894,7 +894,54 @@ class ExecutionService {
                 }
 
                 // Move to next node
-                // Special handling for ForEach nodes: execute loop body for each array item
+                // Special handling for Loop nodes: execute loop pair (pairId-based)
+                if (currentNode.type === 'loop') {
+                    const pairId = (currentNode.data as any)?.pairId;
+                    if (pairId) {
+                        // Find End-Loop node with matching pairId
+                        const endLoopNode = workflow.nodes.find((n: any) => 
+                            n.type === 'end-loop' && (n.data as any)?.pairId === pairId
+                        );
+                        
+                        if (endLoopNode) {
+                            console.log(`[ExecutionService] Found Loop-Pair with pairId: ${pairId}`);
+                            
+                            // Execute loop pair
+                            const loopOutput = await this.executeLoopPairBetweenMarkers(
+                                currentNode,
+                                endLoopNode,
+                                mappedOutput || currentInput,
+                                workflow,
+                                execution,
+                                workflowVariables,
+                                abortSignal
+                            );
+                            
+                            // Update currentInput for next node
+                            currentInput = loopOutput;
+                            
+                            // Find next node after End-Loop
+                            const nextEdge = workflow.edges.find((e: any) => e.source === endLoopNode.id);
+                            if (nextEdge) {
+                                const nextNode = workflow.nodes.find((n: any) => n.id === nextEdge.target);
+                                if (nextNode) {
+                                    currentNode = nextNode;
+                                    currentInput = this.ensureNodeData(loopOutput, currentNode.id, currentNode.type);
+                                    continue; // Skip normal edge finding logic
+                                }
+                            }
+                            
+                            // No next node after End-Loop, return
+                            return loopOutput;
+                        } else {
+                            console.warn(`[ExecutionService] Loop node ${currentNode.id}: No End-Loop found with pairId ${pairId}`);
+                        }
+                    } else {
+                        console.warn(`[ExecutionService] Loop node ${currentNode.id}: No pairId found`);
+                    }
+                }
+                
+                // Legacy: Special handling for ForEach nodes (edge-based, kept for backward compatibility)
                 if (currentNode.type === 'foreach') {
                     // Extract array from foreach output
                     const foreachOutput = mappedOutput?.json || mappedOutput?.data || {};
@@ -961,7 +1008,7 @@ class ExecutionService {
                                     }
                                     
                                     try {
-                                        const loopBodyOutput = await this.processNode(loopBodyNode, loopInput, workflow, execution);
+                                        const loopBodyOutput = await this.processNode(loopBodyNode, loopInput, workflow, execution, workflowVariables);
                                         const loopBodyDuration = Date.now() - loopBodyStartTime;
                                         
                                         try {
@@ -1163,6 +1210,469 @@ class ExecutionService {
         }
 
         return currentInput;
+    }
+
+    /**
+     * Execute loop pair between Loop and End-Loop markers (pairId-based)
+     * 
+     * @param loopNode - The Loop node (start marker)
+     * @param endLoopNode - The End-Loop node (end marker)
+     * @param loopInput - Input data for the loop
+     * @param workflow - The workflow definition
+     * @param execution - The execution context
+     * @param workflowVariables - Workflow variables (shared state)
+     * @param abortSignal - Optional abort signal
+     * @returns Final output from the loop (last iteration or loop summary)
+     */
+    private async executeLoopPairBetweenMarkers(
+        loopNode: any,
+        endLoopNode: any,
+        loopInput: any,
+        workflow: any,
+        execution: Execution,
+        workflowVariables?: Record<string, any>,
+        abortSignal?: AbortSignal
+    ): Promise<any> {
+        const nodeData = loopNode.data || {};
+        const loopType = nodeData.loopType || 'while';
+        const maxIterations = parseInt(nodeData.maxIterations || '100', 10);
+
+        console.log(`[ExecutionService] 🔁 Executing Loop-Pair (${loopType}) between ${loopNode.id} and ${endLoopNode.id}`);
+
+        // Find all nodes between Loop and End-Loop (loop body)
+        const loopBodyNodeIds = this.findLoopBodyNodes(loopNode.id, endLoopNode.id, workflow.edges);
+        
+        if (loopBodyNodeIds.length === 0) {
+            console.warn(`[ExecutionService] Loop-Pair ${loopNode.id}: Empty loop body, returning input`);
+            return loopInput;
+        }
+
+        console.log(`[ExecutionService] Loop-Pair ${loopNode.id}: Found ${loopBodyNodeIds.length} nodes in loop body:`, loopBodyNodeIds);
+
+        let finalOutput: any = loopInput;
+        let iterationCount = 0;
+
+        if (loopType === 'foreach') {
+            // ForEach: Iterate over array
+            const arrayPath = nodeData.arrayPath || '';
+            
+            if (!arrayPath) {
+                throw new Error(`Loop Node ${loopNode.id}: arrayPath is required for foreach loops`);
+            }
+
+            // Resolve array path expression
+            const steps: Record<string, any> = {};
+            if (execution.trace) {
+                for (const traceEntry of execution.trace) {
+                    if (traceEntry.nodeId && traceEntry.nodeId !== loopNode.id) {
+                        steps[traceEntry.nodeId] = traceEntry.output || traceEntry.input;
+                    }
+                }
+            }
+
+            const secrets: Record<string, string> = {};
+            if (workflow.secrets) {
+                Object.assign(secrets, workflow.secrets);
+            }
+
+            const expressionContext = {
+                input: loopInput?.json || {},
+                steps,
+                secrets,
+                vars: workflowVariables || {},
+            };
+
+            const arrayResult = expressionResolutionService.resolveExpressions(
+                arrayPath,
+                expressionContext,
+                { execution, currentNodeId: loopNode.id }
+            );
+            const arrayString = typeof arrayResult === 'string' ? arrayResult : arrayResult.result;
+            
+            // Try to parse as JSON if it looks like JSON
+            let array: any[] = [];
+            if (typeof arrayString === 'string') {
+                try {
+                    const parsed = JSON.parse(arrayString.trim());
+                    array = Array.isArray(parsed) ? parsed : [];
+                } catch {
+                    // Not JSON, try to extract from object path
+                    const pathParts = arrayPath.replace(/^\{\{|\}\}$/g, '').split('.');
+                    let current: any = expressionContext;
+                    for (const part of pathParts) {
+                        if (part === 'steps' || part === 'input' || part === 'secrets' || part === 'vars') {
+                            current = current[part];
+                        } else if (current && typeof current === 'object') {
+                            current = current[part];
+                        } else {
+                            current = undefined;
+                            break;
+                        }
+                    }
+                    array = Array.isArray(current) ? current : [];
+                }
+            } else if (Array.isArray(arrayString)) {
+                array = arrayString;
+            }
+
+            if (!Array.isArray(array) || array.length === 0) {
+                console.log(`[ExecutionService] Loop-Pair ${loopNode.id}: Empty array, skipping loop body`);
+                return loopInput;
+            }
+
+            console.log(`[ExecutionService] Loop-Pair ${loopNode.id}: Executing foreach loop for ${array.length} items`);
+
+            // Execute loop body for each array item
+            for (let index = 0; index < array.length && index < maxIterations; index++) {
+                if (abortSignal?.aborted) {
+                    throw new Error('Execution was cancelled');
+                }
+
+                const currentItem = array[index];
+                iterationCount++;
+
+                // Create loop context
+                const loopContext = {
+                    current: currentItem,
+                    index: index,
+                    array: array,
+                };
+
+                const iterationInput = this.ensureNodeData({
+                    ...(loopInput?.json || {}),
+                    loop: loopContext,
+                    current: currentItem,
+                    index: index,
+                }, loopNode.id, 'loop-body');
+
+                // Execute loop body nodes sequentially
+                finalOutput = await this.executeLoopBody(
+                    loopBodyNodeIds,
+                    iterationInput,
+                    workflow,
+                    execution,
+                    workflowVariables,
+                    abortSignal,
+                    { iteration: index, loopNodeId: loopNode.id }
+                );
+            }
+
+        } else if (loopType === 'while') {
+            // While: Iterate while condition is true
+            const condition = nodeData.condition || '';
+            
+            if (!condition) {
+                throw new Error(`Loop Node ${loopNode.id}: condition is required for while loops`);
+            }
+
+            // Build expression context
+            const steps: Record<string, any> = {};
+            if (execution.trace) {
+                for (const traceEntry of execution.trace) {
+                    if (traceEntry.nodeId && traceEntry.nodeId !== loopNode.id) {
+                        steps[traceEntry.nodeId] = traceEntry.output || traceEntry.input;
+                    }
+                }
+            }
+
+            const secrets: Record<string, string> = {};
+            if (workflow.secrets) {
+                Object.assign(secrets, workflow.secrets);
+            }
+
+            // Execute while loop
+            while (iterationCount < maxIterations) {
+                if (abortSignal?.aborted) {
+                    throw new Error('Execution was cancelled');
+                }
+
+                // Resolve condition expression
+                const expressionContext = {
+                    input: finalOutput?.json || loopInput?.json || {},
+                    steps,
+                    secrets,
+                    vars: workflowVariables || {},
+                };
+
+                const conditionResult = expressionResolutionService.resolveExpressions(
+                    condition,
+                    expressionContext,
+                    { execution, currentNodeId: loopNode.id }
+                );
+                const conditionString = typeof conditionResult === 'string' ? conditionResult : conditionResult.result;
+
+                // Evaluate condition
+                let conditionValue: boolean;
+                try {
+                    // Try to evaluate as JavaScript expression
+                    if (conditionString.includes('===') || conditionString.includes('!==') || 
+                        conditionString.includes('==') || conditionString.includes('!=') ||
+                        conditionString.includes('<=') || conditionString.includes('>=') ||
+                        conditionString.includes('<') || conditionString.includes('>')) {
+                        conditionValue = this.evaluateCondition(conditionString);
+                    } else {
+                        // Truthy/falsy evaluation
+                        conditionValue = Boolean(conditionString && conditionString !== 'false' && conditionString !== '0');
+                    }
+                } catch {
+                    // Fallback: truthy evaluation
+                    conditionValue = Boolean(conditionString && conditionString !== 'false' && conditionString !== '0');
+                }
+
+                if (!conditionValue) {
+                    console.log(`[ExecutionService] Loop-Pair ${loopNode.id}: Condition false, exiting while loop after ${iterationCount} iterations`);
+                    break;
+                }
+
+                iterationCount++;
+
+                // Execute loop body
+                finalOutput = await this.executeLoopBody(
+                    loopBodyNodeIds,
+                    finalOutput || loopInput,
+                    workflow,
+                    execution,
+                    workflowVariables,
+                    abortSignal,
+                    { iteration: iterationCount - 1, loopNodeId: loopNode.id }
+                );
+
+                // Update steps for next iteration (include loop body outputs)
+                if (execution.trace) {
+                    for (const traceEntry of execution.trace) {
+                        if (traceEntry.nodeId && traceEntry.nodeId !== loopNode.id) {
+                            steps[traceEntry.nodeId] = traceEntry.output || traceEntry.input;
+                        }
+                    }
+                }
+            }
+
+            if (iterationCount >= maxIterations) {
+                console.warn(`[ExecutionService] Loop-Pair ${loopNode.id}: Reached max iterations (${maxIterations}), exiting`);
+            }
+        }
+
+        // Return final output with loop summary
+        return this.ensureNodeData({
+            ...(finalOutput?.json || {}),
+            _loopSummary: {
+                iterations: iterationCount,
+                loopType: loopType,
+                loopNodeId: loopNode.id,
+            }
+        }, loopNode.id, 'loop-complete');
+    }
+
+    /**
+     * Find all node IDs in the loop body (between Loop and End-Loop markers)
+     */
+    private findLoopBodyNodes(loopNodeId: string, endLoopNodeId: string, edges: any[]): string[] {
+        const lookup = new Map<string, string[]>();
+        edges.forEach(e => {
+            if (!lookup.has(e.source)) lookup.set(e.source, []);
+            lookup.get(e.source)!.push(e.target);
+        });
+
+        const visited = new Set<string>();
+        const body = new Set<string>();
+        const queue: string[] = [loopNodeId];
+
+        while (queue.length) {
+            const cur = queue.shift()!;
+            if (visited.has(cur)) continue;
+            visited.add(cur);
+            if (cur === endLoopNodeId) continue;
+            if (cur !== loopNodeId) body.add(cur);
+            const nexts = lookup.get(cur) || [];
+            nexts.forEach(n => {
+                if (!visited.has(n)) queue.push(n);
+            });
+        }
+
+        body.delete(endLoopNodeId);
+        return Array.from(body);
+    }
+
+    /**
+     * Execute loop body nodes sequentially
+     */
+    private async executeLoopBody(
+        bodyNodeIds: string[],
+        input: any,
+        workflow: any,
+        execution: Execution,
+        workflowVariables?: Record<string, any>,
+        abortSignal?: AbortSignal,
+        loopMeta?: { iteration: number; loopNodeId: string }
+    ): Promise<any> {
+        let currentInput = input;
+        const visited = new Set<string>();
+
+        // Find start node of loop body (first node after Loop marker)
+        // This is the first node in bodyNodeIds that has an incoming edge from outside the body
+        let startNodeId: string | null = null;
+        for (const nodeId of bodyNodeIds) {
+            const hasIncomingFromOutside = workflow.edges.some((e: any) => 
+                e.target === nodeId && !bodyNodeIds.includes(e.source)
+            );
+            if (hasIncomingFromOutside || bodyNodeIds.indexOf(nodeId) === 0) {
+                startNodeId = nodeId;
+                break;
+            }
+        }
+
+        if (!startNodeId && bodyNodeIds.length > 0) {
+            startNodeId = bodyNodeIds[0];
+        }
+
+        if (!startNodeId) {
+            return currentInput;
+        }
+
+        let currentNode = workflow.nodes.find((n: any) => n.id === startNodeId);
+        if (!currentNode) {
+            throw new Error(`Loop body start node ${startNodeId} not found`);
+        }
+
+        // Execute loop body nodes sequentially
+        while (currentNode && bodyNodeIds.includes(currentNode.id)) {
+            if (abortSignal?.aborted) {
+                throw new Error('Execution was cancelled');
+            }
+
+            if (visited.has(currentNode.id)) {
+                throw new Error(`Circular dependency detected in loop body at node ${currentNode.id}`);
+            }
+            visited.add(currentNode.id);
+
+            // Process node
+            const startTime = Date.now();
+            try {
+                await redisService.publish('node.start', {
+                    executionId: execution.id,
+                    nodeId: currentNode.id,
+                    nodeType: currentNode.type,
+                    nodeLabel: currentNode.data?.label,
+                    startedAt: new Date().toISOString(),
+                    _loopIteration: loopMeta?.iteration,
+                    _loopNodeId: loopMeta?.loopNodeId,
+                });
+            } catch (err) {
+                console.warn('[ExecutionService] Failed to publish node.start event:', err);
+            }
+
+            try {
+                const nodeOutput = await this.processNode(currentNode, currentInput, workflow, execution, workflowVariables);
+                const duration = Date.now() - startTime;
+
+                try {
+                    await redisService.publish('node.end', {
+                        executionId: execution.id,
+                        nodeId: currentNode.id,
+                        nodeType: currentNode.type,
+                        nodeLabel: currentNode.data?.label,
+                        status: 'completed',
+                        duration: duration,
+                        output: nodeOutput,
+                        completedAt: new Date().toISOString(),
+                        _loopIteration: loopMeta?.iteration,
+                        _loopNodeId: loopMeta?.loopNodeId,
+                    });
+                } catch (err) {
+                    console.warn('[ExecutionService] Failed to publish node.end event:', err);
+                }
+
+                // Add trace entry
+                const traceEntry = {
+                    nodeId: currentNode.id,
+                    type: currentNode.type,
+                    input: currentInput,
+                    output: nodeOutput,
+                    timestamp: new Date(),
+                    duration: duration,
+                    _loopIteration: loopMeta?.iteration,
+                    _loopNodeId: loopMeta?.loopNodeId,
+                };
+                this.addSchemaToTraceEntry(traceEntry);
+                await this.addTraceEntry(execution.id!, traceEntry, execution);
+
+                currentInput = nodeOutput;
+
+                // Find next node in loop body
+                const nextEdge = workflow.edges.find((e: any) => 
+                    e.source === currentNode.id && bodyNodeIds.includes(e.target)
+                );
+
+                if (!nextEdge) {
+                    // No more nodes in loop body, return
+                    break;
+                }
+
+                const nextNode = workflow.nodes.find((n: any) => n.id === nextEdge.target);
+                if (!nextNode || !bodyNodeIds.includes(nextNode.id)) {
+                    break;
+                }
+
+                currentNode = nextNode;
+            } catch (error: any) {
+                const duration = Date.now() - startTime;
+                try {
+                    await redisService.publish('node.end', {
+                        executionId: execution.id,
+                        nodeId: currentNode.id,
+                        nodeType: currentNode.type,
+                        nodeLabel: currentNode.data?.label,
+                        status: 'failed',
+                        duration: duration,
+                        error: error.message,
+                        completedAt: new Date().toISOString(),
+                        _loopIteration: loopMeta?.iteration,
+                        _loopNodeId: loopMeta?.loopNodeId,
+                    });
+                } catch (err) {
+                    console.warn('[ExecutionService] Failed to publish node.end event (error):', err);
+                }
+
+                const errorNodeData = createErrorNodeData(
+                    error.message,
+                    currentNode.id,
+                    currentNode.type,
+                    'EXECUTION_ERROR',
+                    { originalError: error.toString() }
+                );
+
+                const errorTraceEntry = {
+                    nodeId: currentNode.id,
+                    type: currentNode.type,
+                    input: currentInput,
+                    output: errorNodeData,
+                    error: error.message,
+                    timestamp: new Date(),
+                    duration: duration,
+                    _loopIteration: loopMeta?.iteration,
+                    _loopNodeId: loopMeta?.loopNodeId,
+                };
+                this.addSchemaToTraceEntry(errorTraceEntry);
+                await this.addTraceEntry(execution.id!, errorTraceEntry, execution);
+                throw error;
+            }
+        }
+
+        return currentInput;
+    }
+
+    /**
+     * Evaluate condition string (simple JavaScript expression evaluator)
+     */
+    private evaluateCondition(condition: string): boolean {
+        try {
+            // Simple evaluation - for production, consider using a proper expression evaluator
+            // This handles basic comparisons: ===, !==, ==, !=, <, >, <=, >=
+            const result = Function(`"use strict"; return (${condition})`)();
+            return Boolean(result);
+        } catch {
+            return false;
+        }
     }
 
     /**
