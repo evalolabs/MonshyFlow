@@ -15,6 +15,7 @@ interface ExpressionEditorProps {
   currentNodeId: string;
   previewSource?: any; // optional explicit preview data
   debugSteps?: any[]; // debug steps with evaluated outputs
+  workflowVariables?: Record<string, any>; // Workflow variables
 }
 
 export const ExpressionEditor: React.FC<ExpressionEditorProps> = ({
@@ -29,6 +30,7 @@ export const ExpressionEditor: React.FC<ExpressionEditorProps> = ({
   currentNodeId,
   previewSource,
   debugSteps = [],
+  workflowVariables,
 }) => {
   const inputId = useId();
   const [showVars, setShowVars] = useState(false);
@@ -166,6 +168,7 @@ export const ExpressionEditor: React.FC<ExpressionEditorProps> = ({
           currentNodeId={currentNodeId}
           data={fetchedPreview ?? previewContext}
           debugSteps={debugSteps}
+          workflowVariables={workflowVariables}
           onPick={(p) => insertAtCursor(`{{${p}}}`)}
           onClose={() => setShowVars(false)}
         />

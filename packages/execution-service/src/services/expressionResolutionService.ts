@@ -33,6 +33,11 @@ export interface ExpressionContext {
      * Secrets: key = secret name, value = secret value
      */
     secrets: Record<string, string>;
+    
+    /**
+     * Workflow variables: key = variable name, value = variable value (can be any type)
+     */
+    vars?: Record<string, any>;
 }
 
 /**
@@ -559,6 +564,114 @@ export class ExpressionResolutionService {
             }
         }
 
+        // Replace {{vars.variableName}} patterns (workflow variables)
+        // Supports nested paths: {{vars.user.name}}, {{vars.items[0].id}}
+        if (normalizedContext.vars) {
+            const varsPattern = /\{\{vars\.([^}]+)\}\}/g;
+            while ((match = varsPattern.exec(text)) !== null) {
+                const fullMatch = match[0];
+                const path = match[1].trim();
+                
+                // Parse path - support both dot notation and array notation
+                // e.g., "user.name", "items[0].id", "items[0]"
+                const pathParts: Array<string | number> = [];
+                let currentPart = '';
+                let inBrackets = false;
+                
+                for (let i = 0; i < path.length; i++) {
+                    const char = path[i];
+                    if (char === '[') {
+                        if (currentPart) {
+                            pathParts.push(currentPart);
+                            currentPart = '';
+                        }
+                        inBrackets = true;
+                    } else if (char === ']') {
+                        if (inBrackets && currentPart) {
+                            const index = parseInt(currentPart, 10);
+                            if (!isNaN(index)) {
+                                pathParts.push(index);
+                            }
+                            currentPart = '';
+                            inBrackets = false;
+                        }
+                    } else if (char === '.' && !inBrackets) {
+                        if (currentPart) {
+                            pathParts.push(currentPart);
+                            currentPart = '';
+                        }
+                    } else {
+                        currentPart += char;
+                    }
+                }
+                if (currentPart) {
+                    pathParts.push(currentPart);
+                }
+                
+                // Resolve path in vars object
+                let value: any = normalizedContext.vars;
+                let found = true;
+                
+                for (const part of pathParts) {
+                    if (value === null || value === undefined) {
+                        found = false;
+                        break;
+                    }
+                    if (typeof part === 'number') {
+                        // Array access
+                        if (Array.isArray(value)) {
+                            value = value[part];
+                        } else {
+                            found = false;
+                            break;
+                        }
+                    } else {
+                        // Object property access
+                        if (typeof value === 'object' && value !== null) {
+                            value = value[part];
+                        } else {
+                            found = false;
+                            break;
+                        }
+                    }
+                }
+                
+                if (found && value !== undefined) {
+                    // Convert value to string representation
+                    let replacement: string;
+                    if (typeof value === 'object' && value !== null) {
+                        replacement = JSON.stringify(value);
+                    } else {
+                        replacement = String(value);
+                    }
+                    
+                    text = text.replace(fullMatch, replacement);
+                    if (options?.debug) {
+                        traces.push({
+                            expression: fullMatch,
+                            resolvedValue: replacement,
+                            duration: Date.now() - startTime
+                        });
+                    }
+                } else {
+                    const error = new ExpressionResolutionError(
+                        fullMatch,
+                        'not_found',
+                        { path: `vars.${path}` }
+                    );
+                    this.handleError(error, options);
+                    if (options?.debug) {
+                        traces.push({
+                            expression: fullMatch,
+                            resolvedValue: null,
+                            duration: Date.now() - startTime,
+                            errors: [error.message]
+                        });
+                    }
+                }
+            }
+        }
+
         if (options?.debug) {
             return { result: text, trace: traces };
         }
@@ -594,13 +707,15 @@ export class ExpressionResolutionService {
         steps?: Record<string, any>;
         input?: any;
         secrets: Record<string, string>;
+        vars?: Record<string, any>;
     }): ExpressionContext {
         const normalized: ExpressionContext = {
             secrets: context.secrets, // Secrets don't need normalization
             steps: {},
             input: context.input 
                 ? this.normalizeToNodeData(context.input, 'input', 'input') 
-                : null
+                : null,
+            vars: context.vars || {} // Workflow variables (can be any type, no normalization needed)
         };
 
         // Normalize all steps

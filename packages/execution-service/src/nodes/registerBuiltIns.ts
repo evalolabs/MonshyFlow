@@ -389,6 +389,95 @@ registerNodeProcessor({
                 $steps: steps,
                 // Resolved secrets
                 $secrets: context.secrets || {},
+                // Workflow variables
+                $vars: context.variables || {},
+                vars: context.variables || {}, // Alias
+                // Helper function to set variables in code
+                setVar: (name: string, value: any) => {
+                    if (!context.variables) {
+                        context.variables = {};
+                    }
+                    context.variables[name] = value;
+                },
+                // Helper function to update a nested property in a variable
+                // Example: updateVar('test', '0.name', 'new name') - updates test[0].name
+                // Example: updateVar('user', 'profile.email', 'new@email.com') - updates user.profile.email
+                updateVar: (name: string, path: string, value: any) => {
+                    if (!context.variables) {
+                        context.variables = {};
+                    }
+                    if (!context.variables[name]) {
+                        throw new Error(`Variable "${name}" does not exist. Use setVar() to create it first.`);
+                    }
+                    
+                    // Parse path (supports both dot notation and bracket notation)
+                    // Examples: "0.name", "user.email", "items[0].id"
+                    const pathParts: Array<string | number> = [];
+                    let currentPart = '';
+                    let inBrackets = false;
+                    
+                    for (let i = 0; i < path.length; i++) {
+                        const char = path[i];
+                        if (char === '[') {
+                            if (currentPart) {
+                                pathParts.push(currentPart);
+                                currentPart = '';
+                            }
+                            inBrackets = true;
+                        } else if (char === ']') {
+                            if (currentPart) {
+                                pathParts.push(Number(currentPart)); // Array index
+                                currentPart = '';
+                            }
+                            inBrackets = false;
+                        } else if (char === '.' && !inBrackets) {
+                            if (currentPart) {
+                                pathParts.push(currentPart);
+                                currentPart = '';
+                            }
+                        } else {
+                            currentPart += char;
+                        }
+                    }
+                    if (currentPart) {
+                        pathParts.push(currentPart);
+                    }
+                    
+                    // Navigate to the parent object/array
+                    let target = context.variables[name];
+                    for (let i = 0; i < pathParts.length - 1; i++) {
+                        const part = pathParts[i];
+                        if (typeof part === 'number') {
+                            if (!Array.isArray(target) || target[part] === undefined) {
+                                throw new Error(`Cannot access array index ${part} in variable "${name}"`);
+                            }
+                            target = target[part];
+                        } else {
+                            if (typeof target !== 'object' || target === null || Array.isArray(target)) {
+                                throw new Error(`Cannot access property "${part}" in variable "${name}"`);
+                            }
+                            if (target[part] === undefined) {
+                                // Create nested object if it doesn't exist
+                                target[part] = {};
+                            }
+                            target = target[part];
+                        }
+                    }
+                    
+                    // Set the value
+                    const lastPart = pathParts[pathParts.length - 1];
+                    if (typeof lastPart === 'number') {
+                        if (!Array.isArray(target)) {
+                            throw new Error(`Cannot set array index ${lastPart} - target is not an array`);
+                        }
+                        target[lastPart] = value;
+                    } else {
+                        if (typeof target !== 'object' || target === null || Array.isArray(target)) {
+                            throw new Error(`Cannot set property "${lastPart}" - target is not an object`);
+                        }
+                        target[lastPart] = value;
+                    }
+                },
                 // Common JavaScript utilities
                 console: {
                     log: (...args: any[]) => console.log(`[CodeNode:${node.id}]`, ...args),
@@ -456,63 +545,204 @@ registerNodeProcessor({
             );
         }
     },
-    // Legacy method for backward compatibility
-    process: async (node, input, context) => {
-        const code = node.data?.code || '';
+});
 
-        if (!code || !code.trim()) {
-            throw new Error('Code is required for Code Node');
+// Variable Node Processor
+registerNodeProcessor({
+    type: 'variable',
+    name: 'Set Variable',
+    description: 'Declare or update a workflow variable that can be used across all nodes',
+    processNodeData: async (node, input, context) => {
+        const nodeData = node.data || {};
+        const variableName = nodeData.variableName;
+        const variableValue = nodeData.variableValue;
+        
+        if (!variableName || !variableName.trim()) {
+            return createErrorNodeData(
+                'Variable name is required.',
+                node.id,
+                'variable'
+            );
         }
-
-        try {
-            // Build steps object from execution trace
-            const steps: Record<string, any> = {};
-            if (context?.execution?.trace) {
-                for (const traceEntry of context.execution.trace) {
-                    if (traceEntry.nodeId && traceEntry.nodeId !== node.id) {
-                        steps[traceEntry.nodeId] = traceEntry.output || traceEntry.input;
+        
+        // Initialize variables in context if not exists
+        if (!context.variables) {
+            context.variables = {};
+        }
+        
+        // Resolve expression if variableValue contains expressions
+        let resolvedValue = variableValue;
+        if (variableValue !== undefined && variableValue !== null && variableValue !== '') {
+            if (typeof variableValue === 'string' && variableValue.includes('{{')) {
+                // Build expression context
+                const steps: Record<string, any> = {};
+                if (context.execution?.trace) {
+                    for (const traceEntry of context.execution.trace) {
+                        if (traceEntry.nodeId && traceEntry.nodeId !== node.id) {
+                            steps[traceEntry.nodeId] = traceEntry.output || traceEntry.input;
+                        }
                     }
                 }
+                
+                const expressionContext = {
+                    steps,
+                    input: input?.json || {},
+                    secrets: context.secrets || {},
+                    vars: context.variables || {}, // Allow referencing other variables
+                };
+                
+                // Resolve expression
+                const expressionResult = expressionResolutionService.resolveExpressions(
+                    variableValue,
+                    expressionContext,
+                    { execution: context.execution, currentNodeId: node.id }
+                );
+                
+                // Extract result from expression resolution (can be string or {result, trace})
+                resolvedValue = typeof expressionResult === 'string' ? expressionResult : expressionResult.result;
+                
+                // Try to parse as JSON if it looks like JSON (after expression resolution)
+                // This handles cases where the expression returns a JSON string that needs to be parsed
+                if (typeof resolvedValue === 'string') {
+                    try {
+                        const trimmed = resolvedValue.trim();
+                        // Check if it's a JSON string (starts with { or [)
+                        if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                            resolvedValue = JSON.parse(trimmed);
+                        }
+                    } catch (e) {
+                        // Not valid JSON, keep as string
+                        console.log(`[Variable Node] Could not parse resolved expression as JSON, keeping as string: ${e}`);
+                    }
+                }
+            } else if (typeof variableValue === 'string') {
+                // Try to parse as JSON if it looks like JSON
+                try {
+                    const trimmed = variableValue.trim();
+                    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                        resolvedValue = JSON.parse(trimmed);
+                    }
+                } catch (e) {
+                    // Not valid JSON, keep as string
+                    console.log(`[Variable Node] Could not parse value as JSON, keeping as string: ${e}`);
+                }
             }
-
-            // Import vm module for safe code execution
-            const { createContext, Script } = await import('vm');
-
-            const vmContext = createContext({
-                $input: input || null,
-                $json: (input as any)?.json || input || null,
-                $steps: steps,
-                $secrets: context.secrets || {},
-                console: {
-                    log: (...args: any[]) => console.log(`[CodeNode:${node.id}]`, ...args),
-                    error: (...args: any[]) => console.error(`[CodeNode:${node.id}]`, ...args),
-                    warn: (...args: any[]) => console.warn(`[CodeNode:${node.id}]`, ...args),
+        } else {
+            // Empty value - declare variable as undefined/null
+            resolvedValue = undefined;
+        }
+        
+        // Set variable in context
+        context.variables[variableName.trim()] = resolvedValue;
+        
+        // For debug visibility: Return input data (passthrough) with variable info
+        // Include variable info in output so debug panel can show it
+        const inputData = input?.json || (input ? input : null);
+        const outputData = {
+            ...(inputData && typeof inputData === 'object' && !Array.isArray(inputData) ? inputData : {}),
+            // Add variable info for debugging
+            _variableSet: {
+                name: variableName.trim(),
+                value: resolvedValue
+            }
+        };
+        
+        // If input is null/undefined/empty, return variable info as main data
+        if (!input || !input.json) {
+            return createNodeData(
+                {
+                    variableSet: {
+                        name: variableName.trim(),
+                        value: resolvedValue
+                    },
+                    message: `Variable "${variableName.trim()}" set successfully`
                 },
-                JSON: JSON,
-                Math: Math,
-                Date: Date,
-            });
-
-            // Wrap code in an IIFE to support return statements
-            const wrappedCode = `(() => { ${code} })()`;
-            const script = new Script(wrappedCode);
-            const result = script.runInContext(vmContext, {
-                timeout: 5000,
-                displayErrors: true,
-            });
-
-            return result;
-        } catch (error: any) {
-            console.error(`[CodeNode:${node.id}] Error executing code:`, error);
-            throw error;
+                node.id,
+                'variable',
+                input?.metadata?.nodeId
+            );
         }
+        
+        // Otherwise return input with variable info
+        return createNodeData(
+            outputData,
+            node.id,
+            'variable',
+            input?.metadata?.nodeId
+        );
     },
-    validate: (node) => {
-        const code = node.data?.code || '';
-        if (!code || !code.trim()) {
-            return { valid: false, error: 'Code is required' };
+    // Legacy method for backward compatibility
+    process: async (node, input, context) => {
+        const nodeData = node.data || {};
+        const variableName = nodeData.variableName;
+        const variableValue = nodeData.variableValue;
+        
+        if (!variableName || !variableName.trim()) {
+            throw new Error('Variable name is required');
         }
-        return { valid: true };
+        
+        // Initialize variables in context if not exists
+        if (!context.variables) {
+            context.variables = {};
+        }
+        
+        // Resolve expression if variableValue contains expressions
+        let resolvedValue = variableValue;
+        if (variableValue !== undefined && variableValue !== null && variableValue !== '') {
+            if (typeof variableValue === 'string' && variableValue.includes('{{')) {
+                // Build expression context
+                const steps: Record<string, any> = {};
+                if (context.execution?.trace) {
+                    for (const traceEntry of context.execution.trace) {
+                        if (traceEntry.nodeId && traceEntry.nodeId !== node.id) {
+                            steps[traceEntry.nodeId] = traceEntry.output || traceEntry.input;
+                        }
+                    }
+                }
+                
+                const expressionContext = {
+                    steps,
+                    input: input?.json || (input as any) || {},
+                    secrets: context.secrets || {},
+                    vars: context.variables || {},
+                };
+                
+                // Resolve expression
+                resolvedValue = expressionResolutionService.resolveExpressions(
+                    variableValue,
+                    expressionContext,
+                    { execution: context.execution, currentNodeId: node.id }
+                );
+                
+                // Try to parse as JSON if it looks like JSON
+                if (typeof resolvedValue === 'string') {
+                    try {
+                        if (resolvedValue.trim().startsWith('{') || resolvedValue.trim().startsWith('[')) {
+                            resolvedValue = JSON.parse(resolvedValue);
+                        }
+                    } catch {
+                        // Not valid JSON, keep as string
+                    }
+                }
+            } else if (typeof variableValue === 'string') {
+                // Try to parse as JSON if it looks like JSON
+                try {
+                    if (variableValue.trim().startsWith('{') || variableValue.trim().startsWith('[')) {
+                        resolvedValue = JSON.parse(variableValue);
+                    }
+                } catch {
+                    // Not valid JSON, keep as string
+                }
+            }
+        } else {
+            resolvedValue = undefined;
+        }
+        
+        // Set variable in context
+        context.variables[variableName.trim()] = resolvedValue;
+        
+        // Return input (passthrough)
+        return input;
     },
 });
 

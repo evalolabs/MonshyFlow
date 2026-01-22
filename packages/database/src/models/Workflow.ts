@@ -55,6 +55,7 @@ export interface IWorkflow extends Document {
   lastExecutedAt?: Date;
   isActive: boolean;
   scheduleConfig?: IScheduleConfig;
+  variables?: Record<string, any>; // Workflow variables - can store any data type
 }
 
 const NodeSchema = new Schema<INode>({
@@ -116,6 +117,7 @@ const WorkflowSchema = new Schema<IWorkflow>({
   lastExecutedAt: { type: Date },
   isActive: { type: Boolean, default: true },
   scheduleConfig: { type: ScheduleConfigSchema },
+  variables: { type: Schema.Types.Mixed, default: {} }, // Workflow variables
 }, {
   timestamps: true,
   collection: 'workflows',

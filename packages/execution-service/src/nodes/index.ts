@@ -8,6 +8,7 @@ export interface NodeProcessorContext {
     secrets: Record<string, string>;
     input: any; // Legacy: can be any
     nodeData?: NodeData; // New: standardized NodeData input
+    variables?: Record<string, any>; // Workflow variables (shared state across all nodes)
 }
 
 export interface NodeProcessor {

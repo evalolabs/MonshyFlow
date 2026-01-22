@@ -158,6 +158,8 @@ interface WorkflowCanvasProps {
   onSave?: (nodes: Node[], edges: Edge[]) => void;
   onExecute?: () => void;
   workflowId?: string;
+  workflow?: any; // Workflow object for variables panel
+  onUpdateVariables?: (variables: Record<string, any>) => void;
 }
 
 // ============================================================================
@@ -169,6 +171,8 @@ export function WorkflowCanvas({
   initialEdges = [],
   onSave,
   workflowId,
+  workflow,
+  onUpdateVariables,
 }: WorkflowCanvasProps) {
   const { fitView } = useReactFlow();
   const { x: viewportX, y: viewportY, zoom } = useViewport();
@@ -1810,6 +1814,8 @@ export function WorkflowCanvas({
       
       // Workflow props
       workflowId={workflowId}
+      workflow={workflow}
+      onUpdateVariables={onUpdateVariables}
     />
     {edgeContextMenu && (
       <EdgeContextMenu

@@ -100,6 +100,14 @@ export class ExecutionController {
                 console.log('[ExecutionController] 🔐 Attached secrets to workflow. Keys:', Object.keys(secrets));
             }
 
+            // Initialize workflow variables from workflow definition (for debug execution)
+            const workflowVariables: Record<string, any> = {};
+            if (workflow.variables) {
+                // Deep clone to avoid reference issues
+                Object.assign(workflowVariables, JSON.parse(JSON.stringify(workflow.variables)));
+                console.log('[ExecutionController] 🔧 Initialized workflow variables for debug:', Object.keys(workflowVariables), workflowVariables);
+            }
+
             // Find all nodes that come before the target node
             const previousNodes = this.findPreviousNodes(nodeId, workflow.nodes || [], workflow.edges || []);
             console.log(`[ExecutionController] Found ${previousNodes.length} previous nodes before ${nodeId}`);
@@ -143,7 +151,7 @@ export class ExecutionController {
                         console.error(`[ExecutionController] ❌ Failed to publish node.start event for node ${prevNode.id}:`, err);
                     }
                     
-                    const nodeOutput = await executionService.processNodeDirectly(prevNode, currentInput, workflow, execution);
+                    const nodeOutput = await executionService.processNodeDirectly(prevNode, currentInput, workflow, execution, workflowVariables);
                     const duration = Date.now() - startTime;
                     
                     // Send node.end event with duration for real-time animation
@@ -246,7 +254,7 @@ export class ExecutionController {
                                         }
                                         
                                         try {
-                                            const loopBodyOutput = await executionService.processNodeDirectly(loopBodyNode, loopInput, workflow, execution);
+                                            const loopBodyOutput = await executionService.processNodeDirectly(loopBodyNode, loopInput, workflow, execution, workflowVariables);
                                             const loopBodyDuration = Date.now() - loopBodyStartTime;
                                             
                                             try {
@@ -417,7 +425,7 @@ export class ExecutionController {
                     console.error(`[ExecutionController] ❌ Failed to publish node.start event for target node ${targetNode.id}:`, err);
                 }
                 
-                targetResult = await executionService.processNodeDirectly(targetNode, currentInput, workflow, execution);
+                targetResult = await executionService.processNodeDirectly(targetNode, currentInput, workflow, execution, workflowVariables);
                 const duration = Date.now() - startTime;
                 
                 // Send node.end event with duration for real-time animation
@@ -624,6 +632,14 @@ export class ExecutionController {
                 console.log('   🔐 Attached secrets to workflow for execution. Keys:', Object.keys(secrets));
             }
 
+            // Initialize workflow variables from workflow definition (for debug execution)
+            const workflowVariables: Record<string, any> = {};
+            if (workflow.variables) {
+                // Deep clone to avoid reference issues
+                Object.assign(workflowVariables, JSON.parse(JSON.stringify(workflow.variables)));
+                console.log('[executeNode] 🔧 Initialized workflow variables for debug:', Object.keys(workflowVariables), workflowVariables);
+            }
+            
             // Create a minimal execution context
             const execution: Execution = {
                 id: `test-${Date.now()}`,
@@ -637,7 +653,8 @@ export class ExecutionController {
             };
 
             // Execute the node using the execution service
-            const result = await executionService.processNodeDirectly(targetNode, input || {}, workflow, execution);
+            // Pass workflowVariables so Variable Node can access and update them
+            const result = await executionService.processNodeDirectly(targetNode, input || {}, workflow, execution, workflowVariables);
 
             res.status(200).json({
                 nodeId: nodeId,

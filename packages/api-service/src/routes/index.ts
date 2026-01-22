@@ -210,6 +210,7 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
           // Ensure nodes and edges are included
           nodes: workflow.nodes || [],
           edges: workflow.edges || [],
+          variables: workflow.variables || {}, // Preserve workflow variables
         },
         nodeId,
         input: inputData, // Use req.body directly, not req.body.input
@@ -410,6 +411,7 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
           nodes: workflow.nodes || [],
           edges: workflow.edges || [],
           secrets: secrets, // Attach secrets to workflow
+          variables: workflow.variables || {}, // Preserve workflow variables
         },
       };
       

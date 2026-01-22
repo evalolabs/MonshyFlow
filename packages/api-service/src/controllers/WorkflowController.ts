@@ -104,6 +104,7 @@ export class WorkflowController {
       lastExecutedAt: workflow.lastExecutedAt,
       isActive: workflow.isActive,
       scheduleConfig: workflow.scheduleConfig,
+      variables: workflow.variables || {}, // Workflow variables
     };
   }
 

@@ -23,6 +23,7 @@ interface RenderFieldProps {
   currentNodeId: string;
   previewSource?: any;
   debugSteps?: any[];
+  workflowVariables?: Record<string, any>; // Workflow variables
   // For special cases (select, range, etc.)
   options?: Array<{ value: string; label: string }>;
   min?: number;
@@ -50,6 +51,7 @@ export function renderField({
   currentNodeId,
   previewSource,
   debugSteps,
+  workflowVariables,
   options,
   min,
   max,
@@ -117,6 +119,7 @@ export function renderField({
           currentNodeId={currentNodeId}
           previewSource={previewSource}
           debugSteps={debugSteps}
+          workflowVariables={workflowVariables}
         />
       </div>
     );

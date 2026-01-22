@@ -13,6 +13,7 @@ import { NodeSelectorPopup } from './NodeSelectorPopup';
 import { CombinedNodeSelectorModal } from './CombinedNodeSelectorModal';
 import { AddNodeButton } from './AddNodeButton';
 import { LoopBracketOverlay } from './LoopBracketOverlay';
+import { VariablesPanel } from './VariablesPanel';
 
 interface ResizableWorkflowLayoutProps {
   // Canvas props
@@ -97,6 +98,8 @@ interface ResizableWorkflowLayoutProps {
   
   // Workflow props
   workflowId?: string;
+  workflow?: any; // Workflow object for variables panel
+  onUpdateVariables?: (variables: Record<string, any>) => void;
 }
 
 export function ResizableWorkflowLayout({
@@ -180,6 +183,8 @@ export function ResizableWorkflowLayout({
   
   // Workflow props
   workflowId,
+  workflow,
+  onUpdateVariables,
 }: ResizableWorkflowLayoutProps) {
   
   // Save panel sizes to localStorage when they change
@@ -205,7 +210,7 @@ export function ResizableWorkflowLayout({
   });
 
   // Handle tab switching in left panel
-  const [activeLeftTab, setActiveLeftTab] = useState<'debug' | 'toolbar' | 'tools'>('debug');
+  const [activeLeftTab, setActiveLeftTab] = useState<'debug' | 'toolbar' | 'tools' | 'variables'>('debug');
 
   const togglePanel = useCallback((panel: 'leftPanel' | 'config') => {
     setCollapsedPanels(prev => ({
@@ -338,6 +343,16 @@ export function ResizableWorkflowLayout({
                     >
                       Tools
                     </button>
+                    <button
+                      onClick={() => setActiveLeftTab('variables')}
+                      className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                        activeLeftTab === 'variables'
+                          ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                          : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      Variables
+                    </button>
                   </div>
                   <div className="flex items-center">
                     <button
@@ -369,6 +384,12 @@ export function ResizableWorkflowLayout({
                   ) : activeLeftTab === 'tools' ? (
                     <ToolCatalog
                       onAddTool={onAddNode}
+                    />
+                  ) : activeLeftTab === 'variables' ? (
+                    <VariablesPanel
+                      workflow={workflow}
+                      onUpdateVariables={onUpdateVariables || (() => {})}
+                      workflowId={workflowId}
                     />
                   ) : (
                     <Toolbar
@@ -536,6 +557,7 @@ export function ResizableWorkflowLayout({
                       nodes={nodes}
                       edges={edges}
                       debugSteps={debugSteps}
+                      workflowVariables={workflow?.variables}
                     />
                   </div>
                 </div>

@@ -22,6 +22,7 @@ import { LLMNode } from '../NodeTypes/OptimizedNodes';
 import { HttpRequestNode } from '../NodeTypes/OptimizedNodes';
 import { TransformNode } from '../NodeTypes/OptimizedNodes';
 import { CodeNode } from '../NodeTypes/CodeNode';
+import { VariableNode } from '../NodeTypes/VariableNode';
 import { EmailNode } from '../NodeTypes/OptimizedNodes';
 import { WhileNode } from '../NodeTypes/WhileNode';
 import { ForEachNode } from '../NodeTypes/ForEachNode';
@@ -38,6 +39,7 @@ const NODE_COMPONENTS: Record<string, ComponentType<any>> = {
   end: EndNode,
   transform: TransformNode,
   code: CodeNode,
+  variable: VariableNode,
   agent: AgentNode,
   llm: LLMNode,
   'http-request': HttpRequestNode,

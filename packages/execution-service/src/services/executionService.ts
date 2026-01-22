@@ -298,6 +298,14 @@ class ExecutionService {
     }
 
     private async executeWorkflowInternal(workflow: any, request: ExecutionRequest, abortSignal?: AbortSignal): Promise<Execution> {
+        // Debug: Log workflow variables
+        console.log('[ExecutionService] 🔍 Workflow variables check:', {
+            hasVariables: !!workflow.variables,
+            variables: workflow.variables,
+            variableKeys: workflow.variables ? Object.keys(workflow.variables) : [],
+            workflowId: workflow.id,
+            workflowName: workflow.name
+        });
         // Extract workflowId from workflow object
         const workflowId = workflow.id || workflow._id || workflow.workflowId || '';
         
@@ -785,6 +793,16 @@ class ExecutionService {
 
         console.log('🔄 Processing workflow sequentially');
         
+        // Initialize workflow variables from workflow definition (initial values)
+        const workflowVariables: Record<string, any> = {};
+        if (workflow.variables) {
+            // Deep clone to avoid reference issues
+            Object.assign(workflowVariables, JSON.parse(JSON.stringify(workflow.variables)));
+            console.log('[ExecutionService] 🔧 Initialized workflow variables:', Object.keys(workflowVariables), workflowVariables);
+        } else {
+            console.log('[ExecutionService] ⚠️ No workflow variables found in workflow definition');
+        }
+        
         // Find start node
         const startNode = workflow.nodes.find((n: any) => n.type === 'start');
         if (!startNode) {
@@ -826,7 +844,7 @@ class ExecutionService {
             }
 
             try {
-                nodeOutput = await this.processNode(currentNode, currentInput, workflow, execution);
+                nodeOutput = await this.processNode(currentNode, currentInput, workflow, execution, workflowVariables);
                 
                 const duration = Date.now() - startTime;
                 
@@ -1171,8 +1189,8 @@ class ExecutionService {
     /**
      * Public method to execute a single node directly (for testing/debugging)
      */
-    async processNodeDirectly(node: any, input: any, workflow: any, execution: Execution): Promise<any> {
-        return await this.processNode(node, input, workflow, execution);
+    async processNodeDirectly(node: any, input: any, workflow: any, execution: Execution, workflowVariables?: Record<string, any>): Promise<any> {
+        return await this.processNode(node, input, workflow, execution, workflowVariables);
     }
 
     /**
@@ -1180,7 +1198,7 @@ class ExecutionService {
      * Uses registry system for automatic node type discovery
      * Now supports standardized NodeData flow
      */
-    private async processNode(node: any, input: any, workflow: any, execution: Execution): Promise<any> {
+    private async processNode(node: any, input: any, workflow: any, execution: Execution, workflowVariables?: Record<string, any>): Promise<any> {
         const nodeData = node.data || {};
         const nodeType = node.type;
 
@@ -1189,7 +1207,7 @@ class ExecutionService {
 
         // Special handling for agent nodes (complex logic)
         if (nodeType === 'agent') {
-            const result = await this.processAgentNode(node, input, workflow, execution);
+            const result = await this.processAgentNode(node, input, workflow, execution, workflowVariables);
             return this.convertToNodeData(result, node.id, nodeType, inputNodeData?.metadata.nodeId);
         }
 
@@ -1211,6 +1229,7 @@ class ExecutionService {
                 secrets,
                 input, // Legacy support
                 nodeData: inputNodeData, // New standardized input
+                variables: workflowVariables || {}, // Workflow variables (shared state)
             };
             
             try {
@@ -1506,7 +1525,7 @@ class ExecutionService {
     // ========================================
     // Agent Node Processor (Agents SDK)
     // ========================================
-    private async processAgentNode(node: any, input: any, workflow: any, execution?: Execution): Promise<any> {
+    private async processAgentNode(node: any, input: any, workflow: any, execution?: Execution, workflowVariables?: Record<string, any>): Promise<any> {
         const nodeData = node.data || {};
         
         // Build tools for this agent from connected nodes
@@ -1546,6 +1565,7 @@ class ExecutionService {
                 }, {}),
                 input: execution.input,
                 secrets: normalizedSecrets,
+                vars: workflowVariables || {}, // Workflow variables
             };
             
             // Resolve systemPrompt if it contains expressions

@@ -73,9 +73,10 @@ interface NodeConfigPanelProps {
   nodes?: Node[];
   edges?: Edge[];
   debugSteps?: any[];
+  workflowVariables?: Record<string, any>; // Workflow variables
 }
 
-export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteNode: _onDeleteNode, workflowId, nodes = [], edges = [], debugSteps = [] }: NodeConfigPanelProps) {
+export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteNode: _onDeleteNode, workflowId, nodes = [], edges = [], debugSteps = [], workflowVariables }: NodeConfigPanelProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [config, setConfig] = useState<any>({});
@@ -195,9 +196,10 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
     return auth.secretKey;
   };
 
-  const renderFieldWithDebug = (props: Omit<Parameters<typeof renderField>[0], 'nodes' | 'edges' | 'currentNodeId' | 'debugSteps' | 'secrets' | 'secretsLoading' | 'reloadSecrets'> & { defaultSecretName?: string; showAdvanced?: boolean }) => {
+  const renderFieldWithDebug = (props: Omit<Parameters<typeof renderField>[0], 'nodes' | 'edges' | 'currentNodeId' | 'debugSteps' | 'secrets' | 'secretsLoading' | 'reloadSecrets' | 'workflowVariables'> & { defaultSecretName?: string; showAdvanced?: boolean }) => {
     return renderField({
       ...props,
+      workflowVariables,
       nodes,
       edges,
       currentNodeId: selectedNode?.id || '',

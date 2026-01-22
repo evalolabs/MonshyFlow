@@ -158,6 +158,48 @@ export const NODE_METADATA_REGISTRY: Record<string, NodeMetadata> = {
     hasInput: true,
     hasOutput: true,
   },
+  variable: {
+    id: 'variable',
+    name: 'Set Variable',
+    icon: '📝',
+    description: 'Declare or update a workflow variable that can be used across all nodes',
+    category: 'core',
+    animationSpeed: 'fast',
+    component: () => null, // Will be lazy-loaded
+    hasConfigForm: true,
+    useAutoConfigForm: true,
+    isUnique: false,
+    canDuplicate: true,
+    hasInput: true,
+    hasOutput: true,
+    fields: {
+      label: {
+        type: 'text',
+        placeholder: 'Variable Node Name'
+      },
+      variableName: {
+        type: 'text',
+        placeholder: 'Variable name (e.g., counter, userData, items)',
+        required: true
+      },
+      variableValue: {
+        type: 'expression',
+        placeholder: 'Variable value (JSON: "text", 123, {"key": "value"}, [1,2,3], or use {{steps.nodeId.json.field}})',
+        multiline: true,
+        rows: 4
+      }
+    },
+    inputSchema: {
+      type: 'object',
+      description: 'Accepts any input. Variable value can reference input data using expressions.',
+      additionalProperties: true
+    },
+    outputSchema: {
+      type: 'object',
+      description: 'Returns the input data unchanged (passthrough). Variable is set in workflow context.',
+      additionalProperties: true
+    },
+  },
   
   // AI Nodes
   llm: {

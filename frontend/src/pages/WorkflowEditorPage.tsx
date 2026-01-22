@@ -267,6 +267,7 @@ export function WorkflowEditorPage() {
           executionCount: workflow?.executionCount || 0,
           lastExecutedAt: workflow?.lastExecutedAt,
           tenantId: workflow?.tenantId || '',
+          variables: workflow?.variables || {}, // Preserve workflow variables
         } as unknown as Partial<Workflow>;
 
         await workflowService.updateWorkflow(id, updatePayload);
@@ -285,6 +286,24 @@ export function WorkflowEditorPage() {
         response: error.response?.data
       });
              console.error('Failed to save workflow: ' + error.message);
+    }
+  };
+
+  const handleUpdateVariables = async (variables: Record<string, any>) => {
+    if (!id || id === 'new') {
+      console.warn('Please save the workflow before updating variables');
+      return;
+    }
+
+    try {
+      const updatedWorkflow = {
+        ...workflow,
+        variables,
+      };
+      await workflowService.updateWorkflow(id, updatedWorkflow);
+      setWorkflow(updatedWorkflow);
+    } catch (error: any) {
+      console.error('Error updating variables:', error);
     }
   };
 
@@ -394,6 +413,8 @@ export function WorkflowEditorPage() {
             onSave={handleSave}
             onExecute={handleExecute}
             workflowId={workflow?.id}
+            workflow={workflow}
+            onUpdateVariables={handleUpdateVariables}
           />
         </ReactFlowProvider>
       </div>

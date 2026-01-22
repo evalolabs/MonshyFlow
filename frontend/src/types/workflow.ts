@@ -67,6 +67,9 @@ export interface Workflow {
     input?: string;
     output?: string;
   };
+  
+  // Workflow Variables - can store any data type (objects, arrays, primitives)
+  variables?: Record<string, any>;
 }
 
 export interface CreateWorkflowRequest {
