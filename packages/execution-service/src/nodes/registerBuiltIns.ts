@@ -1872,10 +1872,13 @@ registerNodeProcessor({
             Object.assign(secrets, context.workflow.secrets);
         }
 
-        // Resolve condition expression (e.g., {{loop.current.id}} === 5)
+        // Get workflow variables from context
+        const vars = context.variables || {};
+
+        // Resolve condition expression (e.g., {{loop.current.id}} === 5, {{vars.counter}} > 10)
         const resolvedCondition = expressionResolutionService.resolveExpressions(
             condition,
-            { input: input?.json || context.input || {}, steps, secrets },
+            { input: input?.json || context.input || {}, steps, secrets, vars },
             { execution: context.execution, currentNodeId: node.id }
         );
         const conditionString = typeof resolvedCondition === 'string' ? resolvedCondition : resolvedCondition.result;

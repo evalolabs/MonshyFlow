@@ -157,6 +157,7 @@ interface WorkflowCanvasProps {
   initialEdges?: WorkflowEdge[];
   onSave?: (nodes: Node[], edges: Edge[]) => void;
   onExecute?: () => void;
+  onExport?: () => void;
   workflowId?: string;
   workflow?: any; // Workflow object for variables panel
   onUpdateVariables?: (variables: Record<string, any>) => void;
@@ -170,6 +171,8 @@ export function WorkflowCanvas({
   initialNodes = [],
   initialEdges = [],
   onSave,
+  onExecute,
+  onExport,
   workflowId,
   workflow,
   onUpdateVariables,
@@ -1771,8 +1774,9 @@ export function WorkflowCanvas({
       // Toolbar props
       onAddNode={handleAddNode}
       onSave={manualSave}
-      onExecute={execute}
+      onExecute={onExecute || execute}
       onPublish={publish}
+      onExport={onExport}
       onAutoLayout={applyLayout}
       autoLayoutEnabled={autoLayoutEnabled}
       onToggleAutoLayout={toggleAutoLayout}

@@ -28,12 +28,14 @@ interface WorkflowToolbarProps {
   onSave: () => void;
   onPublish?: () => void;
   onExecute: () => void;
+  onExport?: () => void;
   
   // States
   saving: boolean;
   executing: boolean;
   autoSaving?: boolean;
   publishing?: boolean;
+  canExport?: boolean; // Only show export if workflow is saved
 
   // Layout lock
   hasLayoutLocks?: boolean;
@@ -56,12 +58,14 @@ export function WorkflowToolbar({
   onSave,
   onPublish,
   onExecute,
+  onExport,
   saving,
   executing,
   autoSaving,
   publishing,
   hasLayoutLocks,
   onUnlockAllLayoutLocks,
+  canExport = false,
 }: WorkflowToolbarProps) {
   return (
     <div className="absolute top-0 left-0 right-0 z-20 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
@@ -210,6 +214,20 @@ export function WorkflowToolbar({
             </svg>
             <span>{executing ? 'Running...' : 'Execute'}</span>
           </button>
+          
+          {onExport && canExport && (
+            <button
+              onClick={onExport}
+              disabled={saving || publishing || executing}
+              className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-md transition-all duration-200 shadow-sm hover:shadow"
+              title="Export workflow as JSON"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              <span>Export</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

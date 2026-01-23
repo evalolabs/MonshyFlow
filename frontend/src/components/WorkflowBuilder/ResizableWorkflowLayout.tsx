@@ -58,6 +58,7 @@ interface ResizableWorkflowLayoutProps {
   onSave: () => void;
   onExecute: () => void;
   onPublish?: () => void;
+  onExport?: () => void;
   onAutoLayout?: () => void;
   autoLayoutEnabled?: boolean;
   onToggleAutoLayout?: () => void;
@@ -145,6 +146,7 @@ export function ResizableWorkflowLayout({
   onSave,
   onExecute,
   onPublish,
+  onExport,
   onAutoLayout,
   autoLayoutEnabled,
   onToggleAutoLayout,
@@ -434,10 +436,12 @@ export function ResizableWorkflowLayout({
                 onSave={onSave}
                 onPublish={onPublish}
                 onExecute={onExecute}
+                onExport={onExport}
                 saving={saving}
                 executing={executing}
                 autoSaving={autoSaving}
                 publishing={publishing}
+                canExport={!!workflowId && workflowId !== 'new'}
               />
               
               <ReactFlow

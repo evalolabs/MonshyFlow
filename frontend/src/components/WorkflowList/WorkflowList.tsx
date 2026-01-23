@@ -9,9 +9,10 @@ interface WorkflowListProps {
   onEdit: (id: string) => void;
   onExecute: (id: string) => void;
   onCreate: () => void;
+  onImport?: () => void;
 }
 
-export function WorkflowList({ onEdit, onExecute: _onExecute, onCreate }: WorkflowListProps) {
+export function WorkflowList({ onEdit, onExecute: _onExecute, onCreate, onImport }: WorkflowListProps) {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -206,14 +207,7 @@ export function WorkflowList({ onEdit, onExecute: _onExecute, onCreate }: Workfl
         <div className="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
           <div className="text-6xl mb-4">🤖</div>
           <h3 className="text-xl font-semibold text-gray-700 mb-2">No workflows yet</h3>
-          <p className="text-gray-500 mb-6">Create your first workflow to get started</p>
-          <button
-            onClick={onCreate}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium inline-flex items-center gap-2"
-          >
-            <span>➕</span>
-            <span>Create Workflow</span>
-          </button>
+          <p className="text-gray-500 mb-6">Use the buttons above to create a new workflow or import an existing one</p>
         </div>
       ) : (
         <DataTable

@@ -234,5 +234,51 @@ export const workflowService = {
     const response = await api.post(`/api/workflows/${workflowId}/nodes/${nodeId}/test-with-context`, input || {});
     return response.data;
   },
+
+  // Export workflow
+  async exportWorkflow(workflowId: string): Promise<any> {
+    const response = await api.get<{ success: boolean; data: any }>(`/api/workflows/${workflowId}/export`);
+    
+    if (!response.data.success || !response.data.data) {
+      throw new Error('Failed to export workflow');
+    }
+    
+    const exportData = response.data.data;
+    
+    // Create blob and download
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    
+    // Generate filename from workflow name and date
+    const workflowName = exportData.workflow?.name || 'workflow';
+    const sanitizedName = workflowName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const date = new Date().toISOString().split('T')[0];
+    const filename = `workflow-${sanitizedName}-${date}.json`;
+    
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+    
+    return exportData;
+  },
+
+  // Import workflow
+  async importWorkflow(workflowData: any, name?: string, description?: string): Promise<Workflow> {
+    const response = await api.post<{ success: boolean; data: Workflow; message?: string }>('/api/workflows/import', {
+      workflow: workflowData,
+      name,
+      description,
+    });
+    
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    
+    throw new Error(response.data.message || 'Failed to import workflow');
+  },
 };
 

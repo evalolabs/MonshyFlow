@@ -330,6 +330,21 @@ export function WorkflowEditorPage() {
     }
   };
 
+  const handleExport = async () => {
+    if (!id || id === 'new') {
+      alert('Please save the workflow before exporting');
+      return;
+    }
+
+    try {
+      await workflowService.exportWorkflow(id);
+    } catch (error: any) {
+      console.error('Error exporting workflow:', error);
+      alert('Failed to export workflow: ' + error.message);
+    }
+  };
+
+
   const createNewWorkflow = async () => {
     if (!workflowName.trim()) {
        console.warn('Please enter a workflow name');
@@ -394,12 +409,14 @@ export function WorkflowEditorPage() {
           </button>
           <h1 className="text-xl font-bold text-gray-800">{workflowName}</h1>
         </div>
-        <button
-          onClick={() => setShowNameDialog(true)}
-          className="text-sm text-blue-600 hover:text-blue-700"
-        >
-          ✏️ Rename
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowNameDialog(true)}
+            className="text-sm text-blue-600 hover:text-blue-700"
+          >
+            ✏️ Rename
+          </button>
+        </div>
       </div>
 
       {/* Workflow Canvas - Scaled to 80% */}
@@ -418,6 +435,7 @@ export function WorkflowEditorPage() {
             initialEdges={workflow?.edges || []}
             onSave={handleSave}
             onExecute={handleExecute}
+            onExport={id && id !== 'new' ? handleExport : undefined}
             workflowId={workflow?.id}
             workflow={workflow}
             onUpdateVariables={handleUpdateVariables}
@@ -461,6 +479,7 @@ export function WorkflowEditorPage() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

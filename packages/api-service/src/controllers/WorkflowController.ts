@@ -506,6 +506,219 @@ export class WorkflowController {
    * Execute workflow (authenticated endpoint)
    * POST /api/workflows/:workflowId/execute
    */
+  /**
+   * Export workflow as JSON file
+   * GET /api/workflows/:id/export
+   */
+  async exportWorkflow(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const user = (req as any).user;
+      
+      // Check access
+      const accessCheck = await this.checkTenantAccess(id, user);
+      if (!accessCheck.allowed) {
+        res.status(403).json({ success: false, error: 'Access denied' });
+        return;
+      }
+      
+      const workflow = accessCheck.workflow!;
+      const workflowObj = workflow.toObject ? workflow.toObject() : workflow;
+      
+      // Create export object with metadata
+      const exportData = {
+        // Export metadata
+        exportVersion: '1.0',
+        exportedAt: new Date().toISOString(),
+        exportedBy: user.userId || user.email || 'unknown',
+        
+        // Workflow data (exclude sensitive/internal fields)
+        workflow: {
+          name: workflowObj.name,
+          description: workflowObj.description,
+          version: workflowObj.version,
+          nodes: workflowObj.nodes || [],
+          edges: workflowObj.edges || [],
+          tags: workflowObj.tags || [],
+          useAgentsSDK: workflowObj.useAgentsSDK || false,
+          enableStreaming: workflowObj.enableStreaming,
+          guardrails: workflowObj.guardrails,
+          variables: workflowObj.variables || {}, // Include workflow variables
+          scheduleConfig: workflowObj.scheduleConfig,
+          // Exclude: id, userId, tenantId, createdAt, updatedAt, isPublished, publishedAt, status, executionCount, lastExecutedAt, isActive
+          // Exclude: secrets (security - never export secrets)
+        },
+        
+        // Instructions for import
+        importInstructions: {
+          note: 'This workflow can be imported to create a new workflow. Secrets and execution metadata are not included.',
+          requiredSecrets: this.extractRequiredSecrets(workflowObj.nodes || []),
+        }
+      };
+      
+      // Set headers for file download
+      const filename = `workflow-${workflowObj.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}-${new Date().toISOString().split('T')[0]}.json`;
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      
+      res.json({ success: true, data: exportData });
+    } catch (error: any) {
+      logger.error({ error: error.message, stack: error.stack }, 'Error exporting workflow');
+      res.status(500).json({ success: false, error: 'Failed to export workflow' });
+    }
+  }
+
+  /**
+   * Import workflow from JSON file
+   * POST /api/workflows/import
+   */
+  async importWorkflow(req: Request, res: Response): Promise<void> {
+    try {
+      const user = (req as any).user;
+      const { workflow, name, description } = req.body;
+      
+      if (!workflow) {
+        res.status(400).json({ success: false, error: 'Workflow data is required' });
+        return;
+      }
+      
+      // Validate workflow structure
+      if (!workflow.name && !name) {
+        res.status(400).json({ success: false, error: 'Workflow name is required' });
+        return;
+      }
+      
+      if (!Array.isArray(workflow.nodes)) {
+        res.status(400).json({ success: false, error: 'Invalid workflow: nodes must be an array' });
+        return;
+      }
+      
+      if (!Array.isArray(workflow.edges)) {
+        res.status(400).json({ success: false, error: 'Invalid workflow: edges must be an array' });
+        return;
+      }
+      
+      // Create new workflow from import
+      const workflowData: any = {
+        name: name || workflow.name || 'Imported Workflow',
+        description: description || workflow.description || '',
+        version: workflow.version || 1,
+        nodes: workflow.nodes || [],
+        edges: workflow.edges || [],
+        tags: workflow.tags || [],
+        useAgentsSDK: workflow.useAgentsSDK || false,
+        enableStreaming: workflow.enableStreaming,
+        guardrails: workflow.guardrails,
+        variables: workflow.variables || {}, // Import workflow variables
+        scheduleConfig: workflow.scheduleConfig,
+        userId: user.userId || user.id,
+        tenantId: user.tenantId,
+        isPublished: false, // Always import as draft
+        status: 'draft',
+        isActive: true,
+        executionCount: 0,
+      };
+      
+      // Validate nodes and edges
+      const validationError = this.validateWorkflowStructure(workflowData);
+      if (validationError) {
+        res.status(400).json({ success: false, error: validationError });
+        return;
+      }
+      
+      // Create workflow
+      const created = await this.workflowService.create(workflowData);
+      
+      // Log import (using logger instead of audit log for now)
+      logger.info({
+        userId: user.userId || user.id,
+        tenantId: user.tenantId,
+        workflowId: created.id,
+        importedName: workflow.name,
+        importedVersion: workflow.version,
+      }, 'Workflow imported');
+      
+      res.json({ 
+        success: true, 
+        data: this.toJSON(created, this.isSuperAdmin(user)),
+        message: 'Workflow imported successfully'
+      });
+    } catch (error: any) {
+      logger.error({ error: error.message, stack: error.stack }, 'Error importing workflow');
+      res.status(500).json({ success: false, error: 'Failed to import workflow: ' + error.message });
+    }
+  }
+
+  /**
+   * Extract required secrets from workflow nodes
+   */
+  private extractRequiredSecrets(nodes: any[]): string[] {
+    const secrets = new Set<string>();
+    
+    for (const node of nodes) {
+      // Check node data for secret references
+      const nodeData = node.data || {};
+      const nodeString = JSON.stringify(nodeData);
+      
+      // Look for common secret patterns
+      const secretPattern = /\{\{secrets\.([^}]+)\}\}/g;
+      let match;
+      while ((match = secretPattern.exec(nodeString)) !== null) {
+        secrets.add(match[1]);
+      }
+    }
+    
+    return Array.from(secrets);
+  }
+
+  /**
+   * Validate workflow structure
+   */
+  private validateWorkflowStructure(workflow: any): string | null {
+    // Check for start node
+    const hasStartNode = workflow.nodes.some((n: any) => n.type === 'start');
+    if (!hasStartNode) {
+      return 'Workflow must have at least one start node';
+    }
+    
+    // Validate node IDs are unique
+    const nodeIds = new Set<string>();
+    for (const node of workflow.nodes) {
+      if (!node.id) {
+        return 'All nodes must have an id';
+      }
+      if (nodeIds.has(node.id)) {
+        return `Duplicate node id: ${node.id}`;
+      }
+      nodeIds.add(node.id);
+    }
+    
+    // Validate edges reference existing nodes
+    for (const edge of workflow.edges) {
+      if (!edge.source || !edge.target) {
+        return 'All edges must have source and target';
+      }
+      if (!nodeIds.has(edge.source)) {
+        return `Edge references non-existent source node: ${edge.source}`;
+      }
+      if (!nodeIds.has(edge.target)) {
+        return `Edge references non-existent target node: ${edge.target}`;
+      }
+    }
+    
+    // Validate loop pairs
+    const loopNodes = workflow.nodes.filter((n: any) => n.type === 'loop' && n.data?.pairId);
+    for (const loopNode of loopNodes) {
+      const pairId = loopNode.data.pairId;
+      const endLoopNode = workflow.nodes.find((n: any) => n.type === 'end-loop' && n.data?.pairId === pairId);
+      if (!endLoopNode) {
+        return `Loop node ${loopNode.id} has no matching end-loop node with pairId ${pairId}`;
+      }
+    }
+    
+    return null;
+  }
+
   async execute(req: Request, res: Response): Promise<void> {
     try {
       const { workflowId } = req.params;

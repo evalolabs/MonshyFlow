@@ -95,6 +95,12 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
   // Workflow Execution (authenticated)
   // POST /api/workflows/:workflowId/execute
   app.post('/api/workflows/:workflowId/execute', authMiddleware, (req, res) => workflowController.execute(req, res));
+  
+  // Workflow Export/Import (authenticated)
+  // GET /api/workflows/:id/export
+  app.get('/api/workflows/:id/export', authMiddleware, (req, res) => workflowController.exportWorkflow(req, res));
+  // POST /api/workflows/import
+  app.post('/api/workflows/import', authMiddleware, (req, res) => workflowController.importWorkflow(req, res));
 
   // ============================================
   // Tenant Routes (für normale User)
