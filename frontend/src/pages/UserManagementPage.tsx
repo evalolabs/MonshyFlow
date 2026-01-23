@@ -242,6 +242,7 @@ export function UserManagementPage() {
           pageSize={10}
           enableSorting={true}
           enableColumnResize={true}
+          onRowDoubleClick={(user) => handleEdit(user)}
         />
 
         {/* User Modal */}

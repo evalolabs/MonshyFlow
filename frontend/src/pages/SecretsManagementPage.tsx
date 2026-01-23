@@ -277,6 +277,7 @@ export function SecretsManagementPage() {
           pageSize={10}
           enableSorting={true}
           enableColumnResize={true}
+          onRowDoubleClick={(secret) => handleEdit(secret)}
         />
 
         {/* Decrypted Value Display */}

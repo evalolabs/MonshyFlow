@@ -21,6 +21,7 @@ interface DataTableProps<TData, TValue> {
   pageSize?: number;
   enableSorting?: boolean;
   enableColumnResize?: boolean;
+  onRowDoubleClick?: (row: TData) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -32,6 +33,7 @@ export function DataTable<TData, TValue>({
   pageSize = 10,
   enableSorting = true,
   enableColumnResize = true,
+  onRowDoubleClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -132,7 +134,11 @@ export function DataTable<TData, TValue>({
             <tbody className="bg-white divide-y divide-gray-200">
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <tr key={row.id} className="hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={row.id}
+                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                    onDoubleClick={() => onRowDoubleClick?.(row.original)}
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}

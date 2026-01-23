@@ -225,6 +225,7 @@ export function WorkflowList({ onEdit, onExecute: _onExecute, onCreate }: Workfl
           pageSize={10}
           enableSorting={true}
           enableColumnResize={true}
+          onRowDoubleClick={(workflow) => onEdit(workflow.id!)}
         />
       )}
     </div>
