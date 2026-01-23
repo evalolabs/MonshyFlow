@@ -61,9 +61,9 @@ export function EndpointTestPanel({
               if (key.toLowerCase().includes('id')) {
                 example = 'user123';
               } else if (key.toLowerCase().includes('prompt') || key.toLowerCase().includes('question')) {
-                example = 'Was ist Machine Learning?';
+                example = 'What is Machine Learning?';
               } else if (key.toLowerCase().includes('message')) {
-                example = 'Hallo, wie kann ich helfen?';
+                example = 'Hello, how can I help?';
               } else if (key.toLowerCase().includes('query')) {
                 example = 'Suche nach Informationen';
               } else {

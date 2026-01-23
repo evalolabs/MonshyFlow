@@ -1450,7 +1450,7 @@ export function WorkflowCanvas({
 
 
   // Simplified workflow animation - status-based (like Activepieces)
-  // executionSteps wird in Echtzeit aktualisiert durch SSE-Events oben
+  // executionSteps is updated in real-time by SSE events above
   const { currentAnimatedNodeId, isNodeAnimating } = useWorkflowAnimation({
     executionSteps,
     isExecuting,

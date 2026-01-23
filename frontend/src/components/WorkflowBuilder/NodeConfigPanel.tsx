@@ -903,7 +903,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 </select>
               ) : (
                 <div className="text-xs text-gray-500 py-2">
-                  Keine Web-Search-Provider verfügbar. Bitte prüfe die Backend-Verbindung.
+                  No web search providers available. Please check the backend connection.
               </div>
             )}
               </div>
@@ -1045,8 +1045,8 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
             {renderFieldWithDebug({
               nodeType: 'tool-file-search',
               fieldName: 'description',
-              label: 'Beschreibung',
-              value: config.description || 'Zugriff auf vektorbasierte Wissensspeicher',
+              label: 'Description',
+              value: config.description || 'Access to vector-based knowledge stores',
               onChange: (v) => setConfig({ ...config, description: v }),
             })}
             <FileSearchVectorStoreUpload
@@ -1149,7 +1149,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 </select>
               ) : (
                 <div className="text-xs text-gray-500 py-2">
-                  Keine MCP-Integrationen verfügbar. Bitte prüfe die Backend-Verbindung.
+                  No MCP integrations available. Please check the backend connection.
               </div>
             )}
             </div>
@@ -1253,7 +1253,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                 </select>
               ) : (
                 <div className="text-xs text-gray-500 py-2">
-                  Keine Funktionen verfügbar. Bitte prüfe die Backend-Verbindung.
+                  No functions available. Please check the backend connection.
                           </div>
                         )}
                       </div>

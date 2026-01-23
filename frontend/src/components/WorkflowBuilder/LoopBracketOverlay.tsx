@@ -2,29 +2,29 @@ import { useMemo } from 'react';
 import { ViewportPortal, type Node, type Edge } from '@xyflow/react';
 
 export type Side = 'left' | 'right' | 'top' | 'bottom';
-export type LaneAnchor = 'center' | 'port'; // wo sich die laneY orientiert
+export type LaneAnchor = 'center' | 'port'; // where laneY is oriented
 
 export interface LoopBracketConfig {
-  /** ===== Ports / Andockpunkte ===== */
+  /** ===== Ports / Docking Points ===== */
   ports: {
     loop: {
-      in: Side; // meist 'left'
-      out: Side; // main split start, im Screenshot 'right'
-      return: Side; // im Screenshot 'bottom'
+      in: Side; // usually 'left'
+      out: Side; // main split start, in screenshot 'right'
+      return: Side; // in screenshot 'bottom'
     };
     endLoop: {
-      in: Side; // im Screenshot 'left'
-      out: Side; // im Screenshot sichtbar 'right'
-      return: Side; // im Screenshot 'bottom'
+      in: Side; // in screenshot 'left'
+      out: Side; // visible in screenshot 'right'
+      return: Side; // in screenshot 'bottom'
     };
   };
 
-  /** ===== Lanes / Abstände ===== */
+  /** ===== Lanes / Spacing ===== */
   lanes: {
     /** Main Lane (Forward) Y-Referenz */
     main: {
-      anchor: LaneAnchor; // 'port' = genau Port-Y; 'center' = Node-Center-Y
-      yOffset: number; // zusätzl. Offset falls gewünscht
+      anchor: LaneAnchor; // 'port' = exact Port-Y; 'center' = Node-Center-Y
+      yOffset: number; // additional offset if desired
     };
 
     /** Top Bracket Lane */
@@ -34,7 +34,7 @@ export interface LoopBracketConfig {
 
     /** Return Lane (unten) */
     return: {
-      offsetFromMain: number; // Abstand unter Main (returnLaneGap)
+      offsetFromMain: number; // distance below Main (returnLaneGap)
     };
 
     /**
@@ -48,25 +48,25 @@ export interface LoopBracketConfig {
 
   /** ===== Orthogonal Routing Parameter ===== */
   routing: {
-    /** Abgerundete Ecken */
+    /** Rounded corners */
     cornerRadius: number;
 
-    /** Wie weit der Bracket rechts über den EndLoop hinaus läuft (Overshoot) */
-    rightOvershoot: number; // entspricht deinem paddingSide (oder zusätzlich)
+    /** How far the bracket extends to the right beyond EndLoop (Overshoot) */
+    rightOvershoot: number; // corresponds to your paddingSide (or additional)
 
-    /** Wie weit links der Return unter dem Loop “vorbeiläuft”, bevor er hochgeht */
+    /** How far left the Return passes under the Loop before going up */
     leftOvershoot: number;
 
-    /** “Lead-in” am Port: kurzer Einlauf in den Port (z.B. DOWN dann LEFT in Port) */
+    /** "Lead-in" at port: short entry into the port (e.g. DOWN then LEFT into port) */
     leadIn: {
       intoPorts: number; // px, typ. 10-18
       outOfPorts: number; // px, typ. 10-18
     };
 
-    /** Zusätzliche Sicherheitsabstände um Node-Rects (damit Rails nicht kleben) */
+    /** Additional safety margins around node rects (so rails don't stick) */
     clearance: {
-      x: number; // horizontaler Abstand zur Node
-      y: number; // vertikaler Abstand zur Node
+      x: number; // horizontal distance to node
+      y: number; // vertical distance to node
     };
 
     /**
@@ -131,23 +131,23 @@ export const LOOP_BRACKET_DEFAULTS_FULL: LoopBracketConfig = {
     lanes: {
       main: { anchor: 'port', yOffset: 0 },
       top: { offsetFromMain: 150 },          // ok
-      return: { offsetFromMain: 150 },       // <<<<< WICHTIG: deutlich runter (26 ist zu wenig)
+      return: { offsetFromMain: 150 },       // <<<<< IMPORTANT: significantly down (26 is too little)
     },
   
     routing: {
       cornerRadius: 10,
   
-      rightOvershoot: 22,                   // bisschen mehr, damit der Top-Bügel rechts sauber „rum“ kann
-      leftOvershoot: 40,                    // <<<<< WICHTIG: Return soll links weiter raus, bevor er hochgeht
+      rightOvershoot: 22,                   // a bit more so the top bracket can go cleanly around on the right
+      leftOvershoot: 40,                    // <<<<< IMPORTANT: Return should go further left before going up
   
       leadIn: {
-        outOfPorts: 16,                     // <<<<< WICHTIG: raus aus Port, bevor der Knick kommt
-        intoPorts: 16,                      // <<<<< WICHTIG: rein in Port als kurzer “Einlauf”
+        outOfPorts: 16,                     // <<<<< IMPORTANT: exit port before the bend comes
+        intoPorts: 16,                      // <<<<< IMPORTANT: into port as short "entry"
       },
   
       clearance: {
         x: 12,
-        y: 18,                              // <<<<< WICHTIG: verhindert, dass Return in den End-loop reinläuft
+        y: 18,                              // <<<<< IMPORTANT: prevents Return from running into End-loop
       },
   
       splitStrategy: 'shared',
@@ -177,7 +177,7 @@ export const LOOP_BRACKET_DEFAULTS_FULL: LoopBracketConfig = {
       paddingTop: 28,
       paddingBottom: 14,
       paddingSide: 18,
-      returnLaneGap: 70,                    // (wenn du legacy nutzt: anpassen!)
+      returnLaneGap: 70,                    // (if you use legacy: adjust!)
     },
   };
   

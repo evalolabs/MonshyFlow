@@ -295,10 +295,16 @@ export function WorkflowEditorPage() {
       return;
     }
 
+    if (!workflow) {
+      console.warn('Workflow not loaded');
+      return;
+    }
+
     try {
-      const updatedWorkflow = {
+      const updatedWorkflow: Workflow = {
         ...workflow,
         variables,
+        name: workflow.name, // Ensure name is always defined
       };
       await workflowService.updateWorkflow(id, updatedWorkflow);
       setWorkflow(updatedWorkflow);

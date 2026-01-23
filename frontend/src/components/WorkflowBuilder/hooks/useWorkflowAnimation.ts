@@ -1,18 +1,18 @@
 /**
- * useWorkflowAnimation Hook (Vereinfacht - wie Activepieces)
+ * useWorkflowAnimation Hook (Simplified - like Activepieces)
  * 
- * Status-basierte Animation - liest Status direkt aus executionSteps.
- * Keine komplexe State Machine, keine SSE-Event-Logik im Hook.
+ * Status-based animation - reads status directly from executionSteps.
+ * No complex state machine, no SSE event logic in the hook.
  * 
- * Wie Activepieces:
- * - Status kommt direkt von Backend (via debugSteps/executionSteps)
- * - Einfache Status-Extraktion
- * - Keine Race Conditions
- * - Keine Timing-Probleme
+ * Like Activepieces:
+ * - Status comes directly from backend (via debugSteps/executionSteps)
+ * - Simple status extraction
+ * - No race conditions
+ * - No timing issues
  * 
- * Vorteile:
- * - ~90% weniger Code als vorheriges System
- * - Einfach zu warten
+ * Advantages:
+ * - ~90% less code than previous system
+ * - Easy to maintain
  * - Zuverlässig
  */
 
@@ -46,28 +46,28 @@ export function useWorkflowAnimation({
       nodeStatuses: new Map(),
     };
 
-    // Wenn nicht ausgeführt wird, return initial state
+    // If not executing, return initial state
     if (!isExecuting || executionSteps.length === 0) {
       return initialState;
     }
 
-    // Analysiere executionSteps (wie Activepieces - Status kommt direkt von Backend)
-    // executionSteps wird in Echtzeit aktualisiert durch SSE-Events in WorkflowCanvas
+    // Analyze executionSteps (like Activepieces - status comes directly from backend)
+    // executionSteps is updated in real-time by SSE events in WorkflowCanvas
     let currentRunning: string | null = null;
     const completed = new Set<string>();
     const failed = new Set<string>();
     const statuses = new Map<string, StepStatus>();
 
-    // Durchlaufe alle Steps und kategorisiere sie
-    // WICHTIG: executionSteps sollte die Statuses in der richtigen Reihenfolge haben
+    // Iterate through all steps and categorize them
+    // IMPORTANT: executionSteps should have the statuses in the correct order
     for (const step of executionSteps) {
       const status = step.status || 'pending';
       statuses.set(step.nodeId, status as StepStatus);
 
       switch (status) {
         case 'running':
-          // Der aktuell laufende Node (es sollte nur einen geben)
-          // Priorisiere den letzten "running" Status (neueste Information)
+          // The currently running node (there should only be one)
+          // Prioritize the last "running" status (newest information)
           currentRunning = step.nodeId;
           break;
         case 'completed':
@@ -78,7 +78,7 @@ export function useWorkflowAnimation({
           break;
         case 'pending':
         default:
-          // Pending steps werden nicht getrackt
+          // Pending steps are not tracked
           break;
       }
     }
@@ -91,7 +91,7 @@ export function useWorkflowAnimation({
     };
   }, [executionSteps, isExecuting]);
 
-  // Helper-Funktionen für einfache Verwendung
+  // Helper functions for easy use
   const isNodeRunning = (nodeId: string): boolean => {
     return state.currentRunningNodeId === nodeId;
   };
@@ -109,8 +109,8 @@ export function useWorkflowAnimation({
   };
 
   const isNodeAnimating = (nodeId: string): boolean => {
-    // Ein Node ist "animierend", wenn er aktuell läuft
-    // Wie bei Activepieces: Nur der laufende Node wird animiert
+    // A node is "animating" if it is currently running
+    // Like Activepieces: Only the running node is animated
     return isNodeRunning(nodeId);
   };
 
@@ -125,7 +125,7 @@ export function useWorkflowAnimation({
     isNodeFailed,
     getNodeStatus,
 
-    // Interner State (für Debugging)
+    // Internal state (for debugging)
     state,
   };
 }

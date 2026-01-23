@@ -106,17 +106,17 @@ export function AuditLogsPage() {
     <div className="p-6">
       <PageHeader
         title="Audit-Logs"
-        description="Einsehen aller Zugriffe auf Ihre Daten (DSGVO-Konformität: Transparenz)"
+        description="View all access to your data (GDPR compliance: transparency)"
       />
 
-      {/* Filter und Suche */}
+      {/* Filter and Search */}
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Suche nach Aktion, Ressource, Email, Grund, IP..."
+              placeholder="Search by action, resource, email, reason, IP..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -137,7 +137,7 @@ export function AuditLogsPage() {
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
             >
-              Alle Logs
+              All Logs
             </button>
             <button
               onClick={() => {
@@ -150,7 +150,7 @@ export function AuditLogsPage() {
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
             >
-              Superadmin-Zugriffe
+              Superadmin Access
             </button>
           </div>
         )}
@@ -167,7 +167,7 @@ export function AuditLogsPage() {
       {loading && (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <p className="mt-2 text-gray-600">Lade Audit-Logs...</p>
+          <p className="mt-2 text-gray-600">Loading audit logs...</p>
         </div>
       )}
 
@@ -180,22 +180,22 @@ export function AuditLogsPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Zeitpunkt
+                      Timestamp
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Aktion
+                      Action
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Ressource
+                      Resource
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Benutzer
+                      User
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Grund
+                      Reason
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      IP-Adresse
+                      IP Address
                     </th>
                   </tr>
                 </thead>
@@ -204,7 +204,7 @@ export function AuditLogsPage() {
                     <tr>
                       <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                         <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <p>Keine Audit-Logs gefunden</p>
+                        <p>No audit logs found</p>
                       </td>
                     </tr>
                   ) : (
@@ -269,7 +269,7 @@ export function AuditLogsPage() {
           {total > limit && (
             <div className="mt-4 flex items-center justify-between">
               <div className="text-sm text-gray-700">
-                Zeige {skip + 1} bis {Math.min(skip + limit, total)} von {total} Logs
+                Showing {skip + 1} to {Math.min(skip + limit, total)} of {total} logs
               </div>
               <div className="flex gap-2">
                 <button
@@ -277,14 +277,14 @@ export function AuditLogsPage() {
                   disabled={skip === 0}
                   className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
-                  Zurück
+                  Previous
                 </button>
                 <button
                   onClick={() => setSkip(skip + limit)}
                   disabled={skip + limit >= total}
                   className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
-                  Weiter
+                  Next
                 </button>
               </div>
             </div>
@@ -296,12 +296,12 @@ export function AuditLogsPage() {
               <Eye className="w-5 h-5 text-blue-500 mr-2 mt-0.5" />
               <div>
                 <h3 className="text-sm font-medium text-blue-900 mb-1">
-                  DSGVO-Konformität: Transparenz
+                  GDPR Compliance: Transparency
                 </h3>
                 <p className="text-sm text-blue-700">
-                  Diese Seite zeigt alle Zugriffe auf Ihre Daten. Superadmin-Zugriffe werden
-                  automatisch protokolliert und hier angezeigt, um vollständige Transparenz zu
-                  gewährleisten (Art. 13 DSGVO).
+                  This page shows all access to your data. Superadmin access is
+                  automatically logged and displayed here to ensure full transparency
+                  (Art. 13 GDPR).
                 </p>
               </div>
             </div>

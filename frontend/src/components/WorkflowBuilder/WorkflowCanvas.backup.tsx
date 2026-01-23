@@ -309,7 +309,7 @@ export function WorkflowCanvas({
         console.log('🔍 [onAddNode] Has Start node?', hasStartNode);
         
         if (hasStartNode) {
-          alert('⚠️ Es kann nur EINEN Start Node geben!\n\nEin Workflow muss genau einen Einstiegspunkt haben.');
+          alert('⚠️ There can only be ONE Start Node!\n\nA workflow must have exactly one entry point.');
           console.log('❌ Prevented adding second Start node');
           return currentNodes; // Return unchanged state
         }
@@ -374,9 +374,9 @@ export function WorkflowCanvas({
     const nodeToDelete = nodes.find(n => n.id === nodeId);
     if (nodeToDelete?.type === 'start') {
       const confirmDelete = window.confirm(
-        '⚠️ ACHTUNG: Du bist dabei, den Start Node zu löschen!\n\n' +
-        'Ohne Start Node kann der Workflow nicht ausgeführt werden.\n\n' +
-        'Möchtest du wirklich fortfahren?'
+        '⚠️ WARNING: You are about to delete the Start Node!\n\n' +
+        'Without a Start Node, the workflow cannot be executed.\n\n' +
+        'Do you really want to continue?'
       );
       if (!confirmDelete) {
         console.log('❌ Start node deletion cancelled by user');
@@ -452,7 +452,7 @@ export function WorkflowCanvas({
     if (nodeType === 'start') {
       const hasStartNode = nodes.some(node => node.type === 'start');
       if (hasStartNode) {
-        alert('⚠️ Es kann nur EINEN Start Node geben!');
+        alert('⚠️ There can only be ONE Start Node!');
         setAddNodePopup(null);
         return;
       }
@@ -519,7 +519,7 @@ export function WorkflowCanvas({
     if (nodeType === 'start') {
       const hasStartNode = nodes.some(node => node.type === 'start');
       if (hasStartNode) {
-        alert('⚠️ Es kann nur EINEN Start Node geben!\n\nEin Workflow muss genau einen Einstiegspunkt haben.');
+        alert('⚠️ There can only be ONE Start Node!\n\nA workflow must have exactly one entry point.');
         console.log('❌ Prevented adding second Start node');
         setNodeSelectorPopup(null);
         return;
@@ -704,7 +704,7 @@ export function WorkflowCanvas({
     
     // Prevent duplicating Start nodes
     if (node.type === 'start') {
-      alert('⚠️ Der Start Node kann nicht dupliziert werden!\n\nEin Workflow kann nur einen Einstiegspunkt haben.');
+      alert('⚠️ The Start Node cannot be duplicated!\n\nA workflow can only have one entry point.');
       console.log('❌ Prevented duplicating Start node');
       return;
     }
@@ -769,7 +769,7 @@ export function WorkflowCanvas({
         console.log('🔍 [onAddNodeWithSave] Has Start node?', hasStartNode);
         
         if (hasStartNode) {
-          alert('⚠️ Es kann nur EINEN Start Node geben!\n\nEin Workflow muss genau einen Einstiegspunkt haben.');
+          alert('⚠️ There can only be ONE Start Node!\n\nA workflow must have exactly one entry point.');
           console.log('❌ Prevented adding second Start node');
           return currentNodes; // Return unchanged state
         }

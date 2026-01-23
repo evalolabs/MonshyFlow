@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { adminService, type User, type CreateUserRequest, type UpdateUserRequest, type Tenant, type Role } from '../services/adminService';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { useIsSuperAdmin, useCurrentUserTenantId } from '../utils/permissions';
-import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
+import { DataTable } from '../components/DataTable/DataTable';
+import type { ColumnDef } from '@tanstack/react-table';
 
 export function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -12,7 +14,6 @@ export function UserManagementPage() {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedTenantFilter, setSelectedTenantFilter] = useState<string>('');
   const isSuperAdmin = useIsSuperAdmin();
   const currentTenantId = useCurrentUserTenantId();
@@ -90,16 +91,97 @@ export function UserManagementPage() {
     }
   };
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesTenant = !selectedTenantFilter || user.tenantId === selectedTenantFilter;
-    
-    return matchesSearch && matchesTenant;
-  });
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      const matchesTenant = !selectedTenantFilter || user.tenantId === selectedTenantFilter;
+      return matchesTenant;
+    });
+  }, [users, selectedTenantFilter]);
+
+  const columns = useMemo<ColumnDef<User>[]>(
+    () => [
+      {
+        accessorKey: 'email',
+        header: 'Email',
+        cell: ({ row }) => <span className="text-sm text-gray-900">{row.original.email}</span>,
+        size: 250,
+      },
+      {
+        accessorKey: 'name',
+        header: 'Name',
+        cell: ({ row }) => {
+          const name = row.original.firstName || row.original.lastName
+            ? `${row.original.firstName || ''} ${row.original.lastName || ''}`.trim()
+            : '-';
+          return <span className="text-sm text-gray-500">{name}</span>;
+        },
+        size: 200,
+      },
+      {
+        accessorKey: 'roles',
+        header: 'Roles',
+        cell: ({ row }) => (
+          <div className="flex gap-1 flex-wrap">
+            {row.original.roles.map(role => (
+              <span key={role} className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                {role}
+              </span>
+            ))}
+          </div>
+        ),
+        size: 200,
+      },
+      ...(isSuperAdmin
+        ? [
+            {
+              accessorKey: 'tenant',
+              header: 'Tenant',
+              cell: ({ row }) => (
+                <span className="text-sm text-gray-500">{row.original.tenantName || row.original.tenantId}</span>
+              ),
+              size: 200,
+            } as ColumnDef<User>,
+          ]
+        : []),
+      {
+        accessorKey: 'isActive',
+        header: 'Status',
+        cell: ({ row }) => (
+          <span
+            className={`px-2 py-1 text-xs rounded ${
+              row.original.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}
+          >
+            {row.original.isActive ? 'Active' : 'Inactive'}
+          </span>
+        ),
+        size: 120,
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => (
+          <div className="flex items-center justify-end gap-2">
+            <button
+              onClick={() => handleEdit(row.original)}
+              className="text-blue-600 hover:text-blue-900 p-2 rounded-md hover:bg-blue-50"
+            >
+              <Edit className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => handleDelete(row.original.id)}
+              className="text-red-600 hover:text-red-900 p-2 rounded-md hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ),
+        size: 120,
+        enableSorting: false,
+      },
+    ],
+    [isSuperAdmin]
+  );
 
   if (loading && users.length === 0) {
     return (
@@ -134,19 +216,9 @@ export function UserManagementPage() {
           </div>
         )}
 
-        {/* Filters */}
-        <div className="mb-6 flex gap-4 items-center">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search users..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          {isSuperAdmin && (
+        {/* Tenant Filter */}
+        {isSuperAdmin && (
+          <div className="mb-6">
             <select
               value={selectedTenantFilter}
               onChange={(e) => setSelectedTenantFilter(e.target.value)}
@@ -157,74 +229,20 @@ export function UserManagementPage() {
                 <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
               ))}
             </select>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Users Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
-                {isSuperAdmin && (
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tenant</th>
-                )}
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.firstName || user.lastName
-                      ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
-                      : '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex gap-1 flex-wrap">
-                      {user.roles.map(role => (
-                        <span key={role} className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                          {role}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  {isSuperAdmin && (
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.tenantName || user.tenantId}
-                    </td>
-                  )}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs rounded ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {user.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleEdit(user)}
-                      className="text-blue-600 hover:text-blue-900 mr-4"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(user.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {filteredUsers.length === 0 && (
-            <div className="text-center py-8 text-gray-500">No users found</div>
-          )}
-        </div>
+        <DataTable
+          columns={columns}
+          data={filteredUsers}
+          searchable={true}
+          searchPlaceholder="Search users by email, name..."
+          enablePagination={true}
+          pageSize={10}
+          enableSorting={true}
+          enableColumnResize={true}
+        />
 
         {/* User Modal */}
         {showModal && (
@@ -295,7 +313,7 @@ function UserModal({ user, tenants, roles, isSuperAdmin, currentTenantId, onClos
       if (prev.includes(roleName)) {
         return prev.filter(r => r !== roleName);
       } else {
-        // Tenant-Admins dürfen keine system-internen Rollen vergeben
+        // Tenant-Admins cannot assign system-internal roles
         if (!isSuperAdmin && (roleName === 'superadmin' || roleName === 'support')) {
           return prev;
         }

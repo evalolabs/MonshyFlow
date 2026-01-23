@@ -72,9 +72,9 @@ export function SupportConsentsPage() {
   if (!isTenantAdmin) {
     return (
       <div className="p-6">
-        <PageHeader title="Support-Freigaben" description="Nur für Tenant-Admins" />
+        <PageHeader title="Support Consents" description="Only for Tenant Admins" />
         <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          Forbidden: Nur Tenant-Admins dürfen Support-Freigaben verwalten.
+          Forbidden: Only tenant admins can manage support consents.
         </div>
       </div>
     );
@@ -83,8 +83,8 @@ export function SupportConsentsPage() {
   return (
     <div className="p-6">
       <PageHeader
-        title="Support-Freigaben"
-        description="Workflow-Inhalte nur nach zeitlich begrenzter Freigabe (Secrets sind immer ausgeschlossen)"
+        title="Support Consents"
+        description="Workflow content only after time-limited consent (Secrets are always excluded)"
       />
 
       {error && (
@@ -100,12 +100,12 @@ export function SupportConsentsPage() {
             <input
               value={grantedToUserId}
               onChange={(e) => setGrantedToUserId(e.target.value)}
-              placeholder="z.B. 65f0... (Support muss seine UserId liefern)"
+              placeholder="e.g. 65f0... (Support must provide their UserId)"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Dauer (Min)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Duration (Min)</label>
             <input
               type="number"
               min={5}
@@ -120,16 +120,16 @@ export function SupportConsentsPage() {
             <input
               value={ticketId}
               onChange={(e) => setTicketId(e.target.value)}
-              placeholder="z.B. JIRA-123"
+              placeholder="e.g. JIRA-123"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
           </div>
           <div className="md:col-span-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Grund (optional)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Reason (optional)</label>
             <input
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Kurz beschreiben, warum Support Workflow-Inhalte sehen muss"
+              placeholder="Briefly describe why support needs to see workflow content"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
           </div>
@@ -142,20 +142,20 @@ export function SupportConsentsPage() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
           >
             <Plus className="w-4 h-4" />
-            Freigabe erteilen (workflow:read:content)
+            Grant Consent (workflow:read:content)
           </button>
           <button
             onClick={load}
             disabled={loading}
             className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
           >
-            Aktualisieren
+            Refresh
           </button>
         </div>
 
         <div className="mt-3 text-xs text-gray-500">
-          Hinweis: Support bekommt damit Zugriff auf Workflow-Inhalte Ihres Tenants für die angegebene Zeit.
-          <b> Secrets bleiben immer gesperrt.</b>
+          Note: Support will have access to workflow content of your tenant for the specified time.
+          <b> Secrets always remain locked.</b>
         </div>
       </div>
 
@@ -177,7 +177,7 @@ export function SupportConsentsPage() {
                   Status
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Aktion
+                  Action
                 </th>
               </tr>
             </thead>
@@ -185,7 +185,7 @@ export function SupportConsentsPage() {
               {consents.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                    Keine Freigaben vorhanden
+                    No consents available
                   </td>
                 </tr>
               ) : (
@@ -225,7 +225,7 @@ export function SupportConsentsPage() {
                           className="inline-flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
                         >
                           <Trash2 className="w-4 h-4" />
-                          Widerrufen
+                          Revoke
                         </button>
                       </td>
                     </tr>

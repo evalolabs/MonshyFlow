@@ -59,7 +59,7 @@ export function Navigation() {
       permission: null, // Always visible
     },
     {
-      name: 'Support-Freigaben',
+      name: 'Support Consents',
       path: '/admin/support-consents',
       icon: ShieldCheck,
       permission: 'admin', // Only tenant admins
@@ -68,7 +68,7 @@ export function Navigation() {
       name: 'Audit-Logs',
       path: '/admin/audit-logs',
       icon: Eye,
-      permission: null, // Always visible - Tenants können ihre Logs sehen
+      permission: null, // Always visible - Tenants can see their logs
     },
     {
       name: 'Tenants',
@@ -125,7 +125,7 @@ export function Navigation() {
                 return isSuperAdmin;
               }
               if (item.permission === 'admin') {
-                // Tenant-Admin-only: Superadmin soll diesen Menüpunkt NICHT sehen (System Console vs Tenant Console)
+                // Tenant-Admin-only: Superadmin should NOT see this menu item (System Console vs Tenant Console)
                 return isTenantAdmin;
               }
               return true;

@@ -5,7 +5,7 @@
  * Supports complex data types: objects, arrays, primitives
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { Workflow } from '../../types/workflow';
 
 interface VariablesPanelProps {
@@ -175,7 +175,7 @@ function VariableEditor({ varName, varValue, onUpdate, onDelete }: VariableEdito
   );
 }
 
-export function VariablesPanel({ workflow, onUpdateVariables, workflowId }: VariablesPanelProps) {
+export function VariablesPanel({ workflow, onUpdateVariables, workflowId: _workflowId }: VariablesPanelProps) {
   const [newVarName, setNewVarName] = useState('');
   const [newVarValue, setNewVarValue] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);

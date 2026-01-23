@@ -62,9 +62,9 @@ export function useIsAdmin(): boolean {
 }
 
 /**
- * Tenant-Admin (nicht Superadmin).
- * Wichtig: Superadmins können in der DB zusätzlich 'admin' haben,
- * sollen aber NICHT als Tenant-Admin für Tenant-Console Features behandelt werden.
+ * Tenant-Admin (not Superadmin).
+ * Important: Superadmins can have 'admin' in the DB as well,
+ * but should NOT be treated as Tenant-Admin for Tenant-Console features.
  */
 export function useIsTenantAdmin(): boolean {
   const { user } = useAuth();

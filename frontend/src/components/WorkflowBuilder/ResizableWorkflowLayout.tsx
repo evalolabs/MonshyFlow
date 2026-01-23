@@ -459,8 +459,8 @@ export function ResizableWorkflowLayout({
                 // We handle Delete/Backspace via useKeyboardShortcuts in WorkflowCanvas
                 // to preserve linear chains (reconnect prev -> next) and respect grouping.
                 deleteKeyCode={[]}
-                multiSelectionKeyCode={['Meta', 'Control']} // Strg/Cmd für Multi-Select
-                selectionOnDrag={false} // Disable drag-selection (optional, kann später aktiviert werden)
+                multiSelectionKeyCode={['Meta', 'Control']} // Ctrl/Cmd for Multi-Select
+                selectionOnDrag={false} // Disable drag-selection (optional, can be enabled later)
                 edgesReconnectable={true}
                 edgesFocusable={true}
                 defaultEdgeOptions={defaultEdgeOptions}

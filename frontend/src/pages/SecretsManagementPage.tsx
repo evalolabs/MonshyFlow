@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { secretsService, type SecretResponse, type CreateSecretRequest, type UpdateSecretRequest, SecretType, SecretTypeLabels, type DecryptedSecretResponse } from '../services/secretsService';
 import { PageHeader } from '../components/Layout/PageHeader';
-import { Plus, Edit, Trash2, Eye, EyeOff, Search, Copy, Check } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Copy, Check } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { DataTable } from '../components/DataTable/DataTable';
+import type { ColumnDef } from '@tanstack/react-table';
 
 export function SecretsManagementPage() {
   const location = useLocation();
@@ -15,7 +17,6 @@ export function SecretsManagementPage() {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingSecret, setEditingSecret] = useState<SecretResponse | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [decryptedSecret, setDecryptedSecret] = useState<DecryptedSecretResponse | null>(null);
   const [showDecrypted, setShowDecrypted] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -144,8 +145,81 @@ export function SecretsManagementPage() {
     }
   };
 
-  const filteredSecrets = secrets.filter(secret =>
-    secret.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false
+  const columns = useMemo<ColumnDef<SecretResponse>[]>(
+    () => [
+      {
+        accessorKey: 'name',
+        header: 'Name',
+        cell: ({ row }) => (
+          <span className="text-sm font-medium text-gray-900">{row.original.name || 'Unnamed'}</span>
+        ),
+        size: 200,
+      },
+      {
+        accessorKey: 'secretType',
+        header: 'Type',
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-500">
+            {SecretTypeLabels[row.original.secretType as SecretType] || `Type ${row.original.secretType}`}
+          </span>
+        ),
+        size: 150,
+      },
+      {
+        accessorKey: 'isActive',
+        header: 'Status',
+        cell: ({ row }) => (
+          <span
+            className={`px-2 py-1 text-xs rounded ${
+              row.original.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}
+          >
+            {row.original.isActive ? 'Active' : 'Inactive'}
+          </span>
+        ),
+        size: 120,
+      },
+      {
+        accessorKey: 'lastAccessedAt',
+        header: 'Last Accessed',
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-500">
+            {row.original.lastAccessedAt ? new Date(row.original.lastAccessedAt).toLocaleDateString() : 'Never'}
+          </span>
+        ),
+        size: 150,
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => (
+          <div className="flex items-center justify-end gap-2">
+            <button
+              onClick={() => handleViewDecrypted(row.original.id)}
+              className="text-blue-600 hover:text-blue-900 p-2 rounded-md hover:bg-blue-50"
+              title="View decrypted value"
+            >
+              {showDecrypted === row.original.id ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={() => handleEdit(row.original)}
+              className="text-blue-600 hover:text-blue-900 p-2 rounded-md hover:bg-blue-50"
+            >
+              <Edit className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => handleDelete(row.original.id)}
+              className="text-red-600 hover:text-red-900 p-2 rounded-md hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ),
+        size: 150,
+        enableSorting: false,
+      },
+    ],
+    [showDecrypted]
   );
 
   if (loading && secrets.length === 0) {
@@ -193,78 +267,17 @@ export function SecretsManagementPage() {
           </div>
         )}
 
-        {/* Search */}
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search secrets..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-        </div>
-
         {/* Secrets Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Accessed</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredSecrets.map((secret) => (
-                <tr key={secret.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{secret.name || 'Unnamed'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {SecretTypeLabels[secret.secretType as SecretType] || `Type ${secret.secretType}`}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs rounded ${secret.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {secret.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {secret.lastAccessedAt ? new Date(secret.lastAccessedAt).toLocaleDateString() : 'Never'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => handleViewDecrypted(secret.id)}
-                        className="text-blue-600 hover:text-blue-900"
-                        title="View decrypted value"
-                      >
-                        {showDecrypted === secret.id ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                      <button
-                        onClick={() => handleEdit(secret)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(secret.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {filteredSecrets.length === 0 && (
-            <div className="text-center py-8 text-gray-500">No secrets found</div>
-          )}
-        </div>
+        <DataTable
+          columns={columns}
+          data={secrets}
+          searchable={true}
+          searchPlaceholder="Search secrets..."
+          enablePagination={true}
+          pageSize={10}
+          enableSorting={true}
+          enableColumnResize={true}
+        />
 
         {/* Decrypted Value Display */}
         {showDecrypted && decryptedSecret && (

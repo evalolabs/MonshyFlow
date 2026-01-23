@@ -134,9 +134,9 @@ export const RANDOM_POSITION_RANGE = {
 // ============================================================================
 
 export const VALIDATION_MESSAGES = {
-  MULTIPLE_START_NODES: '⚠️ Es kann nur EINEN Start Node geben!\n\nEin Workflow muss genau einen Einstiegspunkt haben.',
-  CONFIRM_DELETE_START: '⚠️ ACHTUNG: Du bist dabei, den Start Node zu löschen!\n\nOhne Start Node kann der Workflow nicht ausgeführt werden.\n\nMöchtest du wirklich fortfahren?',
-  CANNOT_DUPLICATE_START: '⚠️ Der Start Node kann nicht dupliziert werden!\n\nEin Workflow kann nur einen Einstiegspunkt haben.',
+  MULTIPLE_START_NODES: '⚠️ There can only be ONE Start Node!\n\nA workflow must have exactly one entry point.',
+  CONFIRM_DELETE_START: '⚠️ WARNING: You are about to delete the Start Node!\n\nWithout a Start Node, the workflow cannot be executed.\n\nDo you really want to continue?',
+  CANNOT_DUPLICATE_START: '⚠️ The Start Node cannot be duplicated!\n\nA workflow can only have one entry point.',
   DELETE_NODE_FAILED: 'Failed to delete node. Please try again.',
   NO_WORKFLOW_ID: 'No workflow ID available. Please create or load a workflow first.',
   PUBLISH_FAILED: 'Error publishing workflow. Please try again.',

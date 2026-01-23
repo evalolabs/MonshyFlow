@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { apiKeysService, type ApiKeyResponse, type CreateApiKeyRequest } from '../services/apiKeysService';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { Plus, Trash2, Copy, Check, Key, AlertCircle, Calendar, Clock, EyeOff } from 'lucide-react';
+import { DataTable } from '../components/DataTable/DataTable';
+import type { ColumnDef } from '@tanstack/react-table';
 
 export function ApiKeysManagementPage() {
   const [apiKeys, setApiKeys] = useState<ApiKeyResponse[]>([]);
@@ -110,6 +112,139 @@ export function ApiKeysManagementPage() {
     return daysUntilExpiry > 0 && daysUntilExpiry <= 30;
   };
 
+  const columns = useMemo<ColumnDef<ApiKeyResponse>[]>(
+    () => [
+      {
+        accessorKey: 'name',
+        header: 'Name',
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <Key className="w-4 h-4 text-gray-400" />
+            <span className="text-sm font-medium text-gray-900">{row.original.name || 'Unnamed'}</span>
+          </div>
+        ),
+        size: 200,
+      },
+      {
+        accessorKey: 'description',
+        header: 'Description',
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-500">{row.original.description || '-'}</span>
+        ),
+        size: 250,
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row }) => {
+          const apiKey = row.original;
+          return (
+            <div className="flex flex-col gap-1">
+              <span
+                className={`px-2 py-1 text-xs rounded w-fit ${
+                  apiKey.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}
+              >
+                {apiKey.isActive ? 'Active' : 'Revoked'}
+              </span>
+              {apiKey.isActive && isExpired(apiKey.expiresAt) && (
+                <span className="px-2 py-1 text-xs rounded w-fit bg-red-100 text-red-800">Expired</span>
+              )}
+              {apiKey.isActive && isExpiringSoon(apiKey.expiresAt) && !isExpired(apiKey.expiresAt) && (
+                <span className="px-2 py-1 text-xs rounded w-fit bg-amber-100 text-amber-800">
+                  Expiring Soon
+                </span>
+              )}
+            </div>
+          );
+        },
+        size: 150,
+      },
+      {
+        accessorKey: 'createdAt',
+        header: 'Created',
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1 text-sm text-gray-500">
+            <Calendar className="w-4 h-4" />
+            {formatDate(row.original.createdAt)}
+          </div>
+        ),
+        size: 150,
+      },
+      {
+        accessorKey: 'lastUsedAt',
+        header: 'Last Used',
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1 text-sm text-gray-500">
+            <Clock className="w-4 h-4" />
+            {formatDate(row.original.lastUsedAt)}
+          </div>
+        ),
+        size: 150,
+      },
+      {
+        accessorKey: 'expiresAt',
+        header: 'Expires',
+        cell: ({ row }) => {
+          const apiKey = row.original;
+          if (!apiKey.expiresAt) {
+            return <span className="text-gray-400">Never</span>;
+          }
+          return (
+            <div
+              className={`flex items-center gap-1 text-sm ${
+                isExpired(apiKey.expiresAt)
+                  ? 'text-red-600'
+                  : isExpiringSoon(apiKey.expiresAt)
+                  ? 'text-amber-600'
+                  : 'text-gray-500'
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              {formatDate(apiKey.expiresAt)}
+            </div>
+          );
+        },
+        size: 150,
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const apiKey = row.original;
+          return (
+            <div className="flex items-center justify-end gap-2">
+              {apiKey.isActive && (
+                <button
+                  onClick={() => handleRevoke(apiKey.id)}
+                  disabled={revokingId === apiKey.id}
+                  className="text-amber-600 hover:text-amber-900 disabled:opacity-50 p-2 rounded-md hover:bg-amber-50"
+                  title="Revoke API key"
+                >
+                  {revokingId === apiKey.id ? (
+                    <div className="w-4 h-4 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <EyeOff className="w-4 h-4" />
+                  )}
+                </button>
+              )}
+              <button
+                onClick={() => handleDelete(apiKey.id)}
+                className="text-red-600 hover:text-red-900 p-2 rounded-md hover:bg-red-50"
+                title="Delete API key"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          );
+        },
+        size: 120,
+        enableSorting: false,
+      },
+    ],
+    [revokingId]
+  );
+
   if (loading && apiKeys.length === 0) {
     return (
       <>
@@ -200,8 +335,8 @@ export function ApiKeysManagementPage() {
         )}
 
         {/* API Keys Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          {apiKeys.length === 0 ? (
+        {apiKeys.length === 0 ? (
+          <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="text-center py-12">
               <Key className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No API keys</h3>
@@ -214,101 +349,19 @@ export function ApiKeysManagementPage() {
                 Create API Key
               </button>
             </div>
-          ) : (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Used</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expires</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {apiKeys.map((apiKey) => (
-                  <tr key={apiKey.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Key className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm font-medium text-gray-900">{apiKey.name || 'Unnamed'}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-sm text-gray-500">{apiKey.description || '-'}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col gap-1">
-                        <span className={`px-2 py-1 text-xs rounded w-fit ${apiKey.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {apiKey.isActive ? 'Active' : 'Revoked'}
-                        </span>
-                        {apiKey.isActive && isExpired(apiKey.expiresAt) && (
-                          <span className="px-2 py-1 text-xs rounded w-fit bg-red-100 text-red-800">
-                            Expired
-                          </span>
-                        )}
-                        {apiKey.isActive && isExpiringSoon(apiKey.expiresAt) && !isExpired(apiKey.expiresAt) && (
-                          <span className="px-2 py-1 text-xs rounded w-fit bg-amber-100 text-amber-800">
-                            Expiring Soon
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {formatDate(apiKey.createdAt)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {formatDate(apiKey.lastUsedAt)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {apiKey.expiresAt ? (
-                        <div className={`flex items-center gap-1 ${isExpired(apiKey.expiresAt) ? 'text-red-600' : isExpiringSoon(apiKey.expiresAt) ? 'text-amber-600' : ''}`}>
-                          <Calendar className="w-4 h-4" />
-                          {formatDate(apiKey.expiresAt)}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">Never</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-2">
-                        {apiKey.isActive && (
-                          <button
-                            onClick={() => handleRevoke(apiKey.id)}
-                            disabled={revokingId === apiKey.id}
-                            className="text-amber-600 hover:text-amber-900 disabled:opacity-50"
-                            title="Revoke API key"
-                          >
-                            {revokingId === apiKey.id ? (
-                              <div className="w-4 h-4 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                              <EyeOff className="w-4 h-4" />
-                            )}
-                          </button>
-                        )}
-                        <button
-                          onClick={() => handleDelete(apiKey.id)}
-                          className="text-red-600 hover:text-red-900"
-                          title="Delete API key"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+          </div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={apiKeys}
+            searchable={true}
+            searchPlaceholder="Search API keys..."
+            enablePagination={true}
+            pageSize={10}
+            enableSorting={true}
+            enableColumnResize={true}
+          />
+        )}
 
         {/* Usage Instructions */}
         {apiKeys.length > 0 && (

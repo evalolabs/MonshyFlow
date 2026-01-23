@@ -212,7 +212,7 @@ export function createNodeTypesMap(
   
   // Helper to get execution status for a node (wie Activepieces)
   const getNodeExecutionStatus = (nodeId: string, isAnimating: boolean): 'idle' | 'running' | 'completed' | 'failed' => {
-    // Wenn Node aktuell animiert wird, zeige als 'running'
+    // If node is currently animating, show as 'running'
     if (isAnimating && isExecuting) {
       return 'running';
     }

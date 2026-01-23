@@ -911,7 +911,7 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
     
     // Add workflow variables
     if (workflowVariables) {
-      Object.entries(workflowVariables).forEach(([k, v]) => {
+      Object.entries(workflowVariables).forEach(([k]) => {
         elements.push({ id: `vars.${k}`, type: 'treeNode', path: `vars.${k}` });
       });
     }
