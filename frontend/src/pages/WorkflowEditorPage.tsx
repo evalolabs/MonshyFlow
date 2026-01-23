@@ -345,6 +345,38 @@ export function WorkflowEditorPage() {
   };
 
 
+  const handleRename = async () => {
+    if (!workflowName.trim()) {
+      console.warn('Please enter a workflow name');
+      return;
+    }
+
+    if (!id || id === 'new') {
+      // If it's a new workflow, create it
+      await createNewWorkflow();
+      return;
+    }
+
+    // Update existing workflow name
+    if (!workflow) {
+      console.warn('Workflow not loaded');
+      return;
+    }
+
+    try {
+      await workflowService.updateWorkflow(id, {
+        ...workflow,
+        name: workflowName,
+      });
+      
+      setWorkflow({ ...workflow, name: workflowName });
+      setShowNameDialog(false);
+    } catch (error) {
+      console.error('❌ Failed to rename workflow:', error);
+      alert('Failed to rename workflow. Please try again.');
+    }
+  };
+
   const createNewWorkflow = async () => {
     if (!workflowName.trim()) {
        console.warn('Please enter a workflow name');
@@ -447,7 +479,9 @@ export function WorkflowEditorPage() {
       {showNameDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
-            <h2 className="text-xl font-bold mb-4">Workflow Name</h2>
+            <h2 className="text-xl font-bold mb-4">
+              {id && id !== 'new' ? 'Rename Workflow' : 'Workflow Name'}
+            </h2>
             <input
               type="text"
               value={workflowName}
@@ -456,24 +490,28 @@ export function WorkflowEditorPage() {
               placeholder="Enter workflow name"
               autoFocus
               onKeyPress={(e) => {
-                if (e.key === 'Enter') createNewWorkflow();
+                if (e.key === 'Enter') handleRename();
               }}
             />
             <div className="flex gap-2 mt-4">
               <button
                 onClick={() => {
-                  if (id !== 'new') setShowNameDialog(false);
-                  else navigate('/');
+                  if (id !== 'new') {
+                    setWorkflowName(workflow?.name || 'New Workflow');
+                    setShowNameDialog(false);
+                  } else {
+                    navigate('/');
+                  }
                 }}
                 className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md transition-colors"
               >
                 Cancel
               </button>
               <button
-                onClick={createNewWorkflow}
+                onClick={handleRename}
                 className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
               >
-                Continue
+                {id && id !== 'new' ? 'Save' : 'Continue'}
               </button>
             </div>
           </div>
