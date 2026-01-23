@@ -20,6 +20,9 @@ export function VariableNode(props: NodeProps) {
       return 'Set Variable';
     }
     
+    const variablePath = safeData.variablePath as string | undefined;
+    const pathDisplay = variablePath ? `.${variablePath}` : '';
+    
     // Show preview of variable value
     if (variableValue !== undefined && variableValue !== null && variableValue !== '') {
       try {
@@ -35,24 +38,24 @@ export function VariableNode(props: NodeProps) {
         
         // Format display based on type
         if (typeof displayValue === 'string') {
-          const maxLength = 25;
-          return `${variableName} = "${displayValue.length > maxLength ? displayValue.substring(0, maxLength) + '...' : displayValue}"`;
+          const maxLength = 20;
+          return `${variableName}${pathDisplay} = "${displayValue.length > maxLength ? displayValue.substring(0, maxLength) + '...' : displayValue}"`;
         } else if (typeof displayValue === 'number' || typeof displayValue === 'boolean') {
-          return `${variableName} = ${String(displayValue)}`;
+          return `${variableName}${pathDisplay} = ${String(displayValue)}`;
         } else if (Array.isArray(displayValue)) {
-          return `${variableName} = Array[${displayValue.length}]`;
+          return `${variableName}${pathDisplay} = Array[${displayValue.length}]`;
         } else if (typeof displayValue === 'object') {
           const keys = Object.keys(displayValue);
-          return `${variableName} = Object{${keys.length} keys}`;
+          return `${variableName}${pathDisplay} = Object{${keys.length} keys}`;
         } else {
-          return `${variableName} = ${String(displayValue)}`;
+          return `${variableName}${pathDisplay} = ${String(displayValue)}`;
         }
       } catch {
-        return `${variableName} = ${String(variableValue)}`;
+        return `${variableName}${pathDisplay} = ${String(variableValue)}`;
       }
     }
     
-    return `${variableName} = (empty)`;
+    return `${variableName}${pathDisplay} = (read)`;
   };
 
   const node: Node = {

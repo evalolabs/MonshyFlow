@@ -720,9 +720,14 @@
           },
           "variableValue": {
             "type": "expression",
-            "placeholder": "Variable value (JSON: \"text\", 123, {\"key\": \"value\"}, [1,2,3], or use {{steps.nodeId.json.field}})",
+            "placeholder": "Variable value (JSON: \"text\", 123, {\"key\": \"value\"}, [1,2,3], or use {{steps.nodeId.json.field}}). Leave empty to read variable.",
             "multiline": true,
             "rows": 4
+          },
+          "variablePath": {
+            "type": "text",
+            "placeholder": "Optional: Nested path (e.g., \"user.email\", \"items[0].name\", \"profile.settings.theme\") to update only this property instead of the entire variable",
+            "required": false
           }
         }
       },

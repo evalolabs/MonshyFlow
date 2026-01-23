@@ -70,6 +70,9 @@ registerNodeProcessor({
                     Object.assign(secrets, context.workflow.secrets);
                 }
                 
+                // Get workflow variables from context
+                const vars = context.variables || {};
+                
                 console.log(`[End Node] 🔍 Available steps for expression resolution:`, Object.keys(steps));
                 
                 // Resolve expressions
@@ -78,7 +81,8 @@ registerNodeProcessor({
                     { 
                         input: input?.json || context.input || {}, 
                         steps, 
-                        secrets 
+                        secrets,
+                        vars  // NEW: Add workflow variables to expression context
                     },
                     { execution: context.execution, currentNodeId: node.id }
                 );
@@ -131,9 +135,10 @@ registerNodeProcessor({
                 if (context?.workflow?.secrets) {
                     Object.assign(secrets, context.workflow.secrets);
                 }
+                const vars = context?.variables || {};
                 const result = expressionResolutionService.resolveExpressions(
                     resultMessage,
-                    { input: input?.json || input || {}, steps, secrets },
+                    { input: input?.json || input || {}, steps, secrets, vars },
                     { execution: context?.execution, currentNodeId: node.id }
                 );
                 resultMessage = typeof result === 'string' ? result : result.result;
@@ -549,6 +554,105 @@ registerNodeProcessor({
     },
 });
 
+// Helper functions for Variable Node (nested path operations)
+function parseVariablePath(path: string): Array<string | number> {
+    const pathParts: Array<string | number> = [];
+    let currentPart = '';
+    let inBrackets = false;
+    
+    for (let i = 0; i < path.length; i++) {
+        const char = path[i];
+        if (char === '[') {
+            if (currentPart) {
+                pathParts.push(currentPart);
+                currentPart = '';
+            }
+            inBrackets = true;
+        } else if (char === ']') {
+            if (currentPart) {
+                pathParts.push(Number(currentPart)); // Array index
+                currentPart = '';
+            }
+            inBrackets = false;
+        } else if (char === '.' && !inBrackets) {
+            if (currentPart) {
+                pathParts.push(currentPart);
+                currentPart = '';
+            }
+        } else {
+            currentPart += char;
+        }
+    }
+    if (currentPart) {
+        pathParts.push(currentPart);
+    }
+    
+    return pathParts;
+}
+
+function resolveNestedPath(obj: any, path: string): any {
+    const pathParts = parseVariablePath(path);
+    let current = obj;
+    
+    for (const part of pathParts) {
+        if (current === null || current === undefined) {
+            throw new Error(`Path "${path}" is null/undefined at "${part}"`);
+        }
+        if (typeof part === 'number') {
+            if (!Array.isArray(current)) {
+                throw new Error(`Cannot access array index ${part} - target is not an array`);
+            }
+            current = current[part];
+        } else {
+            if (typeof current !== 'object' || Array.isArray(current)) {
+                throw new Error(`Cannot access property "${part}" - target is not an object`);
+            }
+            current = current[part];
+        }
+    }
+    
+    return current;
+}
+
+function updateNestedPath(variables: Record<string, any>, varName: string, path: string, value: any): void {
+    const pathParts = parseVariablePath(path);
+    let target = variables[varName];
+    
+    // Navigate to the parent object/array
+    for (let i = 0; i < pathParts.length - 1; i++) {
+        const part = pathParts[i];
+        if (typeof part === 'number') {
+            if (!Array.isArray(target) || target[part] === undefined) {
+                throw new Error(`Cannot access array index ${part} in variable "${varName}"`);
+            }
+            target = target[part];
+        } else {
+            if (typeof target !== 'object' || target === null || Array.isArray(target)) {
+                throw new Error(`Cannot access property "${part}" in variable "${varName}"`);
+            }
+            if (target[part] === undefined || target[part] === null) {
+                // Create nested object if it doesn't exist
+                target[part] = {};
+            }
+            target = target[part];
+        }
+    }
+    
+    // Set the value
+    const lastPart = pathParts[pathParts.length - 1];
+    if (typeof lastPart === 'number') {
+        if (!Array.isArray(target)) {
+            throw new Error(`Cannot set array index ${lastPart} - target is not an array`);
+        }
+        target[lastPart] = value;
+    } else {
+        if (typeof target !== 'object' || target === null || Array.isArray(target)) {
+            throw new Error(`Cannot set property "${lastPart}" - target is not an object`);
+        }
+        target[lastPart] = value;
+    }
+}
+
 // Variable Node Processor
 registerNodeProcessor({
     type: 'variable',
@@ -558,6 +662,7 @@ registerNodeProcessor({
         const nodeData = node.data || {};
         const variableName = nodeData.variableName;
         const variableValue = nodeData.variableValue;
+        const variablePath = nodeData.variablePath; // NEW: Optional path for nested property updates
         
         if (!variableName || !variableName.trim()) {
             return createErrorNodeData(
@@ -577,7 +682,21 @@ registerNodeProcessor({
         
         // If read-only, get current value from context and return it
         if (isReadOnly) {
-            const currentValue = context.variables[variableName.trim()];
+            let currentValue = context.variables[variableName.trim()];
+            
+            // If variablePath is set, navigate to the nested property
+            if (variablePath && variablePath.trim()) {
+                try {
+                    currentValue = resolveNestedPath(context.variables[variableName.trim()], variablePath.trim());
+                } catch (error: any) {
+                    return createErrorNodeData(
+                        `Cannot read path "${variablePath.trim()}" in variable "${variableName.trim()}": ${error.message}`,
+                        node.id,
+                        'variable'
+                    );
+                }
+            }
+            
             // Return current value of the variable
             const inputData = input?.json || (input ? input : null);
             const outputData = {
@@ -585,6 +704,7 @@ registerNodeProcessor({
                 // Add variable info with current value
                 _variableSet: {
                     name: variableName.trim(),
+                    path: variablePath?.trim() || undefined,
                     value: currentValue
                 }
             };
@@ -595,9 +715,12 @@ registerNodeProcessor({
                     {
                         variableSet: {
                             name: variableName.trim(),
+                            path: variablePath?.trim() || undefined,
                             value: currentValue
                         },
-                        message: `Variable "${variableName.trim()}" current value`
+                        message: variablePath?.trim() 
+                            ? `Variable "${variableName.trim()}.${variablePath.trim()}" current value`
+                            : `Variable "${variableName.trim()}" current value`
                     },
                     node.id,
                     'variable',
@@ -676,18 +799,49 @@ registerNodeProcessor({
             resolvedValue = undefined;
         }
         
-        // Set variable in context
-        context.variables[variableName.trim()] = resolvedValue;
+        // Set or update variable in context
+        const trimmedVarName = variableName.trim();
+        if (variablePath && variablePath.trim()) {
+            // Nested property update
+            const trimmedPath = variablePath.trim();
+            
+            // Check if variable exists
+            if (context.variables[trimmedVarName] === undefined || context.variables[trimmedVarName] === null) {
+                return createErrorNodeData(
+                    `Variable "${trimmedVarName}" does not exist. Cannot update nested path "${trimmedPath}". Please create the variable first.`,
+                    node.id,
+                    'variable'
+                );
+            }
+            
+            try {
+                updateNestedPath(context.variables, trimmedVarName, trimmedPath, resolvedValue);
+            } catch (error: any) {
+                return createErrorNodeData(
+                    `Cannot update path "${trimmedPath}" in variable "${trimmedVarName}": ${error.message}`,
+                    node.id,
+                    'variable'
+                );
+            }
+        } else {
+            // Full variable set/update
+            context.variables[trimmedVarName] = resolvedValue;
+        }
         
         // For debug visibility: Return input data (passthrough) with variable info
         // Include variable info in output so debug panel can show it
         const inputData = input?.json || (input ? input : null);
+        const finalValue = variablePath && variablePath.trim() 
+            ? resolveNestedPath(context.variables[trimmedVarName], variablePath.trim())
+            : context.variables[trimmedVarName];
+        
         const outputData = {
             ...(inputData && typeof inputData === 'object' && !Array.isArray(inputData) ? inputData : {}),
             // Add variable info for debugging
             _variableSet: {
-                name: variableName.trim(),
-                value: resolvedValue
+                name: trimmedVarName,
+                path: variablePath?.trim() || undefined,
+                value: finalValue
             }
         };
         
@@ -696,10 +850,13 @@ registerNodeProcessor({
             return createNodeData(
                 {
                     variableSet: {
-                        name: variableName.trim(),
-                        value: resolvedValue
+                        name: trimmedVarName,
+                        path: variablePath?.trim() || undefined,
+                        value: finalValue
                     },
-                    message: `Variable "${variableName.trim()}" set successfully`
+                    message: variablePath?.trim()
+                        ? `Variable "${trimmedVarName}.${variablePath.trim()}" updated successfully`
+                        : `Variable "${trimmedVarName}" set successfully`
                 },
                 node.id,
                 'variable',
@@ -782,8 +939,24 @@ registerNodeProcessor({
             resolvedValue = undefined;
         }
         
-        // Set variable in context
-        context.variables[variableName.trim()] = resolvedValue;
+        // Set or update variable in context
+        const trimmedVarName = variableName.trim();
+        const variablePath = nodeData.variablePath; // NEW: Optional path for nested property updates
+        
+        if (variablePath && variablePath.trim()) {
+            // Nested property update
+            const trimmedPath = variablePath.trim();
+            
+            // Check if variable exists
+            if (context.variables[trimmedVarName] === undefined || context.variables[trimmedVarName] === null) {
+                throw new Error(`Variable "${trimmedVarName}" does not exist. Cannot update nested path "${trimmedPath}". Please create the variable first.`);
+            }
+            
+            updateNestedPath(context.variables, trimmedVarName, trimmedPath, resolvedValue);
+        } else {
+            // Full variable set/update
+            context.variables[trimmedVarName] = resolvedValue;
+        }
         
         // Return input (passthrough)
         return input;
@@ -944,15 +1117,19 @@ registerNodeProcessor({
             Object.assign(secrets, context.workflow.secrets);
         }
 
+        // Get workflow variables from context
+        const vars = context.variables || {};
+
         console.log(`[HTTP Request Node] Available steps for expression resolution:`, Object.keys(steps));
         console.log(`[HTTP Request Node] Available secrets:`, Object.keys(secrets));
+        console.log(`[HTTP Request Node] Available variables:`, Object.keys(vars));
         console.log(`[HTTP Request Node] Original URL: ${url}`);
         console.log(`[HTTP Request Node] Original body: ${nodeData.body || '(none)'}`);
 
-        // Use ExpressionResolutionService to resolve expressions (supports secrets, steps, input)
+        // Use ExpressionResolutionService to resolve expressions (supports secrets, steps, input, vars)
         const urlResult = expressionResolutionService.resolveExpressions(
             url,
-            { input, steps, secrets },
+            { input, steps, secrets, vars },
             { execution: context.execution, currentNodeId: node.id }
         );
         url = typeof urlResult === 'string' ? urlResult : urlResult.result;
@@ -975,13 +1152,13 @@ registerNodeProcessor({
             headers = { 'Content-Type': 'application/json' };
         }
 
-        // Resolve expressions in headers (e.g., {{secrets.PIPEDRIVE_API_KEY}})
+        // Resolve expressions in headers (e.g., {{secrets.PIPEDRIVE_API_KEY}}, {{vars.apiUrl}})
         const resolvedHeaders: Record<string, string> = {};
         for (const [key, value] of Object.entries(headers)) {
             if (typeof value === 'string') {
                 const headerResult = expressionResolutionService.resolveExpressions(
                     value,
-                    { input, steps, secrets },
+                    { input, steps, secrets, vars },
                     { execution: context.execution, currentNodeId: node.id }
                 );
                 resolvedHeaders[key] = typeof headerResult === 'string' ? headerResult : headerResult.result;
@@ -995,11 +1172,11 @@ registerNodeProcessor({
             // Send input as body
             body = typeof input === 'string' ? input : JSON.stringify(input);
         } else if (nodeData.body) {
-            // Resolve expressions in custom body (e.g., {{steps.agent-1.response}}, {{secrets.API_KEY}})
+            // Resolve expressions in custom body (e.g., {{steps.agent-1.response}}, {{secrets.API_KEY}}, {{vars.data}})
             const originalBody = nodeData.body;
             const bodyResult = expressionResolutionService.resolveExpressions(
                 nodeData.body,
-                { input, steps, secrets },
+                { input, steps, secrets, vars },
                 { execution: context.execution, currentNodeId: node.id }
             );
             body = typeof bodyResult === 'string' ? bodyResult : bodyResult.result;
@@ -1194,15 +1371,19 @@ registerNodeProcessor({
             Object.assign(secrets, context.workflow.secrets);
         }
 
+        // Get workflow variables from context
+        const vars = context.variables || {};
+
         console.log(`[HTTP Request Node] Available steps for expression resolution:`, Object.keys(steps));
         console.log(`[HTTP Request Node] Available secrets:`, Object.keys(secrets));
+        console.log(`[HTTP Request Node] Available variables:`, Object.keys(vars));
         console.log(`[HTTP Request Node] Original URL: ${url}`);
         console.log(`[HTTP Request Node] Original body: ${nodeData.body || '(none)'}`);
 
-        // Use ExpressionResolutionService to resolve expressions (supports secrets, steps, input)
+        // Use ExpressionResolutionService to resolve expressions (supports secrets, steps, input, vars)
         const urlResult = expressionResolutionService.resolveExpressions(
             url,
-            { input, steps, secrets },
+            { input, steps, secrets, vars },
             { execution: context.execution, currentNodeId: node.id }
         );
         url = typeof urlResult === 'string' ? urlResult : urlResult.result;
@@ -1225,13 +1406,13 @@ registerNodeProcessor({
             headers = { 'Content-Type': 'application/json' };
         }
 
-        // Resolve expressions in headers (e.g., {{secrets.PIPEDRIVE_API_KEY}})
+        // Resolve expressions in headers (e.g., {{secrets.PIPEDRIVE_API_KEY}}, {{vars.apiUrl}})
         const resolvedHeaders: Record<string, string> = {};
         for (const [key, value] of Object.entries(headers)) {
             if (typeof value === 'string') {
                 const headerResult = expressionResolutionService.resolveExpressions(
                     value,
-                    { input, steps, secrets },
+                    { input, steps, secrets, vars },
                     { execution: context.execution, currentNodeId: node.id }
                 );
                 resolvedHeaders[key] = typeof headerResult === 'string' ? headerResult : headerResult.result;
@@ -1245,11 +1426,11 @@ registerNodeProcessor({
             // Send input as body
             body = typeof input === 'string' ? input : JSON.stringify(input);
         } else if (nodeData.body) {
-            // Resolve expressions in custom body (e.g., {{steps.agent-1.response}}, {{secrets.API_KEY}})
+            // Resolve expressions in custom body (e.g., {{steps.agent-1.response}}, {{secrets.API_KEY}}, {{vars.data}})
             const originalBody = nodeData.body;
             const bodyResult = expressionResolutionService.resolveExpressions(
                 nodeData.body,
-                { input, steps, secrets },
+                { input, steps, secrets, vars },
                 { execution: context.execution, currentNodeId: node.id }
             );
             body = typeof bodyResult === 'string' ? bodyResult : bodyResult.result;

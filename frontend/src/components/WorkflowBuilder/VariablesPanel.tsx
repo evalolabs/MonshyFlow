@@ -12,6 +12,7 @@ interface VariablesPanelProps {
   workflow: Workflow | null;
   onUpdateVariables: (variables: Record<string, any>) => void;
   workflowId?: string;
+  nodes?: any[]; // NEW: Nodes from canvas to extract Variable Nodes
 }
 
 interface VariableEditorProps {
@@ -175,13 +176,61 @@ function VariableEditor({ varName, varValue, onUpdate, onDelete }: VariableEdito
   );
 }
 
-export function VariablesPanel({ workflow, onUpdateVariables, workflowId: _workflowId }: VariablesPanelProps) {
+export function VariablesPanel({ workflow, onUpdateVariables, workflowId: _workflowId, nodes = [] }: VariablesPanelProps) {
   const [newVarName, setNewVarName] = useState('');
   const [newVarValue, setNewVarValue] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
 
-  const variables = useMemo(() => workflow?.variables || {}, [workflow?.variables]);
+  // Extract variables from Variable Nodes in the canvas
+  const variablesFromNodes = useMemo(() => {
+    const vars: Record<string, any> = {};
+    nodes.forEach((node) => {
+      if (node.type === 'variable') {
+        const nodeData = node.data || {};
+        const variableName = nodeData?.variableName?.trim();
+        const variableValue = nodeData?.variableValue;
+        
+        // Only include if variableName is set and variableValue is not an expression
+        if (variableName && variableValue !== undefined && variableValue !== null && variableValue !== '') {
+          const valueStr = String(variableValue);
+          // Skip if it's an expression (contains {{)
+          if (!valueStr.includes('{{')) {
+            try {
+              // Try to parse as JSON if it looks like JSON
+              const trimmed = valueStr.trim();
+              if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                vars[variableName] = JSON.parse(trimmed);
+              } else {
+                // Try to parse as number, boolean, or keep as string
+                if (trimmed === 'true') {
+                  vars[variableName] = true;
+                } else if (trimmed === 'false') {
+                  vars[variableName] = false;
+                } else if (trimmed === 'null') {
+                  vars[variableName] = null;
+                } else if (!isNaN(Number(trimmed)) && trimmed !== '') {
+                  vars[variableName] = Number(trimmed);
+                } else {
+                  vars[variableName] = trimmed;
+                }
+              }
+            } catch (e) {
+              // If parsing fails, use as string
+              vars[variableName] = valueStr;
+            }
+          }
+        }
+      }
+    });
+    return vars;
+  }, [nodes]);
+
+  // Merge workflow variables with variables from Variable Nodes
+  // Priority: workflow.variables (from DB) > variablesFromNodes (from Variable Nodes)
+  const variables = useMemo(() => {
+    return { ...variablesFromNodes, ...(workflow?.variables || {}) };
+  }, [workflow?.variables, variablesFromNodes]);
 
   const handleAddVariable = useCallback(() => {
     setAddError(null);

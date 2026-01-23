@@ -392,6 +392,7 @@ export function ResizableWorkflowLayout({
                       workflow={workflow}
                       onUpdateVariables={onUpdateVariables || (() => {})}
                       workflowId={workflowId}
+                      nodes={nodes}
                     />
                   ) : (
                     <Toolbar

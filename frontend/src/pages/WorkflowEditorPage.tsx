@@ -190,6 +190,63 @@ export function WorkflowEditorPage() {
 
   const handleSave = async (nodes: Node[], edges: Edge[]) => {
     try {
+      // Collect initial variable values from Variable Nodes
+      // Only use static values (not expressions) as initial values
+      const initialVariables: Record<string, any> = {};
+      nodes.forEach((node) => {
+        if (node.type === 'variable') {
+          let nodeData: Record<string, any> = {};
+          if (node.data) {
+            if (typeof node.data === 'string') {
+              try {
+                nodeData = JSON.parse(node.data);
+              } catch {
+                nodeData = {};
+              }
+            } else {
+              nodeData = JSON.parse(JSON.stringify(node.data));
+            }
+          }
+
+          const variableName = nodeData?.variableName?.trim();
+          const variableValue = nodeData?.variableValue;
+
+          // Only use as initial value if:
+          // 1. variableName is set
+          // 2. variableValue is set and not empty
+          // 3. variableValue is NOT an expression (doesn't contain {{)
+          if (variableName && variableValue !== undefined && variableValue !== null && variableValue !== '') {
+            const valueStr = String(variableValue);
+            // Skip if it's an expression (contains {{)
+            if (!valueStr.includes('{{')) {
+              try {
+                // Try to parse as JSON if it looks like JSON
+                const trimmed = valueStr.trim();
+                if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                  initialVariables[variableName] = JSON.parse(trimmed);
+                } else {
+                  // Try to parse as number, boolean, or keep as string
+                  if (trimmed === 'true') {
+                    initialVariables[variableName] = true;
+                  } else if (trimmed === 'false') {
+                    initialVariables[variableName] = false;
+                  } else if (trimmed === 'null') {
+                    initialVariables[variableName] = null;
+                  } else if (!isNaN(Number(trimmed)) && trimmed !== '') {
+                    initialVariables[variableName] = Number(trimmed);
+                  } else {
+                    initialVariables[variableName] = trimmed;
+                  }
+                }
+              } catch (e) {
+                // If parsing fails, use as string
+                initialVariables[variableName] = valueStr;
+              }
+            }
+          }
+        }
+      });
+
       const workflowData = {
         name: workflowName,
         description: workflow?.description || '',
@@ -250,6 +307,10 @@ export function WorkflowEditorPage() {
       if (id && id !== 'new') {
         // CRITICAL: Don't spread the old workflow object, as it may contain stringified data
         // Only include metadata fields that we need to preserve, and use our cleaned workflowData
+        // Merge initial variables from Variable Nodes with existing workflow variables
+        // Priority: existing workflowVariables > initialVariables from Variable Nodes
+        const finalVariables = { ...initialVariables, ...(workflow?.variables || {}) };
+        
         const updatePayload = {
           id: workflow?.id || id,
           name: workflowData.name,
@@ -267,14 +328,19 @@ export function WorkflowEditorPage() {
           executionCount: workflow?.executionCount || 0,
           lastExecutedAt: workflow?.lastExecutedAt,
           tenantId: workflow?.tenantId || '',
-          variables: workflow?.variables || {}, // Preserve workflow variables
+          variables: finalVariables, // Merge initial variables from Variable Nodes with existing ones
         } as unknown as Partial<Workflow>;
 
         await workflowService.updateWorkflow(id, updatePayload);
 
       } else {
+        // For new workflows, include initial variables from Variable Nodes
+        const newWorkflowData = {
+          ...workflowData,
+          variables: initialVariables,
+        };
 
-        const created = await workflowService.createWorkflow(workflowData as any);
+        const created = await workflowService.createWorkflow(newWorkflowData as any);
 
         navigate(`/workflow/${created.id}`);
       }
