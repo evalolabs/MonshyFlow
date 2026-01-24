@@ -1560,6 +1560,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
             secrets={secrets}
             secretsLoading={secretsLoading}
             reloadSecrets={reloadSecrets}
+            workflowVariables={workflowVariables}
           />
         );
     }

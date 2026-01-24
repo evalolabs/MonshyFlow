@@ -703,15 +703,24 @@
       },
       "frontend": {
         "hasConfigForm": true,
-        "useAutoConfigForm": true,
+        "useAutoConfigForm": false,
         "isUnique": false,
         "canDuplicate": true,
         "hasInput": true,
         "hasOutput": true,
+        "configFormComponent": "VariableNodeConfigForm",
         "fields": {
           "label": {
             "type": "text",
             "placeholder": "Variable Node Name"
+          },
+          "variableMode": {
+            "type": "select",
+            "options": [
+              { "value": "set", "label": "Set Variable" },
+              { "value": "update", "label": "Update Variable" }
+            ],
+            "default": "set"
           },
           "variableName": {
             "type": "text",
@@ -726,7 +735,8 @@
           },
           "variablePath": {
             "type": "text",
-            "placeholder": "Optional: Nested path (e.g., \"user.email\", \"items[0].name\", \"profile.settings.theme\") to update only this property instead of the entire variable",
+            "placeholder": "Optional: Path to update nested property (e.g., \"user.email\", \"items[1].name\", \"profile.settings.theme\")",
+            "description": "Update only a specific property without overwriting the entire variable. Supports dot notation (user.email) and array indices (items[1].name). Leave empty to set the whole variable.",
             "required": false
           }
         }

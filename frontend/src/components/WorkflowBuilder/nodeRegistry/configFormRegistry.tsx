@@ -9,11 +9,13 @@
 import type { ComponentType } from 'react';
 import { StartNodeConfigForm } from '../NodeConfigForms/StartNodeConfigForm';
 import { CodeNodeConfigForm } from '../NodeConfigForms/CodeNodeConfigForm';
+import { VariableNodeConfigForm } from '../NodeConfigForms/VariableNodeConfigForm';
 
 // Registry for custom config form components
 const CUSTOM_CONFIG_FORMS: Record<string, ComponentType<any>> = {
   'start': StartNodeConfigForm,
   'code': CodeNodeConfigForm,
+  'variable': VariableNodeConfigForm,
   // Add more custom forms here as needed
   // 'my-custom-node': MyCustomNodeConfigForm,
 };

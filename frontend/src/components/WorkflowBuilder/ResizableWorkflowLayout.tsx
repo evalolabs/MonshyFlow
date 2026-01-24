@@ -54,7 +54,8 @@ interface ResizableWorkflowLayoutProps {
   onDebugTestStart?: (nodeId: string, step: any) => void;
   
   // Toolbar props
-  onAddNode: (type: string) => void;
+  onAddNode: (type: string, initialData?: any) => void;
+  onJumpToNode?: (nodeId: string) => void; // NEW: Jump to a specific node
   onSave: () => void;
   onExecute: () => void;
   onPublish?: () => void;
@@ -143,6 +144,7 @@ export function ResizableWorkflowLayout({
   
   // Toolbar props
   onAddNode,
+  onJumpToNode,
   onSave,
   onExecute,
   onPublish,
@@ -388,12 +390,14 @@ export function ResizableWorkflowLayout({
                       onAddTool={onAddNode}
                     />
                   ) : activeLeftTab === 'variables' ? (
-                    <VariablesPanel
-                      workflow={workflow}
-                      onUpdateVariables={onUpdateVariables || (() => {})}
-                      workflowId={workflowId}
-                      nodes={nodes}
-                    />
+                      <VariablesPanel
+                        workflow={workflow}
+                        onUpdateVariables={onUpdateVariables || (() => {})}
+                        workflowId={workflowId}
+                        nodes={nodes}
+                        onSelectNode={onJumpToNode}
+                        onAddNode={onAddNode}
+                      />
                   ) : (
                     <Toolbar
                       onAddNode={onAddNode}

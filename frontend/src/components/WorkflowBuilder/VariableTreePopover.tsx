@@ -236,6 +236,110 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
   const [isResizing, setIsResizing] = useState(false);
   const [userHeight, setUserHeight] = useState<number | null>(null); // User-defined height (null = auto)
   
+  // Helper function to set a nested value at a path
+  const setNestedValue = (obj: any, path: string, value: any): void => {
+    const parts = path.split(/[\.\[\]]/).filter(p => p !== '');
+    let current = obj;
+    
+    for (let i = 0; i < parts.length - 1; i++) {
+      const part = parts[i];
+      const index = parseInt(part, 10);
+      
+      if (!isNaN(index) && Array.isArray(current)) {
+        if (current[index] === undefined || current[index] === null) {
+          current[index] = {};
+        }
+        current = current[index];
+      } else if (typeof current === 'object' && current !== null) {
+        if (current[part] === undefined || current[part] === null) {
+          current[part] = {};
+        }
+        current = current[part];
+      } else {
+        return; // Cannot set nested value
+      }
+    }
+    
+    const lastPart = parts[parts.length - 1];
+    const lastIndex = parseInt(lastPart, 10);
+    
+    if (!isNaN(lastIndex) && Array.isArray(current)) {
+      current[lastIndex] = value;
+    } else if (typeof current === 'object' && current !== null) {
+      current[lastPart] = value;
+    }
+  };
+  
+  // Extract current variable values from debugSteps (from _variableSet in output.json)
+  // This gives us the runtime values, not just the static DB values
+  const currentVariables = useMemo(() => {
+    const vars: Record<string, any> = {};
+    
+    // Start with static workflow variables from DB (deep clone to avoid mutations)
+    if (workflowVariables) {
+      Object.entries(workflowVariables).forEach(([key, value]) => {
+        vars[key] = JSON.parse(JSON.stringify(value)); // Deep clone
+      });
+    }
+    
+    // Override with values from debugSteps (most recent value wins)
+    // Filter to only completed steps and sort by timestamp to ensure chronological order
+    const completedSteps = debugSteps.filter(step => step.status === 'completed' && step.output);
+    const sortedSteps = [...completedSteps].sort((a, b) => {
+      const timeA = a.completedAt || a.startedAt || '';
+      const timeB = b.completedAt || b.startedAt || '';
+      return timeA.localeCompare(timeB);
+    });
+    
+    // Look for _variableSet in output.json of each debug step
+    sortedSteps.forEach(step => {
+      // Check multiple possible structures:
+      // 1. step.output.json._variableSet (NodeData format: { json: {...}, metadata: {...} })
+      // 2. step.output._variableSet (direct output)
+      // 3. step.json._variableSet (legacy format)
+      let variableSet = null;
+      
+      if (step.output?.json?._variableSet) {
+        variableSet = step.output.json._variableSet;
+      } else if (step.output?._variableSet) {
+        variableSet = step.output._variableSet;
+      } else if (step.json?._variableSet) {
+        variableSet = step.json._variableSet;
+      }
+      
+      if (variableSet) {
+        const varName = variableSet.name;
+        const varValue = variableSet.value;
+        const varPath = variableSet.path;
+        
+        if (varName) {
+          if (varPath && varPath.trim()) {
+            // Nested path update - update only that specific path
+            if (vars[varName] === undefined || vars[varName] === null) {
+              vars[varName] = {};
+            }
+            setNestedValue(vars[varName], varPath.trim(), varValue);
+          } else {
+            // Full variable update
+            vars[varName] = varValue;
+          }
+        }
+      }
+    });
+    
+    // Debug logging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[VariableTreePopover] Current variables:', vars);
+      console.log('[VariableTreePopover] Debug steps:', debugSteps.map(s => ({
+        nodeId: s.nodeId,
+        nodeType: s.nodeType,
+        output: s.output,
+      })));
+    }
+    
+    return vars;
+  }, [workflowVariables, debugSteps]);
+  
   const [pos, setPos] = useState<{ left: number; top: number; width: number; maxHeight: number }>({ 
     left: 0, 
     top: 0, 
@@ -910,14 +1014,14 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
     });
     
     // Add workflow variables
-    if (workflowVariables) {
-      Object.entries(workflowVariables).forEach(([k]) => {
+    if (currentVariables) {
+      Object.entries(currentVariables).forEach(([k]) => {
         elements.push({ id: `vars.${k}`, type: 'treeNode', path: `vars.${k}` });
       });
     }
     
     return elements;
-  }, [currentInput, filteredStartNodes, filteredGuaranteed, filteredConditional, debugSteps, expandedNodes, workflowVariables]);
+  }, [currentInput, filteredStartNodes, filteredGuaranteed, filteredConditional, debugSteps, expandedNodes, currentVariables]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -1122,7 +1226,7 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
   const hasStartNodes = filteredStartNodes.length > 0;
   const hasGuaranteedNodes = filteredGuaranteed.length > 0;
   const hasConditionalNodes = filteredConditional.length > 0;
-  const hasWorkflowVariables = workflowVariables && Object.keys(workflowVariables).length > 0;
+  const hasWorkflowVariables = currentVariables && Object.keys(currentVariables).length > 0;
   const hasFallbackData = (!currentNodeId || upstreamNodes.length === 0) && data && typeof data === 'object';
   
   // Check if search has no results
@@ -1363,7 +1467,7 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
         )}
 
         {/* Workflow Variables Section */}
-        {workflowVariables && Object.keys(workflowVariables).length > 0 && (
+        {currentVariables && Object.keys(currentVariables).length > 0 && (
           <div className="border border-blue-200 rounded-md overflow-hidden mb-2">
             <button
               onClick={() => toggleSection('workflowVariables')}
@@ -1379,19 +1483,19 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
                 <span className="text-xs font-semibold text-blue-700">Workflow Variables</span>
-                <span className="text-xs text-blue-500">({Object.keys(workflowVariables).length})</span>
+                <span className="text-xs text-blue-500">({Object.keys(currentVariables).length})</span>
               </div>
             </button>
             {expandedSections.has('workflowVariables') && (
               <div className="p-2 bg-white space-y-2 transition-all duration-200 ease-out">
-                {Object.entries(workflowVariables)
+                {Object.entries(currentVariables)
                   .filter(([k, v]) => !searchTerm || treeNodeMatchesSearch(searchTerm, 'vars', k, v))
                   .map(([k, v]) => (
                     <div key={k} className="border-l-2 border-blue-300 pl-2 py-1">
                       <TreeNode path="vars" keyName={k} value={v} onPick={onPick} searchTerm={searchTerm} onFocus={setFocusedElementId} focusId={`vars.${k}`} />
                     </div>
                   ))}
-                {Object.entries(workflowVariables).filter(([k, v]) => !searchTerm || treeNodeMatchesSearch(searchTerm, 'vars', k, v)).length === 0 && searchTerm && (
+                {Object.entries(currentVariables).filter(([k, v]) => !searchTerm || treeNodeMatchesSearch(searchTerm, 'vars', k, v)).length === 0 && searchTerm && (
                   <div className="text-center py-4 text-gray-400 text-xs">
                     No matching workflow variables
                   </div>

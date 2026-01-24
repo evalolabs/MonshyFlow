@@ -110,7 +110,7 @@ export function useNodeOperations({
   }, [tenantId]);
   
   // Add a new node
-  const addNode = useCallback((type: string, position?: { x: number; y: number }) => {
+  const addNode = useCallback((type: string, position?: { x: number; y: number }, initialData?: any) => {
     logger.info(`Adding node of type: ${type}`);
 
     // Validate Start node
@@ -120,7 +120,7 @@ export function useNodeOperations({
       return null;
     }
 
-    const newNode = createNode(type, position);
+    const newNode = createNode(type, position, initialData);
     
     onNodesChange([...nodes, newNode]);
     logger.info(`Node added: ${newNode.id}`);

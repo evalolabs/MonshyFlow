@@ -1527,12 +1527,29 @@ export function WorkflowCanvas({
   // ============================================================================
 
   // Add node with auto-save
-  const handleAddNode = useCallback((type: string) => {
-    const node = addNode(type);
+  const handleAddNode = useCallback((type: string, initialData?: any) => {
+    const node = addNode(type, undefined, initialData);
     if (node) {
       triggerImmediateSave();
+      // If node was created, select it and open config panel
+      if (node) {
+        setSelectedNode(node);
+        setShowConfigPanel(true);
+      }
     }
+    return node;
   }, [addNode, triggerImmediateSave]);
+  
+  // Jump to a specific node (select it and open config panel)
+  const handleJumpToNode = useCallback((nodeId: string) => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (node) {
+      setSelectedNode(node);
+      setShowConfigPanel(true);
+      // Optionally: center view on node (requires reactflow instance)
+      // This would need useReactFlow hook
+    }
+  }, [nodes]);
 
   // Delete node with auto-save
   const handleDeleteNode = useCallback(async (nodeId: string) => {
@@ -1773,6 +1790,7 @@ export function WorkflowCanvas({
       
       // Toolbar props
       onAddNode={handleAddNode}
+      onJumpToNode={handleJumpToNode}
       onSave={manualSave}
       onExecute={onExecute || execute}
       onPublish={publish}

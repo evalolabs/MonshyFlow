@@ -144,6 +144,12 @@ export function DataTable<TData, TValue>({
                         key={cell.id}
                         className="px-6 py-4 whitespace-nowrap text-sm"
                         style={{ width: cell.column.getSize() }}
+                        onClick={(e) => {
+                          // Prevent row double-click when clicking on action buttons
+                          if ((e.target as HTMLElement).closest('button')) {
+                            e.stopPropagation();
+                          }
+                        }}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>

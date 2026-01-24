@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Pencil, Trash2, Calendar, Activity } from 'lucide-react';
 import { workflowService } from '../../services/workflowService';
 import type { Workflow } from '../../types/workflow';
@@ -12,7 +12,7 @@ interface WorkflowListProps {
   onImport?: () => void;
 }
 
-export function WorkflowList({ onEdit, onExecute: _onExecute, onCreate, onImport }: WorkflowListProps) {
+export function WorkflowList({ onEdit, onExecute: _onExecute, onCreate: _onCreate, onImport: _onImport }: WorkflowListProps) {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,16 +34,17 @@ export function WorkflowList({ onEdit, onExecute: _onExecute, onCreate, onImport
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (!confirm('Are you sure you want to delete this workflow?')) return;
 
     try {
       await workflowService.deleteWorkflow(id);
-      setWorkflows(workflows.filter((w) => w.id !== id));
+      // Use functional update to avoid stale closure
+      setWorkflows((prevWorkflows) => prevWorkflows.filter((w) => w.id !== id));
     } catch (err: any) {
       alert('Failed to delete workflow: ' + err.message);
     }
-  };
+  }, []);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
@@ -176,7 +177,7 @@ export function WorkflowList({ onEdit, onExecute: _onExecute, onCreate, onImport
         enableSorting: false,
       },
     ],
-    [onEdit]
+    [onEdit, handleDelete]
   );
 
   if (loading) {
