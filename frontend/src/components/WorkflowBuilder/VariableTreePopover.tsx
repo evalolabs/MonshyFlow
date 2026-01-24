@@ -235,6 +235,10 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
   const resizeHandleRef = useRef<HTMLDivElement | null>(null);
   const [isResizing, setIsResizing] = useState(false);
   const [userHeight, setUserHeight] = useState<number | null>(null); // User-defined height (null = auto)
+  const [isInitialized, setIsInitialized] = useState(false); // Track if popover has been opened
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
+  const dragHandleRef = useRef<HTMLDivElement | null>(null);
   
   // Helper function to set a nested value at a path
   const setNestedValue = (obj: any, path: string, value: any): void => {
@@ -682,10 +686,23 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
         );
       }
       // Recalculate maxHeight based on final top position
+      // On first open, set to maximum available height
+      const maxAvailableHeight = effectiveViewportHeight - top - viewportPadding;
+      
       // Use user-defined height if set, otherwise use calculated maxHeight
-      const finalMaxHeight = userHeight !== null 
-        ? Math.min(userHeight, effectiveViewportHeight - top - viewportPadding)
-        : Math.min(maxHeight, effectiveViewportHeight - top - viewportPadding);
+      // But on first open, always use maximum available height
+      let finalMaxHeight: number;
+      if (!isInitialized && anchorEl) {
+        // First time opening - set to maximum available height
+        finalMaxHeight = maxAvailableHeight;
+        setUserHeight(maxAvailableHeight);
+        setIsInitialized(true);
+      } else {
+        // Use user-defined height if set, otherwise use calculated maxHeight
+        finalMaxHeight = userHeight !== null 
+          ? Math.min(userHeight, maxAvailableHeight)
+          : Math.min(maxHeight, maxAvailableHeight);
+      }
       
       setPos({ left, top, width: popoverWidth, maxHeight: finalMaxHeight });
     };
@@ -726,7 +743,81 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
         }
       };
     }
-  }, [anchorEl, userHeight, isResizing]);
+  }, [anchorEl, userHeight, isResizing, isInitialized]);
+  
+  // Reset initialization when popover closes
+  useEffect(() => {
+    if (!anchorEl && isInitialized) {
+      setIsInitialized(false);
+      // Optionally reset userHeight on close, or keep it for next open
+      // setUserHeight(null); // Uncomment if you want to reset height on close
+    }
+  }, [anchorEl, isInitialized]);
+
+  // Drag functionality
+  useEffect(() => {
+    if (!isDragging || !dragStart) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - dragStart.x;
+      const deltaY = e.clientY - dragStart.y;
+      
+      setPos(prev => ({
+        ...prev,
+        left: Math.max(0, Math.min(window.innerWidth - prev.width, prev.left + deltaX)),
+        top: Math.max(0, Math.min(window.innerHeight - 100, prev.top + deltaY)), // Keep at least 100px visible
+      }));
+      
+      setDragStart({ x: e.clientX, y: e.clientY });
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 0) return;
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - dragStart.x;
+      const deltaY = touch.clientY - dragStart.y;
+      
+      setPos(prev => ({
+        ...prev,
+        left: Math.max(0, Math.min(window.innerWidth - prev.width, prev.left + deltaX)),
+        top: Math.max(0, Math.min(window.innerHeight - 100, prev.top + deltaY)),
+      }));
+      
+      setDragStart({ x: touch.clientX, y: touch.clientY });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      setDragStart(null);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+
+    const handleTouchEnd = () => {
+      setIsDragging(false);
+      setDragStart(null);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('touchend', handleTouchEnd);
+
+    // Prevent text selection during drag
+    document.body.style.cursor = 'move';
+    document.body.style.userSelect = 'none';
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchend', handleTouchEnd);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isDragging, dragStart]);
 
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
@@ -1249,13 +1340,37 @@ export const VariableTreePopover: React.FC<VariableTreePopoverProps> = ({ anchor
       onClick={(e) => e.stopPropagation()}
       tabIndex={-1}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50">
+      {/* Header - Draggable */}
+      <div 
+        ref={dragHandleRef}
+        className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50 cursor-move select-none"
+        onMouseDown={(e) => {
+          // Don't start drag if clicking on buttons
+          if ((e.target as HTMLElement).closest('button')) return;
+          setIsDragging(true);
+          setDragStart({ x: e.clientX, y: e.clientY });
+          e.preventDefault();
+        }}
+        onTouchStart={(e) => {
+          if (e.touches.length === 0) return;
+          const touch = e.touches[0];
+          // Don't start drag if clicking on buttons
+          if ((e.target as HTMLElement).closest('button')) return;
+          setIsDragging(true);
+          setDragStart({ x: touch.clientX, y: touch.clientY });
+          e.preventDefault();
+        }}
+        style={{ userSelect: 'none' }}
+      >
         <div className="flex items-center gap-2">
           <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
           </svg>
           <h3 className="text-sm font-semibold text-gray-800">Available Variables</h3>
+          <svg className="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Drag to move">
+            <title>Drag to move</title>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+          </svg>
         </div>
         <div className="flex items-center gap-1">
           {/* Expand/Collapse All Nodes button */}
