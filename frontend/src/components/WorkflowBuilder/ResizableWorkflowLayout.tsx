@@ -397,6 +397,7 @@ export function ResizableWorkflowLayout({
                         nodes={nodes}
                         onSelectNode={onJumpToNode}
                         onAddNode={onAddNode}
+                        debugSteps={debugSteps}
                       />
                   ) : (
                     <Toolbar

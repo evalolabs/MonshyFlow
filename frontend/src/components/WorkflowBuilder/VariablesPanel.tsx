@@ -15,6 +15,7 @@ interface VariablesPanelProps {
   nodes?: any[]; // NEW: Nodes from canvas to extract Variable Nodes
   onSelectNode?: (nodeId: string) => void; // NEW: For jumping to Variable Nodes
   onAddNode?: (nodeType: string, initialData?: any) => void; // NEW: For creating Variable Nodes
+  debugSteps?: any[]; // NEW: Debug steps to extract runtime variable values
 }
 
 interface VariableEditorProps {
@@ -518,13 +519,108 @@ export function VariablesPanel({
   workflowId: _workflowId, 
   nodes = [],
   onSelectNode,
-  onAddNode
+  onAddNode,
+  debugSteps = []
 }: VariablesPanelProps) {
   const [newVarName, setNewVarName] = useState('');
   const [newVarValue, setNewVarValue] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Helper function to set a nested value at a path
+  const setNestedValue = useCallback((obj: any, path: string, value: any): void => {
+    const parts = path.split(/[\.\[\]]/).filter(p => p !== '');
+    let current = obj;
+    
+    for (let i = 0; i < parts.length - 1; i++) {
+      const part = parts[i];
+      const index = parseInt(part, 10);
+      
+      if (!isNaN(index) && Array.isArray(current)) {
+        if (current[index] === undefined || current[index] === null) {
+          current[index] = {};
+        }
+        current = current[index];
+      } else if (typeof current === 'object' && current !== null) {
+        if (current[part] === undefined || current[part] === null) {
+          current[part] = {};
+        }
+        current = current[part];
+      } else {
+        return; // Cannot set nested value
+      }
+    }
+    
+    const lastPart = parts[parts.length - 1];
+    const lastIndex = parseInt(lastPart, 10);
+    
+    if (!isNaN(lastIndex) && Array.isArray(current)) {
+      current[lastIndex] = value;
+    } else if (typeof current === 'object' && current !== null) {
+      current[lastPart] = value;
+    }
+  }, []);
+
+  // Extract current variable values from debugSteps (from _variableSet in output.json)
+  // This gives us the runtime values, not just the static DB values
+  const currentVariablesFromDebug = useMemo(() => {
+    const vars: Record<string, any> = {};
+    
+    // Start with static workflow variables from DB (deep clone to avoid mutations)
+    if (workflow?.variables) {
+      Object.entries(workflow.variables).forEach(([key, value]) => {
+        vars[key] = JSON.parse(JSON.stringify(value)); // Deep clone
+      });
+    }
+    
+    // Override with values from debugSteps (most recent value wins)
+    // Filter to only completed steps and sort by timestamp to ensure chronological order
+    const completedSteps = debugSteps.filter(step => step.status === 'completed' && step.output);
+    const sortedSteps = [...completedSteps].sort((a, b) => {
+      const timeA = a.completedAt || a.startedAt || '';
+      const timeB = b.completedAt || b.startedAt || '';
+      return timeA.localeCompare(timeB);
+    });
+    
+    // Look for _variableSet in output.json of each debug step
+    sortedSteps.forEach(step => {
+      // Check multiple possible structures:
+      // 1. step.output.json._variableSet (NodeData format: { json: {...}, metadata: {...} })
+      // 2. step.output._variableSet (direct output)
+      // 3. step.json._variableSet (legacy format)
+      let variableSet = null;
+      
+      if (step.output?.json?._variableSet) {
+        variableSet = step.output.json._variableSet;
+      } else if (step.output?._variableSet) {
+        variableSet = step.output._variableSet;
+      } else if (step.json?._variableSet) {
+        variableSet = step.json._variableSet;
+      }
+      
+      if (variableSet) {
+        const varName = variableSet.name;
+        const varValue = variableSet.value;
+        const varPath = variableSet.path;
+        
+        if (varName) {
+          if (varPath && varPath.trim()) {
+            // Nested path update - update only that specific path
+            if (vars[varName] === undefined || vars[varName] === null) {
+              vars[varName] = {};
+            }
+            setNestedValue(vars[varName], varPath.trim(), varValue);
+          } else {
+            // Full variable update
+            vars[varName] = varValue;
+          }
+        }
+      }
+    });
+    
+    return vars;
+  }, [workflow?.variables, debugSteps, setNestedValue]);
 
   // Extract variables from Variable Nodes in the canvas
   const variablesFromNodes = useMemo(() => {
@@ -570,11 +666,17 @@ export function VariablesPanel({
     return vars;
   }, [nodes]);
 
-  // Merge workflow variables with variables from Variable Nodes
-  // Priority: workflow.variables (from DB) > variablesFromNodes (from Variable Nodes)
+  // Merge variables with priority:
+  // 1. currentVariablesFromDebug (runtime values from debugSteps) - highest priority
+  // 2. workflow.variables (from DB)
+  // 3. variablesFromNodes (from Variable Nodes on canvas)
   const variables = useMemo(() => {
-    return { ...variablesFromNodes, ...(workflow?.variables || {}) };
-  }, [workflow?.variables, variablesFromNodes]);
+    return { 
+      ...variablesFromNodes, 
+      ...(workflow?.variables || {}), 
+      ...currentVariablesFromDebug // Runtime values override everything
+    };
+  }, [workflow?.variables, variablesFromNodes, currentVariablesFromDebug]);
 
   const handleAddVariable = useCallback(() => {
     setAddError(null);
