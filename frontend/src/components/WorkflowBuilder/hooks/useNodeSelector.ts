@@ -323,8 +323,25 @@ export function useNodeSelector({
         popupExists: !!popup,
       });
 
-      // Position new node to the right (horizontal layout)
-      const position = calculateRelativePosition(sourceNode, 'right', HORIZONTAL_SPACING);
+      // Position new node based on source handle
+      // For If-Else nodes: true = above, false = below
+      let position: { x: number; y: number };
+      if (sourceNode.type === 'ifelse' && sourceHandle === 'true') {
+        // True branch: position above (negative Y offset)
+        position = {
+          x: sourceNode.position.x + HORIZONTAL_SPACING,
+          y: sourceNode.position.y - VERTICAL_SPACING,
+        };
+      } else if (sourceNode.type === 'ifelse' && sourceHandle === 'false') {
+        // False branch: position below (positive Y offset)
+        position = {
+          x: sourceNode.position.x + HORIZONTAL_SPACING,
+          y: sourceNode.position.y + VERTICAL_SPACING,
+        };
+      } else {
+        // Default: position to the right (horizontal layout)
+        position = calculateRelativePosition(sourceNode, 'right', HORIZONTAL_SPACING);
+      }
 
       const newNode = createNode(nodeType, position);
       onNodesChange([...nodes, newNode]);

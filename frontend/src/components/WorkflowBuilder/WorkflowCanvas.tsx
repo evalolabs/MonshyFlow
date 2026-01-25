@@ -1497,8 +1497,23 @@ export function WorkflowCanvas({
       // Skip tool nodes, they shouldn't have an add button
       if (node.type?.startsWith('tool')) return;
       
+      // Special handling for If-Else nodes - check true/false handles
+      // These nodes have multiple output handles (true/false) and NO default output
+      if (node.type === 'ifelse') {
+        // Check 'true' handle
+        if (!hasEdgeFromHandle(node.id, 'true')) {
+          result.push({ nodeId: node.id, sourceHandle: 'true' });
+        }
+        
+        // Check 'false' handle
+        if (!hasEdgeFromHandle(node.id, 'false')) {
+          result.push({ nodeId: node.id, sourceHandle: 'false' });
+        }
+        
+        // If-Else nodes don't have a default output, so we skip that
+      }
       // Special handling for loop nodes (while and foreach) - check loop handles
-      if (node.type === 'while' || node.type === 'foreach') {
+      else if (node.type === 'while' || node.type === 'foreach') {
         // Check default output
         if (!hasEdgeFromHandle(node.id)) {
           result.push({ nodeId: node.id });

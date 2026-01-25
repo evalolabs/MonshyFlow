@@ -55,13 +55,14 @@ export const AddNodeButton: React.FC<AddNodeButtonProps> = ({ nodeId, sourceHand
     }
   }
   // IfElse Node - true/false handles
+  // Both handles are on the right side, at 40% and 70% from top
   else if (sourceHandle === 'true') {
-    nodeRelativeX = baseX + nodeWidth + 25;
-    nodeRelativeY = baseY + nodeHeight * 0.35; // 35% from top
+    nodeRelativeX = baseX + nodeWidth + 25; // Right side
+    nodeRelativeY = baseY + nodeHeight * 0.40; // 40% from top (matches handle position)
   }
   else if (sourceHandle === 'false') {
-    nodeRelativeX = baseX + nodeWidth / 2;
-    nodeRelativeY = baseY + nodeHeight + 25; // Below node
+    nodeRelativeX = baseX + nodeWidth + 25; // Right side
+    nodeRelativeY = baseY + nodeHeight * 0.70; // 70% from top (matches handle position)
   }
   // While Node - loop and back handles (bottom)
   else if (sourceHandle === 'loop' || sourceHandle === 'back') {
@@ -93,23 +94,39 @@ export const AddNodeButton: React.FC<AddNodeButtonProps> = ({ nodeId, sourceHand
   
   // Determine button styling based on handle type
   const isLoopHandle = sourceHandle === 'loop' || sourceHandle === 'back';
-  const buttonClasses = isLoopHandle
-    ? sourceHandle === 'back'
+  const isIfElseHandle = sourceHandle === 'true' || sourceHandle === 'false';
+  
+  let buttonClasses: string;
+  let iconClasses: string;
+  let buttonTitle: string;
+  
+  if (isLoopHandle) {
+    buttonClasses = sourceHandle === 'back'
       ? 'flex items-center justify-center w-8 h-8 bg-white border-2 border-red-500 rounded-full shadow-lg hover:shadow-xl hover:bg-red-500 hover:border-red-600 transition-all duration-200 hover:scale-125 cursor-pointer group'
-      : 'flex items-center justify-center w-8 h-8 bg-white border-2 border-purple-500 rounded-full shadow-lg hover:shadow-xl hover:bg-purple-500 hover:border-purple-600 transition-all duration-200 hover:scale-125 cursor-pointer group'
-    : 'flex items-center justify-center w-8 h-8 bg-white border-2 border-blue-500 rounded-full shadow-lg hover:shadow-xl hover:bg-blue-500 hover:border-blue-600 transition-all duration-200 hover:scale-125 cursor-pointer group';
-  
-  const iconClasses = isLoopHandle
-    ? sourceHandle === 'back'
+      : 'flex items-center justify-center w-8 h-8 bg-white border-2 border-purple-500 rounded-full shadow-lg hover:shadow-xl hover:bg-purple-500 hover:border-purple-600 transition-all duration-200 hover:scale-125 cursor-pointer group';
+    iconClasses = sourceHandle === 'back'
       ? 'w-4 h-4 text-red-600 group-hover:text-white transition-colors'
-      : 'w-4 h-4 text-purple-600 group-hover:text-white transition-colors'
-    : 'w-4 h-4 text-blue-600 group-hover:text-white transition-colors';
-  
-  const buttonTitle = isLoopHandle
-    ? sourceHandle === 'back'
+      : 'w-4 h-4 text-purple-600 group-hover:text-white transition-colors';
+    buttonTitle = sourceHandle === 'back'
       ? 'Add node in loop (back)'
-      : 'Add node in loop (continue)'
-    : 'Add next node';
+      : 'Add node in loop (continue)';
+  } else if (isIfElseHandle) {
+    // If-Else handles: green for true, red for false
+    buttonClasses = sourceHandle === 'true'
+      ? 'flex items-center justify-center w-8 h-8 bg-white border-2 border-green-500 rounded-full shadow-lg hover:shadow-xl hover:bg-green-500 hover:border-green-600 transition-all duration-200 hover:scale-125 cursor-pointer group'
+      : 'flex items-center justify-center w-8 h-8 bg-white border-2 border-red-500 rounded-full shadow-lg hover:shadow-xl hover:bg-red-500 hover:border-red-600 transition-all duration-200 hover:scale-125 cursor-pointer group';
+    iconClasses = sourceHandle === 'true'
+      ? 'w-4 h-4 text-green-600 group-hover:text-white transition-colors'
+      : 'w-4 h-4 text-red-600 group-hover:text-white transition-colors';
+    buttonTitle = sourceHandle === 'true'
+      ? 'Add node (True branch)'
+      : 'Add node (False branch)';
+  } else {
+    // Default: blue for normal nodes
+    buttonClasses = 'flex items-center justify-center w-8 h-8 bg-white border-2 border-blue-500 rounded-full shadow-lg hover:shadow-xl hover:bg-blue-500 hover:border-blue-600 transition-all duration-200 hover:scale-125 cursor-pointer group';
+    iconClasses = 'w-4 h-4 text-blue-600 group-hover:text-white transition-colors';
+    buttonTitle = 'Add next node';
+  }
   
   return (
     <div

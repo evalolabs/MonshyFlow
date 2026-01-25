@@ -38,6 +38,106 @@ function isLoopEdge(edge: Edge): boolean {
 }
 
 /**
+ * Find all nodes in an If-Else branch (true or false)
+ * Returns a map: ifElseNodeId -> { true: [...], false: [...] }
+ * Uses BFS to find all nodes reachable from each branch handle
+ * Handles nested ifelse nodes correctly
+ */
+function findIfElseBranches(nodes: Node[], edges: Edge[]): Map<string, { true: string[]; false: string[] }> {
+  const branchMap = new Map<string, { true: string[]; false: string[] }>();
+  
+  // Find all ifelse nodes
+  const ifElseNodes = nodes.filter(node => node.type === 'ifelse');
+  
+  for (const ifElseNode of ifElseNodes) {
+    const trueBranch: string[] = [];
+    const falseBranch: string[] = [];
+    
+    // Helper function to find all nodes in a branch using BFS
+    // This includes nested ifelse nodes and their branches
+    const findBranchNodes = (sourceHandle: 'true' | 'false', excludeIfElseId?: string): string[] => {
+      const branchNodes: string[] = [];
+      const visited = new Set<string>();
+      const queue: string[] = [];
+      
+      // Find initial nodes connected to this handle
+      const initialEdges = edges.filter(edge => 
+        edge.source === ifElseNode.id && 
+        edge.sourceHandle === sourceHandle
+      );
+      
+      for (const edge of initialEdges) {
+        if (!visited.has(edge.target)) {
+          queue.push(edge.target);
+          visited.add(edge.target);
+          branchNodes.push(edge.target);
+        }
+      }
+      
+      // BFS to find all downstream nodes in this branch
+      while (queue.length > 0) {
+        const currentNodeId = queue.shift()!;
+        const currentNode = nodes.find(n => n.id === currentNodeId);
+        
+        // If this is a nested ifelse node, include its branches too
+        if (currentNode?.type === 'ifelse' && currentNodeId !== excludeIfElseId) {
+          // Find nodes in the nested ifelse's true and false branches
+          const nestedTrueEdges = edges.filter(edge => 
+            edge.source === currentNodeId && 
+            edge.sourceHandle === 'true'
+          );
+          const nestedFalseEdges = edges.filter(edge => 
+            edge.source === currentNodeId && 
+            edge.sourceHandle === 'false'
+          );
+          
+          // Add nested branch nodes (recursively)
+          for (const edge of [...nestedTrueEdges, ...nestedFalseEdges]) {
+            if (!visited.has(edge.target)) {
+              visited.add(edge.target);
+              branchNodes.push(edge.target);
+              queue.push(edge.target);
+            }
+          }
+        }
+        
+        // Find outgoing edges from this node (exclude edges that go back to ifelse or to other branches)
+        const outgoingEdges = edges.filter(edge => 
+          edge.source === currentNodeId &&
+          edge.target !== ifElseNode.id && // Don't follow edges back to parent ifelse node
+          edge.target !== excludeIfElseId // Don't follow edges back to excluded ifelse node
+        );
+        
+        for (const edge of outgoingEdges) {
+          // Skip if this edge connects to a node that's already in the other branch
+          // (to prevent cross-branch contamination)
+          const isInOtherBranch = sourceHandle === 'true' 
+            ? falseBranch.includes(edge.target)
+            : trueBranch.includes(edge.target);
+          
+          if (!isInOtherBranch && !visited.has(edge.target)) {
+            visited.add(edge.target);
+            branchNodes.push(edge.target);
+            queue.push(edge.target);
+          }
+        }
+      }
+      
+      return branchNodes;
+    };
+    
+    trueBranch.push(...findBranchNodes('true', ifElseNode.id));
+    falseBranch.push(...findBranchNodes('false', ifElseNode.id));
+    
+    if (trueBranch.length > 0 || falseBranch.length > 0) {
+      branchMap.set(ifElseNode.id, { true: trueBranch, false: falseBranch });
+    }
+  }
+  
+  return branchMap;
+}
+
+/**
  * Find all nodes that are inside a loop (while or foreach)
  * Returns a map: loopNodeId -> Array of nodeIds inside that loop (in order)
  * Uses BFS to find all nodes connected via loop edges
@@ -161,6 +261,14 @@ export const LayoutV1: LayoutStrategy = {
     const loopNodeSet = new Set<string>();
     for (const loopNodes of loopMap.values()) {
       loopNodes.forEach(nodeId => loopNodeSet.add(nodeId));
+    }
+    
+    // Find all If-Else branches
+    const ifElseBranchMap = findIfElseBranches(nodes, edges);
+    const ifElseBranchNodeSet = new Set<string>();
+    for (const branches of ifElseBranchMap.values()) {
+      branches.true.forEach(nodeId => ifElseBranchNodeSet.add(nodeId));
+      branches.false.forEach(nodeId => ifElseBranchNodeSet.add(nodeId));
     }
 
     // Add nodes (exclude tool nodes, tools with relative positions, and loop nodes)
@@ -291,8 +399,177 @@ export const LayoutV1: LayoutStrategy = {
         return node;
       }
       const { w, h } = getNodeDims(node);
-      const x = nodeWithPosition.x - w / 2;
-      const y = nodeWithPosition.y - h / 2;
+      let x = nodeWithPosition.x - w - 50;
+      let y = nodeWithPosition.y - h / 2;
+      
+      // Special handling for If-Else branches: keep all nodes in a branch aligned
+      // Find which ifelse branch this node belongs to (if any)
+      // Handle nested ifelse nodes: find the most direct (nested) parent branch first
+      let branchInfo: { ifElseNodeId: string; branch: 'true' | 'false' } | null = null;
+      
+      // First, check if this node belongs to a nested ifelse's branch
+      // (nested = ifelse that is itself in another ifelse's branch)
+      const nestedIfElseBranches: Array<{ ifElseNodeId: string; branch: 'true' | 'false' }> = [];
+      const parentIfElseBranches: Array<{ ifElseNodeId: string; branch: 'true' | 'false' }> = [];
+      
+      for (const [ifElseNodeId, branches] of ifElseBranchMap.entries()) {
+        // Check if this ifelse is nested (in another ifelse's branch)
+        let isNested = false;
+        for (const [parentIfElseId, parentBranches] of ifElseBranchMap.entries()) {
+          if (parentIfElseId !== ifElseNodeId) {
+            if (parentBranches.true.includes(ifElseNodeId) || parentBranches.false.includes(ifElseNodeId)) {
+              isNested = true;
+              break;
+            }
+          }
+        }
+        
+        if (branches.true.includes(node.id)) {
+          if (isNested) {
+            nestedIfElseBranches.push({ ifElseNodeId, branch: 'true' });
+          } else {
+            parentIfElseBranches.push({ ifElseNodeId, branch: 'true' });
+          }
+        } else if (branches.false.includes(node.id)) {
+          if (isNested) {
+            nestedIfElseBranches.push({ ifElseNodeId, branch: 'false' });
+          } else {
+            parentIfElseBranches.push({ ifElseNodeId, branch: 'false' });
+          }
+        }
+      }
+      
+      // Prefer nested ifelse branches (more specific) over parent branches
+      if (nestedIfElseBranches.length > 0) {
+        // If this node IS the nested ifelse node itself, use it
+        const selfNested = nestedIfElseBranches.find(b => node.id === b.ifElseNodeId);
+        if (selfNested) {
+          branchInfo = selfNested;
+        } else {
+          // Otherwise, use the first nested branch (should be the most direct)
+          branchInfo = nestedIfElseBranches[0];
+        }
+      } else if (parentIfElseBranches.length > 0) {
+        // Fall back to parent branches
+        const selfParent = parentIfElseBranches.find(b => node.id === b.ifElseNodeId);
+        if (selfParent) {
+          branchInfo = selfParent;
+        } else {
+          branchInfo = parentIfElseBranches[0];
+        }
+      }
+      
+      if (branchInfo) {
+        const ifElseNode = nodes.find(n => n.id === branchInfo!.ifElseNodeId);
+        if (ifElseNode) {
+          // Calculate the base Y position for this branch recursively
+          // This handles nested ifelse nodes correctly
+          const calculateBranchY = (ifElseNodeId: string, branch: 'true' | 'false', isIfElseNodeItself: boolean = false): number | null => {
+            const currentIfElseNode = nodes.find(n => n.id === ifElseNodeId);
+            if (!currentIfElseNode) return null;
+            
+            const currentIfElsePosition = dagreGraph.node(ifElseNodeId);
+            if (!currentIfElsePosition) return null;
+            
+            // Check if this ifelse node is itself in a branch
+            let parentBranchInfo: { ifElseNodeId: string; branch: 'true' | 'false' } | null = null;
+            for (const [parentIfElseId, parentBranches] of ifElseBranchMap.entries()) {
+              if (parentIfElseId !== ifElseNodeId) {
+                if (parentBranches.true.includes(ifElseNodeId)) {
+                  parentBranchInfo = { ifElseNodeId: parentIfElseId, branch: 'true' };
+                  break;
+                } else if (parentBranches.false.includes(ifElseNodeId)) {
+                  parentBranchInfo = { ifElseNodeId: parentIfElseId, branch: 'false' };
+                  break;
+                }
+              }
+            }
+            
+            // If this ifelse is in a parent branch, recursively calculate the parent's Y
+            if (parentBranchInfo) {
+              const parentY = calculateBranchY(parentBranchInfo.ifElseNodeId, parentBranchInfo.branch, false);
+              if (parentY !== null) {
+                // If this is the ifelse node itself (not its branches), use the parent branch's Y
+                if (isIfElseNodeItself) {
+                  return parentY;
+                }
+                // Otherwise, use the parent branch's Y as base, then apply this branch's offset
+                return branch === 'true' 
+                  ? parentY - nodeSep
+                  : parentY + nodeSep;
+              }
+            }
+            
+            // Base case: this ifelse is not in a branch
+            if (isIfElseNodeItself) {
+              // If it's the ifelse node itself and not in a branch, use its dagre position
+              return currentIfElsePosition.y;
+            }
+            // Otherwise, calculate branch Y relative to ifelse position
+            return branch === 'true'
+              ? currentIfElsePosition.y - nodeSep
+              : currentIfElsePosition.y + nodeSep;
+          };
+          
+          // Special case: if this node IS the ifelse node itself and it's in a branch, position it in that branch
+          if (node.id === branchInfo.ifElseNodeId) {
+            const ifElseY = calculateBranchY(branchInfo.ifElseNodeId, branchInfo.branch, true);
+            if (ifElseY !== null) {
+              x = nodeWithPosition.x - w / 2;
+              y = ifElseY - h / 2;
+            }
+          } else {
+            // Regular node in a branch
+            // Check if this node is in a branch of a nested ifelse (ifelse within ifelse)
+            // If so, we need to check if it belongs to the nested ifelse's branch, not the parent's
+            let isInNestedIfElseBranch = false;
+            let nestedBranchInfo: { ifElseNodeId: string; branch: 'true' | 'false' } | null = null;
+            
+            // Check if this node belongs to a nested ifelse's branch
+            for (const [nestedIfElseId, nestedBranches] of ifElseBranchMap.entries()) {
+              if (nestedIfElseId !== branchInfo.ifElseNodeId) {
+                // Check if the nested ifelse is in the current branch
+                const nestedIfElseInCurrentBranch = 
+                  branchInfo.branch === 'true' 
+                    ? ifElseBranchMap.get(branchInfo.ifElseNodeId)?.true.includes(nestedIfElseId)
+                    : ifElseBranchMap.get(branchInfo.ifElseNodeId)?.false.includes(nestedIfElseId);
+                
+                if (nestedIfElseInCurrentBranch) {
+                  // Check if this node belongs to the nested ifelse's branch
+                  if (nestedBranches.true.includes(node.id)) {
+                    isInNestedIfElseBranch = true;
+                    nestedBranchInfo = { ifElseNodeId: nestedIfElseId, branch: 'true' };
+                    break;
+                  } else if (nestedBranches.false.includes(node.id)) {
+                    isInNestedIfElseBranch = true;
+                    nestedBranchInfo = { ifElseNodeId: nestedIfElseId, branch: 'false' };
+                    break;
+                  }
+                }
+              }
+            }
+            
+            if (isInNestedIfElseBranch && nestedBranchInfo) {
+              // This node is in a nested ifelse's branch - use the nested ifelse's branch Y
+              const nestedBranchY = calculateBranchY(nestedBranchInfo.ifElseNodeId, nestedBranchInfo.branch, false);
+              if (nestedBranchY !== null) {
+                x = nodeWithPosition.x - w / 2;
+                y = nestedBranchY - h / 2;
+              }
+            } else {
+              // Regular node in parent branch
+              const branchY = calculateBranchY(branchInfo.ifElseNodeId, branchInfo.branch, false);
+              
+              if (branchY !== null) {
+                // All nodes in this branch should have the same Y position (aligned in a horizontal line)
+                // X position comes from dagre layout (horizontal progression through the workflow)
+                x = nodeWithPosition.x - w / 2;
+                y = branchY - h / 2;
+              }
+            }
+          }
+        }
+      }
       
       return {
         ...node,
