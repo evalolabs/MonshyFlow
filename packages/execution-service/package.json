@@ -15,7 +15,7 @@
   "type": "commonjs",
   "dependencies": {
     "@monshy/core": "workspace:*",
-    "@openai/agents": "^0.1.10",
+    "@openai/agents": "^0.4.3",
     "@types/nodemailer": "^7.0.4",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
