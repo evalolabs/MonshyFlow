@@ -22,7 +22,7 @@
     "zod": "^3.25.76",
     "cron-parser": "^4.9.0",
     "axios": "^1.12.2",
-    "express-rate-limit": "^7.4.1",
+    "express-rate-limit": "^8.2.1",
     "helmet": "^8.0.0",
     "uuid": "^11.0.3"
   },

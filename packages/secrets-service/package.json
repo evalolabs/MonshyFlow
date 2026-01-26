@@ -22,7 +22,7 @@
     "tsyringe": "^4.10.0",
     "zod": "^3.25.76",
     "bcrypt": "^5.1.1",
-    "express-rate-limit": "^7.4.1",
+    "express-rate-limit": "^8.2.1",
     "helmet": "^8.0.0",
     "uuid": "^11.0.3"
   },
