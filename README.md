@@ -196,6 +196,14 @@ We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
+## 🔒 Security
+
+For security vulnerabilities, please see [SECURITY.md](./SECURITY.md) for reporting guidelines.
+
+## 🤝 Contributing
+
+We welcome contributions! Please read our [Contributing Guide](./CONTRIBUTING.md) and [Code of Conduct](./CODE_OF_CONDUCT.md) before submitting pull requests.
+
 ---
 
 ## 🙏 Acknowledgments

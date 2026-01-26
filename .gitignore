@@ -152,6 +152,7 @@ uploads/
 Monshy/
 strategy/
 analysis/
+.private/
 
 # Build outputs
 [Dd]ebug/

@@ -1,73 +1,73 @@
 # MonshyFlow Documentation
 
-Welcome to the MonshyFlow documentation. This directory contains comprehensive guides for developers working on the platform.
+Welcome to the MonshyFlow documentation! This directory contains all public documentation for developers, contributors, and users.
 
-## 📚 Available Documentation
+## 📚 Documentation Index
 
-### Core Development Guides
+### For Developers
 
-- **[Node Development Guide](./NODE_DEVELOPMENT_GUIDE.md)** ⭐ **START HERE**
-  - Complete guide for adding and modifying nodes
-  - Understanding the registry system
-  - Step-by-step instructions with examples
-  - Best practices and troubleshooting
+#### Getting Started
+- **[Node Development Guide](./NODE_DEVELOPMENT_GUIDE.md)** ⭐ **START HERE** - Complete guide for adding and modifying nodes
+- **[Architecture Overview](../ARCHITECTURE.md)** - System architecture and design decisions
+- **[Frontend README](../frontend/README.md)** - Frontend setup and development
 
-### Architecture Documentation
+#### Development Guides
+- **[Contributing Guide](../CONTRIBUTING.md)** - How to contribute to MonshyFlow
+- **[Code of Conduct](../CODE_OF_CONDUCT.md)** - Community guidelines
+- **[Security Policy](../SECURITY.md)** - Security reporting and best practices
 
-- **Frontend Analysis** - See `analysis/FRONTEND_ANALYSIS.md`
-- **Backend Architecture** - See individual service READMEs in `packages/`
+### For Users
 
-### Deployment Documentation
+#### Deployment
+- **[Azure Deployment Guide](../azure-deployment/README.md)** - Deploy to Azure Container Apps
+- **[Environment Variables](../azure-deployment/ENVIRONMENT_VARIABLES.md)** - Configuration reference
+- **[Docker Setup](../README.md#docker-recommended)** - Local development with Docker
 
-- **Azure Deployment** - See `azure-deployment/README.md`
-- **Environment Variables** - See `azure-deployment/ENVIRONMENT_VARIABLES.md`
+#### API & Integration
+- **[Kong Gateway](../kong/README.md)** - API Gateway configuration
+- **[Rate Limiting](../kong/RATE_LIMITING.md)** - Rate limiting setup
 
-### API Documentation
+### System Documentation
 
-- **API Integrations** - See `shared/apiIntegrations/`
-- **API Authentication Categories** - See `docs/API_INTEGRATIONS_AUTH_CATEGORIES.md` (if generated)
+- **[Changelog](../CHANGELOG.md)** - Version history and changes
+- **[Main README](../README.md)** - Project overview and quick start
 
-## 🚀 Quick Start for New Developers
+## 🎯 Quick Links
 
-1. **Read the Node Development Guide**
-   - Essential for understanding how nodes work
-   - Explains the registry system (critical!)
-   - Provides examples and best practices
+- **New to MonshyFlow?** → Start with [README.md](../README.md)
+- **Want to add a node?** → Read [Node Development Guide](./NODE_DEVELOPMENT_GUIDE.md)
+- **Want to contribute?** → Check [Contributing Guide](../CONTRIBUTING.md)
+- **Found a security issue?** → See [Security Policy](../SECURITY.md)
+- **Deploying to production?** → Follow [Azure Deployment Guide](../azure-deployment/README.md)
 
-2. **Understand the Registry System**
-   - `shared/registry.json` is the Single Source of Truth
-   - Always run `npm run generate:registry` after changes
-   - Never hardcode node metadata
+## 📝 Documentation Structure
 
-3. **Study Existing Nodes**
-   - Simple: `delay` node
-   - Medium: `transform` node
-   - Complex: `agent` node, `code` node
+```
+docs/
+├── README.md (this file)
+└── NODE_DEVELOPMENT_GUIDE.md
 
-## 📝 Contributing
+../ (root)
+├── README.md - Main project documentation
+├── CONTRIBUTING.md - Contribution guidelines
+├── CODE_OF_CONDUCT.md - Community standards
+├── SECURITY.md - Security policy
+├── CHANGELOG.md - Version history
+├── ARCHITECTURE.md - System architecture
+├── azure-deployment/ - Deployment documentation
+└── kong/ - API Gateway documentation
+```
 
-When adding new features or modifying existing ones:
+## 🤝 Contributing to Documentation
 
-1. **Check existing documentation first**
-2. **Update documentation if needed**
-3. **Follow the patterns in existing code**
-4. **Run validation scripts before committing**
+Documentation improvements are always welcome! Please:
 
-## 🔍 Finding Information
+1. Read the [Contributing Guide](../CONTRIBUTING.md)
+2. Make your changes
+3. Submit a Pull Request
 
-- **Node Development:** See [NODE_DEVELOPMENT_GUIDE.md](./NODE_DEVELOPMENT_GUIDE.md)
-- **Frontend Components:** See `frontend/src/components/`
-- **Backend Services:** See `packages/`
-- **Registry System:** See `shared/registry.json` and `.cursor/rules/registry-system.md`
-
-## ❓ Need Help?
-
-1. Check the relevant documentation
-2. Review existing code examples
-3. Check registry validation errors
-4. Review generated metadata files
+Good documentation helps everyone! 🎉
 
 ---
 
-**Last Updated:** 2026-01-17
-
+**Last Updated**: 2025-01-26
