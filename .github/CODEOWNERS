@@ -1,0 +1,28 @@
+# Code Owners
+# This file defines who owns which parts of the codebase
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global owners - all files
+* @evalolabs
+
+# Frontend
+/frontend/ @evalolabs
+
+# Backend Services
+/packages/ @evalolabs
+
+# Documentation
+/docs/ @evalolabs
+*.md @evalolabs
+
+# Configuration files
+/.github/ @evalolabs
+/docker-compose.yml @evalolabs
+/package.json @evalolabs
+/pnpm-lock.yaml @evalolabs
+/tsconfig.base.json @evalolabs
+
+# Deployment
+/azure-deployment/ @evalolabs
+/kong/ @evalolabs
+
