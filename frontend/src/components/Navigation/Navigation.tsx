@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Key, Building2, LogOut, Workflow, Shield, Eye, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, Key, Building2, LogOut, Workflow, Shield, Eye, ShieldCheck, Globe } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useIsSuperAdmin, useIsTenantAdmin } from '../../utils/permissions';
 
@@ -38,6 +38,12 @@ export function Navigation() {
       name: 'Workflows',
       path: '/',
       icon: Workflow,
+      permission: null, // Always visible
+    },
+    {
+      name: 'Public Workflows',
+      path: '/workflows/public',
+      icon: Globe,
       permission: null, // Always visible
     },
     {

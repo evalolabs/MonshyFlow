@@ -1,5 +1,6 @@
 // Export all models
 export * from './Workflow';
+export * from './WorkflowComment';
 export * from './User';
 export * from './Tenant';
 export * from './ApiKey';

@@ -5,6 +5,8 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { WorkflowEditorPage } from './pages/WorkflowEditorPage';
 import { WebhookTestPage } from './pages/WebhookTestPage';
+import { PublicWorkflowsPage } from './pages/PublicWorkflowsPage';
+import { PublicWorkflowDetailPage } from './pages/PublicWorkflowDetailPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { UserManagementPage } from './pages/UserManagementPage';
 import { SecretsManagementPage } from './pages/SecretsManagementPage';
@@ -56,6 +58,8 @@ function App() {
                     <Route path="/admin/tenants" element={<ProtectedRoute><TenantManagementPage /></ProtectedRoute>} />
                     <Route path="/workflow/:id" element={<ProtectedRoute><WorkflowEditorPage /></ProtectedRoute>} />
                     <Route path="/webhook-test/:workflowId" element={<ProtectedRoute><WebhookTestPage /></ProtectedRoute>} />
+                    <Route path="/workflows/public" element={<ProtectedRoute><PublicWorkflowsPage /></ProtectedRoute>} />
+                    <Route path="/workflows/public/:id" element={<ProtectedRoute><PublicWorkflowDetailPage /></ProtectedRoute>} />
                   </Routes>
                 </main>
               </div>

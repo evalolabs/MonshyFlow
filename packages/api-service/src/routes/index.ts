@@ -85,6 +85,15 @@ export function setupRoutes(app: Express, container: DependencyContainer): void 
   // Get Published Workflows (spezifisch, vor :id)
   app.get('/api/workflows/published', authMiddleware, (req, res) => workflowController.getPublished(req, res));
   
+  // Public Workflows Routes (spezifisch, vor :id)
+  app.get('/api/workflows/public', authMiddleware, (req, res) => workflowController.getPublicWorkflows(req, res));
+  app.get('/api/workflows/public/:id', authMiddleware, (req, res) => workflowController.getPublicWorkflowById(req, res));
+  app.post('/api/workflows/public/:id/clone', authMiddleware, (req, res) => workflowController.clonePublicWorkflow(req, res));
+  app.post('/api/workflows/public/:id/star', authMiddleware, (req, res) => workflowController.toggleStar(req, res));
+  app.get('/api/workflows/public/:id/comments', authMiddleware, (req, res) => workflowController.getComments(req, res));
+  app.post('/api/workflows/public/:id/comments', authMiddleware, (req, res) => workflowController.addComment(req, res));
+  app.delete('/api/workflows/public/comments/:commentId', authMiddleware, (req, res) => workflowController.deleteComment(req, res));
+  
   // Generische Routes (nach spezifischen Routes)
   app.get('/api/workflows', authMiddleware, (req, res) => workflowController.getAll(req, res));
   app.get('/api/workflows/:id', authMiddleware, (req, res) => workflowController.getById(req, res));

@@ -39,6 +39,10 @@ export class WorkflowRepository {
     edges?: any[];
     tenantId: string;
     userId: string;
+    clonedFrom?: string;
+    originalAuthorId?: string;
+    cloneCount?: number;
+    [key: string]: any; // Allow additional fields
   }): Promise<IWorkflow> {
     try {
       const workflow = new Workflow({
@@ -71,6 +75,11 @@ export class WorkflowRepository {
     isActive: boolean;
     scheduleConfig: any;
     publishedAt: Date;
+    cloneCount: number;
+    clonedFrom: string;
+    originalAuthorId: string;
+    starCount: number;
+    starredBy: string[];
   }>): Promise<IWorkflow> {
     try {
       const workflow = await Workflow.findByIdAndUpdate(

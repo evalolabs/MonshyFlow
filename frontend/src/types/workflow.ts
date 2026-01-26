@@ -42,6 +42,13 @@ export interface WorkflowEdge {
   targetHandle?: string;
 }
 
+export interface ScheduleConfig {
+  enabled: boolean;
+  cronExpression?: string;
+  timezone?: string;
+  nextRun?: Date;
+}
+
 export interface Workflow {
   id?: string;
   name: string;
@@ -60,6 +67,12 @@ export interface Workflow {
   lastExecutedAt?: string;
   tenantId?: string;
   
+  // Activation
+  isActive?: boolean;
+  
+  // Scheduling
+  scheduleConfig?: ScheduleConfig;
+  
   // Agents SDK Integration
   useAgentsSDK?: boolean;
   enableStreaming?: boolean;
@@ -70,6 +83,41 @@ export interface Workflow {
   
   // Workflow Variables - can store any data type (objects, arrays, primitives)
   variables?: Record<string, any>;
+  
+  // Clone tracking
+  clonedFrom?: string; // workflowId of the original workflow
+  cloneCount?: number; // Number of times this workflow has been cloned
+  originalAuthorId?: string; // userId of the original author (for cloned workflows)
+}
+
+export interface PublicWorkflowPreview {
+  id: string;
+  name: string;
+  description?: string;
+  tags?: string[];
+  userId: string;
+  authorName?: string;
+  authorEmail?: string;
+  tenantId: string;
+  createdAt?: string;
+  updatedAt?: string;
+  publishedAt?: string;
+  cloneCount?: number;
+  starCount?: number;
+  nodeCount?: number;
+  edgeCount?: number;
+}
+
+export interface WorkflowComment {
+  id: string;
+  workflowId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  content: string;
+  createdAt?: string;
+  updatedAt?: string;
+  parentCommentId?: string;
 }
 
 export interface CreateWorkflowRequest {

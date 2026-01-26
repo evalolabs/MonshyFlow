@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ReactFlowProvider } from '@xyflow/react';
 import type { Node, Edge } from '@xyflow/react';
+import { Settings } from 'lucide-react';
 import { WorkflowCanvas } from '../components/WorkflowBuilder/WorkflowCanvas';
+import { WorkflowSettingsPanel } from '../components/WorkflowBuilder/WorkflowSettingsPanel';
 import { workflowService } from '../services/workflowService';
 import type { Workflow } from '../types/workflow';
 import { computeEffectiveNodeType } from '../components/WorkflowBuilder/utils/nodeConfigUtils';
@@ -15,6 +17,7 @@ export function WorkflowEditorPage() {
   const [loading, setLoading] = useState(true);
   const [workflowName, setWorkflowName] = useState('New Workflow');
   const [showNameDialog, setShowNameDialog] = useState(false);
+  const [showSettingsPanel, setShowSettingsPanel] = useState(false);
 
   useEffect(() => {
     if (id && id !== 'new') {
@@ -509,6 +512,14 @@ export function WorkflowEditorPage() {
         </div>
         <div className="flex items-center gap-3">
           <button
+            onClick={() => setShowSettingsPanel(true)}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+            title="Workflow Settings"
+          >
+            <Settings className="h-4 w-4" />
+            Settings
+          </button>
+          <button
             onClick={() => setShowNameDialog(true)}
             className="text-sm text-blue-600 hover:text-blue-700"
           >
@@ -540,6 +551,22 @@ export function WorkflowEditorPage() {
           />
         </ReactFlowProvider>
       </div>
+
+      {/* Settings Panel */}
+      {showSettingsPanel && workflow && (
+        <WorkflowSettingsPanel
+          workflow={workflow as any}
+          onClose={() => setShowSettingsPanel(false)}
+          onUpdateWorkflow={async (updates) => {
+            // Update local state
+            setWorkflow({ ...workflow, ...updates });
+            // Update workflow name in header if it changed
+            if (updates.name) {
+              setWorkflowName(updates.name);
+            }
+          }}
+        />
+      )}
 
       {/* Name Dialog */}
       {showNameDialog && (

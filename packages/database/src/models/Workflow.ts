@@ -56,6 +56,13 @@ export interface IWorkflow extends Document {
   isActive: boolean;
   scheduleConfig?: IScheduleConfig;
   variables?: Record<string, any>; // Workflow variables - can store any data type
+  // Clone tracking
+  clonedFrom?: string; // workflowId of the original workflow
+  cloneCount?: number; // Number of times this workflow has been cloned
+  originalAuthorId?: string; // userId of the original author (for cloned workflows)
+  // Social features
+  starCount?: number; // Number of stars/likes
+  starredBy?: string[]; // Array of userIds who starred this workflow
 }
 
 const NodeSchema = new Schema<INode>({
@@ -118,6 +125,13 @@ const WorkflowSchema = new Schema<IWorkflow>({
   isActive: { type: Boolean, default: true },
   scheduleConfig: { type: ScheduleConfigSchema },
   variables: { type: Schema.Types.Mixed, default: {} }, // Workflow variables
+  // Clone tracking
+  clonedFrom: { type: String }, // workflowId of the original workflow
+  cloneCount: { type: Number, default: 0 }, // Number of times this workflow has been cloned
+  originalAuthorId: { type: String }, // userId of the original author (for cloned workflows)
+  // Social features
+  starCount: { type: Number, default: 0 }, // Number of stars/likes
+  starredBy: { type: [String], default: [] }, // Array of userIds who starred this workflow
 }, {
   timestamps: true,
   collection: 'workflows',
@@ -127,6 +141,8 @@ const WorkflowSchema = new Schema<IWorkflow>({
 WorkflowSchema.index({ tenantId: 1, createdAt: -1 });
 WorkflowSchema.index({ tenantId: 1, status: 1 });
 WorkflowSchema.index({ userId: 1 });
+WorkflowSchema.index({ isPublished: 1, createdAt: -1 }); // For public workflows listing
+WorkflowSchema.index({ clonedFrom: 1 }); // For tracking clones
 
 export const Workflow = mongoose.model<IWorkflow>('Workflow', WorkflowSchema);
 

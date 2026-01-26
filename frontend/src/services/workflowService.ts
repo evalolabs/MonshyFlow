@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { Workflow, CreateWorkflowRequest, ExecutionRequest, ExecutionResponse, Execution } from '../types/workflow';
+import type { Workflow, CreateWorkflowRequest, ExecutionRequest, ExecutionResponse, Execution, PublicWorkflowPreview, WorkflowComment } from '../types/workflow';
 import type { StartNodeUpdateRequest } from '../types/startNode';
 
 export const workflowService = {
@@ -158,6 +158,84 @@ export const workflowService = {
   async getPublishedWorkflows(): Promise<Workflow[]> {
     const response = await api.get('/api/workflows/published');
     return response.data;
+  },
+
+  // Get all public workflows (for browsing)
+  async getPublicWorkflows(): Promise<PublicWorkflowPreview[]> {
+    const response = await api.get<{ success: boolean; data: PublicWorkflowPreview[] }>('/api/workflows/public');
+    if (response.data.success && Array.isArray(response.data.data)) {
+      return response.data.data;
+    }
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return [];
+  },
+
+  // Get a single public workflow by ID (read-only)
+  async getPublicWorkflowById(id: string): Promise<Workflow> {
+    const response = await api.get<{ success: boolean; data: Workflow }>(`/api/workflows/public/${id}`);
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    if (response.data && !response.data.success) {
+      return response.data as unknown as Workflow;
+    }
+    throw new Error('Invalid response format');
+  },
+
+  // Clone a public workflow
+  async clonePublicWorkflow(workflowId: string, name?: string, description?: string): Promise<{ id: string; name: string; description?: string }> {
+    const response = await api.post<{ success: boolean; data: { id: string; name: string; description?: string } }>(
+      `/api/workflows/public/${workflowId}/clone`,
+      { name, description }
+    );
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error('Failed to clone workflow');
+  },
+
+  // Toggle star on a public workflow
+  async toggleStar(workflowId: string): Promise<{ starred: boolean; starCount: number }> {
+    const response = await api.post<{ success: boolean; data: { starred: boolean; starCount: number } }>(
+      `/api/workflows/public/${workflowId}/star`
+    );
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error('Failed to toggle star');
+  },
+
+  // Get comments for a public workflow
+  async getComments(workflowId: string): Promise<WorkflowComment[]> {
+    const response = await api.get<{ success: boolean; data: WorkflowComment[] }>(
+      `/api/workflows/public/${workflowId}/comments`
+    );
+    if (response.data.success && Array.isArray(response.data.data)) {
+      return response.data.data;
+    }
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return [];
+  },
+
+  // Add a comment to a public workflow
+  async addComment(workflowId: string, content: string, parentCommentId?: string): Promise<WorkflowComment> {
+    const response = await api.post<{ success: boolean; data: WorkflowComment }>(
+      `/api/workflows/public/${workflowId}/comments`,
+      { content, parentCommentId }
+    );
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error('Failed to add comment');
+  },
+
+  // Delete a comment
+  async deleteComment(commentId: string): Promise<void> {
+    await api.delete(`/api/workflows/public/comments/${commentId}`);
   },
 
   // Execution methods

@@ -465,6 +465,108 @@ export class WorkflowController {
     }
   }
 
+  /**
+   * Get all public workflows (for browsing)
+   * GET /api/workflows/public
+   */
+  async getPublicWorkflows(req: Request, res: Response): Promise<void> {
+    try {
+      const user = (req as any).user;
+      
+      // Optional: Filter by tenant (for now, show all public workflows)
+      // In the future, we might want to make this configurable
+      const workflows = await this.workflowService.getPublicWorkflows();
+      
+      res.json({ 
+        success: true, 
+        data: workflows
+      });
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to get public workflows');
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+
+  /**
+   * Get a single public workflow by ID (read-only)
+   * GET /api/workflows/public/:id
+   */
+  async getPublicWorkflowById(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      
+      const workflow = await this.workflowService.getPublicWorkflowById(id);
+      
+      res.json({ 
+        success: true, 
+        data: workflow
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Workflow not found') {
+        res.status(404).json({ success: false, error: 'Workflow not found' });
+      } else if (error instanceof Error && error.message === 'Workflow is not published') {
+        res.status(403).json({ success: false, error: 'Workflow is not published' });
+      } else {
+        logger.error({ err: error }, 'Failed to get public workflow');
+        res.status(500).json({ success: false, error: (error as Error).message });
+      }
+    }
+  }
+
+  /**
+   * Clone a public workflow
+   * POST /api/workflows/public/:id/clone
+   */
+  async clonePublicWorkflow(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const user = (req as any).user;
+      const { name, description } = req.body;
+      
+      if (!user || !user.userId || !user.tenantId) {
+        res.status(401).json({ 
+          success: false, 
+          error: 'Unauthorized: User authentication required' 
+        });
+        return;
+      }
+
+      const clonedWorkflow = await this.workflowService.clonePublicWorkflow(
+        id,
+        user.userId || user.id,
+        user.tenantId,
+        name,
+        description
+      );
+
+      const clonedWorkflowObj = clonedWorkflow.toObject ? clonedWorkflow.toObject() : clonedWorkflow;
+      
+      logger.info({ 
+        originalWorkflowId: id, 
+        clonedWorkflowId: clonedWorkflowObj._id || clonedWorkflowObj.id,
+        userId: user.userId 
+      }, 'Workflow cloned');
+
+      res.json({ 
+        success: true, 
+        data: {
+          id: clonedWorkflowObj._id || clonedWorkflowObj.id,
+          name: clonedWorkflowObj.name,
+          description: clonedWorkflowObj.description,
+        }
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Workflow not found') {
+        res.status(404).json({ success: false, error: 'Workflow not found' });
+      } else if (error instanceof Error && error.message === 'Workflow is not published') {
+        res.status(403).json({ success: false, error: 'Workflow is not published' });
+      } else {
+        logger.error({ err: error }, 'Failed to clone workflow');
+        res.status(500).json({ success: false, error: (error as Error).message });
+      }
+    }
+  }
+
   async deleteNode(req: Request, res: Response): Promise<void> {
     try {
       const { workflowId, nodeId } = req.params;
@@ -891,6 +993,178 @@ export class WorkflowController {
         success: false, 
         error: (error as Error).message 
       });
+    }
+  }
+
+  /**
+   * Toggle star on a public workflow
+   * POST /api/workflows/public/:id/star
+   */
+  async toggleStar(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const user = (req as any).user;
+      
+      if (!user || !user.userId) {
+        res.status(401).json({ 
+          success: false, 
+          error: 'Unauthorized: User authentication required' 
+        });
+        return;
+      }
+
+      const result = await this.workflowService.toggleStar(id, user.userId || user.id);
+      
+      logger.info({ 
+        workflowId: id, 
+        userId: user.userId,
+        starred: result.starred 
+      }, 'Workflow star toggled');
+
+      res.json({ 
+        success: true, 
+        data: result
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Workflow not found') {
+        res.status(404).json({ success: false, error: 'Workflow not found' });
+      } else if (error instanceof Error && error.message === 'Workflow is not published') {
+        res.status(403).json({ success: false, error: 'Workflow is not published' });
+      } else {
+        logger.error({ err: error }, 'Failed to toggle star');
+        res.status(500).json({ success: false, error: (error as Error).message });
+      }
+    }
+  }
+
+  /**
+   * Get comments for a public workflow
+   * GET /api/workflows/public/:id/comments
+   */
+  async getComments(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      
+      const comments = await this.workflowService.getComments(id);
+      
+      res.json({ 
+        success: true, 
+        data: comments
+      });
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to get comments');
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  }
+
+  /**
+   * Add a comment to a public workflow
+   * POST /api/workflows/public/:id/comments
+   */
+  async addComment(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const user = (req as any).user;
+      const { content, parentCommentId } = req.body;
+      
+      if (!user || !user.userId) {
+        res.status(401).json({ 
+          success: false, 
+          error: 'Unauthorized: User authentication required' 
+        });
+        return;
+      }
+
+      if (!content || !content.trim()) {
+        res.status(400).json({ 
+          success: false, 
+          error: 'Comment content is required' 
+        });
+        return;
+      }
+
+      const userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Unknown';
+      const userEmail = user.email || 'unknown@example.com';
+
+      const comment = await this.workflowService.addComment(
+        id,
+        user.userId || user.id,
+        userName,
+        userEmail,
+        content.trim(),
+        parentCommentId
+      );
+
+      const commentObj = comment.toObject ? comment.toObject() : comment;
+      
+      logger.info({ 
+        workflowId: id, 
+        commentId: commentObj._id || commentObj.id,
+        userId: user.userId 
+      }, 'Comment added');
+
+      res.json({ 
+        success: true, 
+        data: {
+          id: commentObj._id || commentObj.id,
+          workflowId: commentObj.workflowId,
+          userId: commentObj.userId,
+          userName: commentObj.userName,
+          userEmail: commentObj.userEmail,
+          content: commentObj.content,
+          createdAt: commentObj.createdAt,
+          updatedAt: commentObj.updatedAt,
+          parentCommentId: commentObj.parentCommentId,
+        }
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Workflow not found') {
+        res.status(404).json({ success: false, error: 'Workflow not found' });
+      } else if (error instanceof Error && error.message === 'Workflow is not published') {
+        res.status(403).json({ success: false, error: 'Workflow is not published' });
+      } else {
+        logger.error({ err: error }, 'Failed to add comment');
+        res.status(500).json({ success: false, error: (error as Error).message });
+      }
+    }
+  }
+
+  /**
+   * Delete a comment
+   * DELETE /api/workflows/public/comments/:commentId
+   */
+  async deleteComment(req: Request, res: Response): Promise<void> {
+    try {
+      const { commentId } = req.params;
+      const user = (req as any).user;
+      
+      if (!user || !user.userId) {
+        res.status(401).json({ 
+          success: false, 
+          error: 'Unauthorized: User authentication required' 
+        });
+        return;
+      }
+
+      await this.workflowService.deleteComment(commentId, user.userId || user.id);
+      
+      logger.info({ 
+        commentId, 
+        userId: user.userId 
+      }, 'Comment deleted');
+
+      res.json({ 
+        success: true 
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Comment not found') {
+        res.status(404).json({ success: false, error: 'Comment not found' });
+      } else if (error instanceof Error && error.message === 'You can only delete your own comments') {
+        res.status(403).json({ success: false, error: 'You can only delete your own comments' });
+      } else {
+        logger.error({ err: error }, 'Failed to delete comment');
+        res.status(500).json({ success: false, error: (error as Error).message });
+      }
     }
   }
 }

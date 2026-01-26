@@ -1,6 +1,8 @@
 import { injectable, inject } from 'tsyringe';
 import { WorkflowRepository } from '../repositories/WorkflowRepository';
 import { logger } from '@monshy/core';
+import { User, WorkflowComment } from '@monshy/database';
+import mongoose from 'mongoose';
 
 export interface CreateWorkflowDto {
   name: string;
@@ -189,6 +191,283 @@ export class WorkflowService {
       ? await this.workflowRepo.findByTenantId(tenantId)
       : await this.workflowRepo.findAll();
     return workflows.filter((w: any) => w.isPublished === true);
+  }
+
+  /**
+   * Get all public workflows (for browsing)
+   * Returns only metadata, not full workflow data
+   */
+  async getPublicWorkflows(tenantId?: string) {
+    // For now, return all public workflows (tenant-agnostic)
+    // In the future, we might want to filter by tenant or make it configurable
+    const workflows = await this.workflowRepo.findAll();
+    const publicWorkflows = workflows.filter((w: any) => w.isPublished === true);
+    
+    // Get user information for all workflows
+    // Filter out invalid ObjectIds to prevent MongoDB errors
+    const userIds = [...new Set(publicWorkflows.map((w: any) => {
+      const obj = w.toObject ? w.toObject() : w;
+      return obj.userId;
+    }).filter((id: any) => {
+      // Only include valid MongoDB ObjectIds
+      if (!id) return false;
+      const idStr = id.toString();
+      return mongoose.Types.ObjectId.isValid(idStr);
+    }))];
+    
+    // Only query users if we have valid ObjectIds
+    let users: any[] = [];
+    let userMap = new Map();
+    
+    if (userIds.length > 0) {
+      try {
+        users = await User.find({ _id: { $in: userIds } }).exec();
+        userMap = new Map(users.map((u: any) => [u._id.toString(), u]));
+      } catch (err) {
+        logger.warn({ err, userIds }, 'Failed to fetch user information for public workflows');
+        // Continue without user info rather than failing completely
+      }
+    }
+    
+    return publicWorkflows.map((w: any) => {
+      const workflowObj = w.toObject ? w.toObject() : w;
+      const userId = workflowObj.userId?.toString();
+      const user = userId ? userMap.get(userId) : null;
+      
+      return {
+        id: workflowObj._id || workflowObj.id,
+        name: workflowObj.name,
+        description: workflowObj.description,
+        tags: workflowObj.tags || [],
+        userId: workflowObj.userId,
+        authorName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email : 'Unknown',
+        authorEmail: user?.email || 'unknown@example.com',
+        tenantId: workflowObj.tenantId,
+        createdAt: workflowObj.createdAt,
+        updatedAt: workflowObj.updatedAt,
+        publishedAt: workflowObj.publishedAt,
+        cloneCount: workflowObj.cloneCount || 0,
+        starCount: workflowObj.starCount || 0,
+        nodeCount: workflowObj.nodes?.length || 0,
+        edgeCount: workflowObj.edges?.length || 0,
+      };
+    });
+  }
+
+  /**
+   * Get a single public workflow by ID (read-only)
+   */
+  async getPublicWorkflowById(workflowId: string) {
+    const workflow = await this.workflowRepo.findById(workflowId);
+    if (!workflow) {
+      throw new Error('Workflow not found');
+    }
+
+    const workflowObj = workflow.toObject ? workflow.toObject() : workflow;
+    
+    if (!workflowObj.isPublished) {
+      throw new Error('Workflow is not published');
+    }
+
+    // Get author information
+    let authorName = 'Unknown';
+    let authorEmail = 'unknown@example.com';
+    try {
+      const user = await User.findById(workflowObj.userId).exec();
+      if (user) {
+        authorName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Unknown';
+        authorEmail = user.email || 'unknown@example.com';
+      }
+    } catch (err) {
+      logger.warn({ err, userId: workflowObj.userId }, 'Failed to fetch author info');
+    }
+
+    // Return full workflow data but exclude sensitive information
+    return {
+      id: workflowObj._id || workflowObj.id,
+      name: workflowObj.name,
+      description: workflowObj.description,
+      version: workflowObj.version,
+      nodes: workflowObj.nodes || [],
+      edges: workflowObj.edges || [],
+      tags: workflowObj.tags || [],
+      useAgentsSDK: workflowObj.useAgentsSDK || false,
+      enableStreaming: workflowObj.enableStreaming || false,
+      guardrails: workflowObj.guardrails,
+      scheduleConfig: workflowObj.scheduleConfig,
+      userId: workflowObj.userId,
+      tenantId: workflowObj.tenantId,
+      createdAt: workflowObj.createdAt,
+      updatedAt: workflowObj.updatedAt,
+      publishedAt: workflowObj.publishedAt,
+      cloneCount: workflowObj.cloneCount || 0,
+      starCount: workflowObj.starCount || 0,
+      starredBy: workflowObj.starredBy || [],
+      // Author info
+      authorName,
+      authorEmail,
+      // Exclude: variables (user-specific), secrets (never exposed)
+      // Exclude: executionCount, lastExecutedAt (private stats)
+    };
+  }
+
+  /**
+   * Star/unstar a public workflow
+   */
+  async toggleStar(workflowId: string, userId: string): Promise<{ starred: boolean; starCount: number }> {
+    const workflow = await this.workflowRepo.findById(workflowId);
+    if (!workflow) {
+      throw new Error('Workflow not found');
+    }
+
+    const workflowObj = workflow.toObject ? workflow.toObject() : workflow;
+    
+    if (!workflowObj.isPublished) {
+      throw new Error('Workflow is not published');
+    }
+
+    const starredBy = workflowObj.starredBy || [];
+    const isStarred = starredBy.includes(userId);
+    
+    let newStarredBy: string[];
+    if (isStarred) {
+      // Unstar
+      newStarredBy = starredBy.filter((id: string) => id !== userId);
+    } else {
+      // Star
+      newStarredBy = [...starredBy, userId];
+    }
+
+    await this.workflowRepo.update(workflowId, {
+      starredBy: newStarredBy,
+      starCount: newStarredBy.length,
+    });
+
+    return {
+      starred: !isStarred,
+      starCount: newStarredBy.length,
+    };
+  }
+
+  /**
+   * Get comments for a public workflow
+   */
+  async getComments(workflowId: string) {
+    const comments = await WorkflowComment.find({ workflowId })
+      .sort({ createdAt: -1 })
+      .exec();
+    
+    return comments.map((c: any) => {
+      const commentObj = c.toObject ? c.toObject() : c;
+      return {
+        id: commentObj._id || commentObj.id,
+        workflowId: commentObj.workflowId,
+        userId: commentObj.userId,
+        userName: commentObj.userName || 'Unknown',
+        userEmail: commentObj.userEmail || 'unknown@example.com',
+        content: commentObj.content,
+        createdAt: commentObj.createdAt,
+        updatedAt: commentObj.updatedAt,
+        parentCommentId: commentObj.parentCommentId,
+      };
+    });
+  }
+
+  /**
+   * Add a comment to a public workflow
+   */
+  async addComment(workflowId: string, userId: string, userName: string, userEmail: string, content: string, parentCommentId?: string) {
+    // Verify workflow exists and is published
+    const workflow = await this.workflowRepo.findById(workflowId);
+    if (!workflow) {
+      throw new Error('Workflow not found');
+    }
+
+    const workflowObj = workflow.toObject ? workflow.toObject() : workflow;
+    if (!workflowObj.isPublished) {
+      throw new Error('Workflow is not published');
+    }
+
+    const comment = new WorkflowComment({
+      workflowId,
+      userId,
+      userName,
+      userEmail,
+      content,
+      parentCommentId,
+    });
+
+    return await comment.save();
+  }
+
+  /**
+   * Delete a comment
+   */
+  async deleteComment(commentId: string, userId: string) {
+    const comment = await WorkflowComment.findById(commentId);
+    if (!comment) {
+      throw new Error('Comment not found');
+    }
+
+    const commentObj = comment.toObject ? comment.toObject() : comment;
+    
+    // Only allow user to delete their own comments
+    if (commentObj.userId !== userId) {
+      throw new Error('You can only delete your own comments');
+    }
+
+    await WorkflowComment.findByIdAndDelete(commentId);
+  }
+
+  /**
+   * Clone a public workflow
+   */
+  async clonePublicWorkflow(workflowId: string, userId: string, tenantId: string, name?: string, description?: string) {
+    // Get the public workflow
+    const originalWorkflow = await this.workflowRepo.findById(workflowId);
+    if (!originalWorkflow) {
+      throw new Error('Workflow not found');
+    }
+
+    const originalWorkflowObj = originalWorkflow.toObject ? originalWorkflow.toObject() : originalWorkflow;
+    
+    if (!originalWorkflowObj.isPublished) {
+      throw new Error('Workflow is not published');
+    }
+
+    // Create cloned workflow
+    const clonedWorkflowData: any = {
+      name: name || `${originalWorkflowObj.name} (Clone)`,
+      description: description || originalWorkflowObj.description || '',
+      version: 1,
+      nodes: JSON.parse(JSON.stringify(originalWorkflowObj.nodes || [])), // Deep clone
+      edges: JSON.parse(JSON.stringify(originalWorkflowObj.edges || [])), // Deep clone
+      tags: [...(originalWorkflowObj.tags || [])],
+      useAgentsSDK: originalWorkflowObj.useAgentsSDK || false,
+      enableStreaming: originalWorkflowObj.enableStreaming || false,
+      guardrails: originalWorkflowObj.guardrails ? JSON.parse(JSON.stringify(originalWorkflowObj.guardrails)) : undefined,
+      scheduleConfig: originalWorkflowObj.scheduleConfig ? JSON.parse(JSON.stringify(originalWorkflowObj.scheduleConfig)) : undefined,
+      userId: userId,
+      tenantId: tenantId,
+      isPublished: false, // Cloned workflows are always drafts
+      status: 'draft',
+      isActive: true,
+      executionCount: 0,
+      variables: {}, // Start with empty variables (user needs to configure)
+      clonedFrom: workflowId, // Reference to original
+      originalAuthorId: originalWorkflowObj.userId, // Store original author
+    };
+
+    // Create the cloned workflow
+    const clonedWorkflow = await this.workflowRepo.create(clonedWorkflowData);
+
+    // Increment clone count on original workflow
+    const currentCloneCount = originalWorkflowObj.cloneCount || 0;
+    await this.workflowRepo.update(workflowId, {
+      cloneCount: currentCloneCount + 1,
+    });
+
+    return clonedWorkflow;
   }
 
   async deleteNode(workflowId: string, nodeId: string) {
