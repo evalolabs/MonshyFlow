@@ -20,6 +20,25 @@ Closes #(issue number)
 - [ ] ⚡ Performance improvement
 - [ ] ✅ Test updates
 
+## ⚠️ Breaking Changes (if applicable)
+
+<!-- If you checked "💥 Breaking change" above, please fill this out -->
+
+- [ ] I have read the [Backward Compatibility Guidelines](../frontend/CONTRIBUTING.md#-backward-compatibility--breaking-changes)
+- [ ] I have created an issue to discuss this breaking change (#issue-number)
+- [ ] I have provided migration documentation/scripts
+- [ ] I have tested with existing workflow data
+- [ ] I have updated the CHANGELOG.md with breaking change notice
+
+### Migration Path
+<!-- Describe how users can migrate their existing workflows -->
+
+### Affected Areas
+<!-- List what will break (node types, schemas, APIs, etc.) -->
+
+### Why is this breaking change necessary?
+<!-- Explain why this breaking change is needed and cannot be avoided -->
+
 ## 🧪 Testing
 
 <!-- Describe the tests you ran and their results -->

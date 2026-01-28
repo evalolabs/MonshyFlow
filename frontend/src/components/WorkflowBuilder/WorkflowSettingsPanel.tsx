@@ -7,7 +7,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { X, Settings, Zap, Shield, Play, Pause, Calendar, BarChart3, FileText, Globe } from 'lucide-react';
 import { workflowService } from '../../services/workflowService';
-import type { Workflow, ScheduleConfig } from '../../types/workflow';
+import type { Workflow } from '../../types/workflow';
 
 interface WorkflowSettingsPanelProps {
   workflow: Workflow;

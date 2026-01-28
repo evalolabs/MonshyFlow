@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GitBranch, Calendar, Tag, Eye, Copy, Check, Star, MessageCircle, User, Clock, X } from 'lucide-react';
 import { workflowService } from '../services/workflowService';
@@ -16,7 +16,6 @@ export function PublicWorkflowsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedWorkflow, setSelectedWorkflow] = useState<PublicWorkflowPreview | null>(null);
   const [selectedWorkflowDetails, setSelectedWorkflowDetails] = useState<Workflow | null>(null);
-  const [loadingDetails, setLoadingDetails] = useState(false);
   const [comments, setComments] = useState<WorkflowComment[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState('');
@@ -55,13 +54,10 @@ export function PublicWorkflowsPage() {
 
   const loadWorkflowDetails = async (workflowId: string) => {
     try {
-      setLoadingDetails(true);
       const data = await workflowService.getPublicWorkflowById(workflowId);
       setSelectedWorkflowDetails(data);
     } catch (err: any) {
       console.error('Failed to load workflow details:', err);
-    } finally {
-      setLoadingDetails(false);
     }
   };
 
@@ -82,7 +78,7 @@ export function PublicWorkflowsPage() {
     // We'll get this from the workflow details
     if (selectedWorkflowDetails) {
       const starredBy = (selectedWorkflowDetails as any).starredBy || [];
-      const isStarred = user?.userId && starredBy.includes(user.userId);
+      const isStarred = user?.id && starredBy.includes(user.id);
       if (isStarred) {
         setStarredWorkflows(prev => new Set(prev).add(workflowId));
       }
@@ -381,7 +377,7 @@ export function PublicWorkflowsPage() {
                   pageSize={10}
                   enableSorting={true}
                   enableColumnResize={true}
-                  onRowClick={(workflow) => setSelectedWorkflow(workflow)}
+                  onRowDoubleClick={(workflow: PublicWorkflowPreview) => setSelectedWorkflow(workflow)}
                 />
               )}
             </div>
@@ -523,7 +519,7 @@ export function PublicWorkflowsPage() {
                                 <div className="text-xs text-gray-500">{formatRelativeDate(comment.createdAt)}</div>
                               </div>
                             </div>
-                            {user?.userId === comment.userId && (
+                            {user?.id === comment.userId && (
                               <button
                                 onClick={() => handleDeleteComment(comment.id)}
                                 className="text-red-600 hover:text-red-800 text-sm"
