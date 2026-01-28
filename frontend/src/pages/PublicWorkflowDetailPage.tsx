@@ -36,7 +36,7 @@ export function PublicWorkflowDetailPage() {
   useEffect(() => {
     if (workflow) {
       const starredBy = (workflow as any).starredBy || [];
-      const starred = user?.userId && starredBy.includes(user.userId);
+      const starred = user?.id && starredBy.includes(user.id);
       setIsStarred(!!starred);
       setStarCount((workflow as any).starCount || 0);
     }
@@ -345,7 +345,7 @@ export function PublicWorkflowDetailPage() {
                         <div className="text-xs text-gray-500">{formatRelativeDate(comment.createdAt)}</div>
                       </div>
                     </div>
-                    {user?.userId === comment.userId && (
+                    {user?.id === comment.userId && (
                       <button
                         onClick={() => handleDeleteComment(comment.id)}
                         className="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
