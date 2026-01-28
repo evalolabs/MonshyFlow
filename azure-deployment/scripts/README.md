@@ -1,28 +1,28 @@
 # Azure Resource Creation Scripts
 
-Diese Scripts erstellen alle notwendigen Azure-Ressourcen für das Monshy-Projekt.
+These scripts create all necessary Azure resources for the Monshy project.
 
 ---
 
-## 📋 Scripts Übersicht
+## 📋 Scripts Overview
 
-1. **01-create-resource-group** - Erstellt Resource Group
-2. **02-create-container-registry** - Erstellt Azure Container Registry (ACR)
-3. **03-create-container-apps-environment** - Erstellt Container Apps Environment
-4. **04-create-cosmos-db** - Erstellt Cosmos DB (MongoDB API)
-5. **05-create-redis-cache** - Erstellt Azure Cache for Redis
-6. **06-create-key-vault** - Erstellt Azure Key Vault
-7. **07-summary** - Zeigt Zusammenfassung aller erstellten Ressourcen
+1. **01-create-resource-group** - Creates Resource Group
+2. **02-create-container-registry** - Creates Azure Container Registry (ACR)
+3. **03-create-container-apps-environment** - Creates Container Apps Environment
+4. **04-create-cosmos-db** - Creates Cosmos DB (MongoDB API)
+5. **05-create-redis-cache** - Creates Azure Cache for Redis
+6. **06-create-key-vault** - Creates Azure Key Vault
+7. **07-summary** - Shows summary of all created resources
 
-**Hinweis:** RabbitMQ ist **nicht** enthalten (optional, Code hat Fallback zu in-memory queue). Siehe [../RABBITMQ_NOTES.md](../RABBITMQ_NOTES.md) für Details.
+**Note:** RabbitMQ is **not** included (optional, code has fallback to in-memory queue). See [../RABBITMQ_NOTES.md](../RABBITMQ_NOTES.md) for details.
 
 ---
 
-## 🚀 Verwendung
+## 🚀 Usage
 
-### Voraussetzungen
+### Prerequisites
 
-1. **Azure CLI installiert**
+1. **Azure CLI installed**
    ```bash
    # Windows (PowerShell)
    winget install -e --id Microsoft.AzureCLI
@@ -31,12 +31,12 @@ Diese Scripts erstellen alle notwendigen Azure-Ressourcen für das Monshy-Projek
    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
    ```
 
-2. **Bei Azure anmelden**
+2. **Log in to Azure**
    ```bash
    az login
    ```
 
-3. **Subscription auswählen** (optional)
+3. **Select Subscription** (optional)
    ```bash
    az account set --subscription "Your Subscription Name"
    ```
@@ -46,7 +46,7 @@ Diese Scripts erstellen alle notwendigen Azure-Ressourcen für das Monshy-Projek
 ### Windows (PowerShell)
 
 ```powershell
-# Alle Scripts nacheinander ausführen
+# Execute all scripts sequentially
 .\01-create-resource-group.ps1
 .\02-create-container-registry.ps1
 .\03-create-container-apps-environment.ps1
@@ -59,10 +59,10 @@ Diese Scripts erstellen alle notwendigen Azure-Ressourcen für das Monshy-Projek
 ### Linux/Mac (Bash)
 
 ```bash
-# Scripts ausführbar machen
+# Make scripts executable
 chmod +x *.sh
 
-# Alle Scripts nacheinander ausführen
+# Execute all scripts sequentially
 ./01-create-resource-group.sh
 ./02-create-container-registry.sh
 ./03-create-container-apps-environment.sh
@@ -74,11 +74,11 @@ chmod +x *.sh
 
 ---
 
-## ⚙️ Konfiguration
+## ⚙️ Configuration
 
 ### Environment Variables
 
-Die Scripts verwenden folgende Environment Variables (mit Defaults):
+The scripts use the following environment variables (with defaults):
 
 ```bash
 # Resource Group
@@ -127,32 +127,32 @@ export ACR_NAME="myregistry"
 
 ---
 
-## 📝 Wichtige Hinweise
+## 📝 Important Notes
 
 ### Globally Unique Names
 
-Folgende Ressourcen benötigen global eindeutige Namen:
+The following resources require globally unique names:
 - **Container Registry** (ACR): 5-50 alphanumeric chars
 - **Cosmos DB**: 3-44 lowercase chars
 - **Redis Cache**: 1-63 alphanumeric + hyphens
 - **Key Vault**: 3-24 alphanumeric + hyphens
 
-Die Scripts prüfen automatisch, ob Namen verfügbar sind.
+The scripts automatically check if names are available.
 
-### Kosten
+### Costs
 
-Die erstellten Ressourcen verursachen Kosten:
-- **Cosmos DB Serverless**: ~$25-50/Monat
-- **Redis Basic C0**: ~$15/Monat
-- **Container Registry Basic**: ~$5/Monat
+The created resources incur costs:
+- **Cosmos DB Serverless**: ~$25-50/Month
+- **Redis Basic C0**: ~$15/Month
+- **Container Registry Basic**: ~$5/Month
 - **Container Apps**: Pay-per-use
 - **Key Vault**: ~$0.03/10,000 operations
 
-**Gesamt:** ~$75-95/Monat (Development)
+**Total:** ~$75-95/Month (Development)
 
 ### Connection Strings
 
-**WICHTIG:** Alle Scripts geben Connection Strings aus. Speichere diese sicher:
+**IMPORTANT:** All scripts output connection strings. Save these securely:
 - Cosmos DB Connection String
 - Redis Connection String
 - ACR Login Server
@@ -160,9 +160,9 @@ Die erstellten Ressourcen verursachen Kosten:
 
 ---
 
-## 🔐 Secrets hinzufügen
+## 🔐 Add Secrets
 
-Nach dem Erstellen des Key Vaults:
+After creating the Key Vault:
 
 ```bash
 # JWT Secret Key
@@ -186,46 +186,45 @@ az keyvault secret set \
 
 ---
 
-## ✅ Checkliste
+## ✅ Checklist
 
-- [ ] Azure CLI installiert
-- [ ] Bei Azure angemeldet (`az login`)
-- [ ] Subscription ausgewählt
-- [ ] Resource Group erstellt
-- [ ] Container Registry erstellt
-- [ ] Container Apps Environment erstellt
-- [ ] Cosmos DB erstellt
-- [ ] Redis Cache erstellt
-- [ ] Key Vault erstellt
-- [ ] Secrets zu Key Vault hinzugefügt
-- [ ] Connection Strings gespeichert
+- [ ] Azure CLI installed
+- [ ] Logged in to Azure (`az login`)
+- [ ] Subscription selected
+- [ ] Resource Group created
+- [ ] Container Registry created
+- [ ] Container Apps Environment created
+- [ ] Cosmos DB created
+- [ ] Redis Cache created
+- [ ] Key Vault created
+- [ ] Secrets added to Key Vault
+- [ ] Connection Strings saved
 
 ---
 
 ## 🐛 Troubleshooting
 
 ### "Resource Group does not exist"
-→ Führe zuerst `01-create-resource-group` aus
+→ Run `01-create-resource-group` first
 
 ### "Name not available"
-→ Wähle einen anderen Namen (muss global eindeutig sein)
+→ Choose a different name (must be globally unique)
 
 ### "Not logged in"
-→ Führe `az login` aus
+→ Run `az login`
 
 ### "Subscription not found"
-→ Prüfe verfügbare Subscriptions: `az account list`
+→ Check available subscriptions: `az account list`
 
 ---
 
-## 📚 Nächste Schritte
+## 📚 Next Steps
 
-Nach dem Erstellen aller Ressourcen:
+After creating all resources:
 
-1. **Docker Images bauen und pushen** (später)
-2. **Container Apps deployen** (später)
-3. **Environment Variables setzen** (später)
-4. **Frontend deployen** (später)
+1. **Build and push Docker images** (later)
+2. **Deploy Container Apps** (later)
+3. **Set Environment Variables** (later)
+4. **Deploy Frontend** (later)
 
-Siehe [Deployment Guide](../README.md) für Details.
-
+See [Deployment Guide](../README.md) for details.

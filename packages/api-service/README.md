@@ -1,33 +1,33 @@
 # 🚀 API Service
 
-Der **API Service** ist der zentrale Service der MonshyFlow-Plattform. Er kombiniert **API Gateway-Funktionalität** mit **Workflow Management** und bietet eine zentrale Schnittstelle für alle Client-Anfragen.
+The **API Service** is the central service of the MonshyFlow platform. It combines **API Gateway functionality** with **Workflow Management** and provides a central interface for all client requests.
 
 ---
 
-## 📋 Inhaltsverzeichnis
+## 📋 Table of Contents
 
-- [Übersicht](#-übersicht)
+- [Overview](#-overview)
 - [Features](#-features)
 - [Environment Variables](#-environment-variables)
 - [Setup & Installation](#-setup--installation)
 - [API-Endpoints](#-api-endpoints)
 - [Authentication](#-authentication)
-- [Request/Response-Beispiele](#-requestresponse-beispiele)
+- [Request/Response Examples](#-requestresponse-examples)
 - [Health Checks](#-health-checks)
 - [Development](#-development)
 - [Deployment](#-deployment)
 
 ---
 
-## 🎯 Übersicht
+## 🎯 Overview
 
-Der API Service ist ein **Express.js-basierter HTTP-Service**, der auf Port **5000** läuft (konfigurierbar). Er bietet:
+The API Service is an **Express.js-based HTTP service** that runs on port **5000** (configurable). It provides:
 
-- **Workflow Management:** CRUD-Operationen für Workflows
-- **API Gateway:** Routing zu anderen Services (auth-service, execution-service, etc.)
+- **Workflow Management:** CRUD operations for workflows
+- **API Gateway:** Routes requests to other services (auth-service, execution-service, etc.)
 - **Admin Functions:** Tenant Management, User Management, Audit Logs
-- **Swagger UI:** Interaktive API-Dokumentation (Development)
-- **Webhook Support:** Öffentliche Webhook-Endpoints für Workflow-Execution
+- **Swagger UI:** Interactive API documentation (Development)
+- **Webhook Support:** Public webhook endpoints for workflow execution
 
 ---
 
@@ -38,20 +38,20 @@ Der API Service ist ein **Express.js-basierter HTTP-Service**, der auf Port **50
 - ✅ Workflow Publishing & Versioning
 - ✅ Public Workflow Marketplace
 - ✅ Workflow Export/Import (JSON)
-- ✅ Node Testing mit Context
+- ✅ Node Testing with Context
 - ✅ Workflow Execution (proxied to execution-service)
 
 ### Admin Functions
 - ✅ User Management
 - ✅ Tenant Management
 - ✅ Statistics & Analytics
-- ✅ Audit Logs (DSGVO-konform)
+- ✅ Audit Logs (GDPR-compliant)
 - ✅ Support Consent Management
 
-### Gateway-Funktionalität
-- ✅ Request Routing zu anderen Services
-- ✅ Service Discovery (lokal, Docker, Azure)
-- ✅ Load Balancing (über Kong Gateway in Production)
+### Gateway Functionality
+- ✅ Request routing to other services
+- ✅ Service Discovery (local, Docker, Azure)
+- ✅ Load Balancing (via Kong Gateway in Production)
 
 ### Security
 - ✅ JWT Authentication
@@ -59,43 +59,43 @@ Der API Service ist ein **Express.js-basierter HTTP-Service**, der auf Port **50
 - ✅ Rate Limiting
 - ✅ Security Headers (Helmet)
 - ✅ CORS Configuration
-- ✅ Request ID für Tracing
+- ✅ Request ID for tracing
 
 ---
 
 ## 🔧 Environment Variables
 
-### Erforderliche Variablen
+### Required Variables
 
 ```bash
-# Port (Standard: 5000)
+# Port (Default: 5000)
 PORT=5000
-# oder
+# or
 API_SERVICE_PORT=5000
 
 # MongoDB Connection String
 MONGODB_URI=mongodb://localhost:27017/monshyflow
 
-# Frontend URL (für CORS)
+# Frontend URL (for CORS)
 FRONTEND_URL=http://localhost:5173
 
-# Service URLs (optional, wird automatisch erkannt)
+# Service URLs (optional, automatically detected)
 AUTH_SERVICE_URL=http://localhost:5002
 EXECUTION_SERVICE_URL=http://localhost:5004
 SECRETS_SERVICE_URL=http://localhost:5003
 SCHEDULER_SERVICE_URL=http://localhost:5005
 
-# Internal Service Key (für Service-to-Service Kommunikation)
+# Internal Service Key (for service-to-service communication)
 INTERNAL_SERVICE_KEY=your-secret-service-key-change-in-production
 
-# API URL (für Swagger)
+# API URL (for Swagger)
 API_URL=http://localhost:5000
 
 # Node Environment
-NODE_ENV=development  # oder production
+NODE_ENV=development  # or production
 ```
 
-### Optionale Variablen
+### Optional Variables
 
 ```bash
 # Azure Container Apps
@@ -112,13 +112,13 @@ LOG_LEVEL=info  # debug, info, warn, error
 
 ### Service Discovery
 
-Der Service erkennt automatisch die Umgebung:
+The service automatically detects the environment:
 
-- **Lokal:** `http://127.0.0.1:{PORT}`
+- **Local:** `http://127.0.0.1:{PORT}`
 - **Docker Compose:** `http://{service-name}:80`
 - **Azure Container Apps:** `http://{service-name}:80`
 
-Oder setze explizit via Environment Variables:
+Or set explicitly via Environment Variables:
 - `AUTH_SERVICE_URL`
 - `EXECUTION_SERVICE_URL`
 - `SECRETS_SERVICE_URL`
@@ -128,30 +128,30 @@ Oder setze explizit via Environment Variables:
 
 ## 🚀 Setup & Installation
 
-### Voraussetzungen
+### Prerequisites
 
 - Node.js >= 20.0.0
 - pnpm >= 8.0.0
-- MongoDB (lokal oder Remote)
+- MongoDB (local or remote)
 
 ### Installation
 
 ```bash
-# Im Root-Verzeichnis
+# In the root directory
 pnpm install
 
-# Packages bauen
+# Build packages
 pnpm build:packages
 ```
 
-### Development starten
+### Start Development
 
 ```bash
-# Im api-service Verzeichnis
+# In the api-service directory
 cd packages/api-service
 pnpm dev
 
-# Oder vom Root
+# Or from root
 pnpm --filter @monshy/api-service dev
 ```
 
@@ -186,14 +186,14 @@ GET /health
 
 ### Workflow Endpoints
 
-#### Workflows abrufen
+#### Get workflows
 
 ```http
 GET /api/workflows
 Authorization: Bearer {token}
 ```
 
-#### Workflow erstellen
+#### Create workflow
 
 ```http
 POST /api/workflows
@@ -208,7 +208,7 @@ Content-Type: application/json
 }
 ```
 
-#### Workflow aktualisieren
+#### Update workflow
 
 ```http
 PUT /api/workflows/:id
@@ -222,14 +222,14 @@ Content-Type: application/json
 }
 ```
 
-#### Workflow löschen
+#### Delete workflow
 
 ```http
 DELETE /api/workflows/:id
 Authorization: Bearer {token}
 ```
 
-#### Workflow ausführen
+#### Execute workflow
 
 ```http
 POST /api/workflows/:workflowId/execute
@@ -243,14 +243,14 @@ Content-Type: application/json
 }
 ```
 
-#### Workflow exportieren
+#### Export workflow
 
 ```http
 GET /api/workflows/:id/export
 Authorization: Bearer {token}
 ```
 
-#### Workflow importieren
+#### Import workflow
 
 ```http
 POST /api/workflows/import
@@ -262,7 +262,7 @@ Content-Type: application/json
 }
 ```
 
-#### Node testen (mit Context)
+#### Test node (with context)
 
 ```http
 POST /api/workflows/:workflowId/nodes/:nodeId/test-with-context
@@ -278,42 +278,42 @@ Content-Type: application/json
 
 ### Public Workflow Endpoints
 
-#### Public Workflows abrufen
+#### Get public workflows
 
 ```http
 GET /api/workflows/public
 Authorization: Bearer {token}
 ```
 
-#### Public Workflow abrufen
+#### Get public workflow
 
 ```http
 GET /api/workflows/public/:id
 Authorization: Bearer {token}
 ```
 
-#### Public Workflow klonen
+#### Clone public workflow
 
 ```http
 POST /api/workflows/public/:id/clone
 Authorization: Bearer {token}
 ```
 
-#### Workflow starren
+#### Star workflow
 
 ```http
 POST /api/workflows/public/:id/star
 Authorization: Bearer {token}
 ```
 
-#### Kommentare abrufen
+#### Get comments
 
 ```http
 GET /api/workflows/public/:id/comments
 Authorization: Bearer {token}
 ```
 
-#### Kommentar hinzufügen
+#### Add comment
 
 ```http
 POST /api/workflows/public/:id/comments
@@ -360,7 +360,7 @@ DELETE /api/admin/tenants/:id
 
 ### Webhook Endpoints
 
-#### Workflow Webhook (öffentlich, keine Auth)
+#### Workflow Webhook (public, no auth)
 
 ```http
 POST /api/webhooks/:workflowId
@@ -373,13 +373,13 @@ Content-Type: application/json
 }
 ```
 
-**Hinweis:** Webhooks sind öffentlich zugänglich. Der Workflow muss `isActive: true` sein.
+**Note:** Webhooks are publicly accessible. The workflow must have `isActive: true`.
 
 ---
 
 ### Internal Endpoints (Service-to-Service)
 
-#### Workflow abrufen (Internal)
+#### Get workflow (Internal)
 
 ```http
 GET /api/internal/workflows/:workflowId
@@ -392,13 +392,13 @@ X-Service-Key: {INTERNAL_SERVICE_KEY}
 
 ### JWT Authentication
 
-Die meisten Endpoints benötigen JWT Authentication:
+Most endpoints require JWT Authentication:
 
 ```http
 Authorization: Bearer {jwt-token}
 ```
 
-Der Token wird vom `auth-service` ausgestellt und enthält:
+The token is issued by the `auth-service` and contains:
 - `userId`
 - `tenantId`
 - `role`
@@ -406,7 +406,7 @@ Der Token wird vom `auth-service` ausgestellt und enthält:
 
 ### Service-to-Service Authentication
 
-Für interne Service-Kommunikation:
+For internal service-to-service communication:
 
 ```http
 X-Service-Key: {INTERNAL_SERVICE_KEY}
@@ -414,9 +414,9 @@ X-Service-Key: {INTERNAL_SERVICE_KEY}
 
 ---
 
-## 📝 Request/Response-Beispiele
+## 📝 Request/Response Examples
 
-### Workflow erstellen
+### Create workflow
 
 **Request:**
 ```http
@@ -453,7 +453,7 @@ Content-Type: application/json
 }
 ```
 
-### Workflow ausführen
+### Execute workflow
 
 **Request:**
 ```http
@@ -512,16 +512,16 @@ GET /health
 ```
 
 **Status Codes:**
-- `200` - Service ist gesund
-- `500` - Service hat Probleme
+- `200` - Service is healthy
+- `500` - Service has issues
 
 ---
 
 ## 🛠️ Development
 
-### Swagger UI (nur Development)
+### Swagger UI (Development only)
 
-Im Development-Modus ist Swagger UI verfügbar:
+In development mode, Swagger UI is available:
 
 ```
 http://localhost:5000/swagger
@@ -534,7 +534,7 @@ http://localhost:5000/swagger.json
 
 ### Logging
 
-Der Service nutzt **Pino** für strukturiertes Logging:
+The service uses **Pino** for structured logging:
 
 ```typescript
 import { logger } from '@monshy/core';
@@ -546,10 +546,10 @@ logger.error({ err: error }, 'Failed to process request');
 ### Testing
 
 ```bash
-# Tests ausführen
+# Run tests
 pnpm test
 
-# Tests mit Coverage
+# Tests with coverage
 pnpm test --coverage
 ```
 
@@ -589,32 +589,32 @@ docker run -p 5000:80 \
 
 ### Docker Compose
 
-Der Service ist Teil der `docker-compose.yml` im Root-Verzeichnis.
+The service is part of `docker-compose.yml` in the root directory.
 
 ### Azure Container Apps
 
-Der Service ist für Azure Container Apps konfiguriert:
+The service is configured for Azure Container Apps:
 
 - **Port:** 80 (intern)
 - **Health Check:** `/health`
-- **Service Discovery:** Automatisch über interne Namen
+- **Service Discovery:** Automatically via internal names
 
-### Environment-spezifische Konfiguration
+### Environment-specific Configuration
 
-- **Development:** `NODE_ENV=development` (Swagger UI aktiv)
-- **Production:** `NODE_ENV=production` (Swagger UI deaktiviert)
-
----
-
-## 🔗 Weitere Informationen
-
-- **Gateway Details:** Siehe [`src/gateway/README.md`](./src/gateway/README.md)
-- **Swagger Config:** Siehe [`src/config/swagger.ts`](./src/config/swagger.ts)
-- **Packages Overview:** Siehe [`../README.md`](../README.md)
+- **Development:** `NODE_ENV=development` (Swagger UI active)
+- **Production:** `NODE_ENV=production` (Swagger UI disabled)
 
 ---
 
-## 📄 Lizenz
+## 🔗 Further Information
 
-Siehe Root-Repository für Lizenzinformationen.
+- **Gateway Details:** See [`src/gateway/README.md`](./src/gateway/README.md)
+- **Swagger Config:** See [`src/config/swagger.ts`](./src/config/swagger.ts)
+- **Packages Overview:** See [`../README.md`](../README.md)
+
+---
+
+## 📄 License
+
+See root repository for license information.
 

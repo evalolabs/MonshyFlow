@@ -1,47 +1,47 @@
 # 🔐 @monshy/auth
 
-Das **@monshy/auth** Package bietet Authentifizierungs-Utilities für die MonshyFlow-Plattform. Es enthält JWT-Token-Management, API-Key-Generierung und verwandte Hilfsfunktionen.
+The **`@monshy/auth`** package provides authentication utilities for the MonshyFlow platform. It contains JWT token management, API key generation, and related helper functions.
 
 ---
 
-## 📋 Inhaltsverzeichnis
+## 📋 Table of Contents
 
-- [Übersicht](#-übersicht)
+- [Overview](#-overview)
 - [Installation](#-installation)
-- [API-Dokumentation](#-api-dokumentation)
-- [Verwendungsbeispiele](#-verwendungsbeispiele)
+- [API Documentation](#-api-documentation)
+- [Usage Examples](#-usage-examples)
 - [Environment Variables](#-environment-variables)
 - [Dependencies](#-dependencies)
 - [Development](#-development)
 
 ---
 
-## 🎯 Übersicht
+## 🎯 Overview
 
-`@monshy/auth` ist ein **Shared Package** (Library), das folgende Funktionalitäten bereitstellt:
+`@monshy/auth` is a **shared package (library)** that provides:
 
-- **JWT Management:** Token-Generierung, -Validierung und -Dekodierung
-- **API Key Management:** Generierung, Hashing und Validierung von API Keys
-- **Types:** TypeScript-Typen für JWT Payloads und API Keys
-- **Security:** Sichere Token- und Key-Verarbeitung
+- **JWT Management:** Token generation, validation, and decoding
+- **API Key Management:** Generation, hashing, and validation of API keys
+- **Types:** TypeScript types for JWT payloads and API keys
+- **Security:** Secure token and key handling
 
 **Dependencies:**
-- `@monshy/core` - Basis-Utilities
-- `jsonwebtoken` - JWT Handling
-- `bcrypt` - Password Hashing (wird in auth-service verwendet)
+- `@monshy/core` – base utilities
+- `jsonwebtoken` – JWT handling
+- `bcrypt` – password hashing (used in `auth-service`)
 
 ---
 
 ## 📦 Installation
 
-Das Package ist Teil des Monorepos und wird automatisch über Workspaces installiert:
+The package is part of the monorepo and is installed automatically via workspaces:
 
 ```bash
-# Im Root-Verzeichnis
+# In the repository root
 pnpm install
 ```
 
-### In einem Service verwenden
+### Use in a service
 
 ```json
 {
@@ -58,13 +58,13 @@ import { generateApiKey, hashApiKey } from '@monshy/auth';
 
 ---
 
-## 📚 API-Dokumentation
+## 📚 API Documentation
 
 ### JWT Functions
 
 #### generateToken
 
-Generiert ein JWT Token mit den angegebenen Payload-Daten.
+Generates a JWT token with the given payload data.
 
 ```typescript
 import { generateToken } from '@monshy/auth';
@@ -76,31 +76,31 @@ const token = generateToken({
   role: 'user'
 });
 
-// Token wird automatisch mit folgenden Claims signiert:
-// - issuer: JWT_ISSUER (Standard: 'monshy-auth-service')
-// - audience: JWT_AUDIENCE (Standard: 'monshy-services')
+// Token is automatically signed with the following claims:
+// - issuer: JWT_ISSUER (default: 'monshy-auth-service')
+// - audience: JWT_AUDIENCE (default: 'monshy-services')
 // - expiresIn: '24h'
 ```
 
-**Parameter:**
-- `payload`: JWT Payload (ohne `iat` und `exp`, werden automatisch hinzugefügt)
-  - `userId`: string - User ID
-  - `tenantId`: string - Tenant ID
-  - `email`: string - User Email
-  - `role`: string - User Role
+**Parameters:**
+- `payload`: JWT payload (without `iat` and `exp`, they are added automatically)
+  - `userId`: string – user ID
+  - `tenantId`: string – tenant ID
+  - `email`: string – user email
+  - `role`: string – user role
 
-**Returns:** `string` - JWT Token
+**Returns:** `string` – JWT token
 
 **Environment Variables:**
-- `JWT_SECRET_KEY` oder `JWT_SECRET` oder `JwtSettings__SecretKey` - Secret für Signing
-- `JWT_ISSUER` oder `JwtSettings__Issuer` - Token Issuer (Standard: 'monshy-auth-service')
-- `JWT_AUDIENCE` oder `JwtSettings__Audience` - Token Audience (Standard: 'monshy-services')
+- `JWT_SECRET_KEY` or `JWT_SECRET` or `JwtSettings__SecretKey` – secret for signing
+- `JWT_ISSUER` or `JwtSettings__Issuer` – token issuer (default: `monshy-auth-service`)
+- `JWT_AUDIENCE` or `JwtSettings__Audience` – token audience (default: `monshy-services`)
 
 ---
 
 #### verifyToken
 
-Validiert und dekodiert ein JWT Token.
+Validates and decodes a JWT token.
 
 ```typescript
 import { verifyToken } from '@monshy/auth';
@@ -116,43 +116,43 @@ try {
   //   exp: 1704198400
   // }
 } catch (error) {
-  // Token ist ungültig oder abgelaufen
-  console.error('Invalid token:', error.message);
+  // Token is invalid or expired
+  console.error('Invalid token:', (error as Error).message);
 }
 ```
 
-**Parameter:**
-- `token`: string - JWT Token
+**Parameters:**
+- `token`: string – JWT token
 
-**Returns:** `JwtPayload` - Dekodierter Token Payload
+**Returns:** `JwtPayload` – decoded token payload
 
-**Throws:** `Error` - Wenn Token ungültig, abgelaufen oder nicht verifizierbar ist
+**Throws:** `Error` – if token is invalid, expired, or cannot be verified
 
-**Validierung:**
-- Prüft Signatur mit `JWT_SECRET`
-- Prüft `issuer` (muss mit `JWT_ISSUER` übereinstimmen)
-- Prüft `audience` (muss mit `JWT_AUDIENCE` übereinstimmen)
-- Prüft `exp` (Expiration)
+**Validation:**
+- Verifies signature with `JWT_SECRET`
+- Verifies `issuer` (must match `JWT_ISSUER`)
+- Verifies `audience` (must match `JWT_AUDIENCE`)
+- Verifies `exp` (expiration)
 
 ---
 
 #### decodeToken
 
-Dekodiert ein JWT Token ohne Validierung (unsicher, nur für Debugging).
+Decodes a JWT token **without** validation (unsafe, for debugging only).
 
 ```typescript
 import { decodeToken } from '@monshy/auth';
 
 const payload = decodeToken(token);
-// payload kann null sein, wenn Token nicht dekodierbar ist
+// payload can be null if the token cannot be decoded
 ```
 
-**Parameter:**
-- `token`: string - JWT Token
+**Parameters:**
+- `token`: string – JWT token
 
-**Returns:** `JwtPayload | null` - Dekodierter Payload oder null
+**Returns:** `JwtPayload | null` – decoded payload or null
 
-**⚠️ Wichtig:** Diese Funktion validiert **NICHT** die Signatur oder Expiration. Nur für Debugging verwenden!
+**⚠️ Important:** This function does **NOT** validate the signature or expiration. Use only for debugging.
 
 ---
 
@@ -160,31 +160,31 @@ const payload = decodeToken(token);
 
 #### generateApiKey
 
-Generiert einen sicheren API Key.
+Generates a secure API key.
 
 ```typescript
 import { generateApiKey } from '@monshy/auth';
 
 const apiKey = generateApiKey();
-// Beispiel: "mshy_abc123def456ghi789jkl012mno345pqr678"
+// Example: "mshy_abc123def456ghi789jkl012mno345pqr678"
 ```
 
-**Returns:** `string` - API Key mit Prefix `mshy_`
+**Returns:** `string` – API key with `mshy_` prefix
 
 **Format:**
 - Prefix: `mshy_`
-- 32 zufällige Bytes, base64url-kodiert
-- Gesamtlänge: ~45 Zeichen
+- 32 random bytes, base64url-encoded
+- Total length: ~45 characters
 
 **Security:**
-- Verwendet `crypto.randomBytes()` für kryptographisch sichere Zufallswerte
-- Base64url-Kodierung für URL-Sicherheit
+- Uses `crypto.randomBytes()` for cryptographically secure randomness
+- Base64url encoding for URL safety
 
 ---
 
 #### hashApiKey
 
-Hasht einen API Key für sichere Speicherung.
+Hashes an API key for secure storage.
 
 ```typescript
 import { generateApiKey, hashApiKey } from '@monshy/auth';
@@ -192,7 +192,7 @@ import { generateApiKey, hashApiKey } from '@monshy/auth';
 const apiKey = generateApiKey();
 const keyHash = hashApiKey(apiKey);
 
-// Speichere keyHash in Datenbank (NICHT den API Key selbst!)
+// Store keyHash in the database (NOT the API key itself!)
 await apiKeyRepo.create({
   keyHash,
   name: 'Production API Key',
@@ -200,42 +200,42 @@ await apiKeyRepo.create({
 });
 ```
 
-**Parameter:**
-- `apiKey`: string - Plain API Key
+**Parameters:**
+- `apiKey`: string – plain API key
 
-**Returns:** `string` - SHA-256 Hash des API Keys (hex)
+**Returns:** `string` – SHA-256 hash of the API key (hex)
 
 **Security:**
-- Verwendet SHA-256 Hashing
-- Einweg-Hash (nicht umkehrbar)
-- Für Vergleich mit gespeichertem Hash verwenden
+- Uses SHA-256 hashing
+- One-way hash (not reversible)
+- Use for comparison with stored hash
 
-**⚠️ Wichtig:** Der API Key selbst sollte **NIE** in der Datenbank gespeichert werden, nur der Hash!
+**⚠️ Important:** The API key itself should **NEVER** be stored in the database, only the hash!
 
 ---
 
 #### validateApiKeyFormat
 
-Validiert das Format eines API Keys.
+Validates the format of an API key.
 
 ```typescript
 import { validateApiKeyFormat } from '@monshy/auth';
 
 if (validateApiKeyFormat(apiKey)) {
-  // API Key hat korrektes Format
+  // API key has correct format
 } else {
-  // API Key Format ist ungültig
+  // API key format is invalid
 }
 ```
 
-**Parameter:**
-- `apiKey`: string - API Key zum Validieren
+**Parameters:**
+- `apiKey`: string – API key to validate
 
-**Returns:** `boolean` - true wenn Format gültig ist
+**Returns:** `boolean` – true if format is valid
 
-**Validierung:**
-- Muss mit `mshy_` beginnen
-- Muss mindestens 10 Zeichen nach dem Prefix haben
+**Validation:**
+- Must start with `mshy_`
+- Must have at least 10 characters after the prefix
 
 ---
 
@@ -251,18 +251,18 @@ const payload: JwtPayload = {
   tenantId: '507f191e810c19729de860ea',
   email: 'user@example.com',
   role: 'user',
-  iat: 1704112000,  // Issued At (automatisch)
-  exp: 1704198400   // Expiration (automatisch)
+  iat: 1704112000,  // Issued At (automatically set)
+  exp: 1704198400   // Expiration (automatically set)
 };
 ```
 
 **Properties:**
-- `userId`: string - User ID
-- `tenantId`: string - Tenant ID
-- `email`: string - User Email
-- `role`: string - User Role
-- `iat?`: number - Issued At (Timestamp, optional)
-- `exp?`: number - Expiration (Timestamp, optional)
+- `userId`: string – user ID
+- `tenantId`: string – tenant ID
+- `email`: string – user email
+- `role`: string – user role
+- `iat?`: number – issued at (timestamp, optional)
+- `exp?`: number – expiration (timestamp, optional)
 
 ---
 
@@ -280,16 +280,16 @@ const payload: ApiKeyPayload = {
 ```
 
 **Properties:**
-- `apiKeyId`: string - API Key ID
-- `tenantId`: string - Tenant ID
-- `name`: string - API Key Name
-- `authMethod`: 'ApiKey' - Authentication Method
+- `apiKeyId`: string – API key ID
+- `tenantId`: string – tenant ID
+- `name`: string – API key name
+- `authMethod`: 'ApiKey' – authentication method
 
 ---
 
 #### AuthRequest
 
-Erweiterte Express Request mit Auth Context.
+Extended Express request with auth context.
 
 ```typescript
 import { AuthRequest } from '@monshy/auth';
@@ -305,14 +305,14 @@ app.get('/api/protected', (req: AuthRequest, res) => {
 
 ---
 
-## 💡 Verwendungsbeispiele
+## 💡 Usage Examples
 
-### JWT Token generieren und validieren
+### Generate and validate JWT token
 
 ```typescript
 import { generateToken, verifyToken } from '@monshy/auth';
 
-// Token generieren (z.B. nach Login)
+// Generate token (e.g., after login)
 const token = generateToken({
   userId: user._id.toString(),
   tenantId: user.tenantId,
@@ -320,40 +320,40 @@ const token = generateToken({
   role: user.roles[0] || 'user'
 });
 
-// Token an Client senden
+// Send token to client
 res.json({ success: true, data: { token } });
 
-// Token validieren (z.B. in Middleware)
+// Validate token (e.g., in middleware)
 try {
   const payload = verifyToken(token);
-  req.user = payload; // User-Info zu Request hinzufügen
+  req.user = payload; // Attach user info to request
   next();
 } catch (error) {
   res.status(401).json({ success: false, error: 'Invalid token' });
 }
 ```
 
-### API Key erstellen und validieren
+### Create and validate API key
 
 ```typescript
 import { generateApiKey, hashApiKey, validateApiKeyFormat } from '@monshy/auth';
 
-// API Key erstellen
+// Create API key
 const apiKey = generateApiKey();
 const keyHash = hashApiKey(apiKey);
 
-// In Datenbank speichern
+// Store in database
 await apiKeyRepo.create({
-  keyHash,  // Nur Hash speichern!
+  keyHash,  // Store only hash!
   name: 'Production API Key',
   tenantId: user.tenantId,
   expiresAt: new Date('2025-12-31')
 });
 
-// API Key an Client senden (nur einmal!)
+// Send API key to client (only once!)
 res.json({ success: true, data: { apiKey } });
 
-// API Key validieren (z.B. in Middleware)
+// Validate API key (e.g., in middleware)
 const providedKey = req.headers['x-api-key'] as string;
 
 if (!validateApiKeyFormat(providedKey)) {
@@ -367,7 +367,7 @@ if (!storedApiKey || !storedApiKey.isActive) {
   return res.status(401).json({ success: false, error: 'Invalid API key' });
 }
 
-// API Key ist gültig
+// API key is valid
 req.auth = {
   tenantId: storedApiKey.tenantId,
   apiKeyId: storedApiKey._id.toString(),
@@ -376,7 +376,7 @@ req.auth = {
 next();
 ```
 
-### Authentication Middleware
+### Authentication middleware
 
 ```typescript
 import { Request, Response, NextFunction } from 'express';
@@ -390,17 +390,17 @@ export async function authMiddleware(
 ): Promise<void> {
   try {
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedError('Missing or invalid Authorization header');
     }
-    
+
     const token = authHeader.substring(7);
     const payload = verifyToken(token);
-    
-    // User-Info zu Request hinzufügen
+
+    // Attach user info to request
     (req as any).user = payload;
-    
+
     next();
   } catch (error) {
     res.status(401).json({
@@ -411,24 +411,24 @@ export async function authMiddleware(
 }
 ```
 
-### Token Refresh Pattern
+### Token refresh pattern
 
 ```typescript
 import { verifyToken, generateToken, decodeToken } from '@monshy/auth';
 
 function refreshTokenIfNeeded(token: string): string | null {
-  // Prüfe ob Token bald abläuft (z.B. in 1 Stunde)
+  // Check if token will expire soon (e.g., within 1 hour)
   const payload = decodeToken(token);
-  
+
   if (!payload || !payload.exp) {
     return null;
   }
-  
+
   const expiresIn = payload.exp * 1000 - Date.now();
   const oneHour = 60 * 60 * 1000;
-  
+
   if (expiresIn < oneHour) {
-    // Token erneuern
+    // Refresh token
     return generateToken({
       userId: payload.userId,
       tenantId: payload.tenantId,
@@ -436,8 +436,8 @@ function refreshTokenIfNeeded(token: string): string | null {
       role: payload.role
     });
   }
-  
-  return null; // Token ist noch gültig
+
+  return null; // Token is still valid
 }
 ```
 
@@ -448,37 +448,37 @@ function refreshTokenIfNeeded(token: string): string | null {
 ### JWT Configuration
 
 ```bash
-# JWT Secret (MINDESTENS 32 Zeichen!)
+# JWT secret (AT LEAST 32 characters!)
 JWT_SECRET_KEY=your-very-long-and-secure-jwt-secret-min-32-chars
-# oder
+# or
 JWT_SECRET=your-very-long-and-secure-jwt-secret-min-32-chars
-# oder (für .NET Kompatibilität)
+# or (for .NET compatibility)
 JwtSettings__SecretKey=your-very-long-and-secure-jwt-secret-min-32-chars
 
-# JWT Issuer (optional, Standard: 'monshy-auth-service')
+# JWT Issuer (optional, default: 'monshy-auth-service')
 JWT_ISSUER=monshy-auth-service
-# oder
+# or
 JwtSettings__Issuer=monshy-auth-service
 
-# JWT Audience (optional, Standard: 'monshy-services')
+# JWT Audience (optional, default: 'monshy-services')
 JWT_AUDIENCE=monshy-services
-# oder
+# or
 JwtSettings__Audience=monshy-services
 ```
 
 ### ⚠️ Security Best Practices
 
 1. **JWT Secret:**
-   - Mindestens 32 Zeichen lang
-   - Zufällig generiert (z.B. `openssl rand -hex 32`)
-   - Nie im Code committen
-   - In Production: Azure Key Vault oder ähnliches verwenden
+   - At least 32 characters long
+   - Randomly generated (e.g., `openssl rand -hex 32`)
+   - Never commit to code
+   - In production: use Azure Key Vault or similar
 
 2. **API Keys:**
-   - Nur Hash in Datenbank speichern
-   - API Key nur einmal anzeigen (bei Erstellung)
-   - Keys können revokiert werden
-   - Optional: Expiration setzen
+   - Store only the hash in the database
+   - Show the API key only once (on creation)
+   - Keys can be revoked
+   - Optional: set expiration
 
 ---
 
@@ -486,9 +486,9 @@ JwtSettings__Audience=monshy-services
 
 ### Runtime Dependencies
 
-- `@monshy/core` workspace:* - Basis-Utilities
-- `jsonwebtoken` ^9.0.2 - JWT Handling
-- `bcrypt` ^5.1.1 - Password Hashing (wird in auth-service verwendet)
+- `@monshy/core` workspace:* – base utilities
+- `jsonwebtoken` ^9.0.2 – JWT handling
+- `bcrypt` ^5.1.1 – password hashing (used in `auth-service`)
 
 ### Dev Dependencies
 
@@ -524,33 +524,33 @@ pnpm clean
 
 ### Code Structure
 
-```
+``` 
 auth/
 ├── src/
-│   ├── jwt/            # JWT Functions
+│   ├── jwt/            # JWT functions
 │   │   └── index.ts
-│   ├── apiKey/         # API Key Functions
+│   ├── apiKey/         # API key functions
 │   │   └── index.ts
-│   ├── middleware/     # Auth Middleware (zur Zeit leer)
+│   ├── middleware/     # Auth middleware (currently empty)
 │   │   └── index.ts
-│   ├── types/          # TypeScript Types
+│   ├── types/          # TypeScript types
 │   │   └── index.ts
-│   └── index.ts        # Main Export
+│   └── index.ts        # Main export
 ├── dist/               # Compiled JavaScript
 └── package.json
 ```
 
 ---
 
-## 🔗 Weitere Informationen
+## 🔗 Further Information
 
-- **Auth Service:** Siehe [`../auth-service/README.md`](../auth-service/README.md)
-- **Packages Overview:** Siehe [`../README.md`](../README.md)
+- **Auth Service:** See [`../auth-service/README.md`](../auth-service/README.md)
+- **Packages Overview:** See [`../README.md`](../README.md)
 - **jsonwebtoken Documentation:** [github.com/auth0/node-jsonwebtoken](https://github.com/auth0/node-jsonwebtoken)
 
 ---
 
-## 📄 Lizenz
+## 📄 License
 
-Siehe Root-Repository für Lizenzinformationen.
+See root repository for license information.
 

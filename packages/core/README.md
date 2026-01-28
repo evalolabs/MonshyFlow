@@ -1,50 +1,50 @@
 # 🔧 @monshy/core
 
-Das **@monshy/core** Package ist die Basis-Bibliothek für alle MonshyFlow-Services. Es enthält gemeinsame Utilities, Types, Error Classes, Logger und Middleware, die von allen anderen Packages verwendet werden.
+The **`@monshy/core`** package is the base library for all MonshyFlow services. It contains shared utilities, types, error classes, logger, and middleware used by all other packages.
 
 ---
 
-## 📋 Inhaltsverzeichnis
+## 📋 Table of Contents
 
-- [Übersicht](#-übersicht)
+- [Overview](#-overview)
 - [Installation](#-installation)
-- [API-Dokumentation](#-api-dokumentation)
-- [Verwendungsbeispiele](#-verwendungsbeispiele)
+- [API Documentation](#-api-documentation)
+- [Usage Examples](#-usage-examples)
 - [Dependencies](#-dependencies)
 - [Development](#-development)
 
 ---
 
-## 🎯 Übersicht
+## 🎯 Overview
 
-`@monshy/core` ist ein **Shared Package** (Library), das folgende Funktionalitäten bereitstellt:
+`@monshy/core` is a **shared package (library)** that provides:
 
-- **Logger:** Strukturiertes Logging mit Pino
-- **Error Classes:** Standardisierte Error-Typen
-- **Types:** Gemeinsame TypeScript-Typen
-- **Constants:** HTTP Status Codes, Rollen, etc.
-- **Utils:** Hilfsfunktionen
-- **Validation:** Zod-basierte Validierung
-- **Middleware:** Security Headers, Rate Limiting
+- **Logger:** Structured logging with Pino
+- **Error Classes:** Standardized error types
+- **Types:** Shared TypeScript types
+- **Constants:** HTTP status codes, roles, etc.
+- **Utils:** Helper functions
+- **Validation:** Zod-based validation
+- **Middleware:** Security headers, rate limiting
 
-**Wichtig:** Dieses Package hat **keine externen Runtime-Dependencies** außer:
-- `zod` - Schema Validation
-- `pino` / `pino-pretty` - Logging
-- `express-rate-limit` - Rate Limiting
-- `helmet` - Security Headers
+**Important:** This package has **no external runtime dependencies** except:
+- `zod` – schema validation
+- `pino` / `pino-pretty` – logging
+- `express-rate-limit` – rate limiting
+- `helmet` – security headers
 
 ---
 
 ## 📦 Installation
 
-Das Package ist Teil des Monorepos und wird automatisch über Workspaces installiert:
+The package is part of the monorepo and is installed automatically via workspaces:
 
 ```bash
-# Im Root-Verzeichnis
+# In the repository root
 pnpm install
 ```
 
-### In einem Service verwenden
+### Use in a service
 
 ```json
 {
@@ -61,41 +61,41 @@ import { AppError } from '@monshy/core';
 
 ---
 
-## 📚 API-Dokumentation
+## 📚 API Documentation
 
 ### Logger
 
-Strukturiertes Logging mit Pino.
+Structured logging with Pino.
 
 ```typescript
 import { logger } from '@monshy/core';
 
-// Info Log
+// Info log
 logger.info({ userId: '123', action: 'login' }, 'User logged in');
 
-// Error Log
+// Error log
 logger.error({ err: error, userId: '123' }, 'Failed to process request');
 
-// Debug Log
+// Debug log
 logger.debug({ workflowId: '456' }, 'Processing workflow');
 
-// Warn Log
-logger.warn({ apiKey: 'xxx' }, 'API Key expired');
+// Warn log
+logger.warn({ apiKey: 'xxx' }, 'API key expired');
 ```
 
 **Features:**
-- Strukturiertes JSON-Logging (Production)
-- Pretty-printed Logs (Development)
-- Log-Level konfigurierbar via `LOG_LEVEL` Environment Variable
-- ISO Timestamps
+- Structured JSON logging (production)
+- Pretty-printed logs (development)
+- Log level configurable via `LOG_LEVEL` environment variable
+- ISO timestamps
 
 ---
 
 ### Error Classes
 
-Standardisierte Error-Klassen für konsistente Fehlerbehandlung.
+Standardized error classes for consistent error handling.
 
-#### AppError (Base Class)
+#### AppError (base class)
 
 ```typescript
 import { AppError } from '@monshy/core';
@@ -156,7 +156,7 @@ throw new ConflictError('Email already exists');
 
 ### Types
 
-Gemeinsame TypeScript-Typen für alle Services.
+Shared TypeScript types for all services.
 
 #### ApiResponse
 
@@ -221,7 +221,7 @@ const authContext: AuthContext = {
 
 ### Constants
 
-Vordefinierte Konstanten für konsistente Verwendung.
+Predefined constants for consistent usage.
 
 #### HTTP_STATUS
 
@@ -233,7 +233,7 @@ res.status(HTTP_STATUS.NOT_FOUND).json({ error: 'Not found' });
 res.status(HTTP_STATUS.UNAUTHORIZED).json({ error: 'Unauthorized' });
 ```
 
-**Verfügbare Status Codes:**
+**Available status codes:**
 - `HTTP_STATUS.OK` (200)
 - `HTTP_STATUS.CREATED` (201)
 - `HTTP_STATUS.NO_CONTENT` (204)
@@ -253,7 +253,7 @@ if (user.role === ROLES.SUPERADMIN) {
   // Superadmin logic
 }
 
-// Verfügbare Rollen:
+// Available roles:
 // ROLES.SUPERADMIN
 // ROLES.ADMIN
 // ROLES.USER
@@ -269,7 +269,7 @@ if (authMethod === AUTH_METHODS.JWT) {
   // JWT authentication
 }
 
-// Verfügbare Methoden:
+// Available methods:
 // AUTH_METHODS.JWT
 // AUTH_METHODS.API_KEY
 ```
@@ -278,17 +278,17 @@ if (authMethod === AUTH_METHODS.JWT) {
 
 ### Utils
 
-Hilfsfunktionen für häufige Aufgaben.
+Helper functions for common tasks.
 
 #### sleep
 
 ```typescript
 import { sleep } from '@monshy/core';
 
-// Warte 1 Sekunde
+// Wait 1 second
 await sleep(1000);
 
-// Warte 5 Sekunden
+// Wait 5 seconds
 await sleep(5000);
 ```
 
@@ -298,7 +298,7 @@ await sleep(5000);
 import { generateId } from '@monshy/core';
 
 const id = generateId();
-// Beispiel: "1704112000-abc123def"
+// Example: "1704112000-abc123def"
 ```
 
 #### sanitizeObject
@@ -313,7 +313,7 @@ const user = {
   token: 'abc123'
 };
 
-// Entferne sensible Felder
+// Remove sensitive fields
 const sanitized = sanitizeObject(user, ['password', 'token']);
 // { id: '123', email: 'user@example.com' }
 ```
@@ -324,7 +324,7 @@ const sanitized = sanitizeObject(user, ['password', 'token']);
 import { isObject } from '@monshy/core';
 
 if (isObject(value)) {
-  // value ist ein Objekt (nicht null, nicht Array)
+  // value is an object (not null, not an array)
   console.log(value.property);
 }
 ```
@@ -333,7 +333,7 @@ if (isObject(value)) {
 
 ### Validation
 
-Zod-basierte Validierung für Request Bodies.
+Zod-based validation for request bodies.
 
 #### ValidationMiddleware
 
@@ -341,7 +341,7 @@ Zod-basierte Validierung für Request Bodies.
 import { ValidationMiddleware } from '@monshy/core';
 import { z } from 'zod';
 
-// Schema definieren
+// Define schema
 const createUserSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
@@ -349,9 +349,9 @@ const createUserSchema = z.object({
   lastName: z.string().optional()
 });
 
-// Middleware verwenden
+// Use middleware
 app.post('/api/users', ValidationMiddleware(createUserSchema), (req, res) => {
-  // req.body ist jetzt validiert und typisiert
+  // req.body is now validated and typed
   const { email, password } = req.body;
   // ...
 });
@@ -359,7 +359,7 @@ app.post('/api/users', ValidationMiddleware(createUserSchema), (req, res) => {
 
 **Error Handling:**
 
-Bei Validierungsfehlern wird automatisch ein `ValidationError` geworfen:
+On validation errors, a `ValidationError` is thrown automatically:
 
 ```json
 {
@@ -376,7 +376,7 @@ Bei Validierungsfehlern wird automatisch ein `ValidationError` geworfen:
 
 ### Middleware
 
-Security und Rate Limiting Middleware.
+Security and rate limiting middleware.
 
 #### securityHeaders
 
@@ -386,49 +386,49 @@ import express from 'express';
 
 const app = express();
 
-// Security Headers hinzufügen
+// Add security headers
 app.use(securityHeaders);
 ```
 
-**Enthält:**
+**Includes:**
 - Content Security Policy (CSP)
 - HTTP Strict Transport Security (HSTS)
 - X-Frame-Options
 - X-Content-Type-Options
-- Und mehr...
+- And more...
 
 #### apiLimiter
 
 ```typescript
 import { apiLimiter } from '@monshy/core';
 
-// Rate Limiting für alle API-Routes
+// Rate limiting for all API routes
 app.use('/api', apiLimiter);
 ```
 
-**Konfiguration:**
-- **Development:** Deaktiviert (Kong Gateway übernimmt)
-- **Production:** 1000 Requests pro 15 Minuten (Defense-in-depth)
-- Health Checks werden automatisch übersprungen
+**Configuration:**
+- **Development:** Disabled (Kong gateway handles it)
+- **Production:** 1000 requests per 15 minutes (defense-in-depth)
+- Health checks are automatically skipped
 
 #### authLimiter
 
 ```typescript
 import { authLimiter } from '@monshy/core';
 
-// Strikteres Rate Limiting für Auth-Endpoints
+// Stricter rate limiting for auth endpoints
 app.use('/api/auth', authLimiter);
 ```
 
-**Konfiguration:**
-- **Development:** Deaktiviert
-- **Production:** 10 Requests pro 15 Minuten
+**Configuration:**
+- **Development:** Disabled
+- **Production:** 10 requests per 15 minutes
 
 ---
 
-## 💡 Verwendungsbeispiele
+## 💡 Usage Examples
 
-### Komplettes Beispiel: Express Service
+### Complete example: Express service
 
 ```typescript
 import express from 'express';
@@ -445,22 +445,22 @@ import { z } from 'zod';
 
 const app = express();
 
-// Security Headers
+// Security headers
 app.use(securityHeaders);
 
-// Rate Limiting
+// Rate limiting
 app.use('/api', apiLimiter);
 
-// Body Parsing
+// Body parsing
 app.use(express.json());
 
-// Validation Schema
+// Validation schema
 const createWorkflowSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional()
 });
 
-// Route mit Validierung
+// Route with validation
 app.post(
   '/api/workflows',
   ValidationMiddleware(createWorkflowSchema),
@@ -470,7 +470,7 @@ app.post(
       
       logger.info({ name }, 'Creating workflow');
       
-      // Business Logic...
+      // Business logic...
       const workflow = { id: '123', name, description };
       
       res.status(HTTP_STATUS.CREATED).json({
@@ -483,7 +483,7 @@ app.post(
   }
 );
 
-// Error Handler
+// Error handler
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (err instanceof AppError) {
     logger.error({ err, statusCode: err.statusCode }, 'Application error');
@@ -501,7 +501,7 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 });
 ```
 
-### Error Handling Pattern
+### Error handling pattern
 
 ```typescript
 import { NotFoundError, ValidationError, logger } from '@monshy/core';
@@ -527,18 +527,18 @@ async function createWorkflow(data: { name: string; description?: string }) {
 }
 ```
 
-### Logging Pattern
+### Logging pattern
 
 ```typescript
 import { logger } from '@monshy/core';
 
-// Strukturiertes Logging
+// Structured logging
 logger.info(
   { userId: '123', workflowId: '456', action: 'execute' },
   'Workflow execution started'
 );
 
-// Error Logging
+// Error logging
 try {
   await executeWorkflow();
 } catch (error) {
@@ -549,7 +549,7 @@ try {
   throw error;
 }
 
-// Debug Logging
+// Debug logging
 logger.debug(
   { step: 'validation', workflowId: '456' },
   'Validating workflow nodes'
@@ -562,11 +562,11 @@ logger.debug(
 
 ### Runtime Dependencies
 
-- `zod` ^3.25.76 - Schema Validation
-- `pino` ^9.6.0 - Logging
-- `pino-pretty` ^13.0.0 - Pretty Logging (Development)
-- `express-rate-limit` ^7.4.1 - Rate Limiting
-- `helmet` ^8.0.0 - Security Headers
+- `zod` ^3.25.76 – schema validation
+- `pino` ^9.6.0 – logging
+- `pino-pretty` ^13.0.0 – pretty logging (development)
+- `express-rate-limit` ^7.4.1 – rate limiting
+- `helmet` ^8.0.0 – security headers
 
 ### Dev Dependencies
 
@@ -601,33 +601,33 @@ pnpm clean
 
 ### Code Structure
 
-```
+``` 
 core/
 ├── src/
 │   ├── constants/      # HTTP_STATUS, ROLES, etc.
-│   ├── errors/         # Error Classes
-│   ├── logger/         # Pino Logger
-│   ├── middleware/     # Security & Rate Limiting
-│   ├── types/          # TypeScript Types
-│   ├── utils/          # Utility Functions
-│   ├── validation/     # Zod Validation
-│   └── index.ts        # Main Export
+│   ├── errors/         # Error classes
+│   ├── logger/         # Pino logger
+│   ├── middleware/     # Security & rate limiting
+│   ├── types/          # TypeScript types
+│   ├── utils/          # Utility functions
+│   ├── validation/     # Zod validation
+│   └── index.ts        # Main export
 ├── dist/               # Compiled JavaScript
 └── package.json
 ```
 
 ---
 
-## 🔗 Weitere Informationen
+## 🔗 Further Information
 
-- **Packages Overview:** Siehe [`../README.md`](../README.md)
+- **Packages Overview:** See [`../README.md`](../README.md)
 - **Pino Documentation:** [getpino.io](https://getpino.io/)
 - **Zod Documentation:** [zod.dev](https://zod.dev/)
 - **Helmet Documentation:** [helmetjs.github.io](https://helmetjs.github.io/)
 
 ---
 
-## 📄 Lizenz
+## 📄 License
 
-Siehe Root-Repository für Lizenzinformationen.
+See root repository for license information.
 

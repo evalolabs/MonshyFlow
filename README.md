@@ -87,48 +87,48 @@ docker-compose up -d
 
 See [Deployment Guide](./azure-deployment/README.md) for more details.
 
-### Getting Started in 5 Minuten (Docker)
+### Getting Started in 5 Minutes (Docker)
 
-**Ziel**: In wenigen Minuten das UI sehen und sich einloggen, ohne manuelles Setup.
+**Goal**: See the UI and log in within a few minutes, with minimal setup.
 
-1. **Backend & Infrastruktur starten**
+1. **Start backend & infrastructure**
 
    ```bash
-   # Im Projekt-Root
+   # In the project root
    docker-compose up -d
    ```
 
-   - API Gateway (Kong) läuft auf `http://localhost:5000`
-   - MongoDB, Redis, RabbitMQ und alle Node.js Services laufen im Hintergrund
+   - API gateway (Kong) is available at `http://localhost:5000`
+   - MongoDB, Redis, RabbitMQ and all Node.js services run in the background
 
-2. **Datenbank seeden (Tenants, Superadmin, Testdaten)**
+2. **Seed the database (tenants, superadmin, test data)**
 
    ```bash
-   # Im Projekt-Root
-   pnpm install           # falls noch nicht geschehen
-   pnpm build:packages    # einmalig erforderlich
+   # In the project root
+   pnpm install           # if not done yet
+   pnpm build:packages    # required once
 
-   # Testdaten seeden (Tenants, Users, API Keys)
+   # Seed test data (tenants, users, API keys)
    pnpm --filter @monshy/seed seed
    ```
 
-   Danach existieren u.a.:
+   This will create, among other things:
 
    - Tenant: `Monshy`
-   - Superadmin-User: `superadmin@monshy.com / superadmin123`
+   - Superadmin user: `superadmin@monshy.com / superadmin123`
 
-3. **Frontend starten und einloggen**
+3. **Start the frontend and log in**
 
    ```bash
    cd frontend
-   pnpm install           # falls noch nicht geschehen
+   pnpm install           # if not done yet
    pnpm dev
    ```
 
    - Frontend: `http://localhost:5173`
-   - Login im UI mit: `superadmin@monshy.com / superadmin123`
+   - Login credentials: `superadmin@monshy.com / superadmin123`
 
-   Danach kannst du sofort Workflows anlegen, ausführen und die Plattform erkunden.
+   After this, you can immediately create workflows, run them, and explore the platform.
 
 ---
 

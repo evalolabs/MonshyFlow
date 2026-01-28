@@ -1,25 +1,25 @@
-# 🌐 Gateway - Integriert im API Service
+# 🌐 Gateway - Integrated in API Service
 
-## 📋 Übersicht
+## 📋 Overview
 
-Das **Gateway ist vollständig integriert** im API Service und nutzt **http-proxy-middleware** (kostenlos) statt teurer Lösungen wie Kong.
-
----
-
-## ✅ Warum integriert?
-
-1. **Kostenersparnis** - Kein separater Container nötig
-2. **Performance** - Keine zusätzliche Network-Hop
-3. **Einfachheit** - Ein Service weniger zu deployen
-4. **Kostenlos** - http-proxy-middleware statt Kong (~$100+/Monat)
+The **Gateway is fully integrated** in the API Service and uses **http-proxy-middleware** (free) instead of expensive solutions like Kong.
 
 ---
 
-## 🔄 Gateway-Funktionen
+## ✅ Why Integrated?
+
+1. **Cost Savings** - No separate container needed
+2. **Performance** - No additional network hop
+3. **Simplicity** - One less service to deploy
+4. **Free** - http-proxy-middleware instead of Kong (~$100+/month)
+
+---
+
+## 🔄 Gateway Functions
 
 ### 1. Request Routing
 
-Das Gateway routet Requests zu den entsprechenden Services:
+The Gateway routes requests to the corresponding services:
 
 ```
 Frontend Request
@@ -34,35 +34,35 @@ API Service (Gateway)
 
 ### 2. Security Features
 
-- ✅ **Rate Limiting** - Schutz vor DDoS
+- ✅ **Rate Limiting** - Protection against DDoS
 - ✅ **Security Headers** - Helmet
-- ✅ **CORS** - Konfiguriert
-- ✅ **Request Logging** - Strukturiertes Logging
+- ✅ **CORS** - Configured
+- ✅ **Request Logging** - Structured logging
 
 ### 3. Error Handling
 
-- ✅ **Service Unavailable** - Wenn Backend-Service nicht erreichbar
-- ✅ **Timeout Handling** - Automatische Timeouts
-- ✅ **Error Logging** - Fehler werden geloggt
+- ✅ **Service Unavailable** - When backend service is unreachable
+- ✅ **Timeout Handling** - Automatic timeouts
+- ✅ **Error Logging** - Errors are logged
 
 ---
 
-## 📍 Routing-Tabelle
+## 📍 Routing Table
 
-| Route | Target Service | Beschreibung |
-|-------|---------------|--------------|
-| `/api/workflows` | API Service (lokal) | Workflow CRUD |
+| Route | Target Service | Description |
+|-------|---------------|-------------|
+| `/api/workflows` | API Service (local) | Workflow CRUD |
 | `/api/auth` | Auth Service | Authentication |
 | `/api/apikeys` | Auth Service | API Key Management |
 | `/api/secrets` | Secrets Service | Secrets Management |
 | `/api/execute` | Execution Service | Workflow Execution |
 | `/api/execution` | Execution Service | Execution History |
 | `/api/scheduler` | Scheduler Service | Workflow Scheduling |
-| `/api/webhook` | API Service (lokal) | Webhook Endpoints |
+| `/api/webhook` | API Service (local) | Webhook Endpoints |
 
 ---
 
-## 🔧 Konfiguration
+## 🔧 Configuration
 
 ### Service URLs
 
@@ -89,47 +89,47 @@ export const config = {
 ### Environment Variables
 
 ```bash
-# Lokal
+# Local
 AUTH_SERVICE_URL=http://localhost:5002
 SECRETS_SERVICE_URL=http://localhost:5003
 EXECUTION_SERVICE_URL=http://localhost:5004
 SCHEDULER_SERVICE_URL=http://localhost:5005
 
-# Azure (automatisch über Service Discovery)
-# Container Apps erkennt interne Namen: auth-service:80
+# Azure (automatically via Service Discovery)
+# Container Apps recognizes internal names: auth-service:80
 ```
 
 ---
 
-## 💰 Kostenvergleich
+## 💰 Cost Comparison
 
-### Kong (Externes Gateway)
-- **Kosten:** ~$100-500/Monat
-- **Features:** Viele, aber nicht alle nötig
-- **Komplexität:** Hoch
+### Kong (External Gateway)
+- **Cost:** ~$100-500/month
+- **Features:** Many, but not all needed
+- **Complexity:** High
 
-### http-proxy-middleware (Aktuell)
-- **Kosten:** $0 (kostenlos)
-- **Features:** Alles was wir brauchen
-- **Komplexität:** Niedrig
+### http-proxy-middleware (Current)
+- **Cost:** $0 (free)
+- **Features:** Everything we need
+- **Complexity:** Low
 
-**Ersparnis: ~$100-500/Monat** 💰
-
----
-
-## 🚀 Vorteile
-
-1. **Kostenlos** - Keine zusätzlichen Gateway-Kosten
-2. **Einfach** - Standard Express Middleware
-3. **Flexibel** - Einfach zu erweitern
-4. **Performance** - Direkt im API Service, keine zusätzliche Hop
-5. **Wartbar** - TypeScript, klare Struktur
+**Savings: ~$100-500/month** 💰
 
 ---
 
-## 📝 Erweiterungen
+## 🚀 Advantages
 
-### Neue Route hinzufügen
+1. **Free** - No additional gateway costs
+2. **Simple** - Standard Express middleware
+3. **Flexible** - Easy to extend
+4. **Performance** - Directly in API Service, no additional hop
+5. **Maintainable** - TypeScript, clear structure
+
+---
+
+## 📝 Extensions
+
+### Adding a New Route
 
 ```typescript
 // packages/api-service/src/routes/index.ts
@@ -159,9 +159,8 @@ app.use(
 
 ---
 
-## ✅ Fazit
+## ✅ Conclusion
 
-Das Gateway ist **vollständig funktional**, **kostenlos** und **produktionsreif**. Es bietet alle Features, die wir brauchen, ohne die Kosten von externen Gateway-Lösungen wie Kong.
+The Gateway is **fully functional**, **free**, and **production-ready**. It provides all the features we need without the costs of external gateway solutions like Kong.
 
 **Status:** ✅ Production Ready
-

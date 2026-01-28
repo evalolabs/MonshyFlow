@@ -1,51 +1,51 @@
 # 🗄️ @monshy/database
 
-Das **@monshy/database** Package verwaltet MongoDB-Verbindungen, Mongoose-Models und Datenzugriff für die MonshyFlow-Plattform. Es bietet eine zentrale Datenbank-Schicht für alle Services.
+The **@monshy/database** package manages MongoDB connections, Mongoose models, and data access for the MonshyFlow platform. It provides a central database layer for all services.
 
 ---
 
-## 📋 Inhaltsverzeichnis
+## 📋 Table of Contents
 
-- [Übersicht](#-übersicht)
+- [Overview](#-overview)
 - [Installation](#-installation)
-- [API-Dokumentation](#-api-dokumentation)
+- [API Documentation](#-api-documentation)
 - [Models](#-models)
-- [Verwendungsbeispiele](#-verwendungsbeispiele)
+- [Usage Examples](#-usage-examples)
 - [Environment Variables](#-environment-variables)
 - [Dependencies](#-dependencies)
 - [Development](#-development)
 
 ---
 
-## 🎯 Übersicht
+## 🎯 Overview
 
-`@monshy/database` ist ein **Shared Package** (Library), das folgende Funktionalitäten bereitstellt:
+`@monshy/database` is a **Shared Package** (Library) that provides the following functionalities:
 
-- **Connection Management:** MongoDB-Verbindungsverwaltung
-- **Mongoose Models:** Alle Datenbank-Models (User, Workflow, Tenant, etc.)
-- **TypeScript Interfaces:** Type-safe Model-Definitionen
-- **Azure Cosmos DB Support:** Kompatibilität mit Azure Cosmos DB (MongoDB API)
+- **Connection Management:** MongoDB connection management
+- **Mongoose Models:** All database models (User, Workflow, Tenant, etc.)
+- **TypeScript Interfaces:** Type-safe model definitions
+- **Azure Cosmos DB Support:** Compatibility with Azure Cosmos DB (MongoDB API)
 
 **Dependencies:**
-- `@monshy/core` - Basis-Utilities
+- `@monshy/core` - Base utilities
 - `mongoose` ^8.19.1 - MongoDB ODM
 
-**Unterstützte Datenbanken:**
-- MongoDB (lokal oder Remote)
+**Supported Databases:**
+- MongoDB (local or remote)
 - Azure Cosmos DB (MongoDB API)
 
 ---
 
 ## 📦 Installation
 
-Das Package ist Teil des Monorepos und wird automatisch über Workspaces installiert:
+The package is part of the monorepo and is automatically installed via workspaces:
 
 ```bash
-# Im Root-Verzeichnis
+# In the root directory
 pnpm install
 ```
 
-### In einem Service verwenden
+### Using in a Service
 
 ```json
 {
@@ -61,71 +61,71 @@ import { connectDatabase, User, Workflow } from '@monshy/database';
 
 ---
 
-## 📚 API-Dokumentation
+## 📚 API Documentation
 
 ### Connection Management
 
 #### connectDatabase
 
-Stellt eine Verbindung zur MongoDB her.
+Establishes a connection to MongoDB.
 
 ```typescript
 import { connectDatabase } from '@monshy/database';
 
-// Beim Service-Start
+// On service startup
 await connectDatabase();
 // ✅ MongoDB connected
 ```
 
 **Features:**
-- Automatische Verbindungsprüfung (verhindert doppelte Verbindungen)
-- Azure Cosmos DB Kompatibilität
-- Automatische Retry-Logik
-- Logging der Verbindungsart
+- Automatic connection check (prevents duplicate connections)
+- Azure Cosmos DB compatibility
+- Automatic retry logic
+- Connection type logging
 
 **Environment Variables:**
-- `MONGODB_URL` - MongoDB Connection String
-- `MongoDbSettings__ConnectionString` - Alternative (für .NET Kompatibilität)
+- `MONGODB_URL` - MongoDB connection string
+- `MongoDbSettings__ConnectionString` - Alternative (for .NET compatibility)
 
 **Standard Connection Strings:**
 - **Production:** `mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin`
 - **Development:** `mongodb://admin:admin123@localhost:27018/MonshyFlow?authSource=admin`
 
 **Azure Cosmos DB:**
-- Automatische Erkennung (enthält `cosmos.azure.com`)
-- `retryWrites: false` wird automatisch gesetzt (Cosmos DB Anforderung)
+- Automatic detection (contains `cosmos.azure.com`)
+- `retryWrites: false` is automatically set (Cosmos DB requirement)
 
 ---
 
 #### disconnectDatabase
 
-Trennt die Verbindung zur MongoDB.
+Disconnects from MongoDB.
 
 ```typescript
 import { disconnectDatabase } from '@monshy/database';
 
-// Beim Service-Shutdown
+// On service shutdown
 await disconnectDatabase();
 // MongoDB disconnected
 ```
 
-**Verwendung:**
-- Graceful Shutdown
-- Testing (Cleanup)
-- Service-Restart
+**Usage:**
+- Graceful shutdown
+- Testing (cleanup)
+- Service restart
 
 ---
 
 ### Models
 
-Alle Models werden als Mongoose Models exportiert und können direkt verwendet werden.
+All models are exported as Mongoose models and can be used directly.
 
 #### User
 
 ```typescript
 import { User, IUser } from '@monshy/database';
 
-// User erstellen
+// Create user
 const user = new User({
   email: 'user@example.com',
   passwordHash: 'hashed-password',
@@ -137,7 +137,7 @@ const user = new User({
 });
 await user.save();
 
-// User finden
+// Find user
 const foundUser = await User.findById(userId);
 const userByEmail = await User.findOne({ email: 'user@example.com' });
 const usersByTenant = await User.find({ tenantId: tenantId });
@@ -170,7 +170,7 @@ interface IUser {
 ```typescript
 import { Workflow, IWorkflow } from '@monshy/database';
 
-// Workflow erstellen
+// Create workflow
 const workflow = new Workflow({
   name: 'My Workflow',
   description: 'Workflow description',
@@ -190,7 +190,7 @@ const workflow = new Workflow({
 });
 await workflow.save();
 
-// Workflow finden
+// Find workflow
 const foundWorkflow = await Workflow.findById(workflowId);
 const workflowsByTenant = await Workflow.find({ tenantId: tenantId });
 const publishedWorkflows = await Workflow.find({ isPublished: true });
@@ -213,7 +213,7 @@ interface IWorkflow {
   isActive: boolean;
   scheduleConfig?: IScheduleConfig;
   variables?: Record<string, any>;
-  // ... weitere Felder
+  // ... additional fields
 }
 ```
 
@@ -230,7 +230,7 @@ interface IWorkflow {
 ```typescript
 import { Tenant, ITenant } from '@monshy/database';
 
-// Tenant erstellen
+// Create tenant
 const tenant = new Tenant({
   name: 'My Company',
   domain: 'mycompany.com',
@@ -238,7 +238,7 @@ const tenant = new Tenant({
 });
 await tenant.save();
 
-// Tenant finden
+// Find tenant
 const foundTenant = await Tenant.findById(tenantId);
 const tenantByDomain = await Tenant.findOne({ domain: 'mycompany.com' });
 ```
@@ -264,7 +264,7 @@ interface ITenant {
 ```typescript
 import { ApiKey, IApiKey } from '@monshy/database';
 
-// API Key erstellen
+// Create API key
 const apiKey = new ApiKey({
   keyHash: 'hashed-api-key',
   name: 'Production API Key',
@@ -275,7 +275,7 @@ const apiKey = new ApiKey({
 });
 await apiKey.save();
 
-// API Key finden
+// Find API key
 const foundApiKey = await ApiKey.findById(apiKeyId);
 const apiKeysByTenant = await ApiKey.find({ tenantId: tenantId, isActive: true });
 ```
@@ -301,7 +301,7 @@ interface IApiKey {
 ```typescript
 import { Secret, ISecret } from '@monshy/database';
 
-// Secret erstellen
+// Create secret
 const secret = new Secret({
   name: 'openai-api-key',
   description: 'OpenAI API Key',
@@ -314,7 +314,7 @@ const secret = new Secret({
 });
 await secret.save();
 
-// Secret finden
+// Find secret
 const foundSecret = await Secret.findById(secretId);
 const secretsByTenant = await Secret.find({ tenantId: tenantId });
 const secretByName = await Secret.findOne({ 
@@ -346,7 +346,7 @@ interface ISecret {
 ```typescript
 import { AuditLog, IAuditLog } from '@monshy/database';
 
-// Audit Log erstellen
+// Create audit log
 const auditLog = new AuditLog({
   action: 'workflow.created',
   resource: 'workflow',
@@ -359,7 +359,7 @@ const auditLog = new AuditLog({
 });
 await auditLog.save();
 
-// Audit Logs abrufen
+// Retrieve audit logs
 const logsByTenant = await AuditLog.find({ tenantId: tenantId })
   .sort({ createdAt: -1 })
   .limit(100);
@@ -385,7 +385,7 @@ interface IAuditLog {
 ```typescript
 import { WorkflowComment, IWorkflowComment } from '@monshy/database';
 
-// Kommentar erstellen
+// Create comment
 const comment = new WorkflowComment({
   workflowId: '507f1f77bcf86cd799439011',
   userId: '507f1f77bcf86cd799439012',
@@ -394,7 +394,7 @@ const comment = new WorkflowComment({
 });
 await comment.save();
 
-// Kommentare abrufen
+// Retrieve comments
 const comments = await WorkflowComment.find({ workflowId: workflowId })
   .sort({ createdAt: -1 });
 ```
@@ -418,7 +418,7 @@ interface IWorkflowComment {
 ```typescript
 import { SupportConsent, ISupportConsent } from '@monshy/database';
 
-// Support Consent erstellen
+// Create support consent
 const consent = new SupportConsent({
   tenantId: '507f191e810c19729de860ea',
   grantedBy: '507f1f77bcf86cd799439012',
@@ -442,9 +442,9 @@ interface ISupportConsent {
 
 ---
 
-## 💡 Verwendungsbeispiele
+## 💡 Usage Examples
 
-### Service-Start mit Database Connection
+### Service Startup with Database Connection
 
 ```typescript
 import { connectDatabase } from '@monshy/database';
@@ -452,10 +452,10 @@ import { logger } from '@monshy/core';
 
 async function start() {
   try {
-    // Database verbinden
+    // Connect to database
     await connectDatabase();
     
-    // Service starten
+    // Start service
     app.listen(PORT, () => {
       logger.info({ port: PORT }, 'Service started');
     });
@@ -474,7 +474,7 @@ start();
 import { User, IUser } from '@monshy/database';
 import bcrypt from 'bcrypt';
 
-// User erstellen
+// Create user
 async function createUser(email: string, password: string, tenantId: string) {
   const passwordHash = await bcrypt.hash(password, 10);
   
@@ -490,17 +490,17 @@ async function createUser(email: string, password: string, tenantId: string) {
   return user;
 }
 
-// User finden
+// Find user
 async function getUserByEmail(email: string): Promise<IUser | null> {
   return await User.findOne({ email: email.toLowerCase() });
 }
 
-// User aktualisieren
+// Update user
 async function updateUser(userId: string, updates: Partial<IUser>) {
   return await User.findByIdAndUpdate(userId, updates, { new: true });
 }
 
-// User deaktivieren
+// Deactivate user
 async function deactivateUser(userId: string) {
   return await User.findByIdAndUpdate(userId, { isActive: false }, { new: true });
 }
@@ -511,7 +511,7 @@ async function deactivateUser(userId: string) {
 ```typescript
 import { Workflow, IWorkflow } from '@monshy/database';
 
-// Workflow erstellen
+// Create workflow
 async function createWorkflow(data: {
   name: string;
   description?: string;
@@ -531,7 +531,7 @@ async function createWorkflow(data: {
   return workflow;
 }
 
-// Workflow veröffentlichen
+// Publish workflow
 async function publishWorkflow(workflowId: string) {
   return await Workflow.findByIdAndUpdate(
     workflowId,
@@ -543,13 +543,13 @@ async function publishWorkflow(workflowId: string) {
   );
 }
 
-// Workflows nach Tenant abrufen
+// Get workflows by tenant
 async function getWorkflowsByTenant(tenantId: string) {
   return await Workflow.find({ tenantId, isActive: true })
     .sort({ updatedAt: -1 });
 }
 
-// Veröffentlichte Workflows abrufen
+// Get published workflows
 async function getPublishedWorkflows(limit: number = 10) {
   return await Workflow.find({ isPublished: true, isActive: true })
     .sort({ publishedAt: -1 })
@@ -600,8 +600,8 @@ async function getWorkflowStats(tenantId: string) {
   return stats[0] || { total: 0, published: 0, active: 0 };
 }
 
-// Populate (wenn Referenzen vorhanden)
-// Beispiel: Workflow mit User-Info
+// Populate (when references exist)
+// Example: Workflow with user info
 const workflow = await Workflow.findById(workflowId)
   .populate('userId', 'email firstName lastName');
 ```
@@ -615,10 +615,10 @@ import { logger } from '@monshy/core';
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
   
-  // Database trennen
+  // Disconnect database
   await disconnectDatabase();
   
-  // Service beenden
+  // Terminate service
   process.exit(0);
 });
 ```
@@ -633,10 +633,10 @@ process.on('SIGTERM', async () => {
 # MongoDB Connection String
 MONGODB_URL=mongodb://admin:admin123@localhost:27018/MonshyFlow?authSource=admin
 
-# Alternative (für .NET Kompatibilität)
+# Alternative (for .NET compatibility)
 MongoDbSettings__ConnectionString=mongodb://admin:admin123@localhost:27018/MonshyFlow?authSource=admin
 
-# Azure Cosmos DB Beispiel
+# Azure Cosmos DB example
 MONGODB_URL=mongodb://account:key@account.mongo.cosmos.azure.com:10255/MonshyFlow?ssl=true&replicaSet=globaldb
 ```
 
@@ -646,9 +646,9 @@ MONGODB_URL=mongodb://account:key@account.mongo.cosmos.azure.com:10255/MonshyFlo
 mongodb://[username:password@]host[:port]/[database][?options]
 ```
 
-**Beispiele:**
-- Lokal: `mongodb://localhost:27017/MonshyFlow`
-- Mit Auth: `mongodb://admin:password@localhost:27017/MonshyFlow?authSource=admin`
+**Examples:**
+- Local: `mongodb://localhost:27017/MonshyFlow`
+- With Auth: `mongodb://admin:password@localhost:27017/MonshyFlow?authSource=admin`
 - Azure Cosmos DB: `mongodb://account:key@account.mongo.cosmos.azure.com:10255/MonshyFlow?ssl=true`
 
 ---
@@ -657,7 +657,7 @@ mongodb://[username:password@]host[:port]/[database][?options]
 
 ### Runtime Dependencies
 
-- `@monshy/core` workspace:* - Basis-Utilities
+- `@monshy/core` workspace:* - Base utilities
 - `mongoose` ^8.19.1 - MongoDB ODM
 
 ### Dev Dependencies
@@ -706,7 +706,7 @@ database/
 │   │   ├── WorkflowComment.ts
 │   │   ├── SupportConsent.ts
 │   │   └── index.ts
-│   ├── repositories/      # Repository Pattern (zur Zeit leer)
+│   ├── repositories/      # Repository Pattern (currently empty)
 │   │   └── index.ts
 │   ├── utils/             # Utilities
 │   │   └── logger.ts
@@ -717,16 +717,15 @@ database/
 
 ---
 
-## 🔗 Weitere Informationen
+## 🔗 Further Information
 
 - **Mongoose Documentation:** [mongoosejs.com](https://mongoosejs.com/)
 - **MongoDB Documentation:** [docs.mongodb.com](https://docs.mongodb.com/)
 - **Azure Cosmos DB:** [docs.microsoft.com/azure/cosmos-db](https://docs.microsoft.com/azure/cosmos-db/)
-- **Packages Overview:** Siehe [`../README.md`](../README.md)
+- **Packages Overview:** See [`../README.md`](../README.md)
 
 ---
 
-## 📄 Lizenz
+## 📄 License
 
-Siehe Root-Repository für Lizenzinformationen.
-
+See root repository for license information.

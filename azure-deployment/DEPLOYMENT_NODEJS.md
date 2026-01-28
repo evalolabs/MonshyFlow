@@ -1,22 +1,22 @@
 # 🚀 Azure Deployment - Node.js Services
 
-Deployment-Guide für die Node.js Services in Azure Container Apps.
+Deployment guide for the Node.js services in Azure Container Apps.
 
 ---
 
-## 📋 Voraussetzungen
+## 📋 Prerequisites
 
-1. ✅ Azure Ressourcen erstellt (siehe `README.md`)
-2. ✅ Azure Container Registry (ACR) vorhanden
-3. ✅ Container Apps Environment erstellt
-4. ✅ Cosmos DB & Redis erstellt
-5. ✅ Key Vault erstellt
+1. ✅ Azure resources created (see `README.md`)
+2. ✅ Azure Container Registry (ACR) available
+3. ✅ Container Apps Environment created
+4. ✅ Cosmos DB & Redis created
+5. ✅ Key Vault created
 
 ---
 
-## 🐳 Docker Images bauen
+## 🐳 Build Docker images
 
-### Build-Script erstellen
+### Create build script
 
 ```bash
 # azure-deployment/scripts/build-push-images.sh
@@ -54,9 +54,9 @@ echo "✅ All images built and pushed"
 
 ---
 
-## 🚀 Container Apps deployen
+## 🚀 Deploy Container Apps
 
-### API Service
+### API service
 
 ```bash
 az containerapp create \
@@ -82,7 +82,7 @@ az containerapp create \
     "PORT=80"
 ```
 
-### Auth Service
+### Auth service
 
 ```bash
 az containerapp create \
@@ -101,7 +101,7 @@ az containerapp create \
     "PORT=80"
 ```
 
-### Secrets Service
+### Secrets service
 
 ```bash
 az containerapp create \
@@ -123,7 +123,7 @@ az containerapp create \
     "PORT=80"
 ```
 
-### Execution Service
+### Execution service
 
 ```bash
 az containerapp create \
@@ -146,7 +146,7 @@ az containerapp create \
     "NODE_ENV=production"
 ```
 
-### Scheduler Service
+### Scheduler service
 
 ```bash
 az containerapp create \
@@ -165,16 +165,16 @@ az containerapp create \
 
 ---
 
-## 🔄 Update bestehender Container Apps
+## 🔄 Update existing Container Apps
 
 ```bash
-# Image aktualisieren
+# Update single image
 az containerapp update \
   --name api-service \
   --resource-group monshy-rg \
   --image monshy.azurecr.io/api-service:latest
 
-# Oder alle Services aktualisieren
+# Or update all services
 for service in api-service auth-service secrets-service execution-service scheduler-service; do
   az containerapp update \
     --name $service \
@@ -185,9 +185,9 @@ done
 
 ---
 
-## 📊 Health Checks
+## 📊 Health checks
 
-Jeder Service sollte einen `/health` Endpoint haben:
+Each service should expose a `/health` endpoint:
 
 ```typescript
 app.get('/health', (req, res) => {
@@ -203,7 +203,7 @@ app.get('/health', (req, res) => {
 
 ## 🔍 Monitoring
 
-### Logs anzeigen
+### Show logs
 
 ```bash
 az containerapp logs show \
@@ -223,54 +223,54 @@ az containerapp show \
 
 ---
 
-## ✅ Checkliste
+## ✅ Checklist
 
-- [ ] Docker Images gebaut und gepusht
-- [ ] Container Apps erstellt
-- [ ] Environment Variables gesetzt
-- [ ] Key Vault Secrets referenziert
-- [ ] Health Checks funktionieren
-- [ ] Service Discovery funktioniert
-- [ ] Logs sichtbar
-- [ ] Frontend kann Gateway erreichen
+- [ ] Docker images built and pushed
+- [ ] Container Apps created
+- [ ] Environment variables configured
+- [ ] Key Vault secrets referenced
+- [ ] Health checks working
+- [ ] Service discovery working
+- [ ] Logs visible
+- [ ] Frontend can reach API service
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Service kann andere Services nicht erreichen
+### Service cannot reach other services
 
-**Problem:** Service Discovery funktioniert nicht
+**Problem:** Service discovery is not working
 
-**Lösung:**
-- Prüfe interne Container App Namen (müssen exakt übereinstimmen)
-- Prüfe Port (muss 80 sein in Azure, außer execution-service: 5004)
-- Prüfe Ingress (muss `internal` sein für interne Services)
-- Prüfe Environment Variables (Service URLs müssen korrekt sein)
+**Solution:**
+- Check internal Container App names (they must match exactly)
+- Check port (must be 80 in Azure, except `execution-service`: 5004)
+- Check ingress (must be `internal` for internal services)
+- Check environment variables (service URLs must be correct)
 
-### Database Connection Error
+### Database connection error
 
-**Problem:** Cosmos DB Connection schlägt fehl
+**Problem:** Cosmos DB connection fails
 
-**Lösung:**
-- Prüfe Connection String Format
-- Prüfe Firewall-Regeln (Cosmos DB muss Container Apps erlauben)
-- Prüfe SSL Settings (`ssl=true` ist erforderlich)
+**Solution:**
+- Check connection string format
+- Check firewall rules (Cosmos DB must allow Container Apps)
+- Check SSL settings (`ssl=true` is required)
 
-### Redis Connection Error
+### Redis connection error
 
-**Problem:** Redis Connection schlägt fehl
+**Problem:** Redis connection fails
 
-**Lösung:**
-- Prüfe Connection String Format
-- Prüfe Firewall-Regeln
-- Prüfe SSL Settings (`ssl=True` ist erforderlich)
+**Solution:**
+- Check connection string format
+- Check firewall rules
+- Check SSL settings (`ssl=True` is required)
 
 ---
 
-## 📚 Weitere Ressourcen
+## 📚 Further resources
 
 - [Azure Container Apps Docs](https://docs.microsoft.com/azure/container-apps/)
-- [Service Discovery in Container Apps](https://docs.microsoft.com/azure/container-apps/networking)
-- [Environment Variables](https://docs.microsoft.com/azure/container-apps/environment-variables)
+- [Service discovery in Container Apps](https://docs.microsoft.com/azure/container-apps/networking)
+- [Environment variables](https://docs.microsoft.com/azure/container-apps/environment-variables)
 

@@ -1,29 +1,29 @@
 # 📦 Packages Overview
 
-Dieses Verzeichnis enthält alle **Shared Packages** und **Microservices** für die MonshyFlow-Plattform. Die Architektur basiert auf einem **Monorepo** mit **pnpm Workspaces** und folgt dem **Microservices-Pattern** mit getrennten, unabhängig deploybaren Services.
+This directory contains all **Shared Packages** and **Microservices** for the MonshyFlow platform. The architecture is based on a **Monorepo** with **pnpm Workspaces** and follows the **Microservices Pattern** with separate, independently deployable services.
 
 ---
 
-## 📋 Inhaltsverzeichnis
+## 📋 Table of Contents
 
 - [Shared Packages](#-shared-packages)
 - [Services](#-services)
 - [Quick Start](#-quick-start)
-- [Entwicklung](#-entwicklung)
-- [Architektur](#-architektur)
+- [Development](#-development)
+- [Architecture](#-architecture)
 
 ---
 
 ## 🔧 Shared Packages
 
-Shared Packages sind wiederverwendbare Libraries, die von mehreren Services genutzt werden. Sie werden als npm Packages mit `workspace:*` Dependencies verwaltet.
+Shared Packages are reusable libraries used by multiple services. They are managed as npm packages with `workspace:*` dependencies.
 
 ### `@monshy/core`
 
-**Basis-Utilities Package** - Enthält gemeinsame Funktionalitäten für alle Services.
+**Base Utilities Package** - Contains common functionality for all services.
 
-**Funktionen:**
-- Logger (Pino-basiert)
+**Functions:**
+- Logger (Pino-based)
 - Error Classes (`AppError`, `ValidationError`, etc.)
 - Validation Utilities (Zod)
 - Security Middleware (Helmet, Rate Limiting)
@@ -36,7 +36,7 @@ Shared Packages sind wiederverwendbare Libraries, die von mehreren Services genu
 - `express-rate-limit` - Rate Limiting
 - `helmet` - Security Headers
 
-**Verwendung:**
+**Usage:**
 ```typescript
 import { logger } from '@monshy/core';
 import { AppError } from '@monshy/core';
@@ -47,9 +47,9 @@ import { securityHeaders } from '@monshy/core';
 
 ### `@monshy/database`
 
-**Database Package** - MongoDB Models, Repositories und Connection Management.
+**Database Package** - MongoDB Models, Repositories and Connection Management.
 
-**Funktionen:**
+**Functions:**
 - Mongoose Models (Workflow, User, Tenant, etc.)
 - Database Connection Management
 - Repository Pattern Implementation
@@ -59,7 +59,7 @@ import { securityHeaders } from '@monshy/core';
 - `@monshy/core` - Shared Utilities
 - `mongoose` - MongoDB ODM
 
-**Verwendung:**
+**Usage:**
 ```typescript
 import { connectDatabase } from '@monshy/database';
 import { Workflow, User } from '@monshy/database';
@@ -69,9 +69,9 @@ import { Workflow, User } from '@monshy/database';
 
 ### `@monshy/auth`
 
-**Authentication Package** - JWT und API Key Utilities, Auth Middleware.
+**Authentication Package** - JWT and API Key Utilities, Auth Middleware.
 
-**Funktionen:**
+**Functions:**
 - JWT Token Generation & Verification
 - API Key Management
 - Authentication Middleware
@@ -82,7 +82,7 @@ import { Workflow, User } from '@monshy/database';
 - `jsonwebtoken` - JWT Handling
 - `bcrypt` - Password Hashing
 
-**Verwendung:**
+**Usage:**
 ```typescript
 import { generateToken, verifyToken } from '@monshy/auth';
 import { authenticate } from '@monshy/auth';
@@ -92,16 +92,16 @@ import { authenticate } from '@monshy/auth';
 
 ## 🚀 Services
 
-Services sind eigenständige HTTP-Services (Express.js), die auf verschiedenen Ports laufen und über HTTP kommunizieren.
+Services are standalone HTTP services (Express.js) that run on different ports and communicate via HTTP.
 
 ### `@monshy/api-service` (Port: 5000)
 
-**API Service** - Zentraler Service für Gateway-Funktionalität und Workflow Management.
+**API Service** - Central service for Gateway functionality and Workflow Management.
 
-**Funktionen:**
-- **API Gateway:** Routet Requests zu den verschiedenen Services (http-proxy-middleware)
-- **Workflow Management:** CRUD Operations für Workflows
-- **Swagger UI:** API-Dokumentation unter `/api-docs`
+**Functions:**
+- **API Gateway:** Routes requests to various services (http-proxy-middleware)
+- **Workflow Management:** CRUD operations for workflows
+- **Swagger UI:** API documentation at `/api-docs`
 - **Admin Functions:** Tenant Management, Audit Logs, OAuth2
 
 **Dependencies:**
@@ -119,9 +119,9 @@ Services sind eigenständige HTTP-Services (Express.js), die auf verschiedenen P
 
 ### `@monshy/auth-service` (Port: 5002)
 
-**Authentication & Authorization Service** - Verwaltet Benutzerauthentifizierung und Autorisierung.
+**Authentication & Authorization Service** - Manages user authentication and authorization.
 
-**Funktionen:**
+**Functions:**
 - User Registration & Login
 - JWT Token Management
 - API Key Management
@@ -140,9 +140,9 @@ Services sind eigenständige HTTP-Services (Express.js), die auf verschiedenen P
 
 ### `execution-service` (Port: 5004)
 
-**Workflow Execution Service** - Führt Workflows aus und verarbeitet Node-Operationen.
+**Workflow Execution Service** - Executes workflows and processes node operations.
 
-**Funktionen:**
+**Functions:**
 - Node Execution (LLM, HTTP, Code, Transform, etc.)
 - Agent SDK Integration (OpenAI Agents)
 - MCP (Model Context Protocol) Support
@@ -151,7 +151,7 @@ Services sind eigenständige HTTP-Services (Express.js), die auf verschiedenen P
 
 **Dependencies:**
 - `@monshy/core`
-- `mongoose` (direkt, nicht über @monshy/database)
+- `mongoose` (direct, not via @monshy/database)
 - `express`, `openai`, `axios`
 - `redis` (Caching)
 - `amqplib` (Message Queue)
@@ -164,10 +164,10 @@ Services sind eigenständige HTTP-Services (Express.js), die auf verschiedenen P
 
 ### `@monshy/scheduler-service` (Port: 5005)
 
-**Workflow Scheduling Service** - Plant und verwaltet geplante Workflows.
+**Workflow Scheduling Service** - Schedules and manages scheduled workflows.
 
-**Funktionen:**
-- Cron-basierte Scheduling
+**Functions:**
+- Cron-based Scheduling
 - Workflow Trigger Management
 - Scheduled Execution Coordination
 
@@ -183,9 +183,9 @@ Services sind eigenständige HTTP-Services (Express.js), die auf verschiedenen P
 
 ### `@monshy/secrets-service` (Port: 5003)
 
-**Secrets Management Service** - Verwaltet verschlüsselte Secrets für Workflows.
+**Secrets Management Service** - Manages encrypted secrets for workflows.
 
-**Funktionen:**
+**Functions:**
 - Secure Secret Storage
 - Encryption/Decryption
 - Secret Rotation
@@ -202,29 +202,29 @@ Services sind eigenständige HTTP-Services (Express.js), die auf verschiedenen P
 
 ## 🚀 Quick Start
 
-### Voraussetzungen
+### Prerequisites
 
 - Node.js >= 20.0.0
 - pnpm >= 8.0.0
-- MongoDB (lokal oder Remote)
+- MongoDB (local or remote)
 
 ### Installation
 
 ```bash
-# Dependencies installieren
+# Install dependencies
 pnpm install
 
-# Alle Packages bauen
+# Build all packages
 pnpm build:packages
 ```
 
-### Services starten
+### Start Services
 
 ```bash
-# Alle Services im Development-Modus starten
+# Start all services in development mode
 pnpm dev
 
-# Oder einzelne Services
+# Or individual services
 cd packages/api-service && pnpm dev
 cd packages/auth-service && pnpm dev
 ```
@@ -232,28 +232,28 @@ cd packages/auth-service && pnpm dev
 ### Testing
 
 ```bash
-# Alle Tests ausführen
+# Run all tests
 pnpm test
 
-# Tests für ein spezifisches Package
+# Tests for a specific package
 cd packages/api-service && pnpm test
 ```
 
 ---
 
-## 📝 Entwicklung
+## 📝 Development
 
-### Neues Package erstellen
+### Create New Package
 
 ```bash
-# Package-Verzeichnis erstellen
+# Create package directory
 mkdir packages/my-package
 cd packages/my-package
 
-# package.json initialisieren
+# Initialize package.json
 pnpm init
 
-# Workspace-Dependency hinzufügen (in package.json)
+# Add workspace dependency (in package.json)
 {
   "name": "@monshy/my-package",
   "dependencies": {
@@ -262,30 +262,30 @@ pnpm init
 }
 ```
 
-### Package verwenden
+### Use Package
 
 ```typescript
-// In einem Service
+// In a service
 import { AppError } from '@monshy/core';
 import { connectDatabase } from '@monshy/database';
 import { generateToken } from '@monshy/auth';
 ```
 
-### Build-Prozess
+### Build Process
 
 ```bash
-# Alle Packages bauen
+# Build all packages
 pnpm build:packages
 
-# Einzelnes Package bauen
+# Build individual package
 cd packages/core && pnpm build
 ```
 
 ---
 
-## 🏗️ Architektur
+## 🏗️ Architecture
 
-### Monorepo-Struktur
+### Monorepo Structure
 
 ```
 packages/
@@ -299,37 +299,37 @@ packages/
 └── secrets-service/   # Secrets Management
 ```
 
-### Service-Kommunikation
+### Service Communication
 
-- **HTTP/REST:** Services kommunizieren über HTTP
-- **Message Queue:** Für asynchrone Operationen (RabbitMQ/AMQP)
-- **Database:** Shared MongoDB über `@monshy/database`
+- **HTTP/REST:** Services communicate via HTTP
+- **Message Queue:** For asynchronous operations (RabbitMQ/AMQP)
+- **Database:** Shared MongoDB via `@monshy/database`
 
 ### Dependency Graph
 
 ```
 Services
-  ├── @monshy/core (Basis)
+  ├── @monshy/core (Base)
   ├── @monshy/database (Models)
   └── @monshy/auth (Auth Utils)
 ```
 
 ---
 
-## 🔗 Weitere Informationen
+## 🔗 Further Information
 
-- **Gateway Details:** Siehe [`api-service/src/gateway/README.md`](./api-service/src/gateway/README.md)
-- **Service Ports (extern, lokal):** 
-  - API Service: `:5000` (über Kong Gateway)
+- **Gateway Details:** See [`api-service/src/gateway/README.md`](./api-service/src/gateway/README.md)
+- **Service Ports (external, local):** 
+  - API Service: `:5000` (via Kong Gateway)
   - Auth Service: `:5002`
   - Execution Service: `:5004`
   - Scheduler Service: `:5005`
   - Secrets Service: `:5003`
   
-**Hinweis:** In Docker/Production laufen Services intern auf Port 80 (außer execution-service auf 5004) und werden über Service Discovery erreicht.
+**Note:** In Docker/Production, services run internally on port 80 (except execution-service on 5004) and are reached via Service Discovery.
 
 ---
 
-## 📄 Lizenz
+## 📄 License
 
-Siehe Root-Repository für Lizenzinformationen.
+See root repository for license information.

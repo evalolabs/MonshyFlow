@@ -1,19 +1,19 @@
 # 🔐 Auth Service
 
-Der **Auth Service** verwaltet Benutzerauthentifizierung und Autorisierung für die MonshyFlow-Plattform. Er bietet JWT-basierte Authentication, User Registration, Login und API Key Management.
+The **Auth Service** manages user authentication and authorization for the MonshyFlow platform. It provides JWT-based authentication, user registration, login, and API key management.
 
 ---
 
-## 📋 Inhaltsverzeichnis
+## 📋 Table of Contents
 
-- [Übersicht](#-übersicht)
+- [Overview](#-overview)
 - [Features](#-features)
 - [Security](#-security)
 - [Environment Variables](#-environment-variables)
 - [Setup & Installation](#-setup--installation)
 - [API-Endpoints](#-api-endpoints)
 - [Authentication Flow](#-authentication-flow)
-- [Request/Response-Beispiele](#-requestresponse-beispiele)
+- [Request/Response Examples](#-requestresponse-examples)
 - [JWT Tokens](#-jwt-tokens)
 - [API Keys](#-api-keys)
 - [Health Checks](#-health-checks)
@@ -22,14 +22,14 @@ Der **Auth Service** verwaltet Benutzerauthentifizierung und Autorisierung für 
 
 ---
 
-## 🎯 Übersicht
+## 🎯 Overview
 
-Der Auth Service ist ein **Express.js-basierter HTTP-Service**, der auf Port **5002** läuft (konfigurierbar). Er bietet:
+The Auth Service is an **Express.js-based HTTP service** that runs on port **5002** (configurable). It provides:
 
-- **User Authentication:** Login, Registration, Token-Validierung
-- **JWT Management:** Token-Generierung und -Validierung
-- **API Key Management:** Erstellen, Verwalten und Revokieren von API Keys
-- **Password Security:** bcrypt-basierte Passwort-Hashing
+- **User Authentication:** Login, Registration, Token Validation
+- **JWT Management:** Token Generation and Validation
+- **API Key Management:** Create, Manage, and Revoke API Keys
+- **Password Security:** bcrypt-based password hashing
 - **Tenant Support:** Multi-Tenant Authentication
 
 ---
@@ -54,10 +54,10 @@ Der Auth Service ist ein **Express.js-basierter HTTP-Service**, der auf Port **5
 ### Security
 - ✅ bcrypt Password Hashing (10 rounds)
 - ✅ JWT Token Signing & Verification
-- ✅ Rate Limiting (stricter für Auth-Endpoints)
+- ✅ Rate Limiting (stricter for auth endpoints)
 - ✅ Security Headers (Helmet)
 - ✅ CORS Configuration
-- ✅ Request ID für Tracing
+- ✅ Request ID for tracing
 
 ---
 
@@ -65,69 +65,69 @@ Der Auth Service ist ein **Express.js-basierter HTTP-Service**, der auf Port **5
 
 ### Password Hashing
 
-Passwörter werden mit **bcrypt** gehasht:
-- **Rounds:** 10 (konfigurierbar)
+Passwords are hashed with **bcrypt**:
+- **Rounds:** 10 (configurable)
 - **Algorithm:** bcrypt
-- **Salt:** Automatisch generiert
+- **Salt:** Automatically generated
 
 **Best Practices:**
-- Passwörter werden niemals im Klartext gespeichert
-- Passwörter werden niemals in Logs geschrieben
-- Passwort-Vergleich erfolgt mit `bcrypt.compare()`
+- Passwords are never stored in plain text
+- Passwords are never written to logs
+- Password comparison is done with `bcrypt.compare()`
 
 ### JWT Tokens
 
 - **Algorithm:** HS256 (HMAC SHA-256)
-- **Expiration:** Konfigurierbar (Standard: 24h)
+- **Expiration:** Configurable (default: 24h)
 - **Payload:** `userId`, `tenantId`, `email`, `role`
-- **Secret:** Aus Environment Variable (`JWT_SECRET`)
+- **Secret:** From environment variable (`JWT_SECRET`)
 
 ### API Keys
 
-- **Format:** `mf_` + 32 zufällige Zeichen
-- **Storage:** Gehasht (SHA-256) in Datenbank
-- **Validation:** Timing-safe Vergleich
-- **Expiration:** Optional, konfigurierbar
+- **Format:** `mf_` + 32 random characters
+- **Storage:** Hashed (SHA-256) in database
+- **Validation:** Timing-safe comparison
+- **Expiration:** Optional, configurable
 
 ---
 
 ## 🔧 Environment Variables
 
-### Erforderliche Variablen
+### Required Variables
 
 ```bash
-# Port (Standard: 5002)
+# Port (Default: 5002)
 PORT=5002
 
 # MongoDB Connection String
 MONGODB_URI=mongodb://localhost:27017/monshyflow
 
-# JWT Secret (MINDESTENS 32 Zeichen!)
-# Unterstützt mehrere Variablennamen (für Kompatibilität):
+# JWT Secret (MINIMUM 32 characters!)
+# Supports multiple variable names (for compatibility):
 JWT_SECRET_KEY=your-very-long-and-secure-jwt-secret-min-32-chars
-# oder
+# or
 JWT_SECRET=your-very-long-and-secure-jwt-secret-min-32-chars
-# oder (für .NET Kompatibilität)
+# or (for .NET compatibility)
 JwtSettings__SecretKey=your-very-long-and-secure-jwt-secret-min-32-chars
 
-# JWT Issuer (optional, Standard: 'monshy-auth-service')
+# JWT Issuer (optional, default: 'monshy-auth-service')
 JWT_ISSUER=monshy-auth-service
-# oder
+# or
 JwtSettings__Issuer=monshy-auth-service
 
-# JWT Audience (optional, Standard: 'monshy-services')
+# JWT Audience (optional, default: 'monshy-services')
 JWT_AUDIENCE=monshy-services
-# oder
+# or
 JwtSettings__Audience=monshy-services
 
-# Frontend URL (für CORS)
+# Frontend URL (for CORS)
 FRONTEND_URL=http://localhost:5173
 
 # Node Environment
-NODE_ENV=development  # oder production
+NODE_ENV=development  # or production
 ```
 
-### Optionale Variablen
+### Optional Variables
 
 ```bash
 # Azure Container Apps
@@ -140,43 +140,43 @@ LOG_LEVEL=info  # debug, info, warn, error
 ### ⚠️ Security Best Practices
 
 1. **JWT Secret:**
-   - Mindestens 32 Zeichen lang
-   - Zufällig generiert (z.B. `openssl rand -hex 32`)
-   - Nie im Code committen
-   - In Production: Azure Key Vault oder ähnliches verwenden
+   - At least 32 characters long
+   - Randomly generated (e.g., `openssl rand -hex 32`)
+   - Never commit to code
+   - In Production: Use Azure Key Vault or similar
 
 2. **Password Hashing:**
-   - bcrypt Rounds sollten >= 10 sein
-   - Passwörter niemals loggen
+   - bcrypt rounds should be >= 10
+   - Never log passwords
 
 ---
 
 ## 🚀 Setup & Installation
 
-### Voraussetzungen
+### Prerequisites
 
 - Node.js >= 20.0.0
 - pnpm >= 8.0.0
-- MongoDB (lokal oder Remote)
+- MongoDB (local or remote)
 
 ### Installation
 
 ```bash
-# Im Root-Verzeichnis
+# In the root directory
 pnpm install
 
-# Packages bauen
+# Build packages
 pnpm build:packages
 ```
 
-### Development starten
+### Start Development
 
 ```bash
-# Im auth-service Verzeichnis
+# In the auth-service directory
 cd packages/auth-service
 pnpm dev
 
-# Oder vom Root
+# Or from root
 pnpm --filter @monshy/auth-service dev
 ```
 
@@ -209,7 +209,7 @@ GET /health
 
 ---
 
-### Public Endpoints (keine Auth erforderlich)
+### Public Endpoints (no auth required)
 
 #### User Registration
 
@@ -244,10 +244,10 @@ Content-Type: application/json
 }
 ```
 
-**Validierung:**
-- `email`: Erforderlich, muss eindeutig sein
-- `password`: Erforderlich, min. 8 Zeichen (empfohlen)
-- `tenantId`: Optional, wird automatisch erstellt falls nicht vorhanden
+**Validation:**
+- `email`: Required, must be unique
+- `password`: Required, min. 8 characters (recommended)
+- `tenantId`: Optional, automatically created if not present
 
 ---
 
@@ -322,7 +322,7 @@ Authorization: Bearer {token}
 
 ---
 
-#### API Key Validation (für Gateway)
+#### API Key Validation (for Gateway)
 
 ```http
 POST /api/auth/validate-apikey
@@ -355,7 +355,7 @@ Content-Type: application/json
 
 ---
 
-### Protected Endpoints (JWT Authentication erforderlich)
+### Protected Endpoints (JWT Authentication required)
 
 #### Current User Info
 
@@ -384,7 +384,7 @@ Authorization: Bearer {token}
 
 ---
 
-#### API Keys abrufen
+#### Get API keys
 
 ```http
 GET /api/apikeys
@@ -409,11 +409,11 @@ Authorization: Bearer {token}
 }
 ```
 
-**Hinweis:** Der API Key selbst wird nur bei der Erstellung zurückgegeben, danach nur noch Metadaten.
+**Note:** The API key itself is only returned during creation, after that only metadata.
 
 ---
 
-#### API Key erstellen
+#### Create API key
 
 ```http
 POST /api/apikeys
@@ -441,11 +441,11 @@ Content-Type: application/json
 }
 ```
 
-**⚠️ WICHTIG:** Der `apiKey` wird nur einmal bei der Erstellung zurückgegeben. Speichere ihn sicher!
+**⚠️ IMPORTANT:** The `apiKey` is only returned once during creation. Store it securely!
 
 ---
 
-#### API Key revokieren
+#### Revoke API key
 
 ```http
 POST /api/apikeys/:id/revoke
@@ -462,7 +462,7 @@ Authorization: Bearer {token}
 
 ---
 
-#### API Key löschen
+#### Delete API key
 
 ```http
 DELETE /api/apikeys/:id
@@ -487,13 +487,13 @@ Authorization: Bearer {token}
 Client
   ↓ POST /api/auth/register
 Auth Service
-  ↓ Validierung (Email, Password)
-  ↓ Passwort hashen (bcrypt)
-  ↓ User in DB speichern
-  ↓ JWT Token generieren
-  ↓ Response mit Token
+  ↓ Validation (Email, Password)
+  ↓ Hash password (bcrypt)
+  ↓ Save user to DB
+  ↓ Generate JWT token
+  ↓ Response with token
 Client
-  ↓ Token speichern (z.B. localStorage)
+  ↓ Store token (e.g., localStorage)
 ```
 
 ### 2. User Login
@@ -502,12 +502,12 @@ Client
 Client
   ↓ POST /api/auth/login
 Auth Service
-  ↓ User in DB finden
-  ↓ Passwort vergleichen (bcrypt.compare)
-  ↓ JWT Token generieren
-  ↓ Response mit Token
+  ↓ Find user in DB
+  ↓ Compare password (bcrypt.compare)
+  ↓ Generate JWT token
+  ↓ Response with token
 Client
-  ↓ Token speichern
+  ↓ Store token
 ```
 
 ### 3. Authenticated Request
@@ -516,14 +516,14 @@ Client
 Client
   ↓ Request mit Authorization: Bearer {token}
 API Service / Auth Service
-  ↓ Token validieren (verifyToken)
-  ↓ User-Info aus Token extrahieren
-  ↓ Request weiterleiten
+  ↓ Validate token (verifyToken)
+  ↓ Extract user info from token
+  ↓ Forward request
 ```
 
 ---
 
-## 📝 Request/Response-Beispiele
+## 📝 Request/Response Examples
 
 ### Registration
 
@@ -680,11 +680,11 @@ Authorization: Bearer mf_abc123def456...
 
 ### API Key Security
 
-- ✅ Keys werden gehasht (SHA-256) gespeichert
-- ✅ Keys werden niemals im Klartext geloggt
-- ✅ Keys können revokiert werden
-- ✅ Keys können ablaufen (optional)
-- ✅ Keys sind tenant-scoped
+- ✅ Keys are hashed (SHA-256) when stored
+- ✅ Keys are never logged in plain text
+- ✅ Keys can be revoked
+- ✅ Keys can expire (optional)
+- ✅ Keys are tenant-scoped
 
 ---
 
@@ -706,8 +706,8 @@ GET /health
 ```
 
 **Status Codes:**
-- `200` - Service ist gesund
-- `500` - Service hat Probleme
+- `200` - Service is healthy
+- `500` - Service has issues
 
 ---
 
@@ -715,7 +715,7 @@ GET /health
 
 ### Logging
 
-Der Service nutzt **Pino** für strukturiertes Logging:
+The service uses **Pino** for structured logging:
 
 ```typescript
 import { logger } from '@monshy/core';
@@ -724,15 +724,15 @@ logger.info({ userId: '123', email: 'user@example.com' }, 'User logged in');
 logger.error({ err: error }, 'Login failed');
 ```
 
-**⚠️ Wichtig:** Passwörter werden **NIE** geloggt!
+**⚠️ Important:** Passwords are **NEVER** logged!
 
 ### Testing
 
 ```bash
-# Tests ausführen
+# Run tests
 pnpm test
 
-# Tests mit Coverage
+# Tests with coverage
 pnpm test --coverage
 ```
 
@@ -776,38 +776,38 @@ docker run -p 5002:80 \
 
 ### Docker Compose
 
-Der Service ist Teil der `docker-compose.yml` im Root-Verzeichnis.
+The service is part of `docker-compose.yml` in the root directory.
 
 ### Azure Container Apps
 
-Der Service ist für Azure Container Apps konfiguriert:
+The service is configured for Azure Container Apps:
 
 - **Port:** 80 (intern)
 - **Health Check:** `/health`
-- **Key Management:** Azure Key Vault empfohlen für `JWT_SECRET`
+- **Key Management:** Azure Key Vault recommended for `JWT_SECRET`
 
 ### ⚠️ Production Checklist
 
-- [ ] `JWT_SECRET_KEY` (oder `JWT_SECRET`) aus Azure Key Vault oder ähnlichem
-- [ ] `JWT_ISSUER` und `JWT_AUDIENCE` konfiguriert
+- [ ] `JWT_SECRET_KEY` (or `JWT_SECRET`) from Azure Key Vault or similar
+- [ ] `JWT_ISSUER` and `JWT_AUDIENCE` configured
 - [ ] `NODE_ENV=production`
-- [ ] Rate Limiting aktiviert
-- [ ] Security Headers aktiviert
-- [ ] CORS korrekt konfiguriert
-- [ ] Passwörter niemals loggen
+- [ ] Rate Limiting enabled
+- [ ] Security Headers enabled
+- [ ] CORS correctly configured
+- [ ] Never log passwords
 - [ ] bcrypt Rounds >= 10
 
 ---
 
-## 🔗 Weitere Informationen
+## 🔗 Further Information
 
-- **Auth Package:** Siehe `@monshy/auth` Package
-- **Database Models:** Siehe `@monshy/database` Package
-- **Packages Overview:** Siehe [`../README.md`](../README.md)
+- **Auth Package:** See `@monshy/auth` Package
+- **Database Models:** See `@monshy/database` Package
+- **Packages Overview:** See [`../README.md`](../README.md)
 
 ---
 
-## 📄 Lizenz
+## 📄 License
 
-Siehe Root-Repository für Lizenzinformationen.
+See root repository for license information.
 

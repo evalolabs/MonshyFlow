@@ -1,18 +1,18 @@
 # ⏰ Scheduler Service
 
-Der **Scheduler Service** verwaltet geplante Workflow-Ausführungen basierend auf Cron-Expressions. Er prüft regelmäßig nach fälligen Workflows und triggert deren Ausführung über den Execution Service.
+The **Scheduler Service** manages scheduled workflow executions based on cron expressions. It regularly checks for due workflows and triggers their execution via the Execution Service.
 
 ---
 
-## 📋 Inhaltsverzeichnis
+## 📋 Table of Contents
 
-- [Übersicht](#-übersicht)
+- [Overview](#-overview)
 - [Features](#-features)
 - [Cron Expressions](#-cron-expressions)
 - [Environment Variables](#-environment-variables)
 - [Setup & Installation](#-setup--installation)
 - [API-Endpoints](#-api-endpoints)
-- [Request/Response-Beispiele](#-requestresponse-beispiele)
+- [Request/Response Examples](#-requestresponse-examples)
 - [Scheduling Flow](#-scheduling-flow)
 - [Health Checks](#-health-checks)
 - [Development](#-development)
@@ -20,15 +20,15 @@ Der **Scheduler Service** verwaltet geplante Workflow-Ausführungen basierend au
 
 ---
 
-## 🎯 Übersicht
+## 🎯 Overview
 
-Der Scheduler Service ist ein **Express.js-basierter HTTP-Service**, der auf Port **5005** läuft (konfigurierbar). Er bietet:
+The Scheduler Service is an **Express.js-based HTTP service** that runs on port **5005** (configurable). It provides:
 
-- **Cron-basiertes Scheduling:** Workflows können mit Cron-Expressions geplant werden
-- **Automatische Ausführung:** Prüft alle 1 Minute nach fälligen Workflows
-- **Timezone Support:** Unterstützt verschiedene Zeitzonen
-- **Workflow Management:** Registrieren, Abmelden und Status-Abfrage von geplanten Workflows
-- **Cron Validation:** Validiert Cron-Expressions vor dem Speichern
+- **Cron-based Scheduling:** Workflows can be scheduled with cron expressions
+- **Automatic Execution:** Checks every 1 minute for due workflows
+- **Timezone Support:** Supports various timezones
+- **Workflow Management:** Register, unregister, and status query for scheduled workflows
+- **Cron Validation:** Validates cron expressions before saving
 
 ---
 
@@ -37,24 +37,24 @@ Der Scheduler Service ist ein **Express.js-basierter HTTP-Service**, der auf Por
 ### Scheduling
 - ✅ Cron Expression Parsing (via `cron-parser`)
 - ✅ Timezone Support
-- ✅ Automatische Workflow-Ausführung
-- ✅ Next Run Time Berechnung
+- ✅ Automatic workflow execution
+- ✅ Next run time calculation
 - ✅ Enable/Disable Scheduling
 - ✅ Workflow Status Tracking
 
 ### Workflow Management
-- ✅ Workflow Registrieren
-- ✅ Workflow Abmelden
-- ✅ Status abrufen
-- ✅ Alle geplanten Workflows auflisten
-- ✅ Automatisches Laden beim Start
+- ✅ Register workflow
+- ✅ Unregister workflow
+- ✅ Get status
+- ✅ List all scheduled workflows
+- ✅ Automatic loading on startup
 
 ### Security
 - ✅ JWT Authentication
 - ✅ Rate Limiting
 - ✅ Security Headers (Helmet)
 - ✅ CORS Configuration
-- ✅ Request ID für Tracing
+- ✅ Request ID for tracing
 
 ---
 
@@ -62,33 +62,33 @@ Der Scheduler Service ist ein **Express.js-basierter HTTP-Service**, der auf Por
 
 ### Format
 
-Cron-Expressions folgen dem Standard-Format:
+Cron expressions follow the standard format:
 
 ```
 ┌───────────── Minute (0 - 59)
-│ ┌───────────── Stunde (0 - 23)
-│ │ ┌───────────── Tag des Monats (1 - 31)
-│ │ │ ┌───────────── Monat (1 - 12)
-│ │ │ │ ┌───────────── Wochentag (0 - 6) (Sonntag = 0)
+│ ┌───────────── Hour (0 - 23)
+│ │ ┌───────────── Day of month (1 - 31)
+│ │ │ ┌───────────── Month (1 - 12)
+│ │ │ │ ┌───────────── Day of week (0 - 6) (Sunday = 0)
 │ │ │ │ │
 * * * * *
 ```
 
-### Beispiele
+### Examples
 
-| Cron Expression | Beschreibung |
+| Cron Expression | Description |
 |----------------|--------------|
-| `0 * * * *` | Jede Stunde (Minute 0) |
-| `0 0 * * *` | Täglich um Mitternacht |
-| `0 9 * * 1-5` | Werktags um 9:00 Uhr |
-| `*/15 * * * *` | Alle 15 Minuten |
-| `0 0 1 * *` | Am 1. jedes Monats um Mitternacht |
-| `0 0 * * 0` | Jeden Sonntag um Mitternacht |
-| `0 9,17 * * *` | Täglich um 9:00 und 17:00 Uhr |
+| `0 * * * *` | Every hour (minute 0) |
+| `0 0 * * *` | Daily at midnight |
+| `0 9 * * 1-5` | Weekdays at 9:00 AM |
+| `*/15 * * * *` | Every 15 minutes |
+| `0 0 1 * *` | First day of every month at midnight |
+| `0 0 * * 0` | Every Sunday at midnight |
+| `0 9,17 * * *` | Daily at 9:00 AM and 5:00 PM |
 
 ### Timezone Support
 
-Cron-Expressions können mit verschiedenen Zeitzonen verwendet werden:
+Cron expressions can be used with different timezones:
 
 ```json
 {
@@ -97,7 +97,7 @@ Cron-Expressions können mit verschiedenen Zeitzonen verwendet werden:
 }
 ```
 
-Unterstützte Zeitzonen:
+Supported timezones:
 - `UTC` (Standard)
 - `Europe/Berlin`
 - `America/New_York`
@@ -108,10 +108,10 @@ Unterstützte Zeitzonen:
 
 ## 🔧 Environment Variables
 
-### Erforderliche Variablen
+### Required Variables
 
 ```bash
-# Port (Standard: 5005)
+# Port (Default: 5005)
 PORT=5005
 
 # MongoDB Connection String
@@ -120,17 +120,17 @@ MONGODB_URI=mongodb://localhost:27017/monshyflow
 # Execution Service URL
 EXECUTION_SERVICE_URL=http://localhost:5004
 
-# Frontend URL (für CORS)
+# Frontend URL (for CORS)
 FRONTEND_URL=http://localhost:5173
 
-# Auth Service URL (für Token-Validierung)
+# Auth Service URL (for token validation)
 AUTH_SERVICE_URL=http://localhost:5002
 
 # Node Environment
-NODE_ENV=development  # oder production
+NODE_ENV=development  # or production
 ```
 
-### Optionale Variablen
+### Optional Variables
 
 ```bash
 # Azure Container Apps
@@ -139,7 +139,7 @@ AZURE_CONTAINER_APPS_ENVIRONMENT=your-environment-name
 # Logging
 LOG_LEVEL=info  # debug, info, warn, error
 
-# Scheduler Check Interval (optional, Standard: 60000ms = 1 Minute)
+# Scheduler Check Interval (optional, default: 60000ms = 1 minute)
 SCHEDULER_CHECK_INTERVAL_MS=60000
 ```
 
@@ -147,31 +147,31 @@ SCHEDULER_CHECK_INTERVAL_MS=60000
 
 ## 🚀 Setup & Installation
 
-### Voraussetzungen
+### Prerequisites
 
 - Node.js >= 20.0.0
 - pnpm >= 8.0.0
-- MongoDB (lokal oder Remote)
-- Execution Service muss laufen
+- MongoDB (local or remote)
+- Execution Service must be running
 
 ### Installation
 
 ```bash
-# Im Root-Verzeichnis
+# In the root directory
 pnpm install
 
-# Packages bauen
+# Build packages
 pnpm build:packages
 ```
 
-### Development starten
+### Start Development
 
 ```bash
-# Im scheduler-service Verzeichnis
+# In the scheduler-service directory
 cd packages/scheduler-service
 pnpm dev
 
-# Oder vom Root
+# Or from root
 pnpm --filter @monshy/scheduler-service dev
 ```
 
@@ -204,9 +204,9 @@ GET /health
 
 ---
 
-### Protected Endpoints (JWT Authentication erforderlich)
+### Protected Endpoints (JWT Authentication required)
 
-#### Workflow registrieren
+#### Register workflow
 
 ```http
 POST /api/scheduler/workflows/:workflowId/register
@@ -228,14 +228,14 @@ Content-Type: application/json
 }
 ```
 
-**Validierung:**
-- `cronExpression`: Erforderlich, muss gültig sein
-- `timezone`: Optional, Standard: `UTC`
-- `enabled`: Optional, Standard: `true`
+**Validation:**
+- `cronExpression`: Required, must be valid
+- `timezone`: Optional, default: `UTC`
+- `enabled`: Optional, default: `true`
 
 ---
 
-#### Workflow abmelden
+#### Unregister workflow
 
 ```http
 POST /api/scheduler/workflows/:workflowId/unregister
@@ -252,7 +252,7 @@ Authorization: Bearer {token}
 
 ---
 
-#### Workflow Status abrufen
+#### Get workflow status
 
 ```http
 GET /api/scheduler/workflows/:workflowId/status
@@ -277,7 +277,7 @@ Authorization: Bearer {token}
 
 ---
 
-#### Alle geplanten Workflows abrufen
+#### Get all scheduled workflows
 
 ```http
 GET /api/scheduler/workflows
@@ -304,7 +304,7 @@ Authorization: Bearer {token}
 
 ---
 
-#### Cron Expression validieren
+#### Validate cron expression
 
 ```http
 POST /api/scheduler/validate-cron
@@ -335,7 +335,7 @@ Content-Type: application/json
 
 ---
 
-#### Next Run Time berechnen
+#### Calculate next run time
 
 ```http
 POST /api/scheduler/next-run-time
@@ -360,9 +360,9 @@ Content-Type: application/json
 
 ---
 
-## 📝 Request/Response-Beispiele
+## 📝 Request/Response Examples
 
-### Workflow registrieren
+### Register workflow
 
 **Request:**
 ```http
@@ -385,7 +385,7 @@ Content-Type: application/json
 }
 ```
 
-### Workflow Status abrufen
+### Get workflow status
 
 **Request:**
 ```http
@@ -409,7 +409,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-### Cron Expression validieren
+### Validate cron expression
 
 **Request:**
 ```http
@@ -443,44 +443,44 @@ Content-Type: application/json
 
 ## 🔄 Scheduling Flow
 
-### 1. Workflow registrieren
+### 1. Register Workflow
 
 ```
 Client
   ↓ POST /api/scheduler/workflows/:id/register
 Scheduler Service
-  ↓ Validierung (Cron Expression)
-  ↓ Next Run Time berechnen
-  ↓ In Memory Map speichern
-  ↓ In Database speichern
+  ↓ Validation (Cron Expression)
+  ↓ Calculate next run time
+  ↓ Store in memory map
+  ↓ Store in database
   ↓ Response
 ```
 
-### 2. Automatische Ausführung
+### 2. Automatic Execution
 
 ```
-Scheduler Service (jede Minute)
-  ↓ Prüfe alle geplanten Workflows
-  ↓ Für jeden Workflow:
-    - Ist nextRunAt <= jetzt?
-    - Ist enabled = true?
-  ↓ Wenn ja:
-    - Workflow über Execution Service ausführen
-    - lastRunAt aktualisieren
-    - nextRunAt neu berechnen
-    - runCount erhöhen
+Scheduler Service (every minute)
+  ↓ Check all scheduled workflows
+  ↓ For each workflow:
+    - Is nextRunAt <= now?
+    - Is enabled = true?
+  ↓ If yes:
+    - Execute workflow via Execution Service
+    - Update lastRunAt
+    - Recalculate nextRunAt
+    - Increment runCount
 ```
 
-### 3. Workflow Ausführung
+### 3. Workflow Execution
 
 ```
 Scheduler Service
-  ↓ HTTP POST zu Execution Service
+  ↓ HTTP POST to Execution Service
 Execution Service
-  ↓ Workflow ausführen
+  ↓ Execute workflow
   ↓ Response
 Scheduler Service
-  ↓ Status aktualisieren
+  ↓ Update status
 ```
 
 ---
@@ -503,8 +503,8 @@ GET /health
 ```
 
 **Status Codes:**
-- `200` - Service ist gesund
-- `500` - Service hat Probleme
+- `200` - Service is healthy
+- `500` - Service has issues
 
 ---
 
@@ -512,7 +512,7 @@ GET /health
 
 ### Logging
 
-Der Service nutzt **Pino** für strukturiertes Logging:
+The service uses **Pino** for structured logging:
 
 ```typescript
 import { logger } from '@monshy/core';
@@ -524,10 +524,10 @@ logger.error({ err: error, workflowId: '123' }, 'Failed to execute scheduled wor
 ### Testing
 
 ```bash
-# Tests ausführen
+# Run tests
 pnpm test
 
-# Tests mit Coverage
+# Tests with coverage
 pnpm test --coverage
 ```
 
@@ -549,9 +549,9 @@ scheduler-service/
 
 ### Scheduler Check Interval
 
-Der Service prüft standardmäßig **alle 1 Minute** (60000ms) nach fälligen Workflows. Dies kann über `SCHEDULER_CHECK_INTERVAL_MS` angepasst werden.
+The service checks **every 1 minute** (60000ms) for due workflows by default. This can be adjusted via `SCHEDULER_CHECK_INTERVAL_MS`.
 
-**Hinweis:** Ein kürzeres Intervall erhöht die Genauigkeit, aber auch die Last auf die Datenbank.
+**Note:** A shorter interval increases accuracy but also the load on the database.
 
 ---
 
@@ -574,45 +574,45 @@ docker run -p 5005:80 \
 
 ### Docker Compose
 
-Der Service ist Teil der `docker-compose.yml` im Root-Verzeichnis.
+The service is part of `docker-compose.yml` in the root directory.
 
 ### Azure Container Apps
 
-Der Service ist für Azure Container Apps konfiguriert:
+The service is configured for Azure Container Apps:
 
 - **Port:** 80 (intern)
 - **Health Check:** `/health`
-- **Service Discovery:** Automatisch über interne Namen
+- **Service Discovery:** Automatically via internal names
 
 ### Graceful Shutdown
 
-Der Service unterstützt graceful shutdown:
-- Bei `SIGTERM` wird der Scheduler gestoppt
-- Laufende Workflow-Ausführungen werden nicht unterbrochen
-- Service beendet sich sauber
+The service supports graceful shutdown:
+- On `SIGTERM`, the scheduler is stopped
+- Running workflow executions are not interrupted
+- Service shuts down cleanly
 
 ### ⚠️ Production Checklist
 
-- [ ] `EXECUTION_SERVICE_URL` korrekt konfiguriert
-- [ ] `AUTH_SERVICE_URL` korrekt konfiguriert
+- [ ] `EXECUTION_SERVICE_URL` correctly configured
+- [ ] `AUTH_SERVICE_URL` correctly configured
 - [ ] `NODE_ENV=production`
-- [ ] Rate Limiting aktiviert
-- [ ] Security Headers aktiviert
-- [ ] CORS korrekt konfiguriert
-- [ ] Scheduler Check Interval angemessen (Standard: 1 Minute)
-- [ ] Monitoring für fehlgeschlagene Workflow-Ausführungen
+- [ ] Rate limiting enabled
+- [ ] Security headers enabled
+- [ ] CORS correctly configured
+- [ ] Scheduler check interval appropriate (default: 1 minute)
+- [ ] Monitoring for failed workflow executions
 
 ---
 
-## 🔗 Weitere Informationen
+## 🔗 Further Information
 
 - **Cron Parser:** [node-cron-parser](https://github.com/harrisiirak/cron-parser)
-- **Execution Service:** Siehe `execution-service` README
-- **Packages Overview:** Siehe [`../README.md`](../README.md)
+- **Execution Service:** See `execution-service` README
+- **Packages Overview:** See [`../README.md`](../README.md)
 
 ---
 
-## 📄 Lizenz
+## 📄 License
 
-Siehe Root-Repository für Lizenzinformationen.
+See root repository for license information.
 

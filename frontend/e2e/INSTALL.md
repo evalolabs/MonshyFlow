@@ -2,62 +2,61 @@
 
 ## 📦 Installation
 
-### 1. Dependencies installieren
+### 1. Install Dependencies
 ```bash
 cd frontend
 pnpm install
 ```
 
-Dies installiert alle Dependencies inklusive `@playwright/test` (bereits in `package.json` enthalten).
+This installs all dependencies including `@playwright/test` (already included in `package.json`).
 
-### 2. Playwright Browser installieren
+### 2. Install Playwright Browsers
 ```bash
 pnpm exec playwright install
 ```
 
-Playwright installiert automatisch Chromium, Firefox und WebKit.
+Playwright automatically installs Chromium, Firefox, and WebKit.
 
-### 3. Konfiguration prüfen
-Die Konfiguration ist bereits in `playwright.config.ts` vorhanden.
+### 3. Check Configuration
+The configuration is already present in `playwright.config.ts`.
 
-## 🚀 Erste Schritte
+## 🚀 Getting Started
 
-### Tests ausführen
+### Run Tests
 ```bash
-# Alle Tests
+# All tests
 pnpm test:e2e
 
-# Im UI-Modus (empfohlen für Entwicklung)
+# In UI mode (recommended for development)
 pnpm test:e2e:ui
 
-# Debug-Modus
+# Debug mode
 pnpm test:e2e:debug
 ```
 
-### Test-Report anzeigen
+### View Test Report
 ```bash
 pnpm test:e2e:report
 ```
 
-## ⚙️ Konfiguration
+## ⚙️ Configuration
 
-### Umgebungsvariablen
-- `E2E_BASE_URL`: Base URL für Tests (Standard: `http://localhost:5173`)
-- `CI`: Wird automatisch in CI/CD gesetzt
+### Environment Variables
+- `E2E_BASE_URL`: Base URL for tests (default: `http://localhost:5173`)
+- `CI`: Automatically set in CI/CD
 
-### Anpassungen
-Bearbeite `playwright.config.ts` für:
-- Andere Browser
+### Customization
+Edit `playwright.config.ts` for:
+- Different browsers
 - Timeouts
-- Retry-Logik
-- Reporter
+- Retry logic
+- Reporters
 
-## 📝 Nächste Schritte
+## 📝 Next Steps
 
-1. Tests ausführen: `pnpm test:e2e`
-2. Eigene Tests schreiben in `tests/secrets/`
-3. Page Objects erweitern in `tests/helpers/page-objects/`
-
+1. Run tests: `pnpm test:e2e`
+2. Write your own tests in `tests/secrets/`
+3. Extend page objects in `tests/helpers/page-objects/`
 
 
 

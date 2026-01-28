@@ -1,18 +1,18 @@
-# E2E Tests für Secrets Management
+# E2E Tests for Secrets Management
 
-## 🏗️ Architektur
+## 🏗️ Architecture
 
 ### Page Object Model Pattern
-- **SecretsPage**: Encapsuliert alle Interaktionen mit der Secrets-Seite
-- **WorkflowEditorPage**: Encapsuliert Workflow-Editor-Interaktionen
-- **Test Utils**: Wiederverwendbare Helper-Funktionen
+- **SecretsPage**: Encapsulates all interactions with the secrets page
+- **WorkflowEditorPage**: Encapsulates workflow editor interactions
+- **Test Utils**: Reusable helper functions
 
 ### Best Practices
-1. **Test Isolation**: Jeder Test läuft in einem separaten Browser-Context
-2. **Cleanup**: Automatisches Cleanup von Test-Daten nach jedem Test
-3. **Page Objects**: Alle Page-Interaktionen sind in Klassen gekapselt
-4. **Retry Logic**: Automatische Retries bei flaky Tests
-5. **Screenshots/Videos**: Automatische Aufnahme bei Fehlern
+1. **Test Isolation**: Each test runs in a separate browser context
+2. **Cleanup**: Automatic cleanup of test data after each test
+3. **Page Objects**: All page interactions are encapsulated in classes
+4. **Retry Logic**: Automatic retries for flaky tests
+5. **Screenshots/Videos**: Automatic capture on failures
 
 ## 🚀 Setup
 
@@ -26,18 +26,18 @@ pnpm install
 pnpm exec playwright install
 ```
 
-### Konfiguration
-- `playwright.config.ts`: Hauptkonfiguration
-- `tests/helpers/`: Test Utilities und Page Objects
-- `tests/secrets/`: Secrets-spezifische Tests
+### Configuration
+- `playwright.config.ts`: Main configuration
+- `tests/helpers/`: Test utilities and page objects
+- `tests/secrets/`: Secrets-specific tests
 
-## 📝 Tests ausführen
+## 📝 Running Tests
 
-### ⚠️ Vor dem Testlauf
+### ⚠️ Before Running Tests
 
-**Wichtig:** Stelle sicher, dass folgende Services laufen:
+**Important:** Make sure the following services are running:
 
-1. **Backend Services** (via Docker Compose oder lokal):
+1. **Backend Services** (via Docker Compose or locally):
    - Kong Gateway (Port 5000)
    - Auth Service (Port 5244)
    - Secrets Service (Port 5004)
@@ -46,45 +46,45 @@ pnpm exec playwright install
    - RabbitMQ (Port 5672)
 
 2. **Frontend Dev Server** (optional):
-   - Playwright startet den Server automatisch, wenn er nicht läuft
-   - Falls bereits gestartet, wird er wiederverwendet (`reuseExistingServer: true`)
+   - Playwright starts the server automatically if it's not running
+   - If already started, it will be reused (`reuseExistingServer: true`)
 
 3. **Auth State** (optional):
-   - Falls du einen frischen Login testen willst, lösche: `frontend/e2e/playwright/.auth/user.json`
-   - Ansonsten wird der vorhandene Auth-State wiederverwendet
+   - If you want to test a fresh login, delete: `frontend/e2e/playwright/.auth/user.json`
+   - Otherwise, the existing auth state will be reused
 
 **Quick Check:**
 ```bash
-# Prüfe ob Backend läuft
+# Check if backend is running
 curl http://localhost:5000/health  # Kong Gateway
-curl http://localhost:5244/health  # Auth Service (falls direkt erreichbar)
+curl http://localhost:5244/health  # Auth Service (if directly accessible)
 
-# Prüfe ob Frontend läuft
+# Check if frontend is running
 curl http://localhost:5173
 ```
 
-### Alle Tests
+### All Tests
 ```bash
 cd frontend/e2e
 pnpm exec playwright test
 ```
 
-### Spezifische Test-Suite
+### Specific Test Suite
 ```bash
 pnpm exec playwright test secrets-management
 ```
 
-### Im UI-Modus (interaktiv)
+### In UI Mode (interactive)
 ```bash
 pnpm exec playwright test --ui
 ```
 
-### Debug-Modus
+### Debug Mode
 ```bash
 pnpm exec playwright test --debug
 ```
 
-## 🧪 Test-Suites
+## 🧪 Test Suites
 
 ### 1. Secrets Management (`secrets-management.spec.ts`)
 - Create secret
@@ -108,20 +108,20 @@ pnpm exec playwright test --debug
 ## 🔧 Test Utilities
 
 ### `test-utils.ts`
-- `loginAsTestUser()`: Login-Helper
-- `createTestSecret()`: Secret erstellen
-- `deleteTestSecret()`: Secret löschen
-- `cleanupTestSecrets()`: Bulk-Cleanup
-- `waitForElement()`: Element-Waiting mit Retry
-- `expectVisible()` / `expectText()`: Assertion-Helper
+- `loginAsTestUser()`: Login helper
+- `createTestSecret()`: Create secret
+- `deleteTestSecret()`: Delete secret
+- `cleanupTestSecrets()`: Bulk cleanup
+- `waitForElement()`: Element waiting with retry
+- `expectVisible()` / `expectText()`: Assertion helpers
 
 ### Page Objects
-- **SecretsPage**: Alle Secrets-Seite-Interaktionen
-- **WorkflowEditorPage**: Workflow-Editor-Interaktionen
+- **SecretsPage**: All secrets page interactions
+- **WorkflowEditorPage**: Workflow editor interactions
 
 ## 🎯 CI/CD Integration
 
-Tests können in CI/CD integriert werden:
+Tests can be integrated into CI/CD:
 
 ```yaml
 # .github/workflows/e2e.yml
@@ -131,20 +131,20 @@ Tests können in CI/CD integriert werden:
     pnpm exec playwright test
 ```
 
-## 📊 Test-Report
+## 📊 Test Report
 
-Nach dem Ausführen:
+After running:
 ```bash
 pnpm exec playwright show-report
 ```
 
 ## 🐛 Debugging
 
-### Screenshots bei Fehlern
-Automatisch in `test-results/` gespeichert
+### Screenshots on Failures
+Automatically saved in `test-results/`
 
-### Videos bei Fehlern
-Automatisch in `test-results/` gespeichert
+### Videos on Failures
+Automatically saved in `test-results/`
 
 ### Trace Viewer
 ```bash
@@ -153,22 +153,22 @@ pnpm exec playwright show-trace test-results/trace.zip
 
 ## 🧹 Cleanup Test Secrets
 
-Falls Test-Secrets nach den Tests übrig bleiben, kannst du sie manuell aufräumen:
+If test secrets remain after tests, you can clean them up manually:
 
 ```bash
 cd frontend/e2e
 pnpm cleanup
 ```
 
-Das Script löscht automatisch alle Secrets mit folgenden Präfixen:
+The script automatically deletes all secrets with the following prefixes:
 - `test-`
 - `OPENAI_API_KEY_`
 - `DEEP_LINK_SECRET_`
 - `PIPEDRIVE_API_KEY`
 
-**Hinweis:** Die Tests sollten automatisch aufräumen (`afterEach`), aber falls Tests fehlschlagen oder unterbrochen werden, können Secrets übrig bleiben.
+**Note:** Tests should automatically clean up (`afterEach`), but if tests fail or are interrupted, secrets may remain.
 
-## 📋 Checkliste
+## 📋 Checklist
 
 - [x] Playwright Setup
 - [x] Page Object Model Pattern
@@ -179,7 +179,6 @@ Das Script löscht automatisch alle Secrets mit folgenden Präfixen:
 - [ ] CI/CD Integration
 - [ ] Performance Tests
 - [ ] Visual Regression Tests
-
 
 
 

@@ -1,19 +1,19 @@
 # 🔐 Secrets Service
 
-Der **Secrets Service** verwaltet verschlüsselte Secrets für Workflows und Anwendungen. Er bietet sichere Speicherung, Verschlüsselung und Entschlüsselung von sensiblen Daten wie API-Keys, Passwörtern und Credentials.
+The **Secrets Service** manages encrypted secrets for workflows and applications. It provides secure storage, encryption, and decryption of sensitive data such as API keys, passwords, and credentials.
 
 ---
 
-## 📋 Inhaltsverzeichnis
+## 📋 Table of Contents
 
-- [Übersicht](#-übersicht)
+- [Overview](#-overview)
 - [Features](#-features)
 - [Security](#-security)
 - [Environment Variables](#-environment-variables)
 - [Setup & Installation](#-setup--installation)
 - [API-Endpoints](#-api-endpoints)
 - [Authentication](#-authentication)
-- [Request/Response-Beispiele](#-requestresponse-beispiele)
+- [Request/Response Examples](#-requestresponse-examples)
 - [Encryption Details](#-encryption-details)
 - [Health Checks](#-health-checks)
 - [Development](#-development)
@@ -21,15 +21,15 @@ Der **Secrets Service** verwaltet verschlüsselte Secrets für Workflows und Anw
 
 ---
 
-## 🎯 Übersicht
+## 🎯 Overview
 
-Der Secrets Service ist ein **Express.js-basierter HTTP-Service**, der auf Port **5003** läuft (konfigurierbar). Er bietet:
+The Secrets Service is an **Express.js-based HTTP service** that runs on port **5003** (configurable). It provides:
 
-- **Verschlüsselte Speicherung:** AES-256-GCM Verschlüsselung für alle Secrets
-- **Tenant-Isolation:** Secrets sind pro Tenant isoliert
-- **Service-to-Service API:** Andere Services können Secrets abrufen
-- **Secret Management:** CRUD-Operationen für Secrets
-- **Type Support:** Verschiedene Secret-Typen (API Key, Password, Token, etc.)
+- **Encrypted Storage:** AES-256-GCM encryption for all secrets
+- **Tenant Isolation:** Secrets are isolated per tenant
+- **Service-to-Service API:** Other services can retrieve secrets
+- **Secret Management:** CRUD operations for secrets
+- **Type Support:** Various secret types (API Key, Password, Token, etc.)
 
 ---
 
@@ -37,34 +37,34 @@ Der Secrets Service ist ein **Express.js-basierter HTTP-Service**, der auf Port 
 
 ### Secret Management
 - ✅ Secret CRUD (Create, Read, Update, Delete)
-- ✅ Verschlüsselte Speicherung (AES-256-GCM)
+- ✅ Encrypted storage (AES-256-GCM)
 - ✅ Secret Decryption on-demand
 - ✅ Secret Types (API Key, Password, Token, etc.)
 - ✅ Provider Support (OpenAI, Azure, etc.)
 - ✅ Active/Inactive Status
 
 ### Security
-- ✅ AES-256-GCM Verschlüsselung
-- ✅ Salt-basierte Key Derivation
-- ✅ Tenant-Isolation
-- ✅ JWT Authentication für Public Endpoints
-- ✅ Service Key Authentication für Internal Endpoints
+- ✅ AES-256-GCM encryption
+- ✅ Salt-based key derivation
+- ✅ Tenant isolation
+- ✅ JWT Authentication for public endpoints
+- ✅ Service Key Authentication for internal endpoints
 - ✅ Rate Limiting
 - ✅ Security Headers (Helmet)
 
 ### Service Integration
-- ✅ Internal API für andere Services
-- ✅ Bulk Secret Retrieval per Tenant
-- ✅ Secret Lookup by Name
-- ✅ Automatic Decryption für Services
+- ✅ Internal API for other services
+- ✅ Bulk secret retrieval per tenant
+- ✅ Secret lookup by name
+- ✅ Automatic decryption for services
 
 ---
 
 ## 🔒 Security
 
-### Verschlüsselung
+### Encryption
 
-Der Service verwendet **AES-256-GCM** (Galois/Counter Mode) für Verschlüsselung:
+The service uses **AES-256-GCM** (Galois/Counter Mode) for encryption:
 
 - **Algorithm:** AES-256-GCM
 - **Key Length:** 256 bits (32 bytes)
@@ -74,59 +74,59 @@ Der Service verwendet **AES-256-GCM** (Galois/Counter Mode) für Verschlüsselun
 
 ### Key Management
 
-Der Encryption Key wird aus Environment Variables geladen:
+The encryption key is loaded from environment variables:
 
-1. `SECRETS_ENCRYPTION_KEY` (bevorzugt)
-2. `ENCRYPTION_KEY` (Fallback)
-3. Default Key (nur Development, **NICHT für Production!**)
+1. `SECRETS_ENCRYPTION_KEY` (preferred)
+2. `ENCRYPTION_KEY` (fallback)
+3. Default Key (Development only, **NOT for Production!**)
 
-**⚠️ WICHTIG:** In Production sollte der Key aus einem sicheren Key Management System kommen (z.B. Azure Key Vault).
+**⚠️ IMPORTANT:** In production, the key should come from a secure key management system (e.g., Azure Key Vault).
 
-### Salt-basierte Key Derivation
+### Salt-based Key Derivation
 
-Jedes Secret verwendet einen eigenen Salt:
-- Salt wird zufällig generiert bei Verschlüsselung
-- Key wird aus Master Key + Salt abgeleitet
-- Verhindert Rainbow Table Attacks
+Each secret uses its own salt:
+- Salt is randomly generated during encryption
+- Key is derived from master key + salt
+- Prevents rainbow table attacks
 
-### Tenant-Isolation
+### Tenant Isolation
 
-- Secrets sind pro Tenant isoliert
-- User können nur Secrets ihres eigenen Tenants sehen
-- Superadmin kann alle Secrets sehen (für Support)
+- Secrets are isolated per tenant
+- Users can only see secrets of their own tenant
+- Superadmin can see all secrets (for support)
 
 ---
 
 ## 🔧 Environment Variables
 
-### Erforderliche Variablen
+### Required Variables
 
 ```bash
-# Port (Standard: 5003)
+# Port (Default: 5003)
 PORT=5003
 
 # MongoDB Connection String
 MONGODB_URI=mongodb://localhost:27017/monshyflow
 
-# Encryption Key (MINDESTENS 32 Zeichen!)
+# Encryption Key (MINIMUM 32 characters!)
 SECRETS_ENCRYPTION_KEY=your-very-long-and-secure-encryption-key-min-32-chars
-# oder
+# or
 ENCRYPTION_KEY=your-very-long-and-secure-encryption-key-min-32-chars
 
-# Frontend URL (für CORS)
+# Frontend URL (for CORS)
 FRONTEND_URL=http://localhost:5173
 
-# Auth Service URL (für Token-Validierung)
+# Auth Service URL (for token validation)
 AUTH_SERVICE_URL=http://localhost:5002
 
-# Internal Service Key (für Service-to-Service Kommunikation)
+# Internal Service Key (for service-to-service communication)
 INTERNAL_SERVICE_KEY=your-secret-service-key-change-in-production
 
 # Node Environment
-NODE_ENV=development  # oder production
+NODE_ENV=development  # or production
 ```
 
-### Optionale Variablen
+### Optional Variables
 
 ```bash
 # Azure Container Apps
@@ -139,44 +139,44 @@ LOG_LEVEL=info  # debug, info, warn, error
 ### ⚠️ Security Best Practices
 
 1. **Encryption Key:**
-   - Mindestens 32 Zeichen lang
-   - Zufällig generiert (z.B. `openssl rand -hex 32`)
-   - Nie im Code committen
-   - In Production: Azure Key Vault oder ähnliches verwenden
+   - At least 32 characters long
+   - Randomly generated (e.g., `openssl rand -hex 32`)
+   - Never commit to code
+   - In Production: Use Azure Key Vault or similar
 
 2. **Internal Service Key:**
-   - Starker, zufälliger Wert
-   - Nur für Service-to-Service Kommunikation
-   - Nie im Code committen
+   - Strong, random value
+   - Only for service-to-service communication
+   - Never commit to code
 
 ---
 
 ## 🚀 Setup & Installation
 
-### Voraussetzungen
+### Prerequisites
 
 - Node.js >= 20.0.0
 - pnpm >= 8.0.0
-- MongoDB (lokal oder Remote)
+- MongoDB (local or remote)
 
 ### Installation
 
 ```bash
-# Im Root-Verzeichnis
+# In the root directory
 pnpm install
 
-# Packages bauen
+# Build packages
 pnpm build:packages
 ```
 
-### Development starten
+### Start Development
 
 ```bash
-# Im secrets-service Verzeichnis
+# In the secrets-service directory
 cd packages/secrets-service
 pnpm dev
 
-# Oder vom Root
+# Or from root
 pnpm --filter @monshy/secrets-service dev
 ```
 
@@ -211,7 +211,7 @@ GET /health
 
 ### Public Endpoints (JWT Authentication)
 
-#### Secrets abrufen
+#### Get secrets
 
 ```http
 GET /api/secrets
@@ -237,11 +237,11 @@ Authorization: Bearer {token}
 }
 ```
 
-**Hinweis:** Secrets werden **verschlüsselt** zurückgegeben. Verwende `/api/secrets/:id/decrypt` für entschlüsselte Werte.
+**Note:** Secrets are returned **encrypted**. Use `/api/secrets/:id/decrypt` for decrypted values.
 
 ---
 
-#### Secret abrufen (verschlüsselt)
+#### Get secret (encrypted)
 
 ```http
 GET /api/secrets/:id
@@ -250,7 +250,7 @@ Authorization: Bearer {token}
 
 ---
 
-#### Secret entschlüsseln
+#### Decrypt secret
 
 ```http
 GET /api/secrets/:id/decrypt
@@ -264,18 +264,18 @@ Authorization: Bearer {token}
   "data": {
     "_id": "507f1f77bcf86cd799439011",
     "name": "openai-api-key",
-    "value": "sk-...",  // ← Entschlüsselt!
+    "value": "sk-...",  // ← Decrypted!
     "secretType": "api-key",
     "provider": "openai"
   }
 }
 ```
 
-**⚠️ Sicherheitshinweis:** Entschlüsselte Secrets sollten nur bei Bedarf abgerufen werden und nicht geloggt werden.
+**⚠️ Security Note:** Decrypted secrets should only be retrieved when needed and should not be logged.
 
 ---
 
-#### Secret erstellen
+#### Create secret
 
 ```http
 POST /api/secrets
@@ -309,15 +309,15 @@ Content-Type: application/json
 }
 ```
 
-**Validierung:**
-- `name`: Erforderlich, eindeutig pro Tenant
-- `value`: Erforderlich, wird verschlüsselt gespeichert
-- `secretType`: Optional (z.B. "api-key", "password", "token")
-- `provider`: Optional (z.B. "openai", "azure", "aws")
+**Validation:**
+- `name`: Required, unique per tenant
+- `value`: Required, stored encrypted
+- `secretType`: Optional (e.g., "api-key", "password", "token")
+- `provider`: Optional (e.g., "openai", "azure", "aws")
 
 ---
 
-#### Secret aktualisieren
+#### Update secret
 
 ```http
 PUT /api/secrets/:id
@@ -331,11 +331,11 @@ Content-Type: application/json
 }
 ```
 
-**Hinweis:** Wenn `value` aktualisiert wird, wird es neu verschlüsselt.
+**Note:** If `value` is updated, it will be re-encrypted.
 
 ---
 
-#### Secret löschen
+#### Delete secret
 
 ```http
 DELETE /api/secrets/:id
@@ -354,7 +354,7 @@ Authorization: Bearer {token}
 
 ### Internal Endpoints (Service-to-Service)
 
-#### Secrets per Tenant abrufen (entschlüsselt)
+#### Get secrets per tenant (decrypted)
 
 ```http
 GET /api/internal/secrets/tenant/:tenantId
@@ -368,7 +368,7 @@ X-Service-Key: {INTERNAL_SERVICE_KEY}
   "data": [
     {
       "name": "openai-api-key",
-      "value": "sk-proj-...",  // ← Entschlüsselt!
+      "value": "sk-proj-...",  // ← Decrypted!
       "secretType": "api-key",
       "provider": "openai"
     },
@@ -382,11 +382,11 @@ X-Service-Key: {INTERNAL_SERVICE_KEY}
 }
 ```
 
-**Verwendung:** Wird von `execution-service` und anderen Services verwendet, um Secrets für Workflow-Execution zu laden.
+**Usage:** Used by `execution-service` and other services to load secrets for workflow execution.
 
 ---
 
-#### Secret per Name abrufen (entschlüsselt)
+#### Get secret by name (decrypted)
 
 ```http
 GET /api/internal/secrets/tenant/:tenantId/name/:name
@@ -416,14 +416,14 @@ X-Service-Key: {INTERNAL_SERVICE_KEY}
 Authorization: Bearer {jwt-token}
 ```
 
-Der Token wird vom `auth-service` ausgestellt und enthält:
+The token is issued by the `auth-service` and contains:
 - `userId`
 - `tenantId`
 - `role`
 
-**Berechtigungen:**
-- **User:** Kann nur Secrets des eigenen Tenants sehen
-- **Superadmin:** Kann alle Secrets sehen (für Support)
+**Permissions:**
+- **User:** Can only see secrets of their own tenant
+- **Superadmin:** Can see all secrets (for support)
 
 ### Service-to-Service Authentication (Internal Endpoints)
 
@@ -431,13 +431,13 @@ Der Token wird vom `auth-service` ausgestellt und enthält:
 X-Service-Key: {INTERNAL_SERVICE_KEY}
 ```
 
-**Verwendung:** Für Service-to-Service Kommunikation (z.B. `execution-service` → `secrets-service`).
+**Usage:** For service-to-service communication (e.g., `execution-service` → `secrets-service`).
 
 ---
 
-## 📝 Request/Response-Beispiele
+## 📝 Request/Response Examples
 
-### Secret erstellen
+### Create secret
 
 **Request:**
 ```http
@@ -473,7 +473,7 @@ Content-Type: application/json
 }
 ```
 
-### Secret entschlüsseln
+### Decrypt secret
 
 **Request:**
 ```http
@@ -538,20 +538,20 @@ X-Service-Key: internal-service-key
 
 ## 🔐 Encryption Details
 
-### Verschlüsselungsprozess
+### Encryption Process
 
-1. **Salt Generation:** Zufälliger 32-byte Salt wird generiert
-2. **Key Derivation:** Key wird aus Master Key + Salt abgeleitet (scrypt)
-3. **IV Generation:** Zufälliger 16-byte IV wird generiert
-4. **Encryption:** Wert wird mit AES-256-GCM verschlüsselt
-5. **Storage:** `encryptedValue` (IV:tag:data) und `salt` werden gespeichert
+1. **Salt Generation:** Random 32-byte salt is generated
+2. **Key Derivation:** Key is derived from master key + salt (scrypt)
+3. **IV Generation:** Random 16-byte IV is generated
+4. **Encryption:** Value is encrypted with AES-256-GCM
+5. **Storage:** `encryptedValue` (IV:tag:data) and `salt` are stored
 
-### Entschlüsselungsprozess
+### Decryption Process
 
-1. **Key Derivation:** Key wird aus Master Key + gespeichertem Salt abgeleitet
-2. **Parsing:** `encryptedValue` wird in IV, Tag und verschlüsselte Daten aufgeteilt
-3. **Decryption:** Wert wird mit AES-256-GCM entschlüsselt
-4. **Validation:** Auth Tag wird validiert (verhindert Manipulation)
+1. **Key Derivation:** Key is derived from master key + stored salt
+2. **Parsing:** `encryptedValue` is split into IV, tag, and encrypted data
+3. **Decryption:** Value is decrypted with AES-256-GCM
+4. **Validation:** Auth tag is validated (prevents tampering)
 
 ### Format
 
@@ -585,8 +585,8 @@ GET /health
 ```
 
 **Status Codes:**
-- `200` - Service ist gesund
-- `500` - Service hat Probleme
+- `200` - Service is healthy
+- `500` - Service has issues
 
 ---
 
@@ -594,7 +594,7 @@ GET /health
 
 ### Logging
 
-Der Service nutzt **Pino** für strukturiertes Logging:
+The service uses **Pino** for structured logging:
 
 ```typescript
 import { logger } from '@monshy/core';
@@ -603,15 +603,15 @@ logger.info({ tenantId: '123', secretId: '456' }, 'Secret created');
 logger.error({ err: error }, 'Failed to encrypt secret');
 ```
 
-**⚠️ Wichtig:** Entschlüsselte Secrets werden **NIE** geloggt!
+**⚠️ Important:** Decrypted secrets are **NEVER** logged!
 
 ### Testing
 
 ```bash
-# Tests ausführen
+# Run tests
 pnpm test
 
-# Tests mit Coverage
+# Tests with coverage
 pnpm test --coverage
 ```
 
@@ -654,38 +654,38 @@ docker run -p 5003:80 \
 
 ### Docker Compose
 
-Der Service ist Teil der `docker-compose.yml` im Root-Verzeichnis.
+The service is part of `docker-compose.yml` in the root directory.
 
 ### Azure Container Apps
 
-Der Service ist für Azure Container Apps konfiguriert:
+The service is configured for Azure Container Apps:
 
 - **Port:** 80 (intern)
 - **Health Check:** `/health`
-- **Key Management:** Azure Key Vault empfohlen
+- **Key Management:** Azure Key Vault recommended
 
 ### ⚠️ Production Checklist
 
-- [ ] `SECRETS_ENCRYPTION_KEY` aus Azure Key Vault oder ähnlichem
-- [ ] `INTERNAL_SERVICE_KEY` stark und zufällig
+- [ ] `SECRETS_ENCRYPTION_KEY` from Azure Key Vault or similar
+- [ ] `INTERNAL_SERVICE_KEY` strong and random
 - [ ] `NODE_ENV=production`
-- [ ] Rate Limiting aktiviert
-- [ ] Security Headers aktiviert
-- [ ] CORS korrekt konfiguriert
-- [ ] Logging für Audit-Zwecke aktiviert
-- [ ] Backup-Strategie für Secrets
+- [ ] Rate Limiting enabled
+- [ ] Security Headers enabled
+- [ ] CORS correctly configured
+- [ ] Logging enabled for audit purposes
+- [ ] Backup strategy for secrets
 
 ---
 
-## 🔗 Weitere Informationen
+## 🔗 Further Information
 
-- **Packages Overview:** Siehe [`../README.md`](../README.md)
-- **Database Models:** Siehe `@monshy/database` Package
-- **Auth Integration:** Siehe `@monshy/auth-service`
+- **Packages Overview:** See [`../README.md`](../README.md)
+- **Database Models:** See `@monshy/database` Package
+- **Auth Integration:** See `@monshy/auth-service`
 
 ---
 
-## 📄 Lizenz
+## 📄 License
 
-Siehe Root-Repository für Lizenzinformationen.
+See root repository for license information.
 

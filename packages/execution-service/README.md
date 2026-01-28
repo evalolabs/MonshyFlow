@@ -1,54 +1,54 @@
 # ⚙️ Execution Service
 
-Der **Execution Service** ist der Kern der MonshyFlow-Plattform. Er führt Workflows aus, verarbeitet Node-Operationen und integriert verschiedene Services wie OpenAI Agents, MCP (Model Context Protocol), Web Search und mehr.
+The **Execution Service** is the core of the MonshyFlow platform. It executes workflows, processes node operations, and integrates various services such as OpenAI Agents, MCP (Model Context Protocol), Web Search, and more.
 
 ---
 
-## 📋 Inhaltsverzeichnis
+## 📋 Table of Contents
 
-- [Übersicht](#-übersicht)
+- [Overview](#-overview)
 - [Features](#-features)
 - [Environment Variables](#-environment-variables)
 - [Setup & Installation](#-setup--installation)
 - [API-Endpoints](#-api-endpoints)
-- [Request/Response-Beispiele](#-requestresponse-beispiele)
-- [Architektur](#-architektur)
+- [Request/Response Examples](#-requestresponse-examples)
+- [Architecture](#-architecture)
 - [Health Checks](#-health-checks)
 - [Development](#-development)
 - [Deployment](#-deployment)
 
 ---
 
-## 🎯 Übersicht
+## 🎯 Overview
 
-Der Execution Service ist ein **Express.js-basierter HTTP-Service**, der auf Port **5004** läuft (Standard, konfigurierbar via `PORT` Environment Variable). 
+The Execution Service is an **Express.js-based HTTP service** that runs on port **5004** (default, configurable via `PORT` environment variable). 
 
-**Port-Konfiguration:**
-- **Standard-Port:** Port 5004 (siehe `src/config/config.ts`: `process.env.PORT || 5004`)
-- **Docker Compose:** Port 5004 (siehe `docker-compose.yml`: `PORT=5004`)
-- **Andere Services erwarten:** Port 5004 (siehe `api-service` und `scheduler-service` Config)
+**Port Configuration:**
+- **Default Port:** Port 5004 (see `src/config/config.ts`: `process.env.PORT || 5004`)
+- **Docker Compose:** Port 5004 (see `docker-compose.yml`: `PORT=5004`)
+- **Other Services Expect:** Port 5004 (see `api-service` and `scheduler-service` Config)
 
-**Hinweis:** Der Service läuft konsistent auf Port 5004, sowohl lokal als auch in Docker.
+**Note:** The service runs consistently on port 5004, both locally and in Docker.
 
-Er bietet:
+It provides:
 
-- **Workflow Execution:** Vollständige Workflow-Ausführung mit Node-Processing
-- **Node Execution:** Einzelne Node-Ausführung für Testing
-- **Agent SDK Integration:** OpenAI Agents für intelligente Workflows
-- **MCP Support:** Model Context Protocol für erweiterte Funktionalität
-- **Web Search:** Integration verschiedener Web-Search-Provider
+- **Workflow Execution:** Complete workflow execution with node processing
+- **Node Execution:** Single node execution for testing
+- **Agent SDK Integration:** OpenAI Agents for intelligent workflows
+- **MCP Support:** Model Context Protocol for extended functionality
+- **Web Search:** Integration of various web search providers
 - **OpenAI Integration:** Files API, Vector Stores, Assistants
-- **Schema Validation:** Node-Schema-Validierung
-- **Real-time Events:** SSE (Server-Sent Events) für Live-Updates
+- **Schema Validation:** Node schema validation
+- **Real-time Events:** SSE (Server-Sent Events) for live updates
 
 ---
 
 ## ✨ Features
 
 ### Workflow Execution
-- ✅ Vollständige Workflow-Ausführung
+- ✅ Complete workflow execution
 - ✅ Node-by-Node Processing
-- ✅ Expression Resolution (Variablen, Secrets)
+- ✅ Expression Resolution (Variables, Secrets)
 - ✅ Error Handling & Retry Logic
 - ✅ Background Execution (via RabbitMQ)
 - ✅ Run History & Status Tracking
@@ -64,8 +64,8 @@ Er bietet:
 - ✅ Custom Nodes (via Registry)
 
 ### Integrations
-- ✅ **OpenAI Agents SDK:** Intelligente Agent-basierte Workflows
-- ✅ **MCP (Model Context Protocol):** 20+ integrierte MCP Handler
+- ✅ **OpenAI Agents SDK:** Intelligent agent-based workflows
+- ✅ **MCP (Model Context Protocol):** 20+ integrated MCP handlers
 - ✅ **Web Search:** Serper, OpenAI Web Search
 - ✅ **Email:** Nodemailer Integration
 - ✅ **OpenAI Files API:** File Upload/Management
@@ -73,18 +73,18 @@ Er bietet:
 
 ### Services
 - ✅ **Redis:** Caching & State Management
-- ✅ **RabbitMQ:** Message Queue für Background Jobs
+- ✅ **RabbitMQ:** Message Queue for background jobs
 - ✅ **MongoDB:** Run Storage & Execution History
-- ✅ **Cleanup Service:** Automatische Datenbereinigung
+- ✅ **Cleanup Service:** Automatic data cleanup
 
 ---
 
 ## 🔧 Environment Variables
 
-### Erforderliche Variablen
+### Required Variables
 
 ```bash
-# Port (Standard: 5004)
+# Port (Default: 5004)
 PORT=5004
 
 # MongoDB Connection String
@@ -96,22 +96,22 @@ REDIS_URL=redis://localhost:6379
 # RabbitMQ Connection String
 RABBITMQ_URL=amqp://localhost:5672
 
-# Secrets Service URL (für API Keys)
+# Secrets Service URL (for API Keys)
 SECRETS_SERVICE_URL=http://localhost:5003
-# oder
+# or
 SECRETS_SERVICE_URL=http://secrets-service:80
 
-# Internal Service Key (für Service-to-Service Kommunikation)
+# Internal Service Key (for service-to-service communication)
 INTERNAL_SERVICE_KEY=internal-service-key-change-in-production
 
 # Node Environment
-NODE_ENV=development  # oder production
+NODE_ENV=development  # or production
 ```
 
-### Optionale Variablen
+### Optional Variables
 
 ```bash
-# OpenAI API Key (Fallback, wird normalerweise aus Secrets geladen)
+# OpenAI API Key (Fallback, normally loaded from Secrets)
 OPENAI_API_KEY=sk-...
 
 # Agent Service URL
@@ -120,7 +120,7 @@ AGENT_SERVICE_URL=http://localhost:5000
 # Cleanup Configuration
 EXECUTION_RETENTION_DAYS=30
 CLEANUP_RETENTION_DAYS=30
-CLEANUP_INTERVAL_MS=86400000  # 24 Stunden
+CLEANUP_INTERVAL_MS=86400000  # 24 hours
 CLEANUP_RUN_ON_STARTUP=true
 
 # Webhook Secret
@@ -134,31 +134,31 @@ AZURE_CONTAINER_APPS_ENVIRONMENT=your-environment-name
 
 ## 🚀 Setup & Installation
 
-### Voraussetzungen
+### Prerequisites
 
 - Node.js >= 20.0.0
-- MongoDB (lokal oder Remote)
-- Redis (lokal oder Remote)
-- RabbitMQ (lokal oder Remote)
+- MongoDB (local or remote)
+- Redis (local or remote)
+- RabbitMQ (local or remote)
 
 ### Installation
 
 ```bash
-# Im Root-Verzeichnis
+# In the root directory
 pnpm install
 
-# Packages bauen
+# Build packages
 pnpm build:packages
 ```
 
-### Development starten
+### Start Development
 
 ```bash
-# Im execution-service Verzeichnis
+# In the execution-service directory
 cd packages/execution-service
 pnpm dev
 
-# Oder vom Root
+# Or from root
 pnpm --filter execution-service dev
 ```
 
@@ -197,7 +197,7 @@ GET /health
 
 ### Workflow Execution (v1 API - Professional)
 
-#### Workflow Run erstellen und starten
+#### Create and start workflow run
 
 ```http
 POST /v1/workflows/:workflowId/runs
@@ -233,21 +233,21 @@ Content-Type: application/json
 ```
 
 **Options:**
-- `stream`: boolean - SSE Events streamen (Standard: false)
-- `background`: boolean - Im Hintergrund ausführen (Standard: false)
-- `store`: boolean - Run in Datenbank speichern (Standard: true)
+- `stream`: boolean - Stream SSE events (default: false)
+- `background`: boolean - Execute in background (default: false)
+- `store`: boolean - Store run in database (default: true)
 
 ---
 
-#### Workflow Runs abrufen
+#### Get workflow runs
 
 ```http
 GET /v1/workflows/:workflowId/runs
 ```
 
 **Query Parameters:**
-- `limit`: number - Anzahl der Runs (Standard: 10)
-- `offset`: number - Offset für Pagination
+- `limit`: number - Number of runs (default: 10)
+- `offset`: number - Offset for pagination
 
 **Response:**
 ```json
@@ -269,7 +269,7 @@ GET /v1/workflows/:workflowId/runs
 
 ---
 
-#### Run Status abrufen
+#### Get run status
 
 ```http
 GET /v1/runs/:runId/status
@@ -294,16 +294,16 @@ GET /v1/runs/:runId/status
 }
 ```
 
-**Status Werte:**
-- `pending` - Wartet auf Ausführung
-- `running` - Läuft gerade
-- `completed` - Erfolgreich abgeschlossen
-- `failed` - Fehlgeschlagen
-- `cancelled` - Abgebrochen
+**Status Values:**
+- `pending` - Waiting for execution
+- `running` - Currently running
+- `completed` - Successfully completed
+- `failed` - Failed
+- `cancelled` - Cancelled
 
 ---
 
-#### Run abbrechen
+#### Cancel run
 
 ```http
 POST /v1/runs/:runId/cancel
@@ -321,7 +321,7 @@ POST /v1/runs/:runId/cancel
 
 ### Legacy Execution API
 
-#### Workflow ausführen
+#### Execute workflow
 
 ```http
 POST /api/execute/:workflowId
@@ -336,7 +336,7 @@ Content-Type: application/json
 
 ---
 
-#### Node testen (mit Context)
+#### Test node (with context)
 
 ```http
 POST /api/execute/test-node-with-context
@@ -356,7 +356,7 @@ Content-Type: application/json
 
 ---
 
-#### Node ausführen
+#### Execute node
 
 ```http
 POST /api/execute/node
@@ -376,7 +376,7 @@ Content-Type: application/json
 
 ### Schema API
 
-#### Node Schema abrufen
+#### Get node schema
 
 ```http
 GET /api/schemas/:nodeType/:version
@@ -384,7 +384,7 @@ GET /api/schemas/:nodeType/:version/:resource
 GET /api/schemas/:nodeType/:version/:resource/:operation
 ```
 
-**Beispiele:**
+**Examples:**
 - `/api/schemas/email/1.0`
 - `/api/schemas/httpRequest/1.0/request`
 - `/api/schemas/httpRequest/1.0/request/get`
@@ -408,7 +408,7 @@ GET /api/schemas/:nodeType/:version/:resource/:operation
 
 ---
 
-#### Alle Node Types abrufen
+#### Get all node types
 
 ```http
 GET /api/schemas/nodes
@@ -455,7 +455,7 @@ Content-Type: application/json
 }
 ```
 
-Oder bei Fehlern:
+Or on errors:
 ```json
 {
   "success": false,
@@ -497,7 +497,7 @@ data: {"runId": "123", "status": "completed", "output": {...}}
 
 ### Functions API
 
-#### Verfügbare Functions abrufen
+#### Get available functions
 
 ```http
 GET /api/functions
@@ -525,7 +525,7 @@ GET /api/functions
 
 ### MCP Handlers API
 
-#### Verfügbare MCP Handler abrufen
+#### Get available MCP handlers
 
 ```http
 GET /api/mcp-handlers
@@ -544,20 +544,20 @@ GET /api/mcp-handlers
 ]
 ```
 
-**Verfügbare MCP Handler:**
+**Available MCP Handlers:**
 - Gmail, Outlook Email
 - Google Calendar, Outlook Calendar
 - Google Drive, Dropbox, SharePoint
 - Stripe, PayPal, Square, Plaid
 - HubSpot, Intercom, Shopify
 - Box, Teams, Pipedream, Zapier
-- Und mehr...
+- And more...
 
 ---
 
 ### Web Search Handlers API
 
-#### Verfügbare Web Search Handler abrufen
+#### Get available web search handlers
 
 ```http
 GET /api/web-search-handlers
@@ -580,7 +580,7 @@ GET /api/web-search-handlers
 
 ### Node Processors API
 
-#### Verfügbare Node Processors abrufen
+#### Get available node processors
 
 ```http
 GET /api/node-processors
@@ -601,7 +601,7 @@ GET /api/node-processors
 
 ### Tool Creators API
 
-#### Verfügbare Tool Creators abrufen
+#### Get available tool creators
 
 ```http
 GET /api/tool-creators
@@ -622,7 +622,7 @@ GET /api/tool-creators
 
 ### OpenAI Files API
 
-#### File hochladen
+#### Upload file
 
 ```http
 POST /api/openai/files/upload
@@ -653,7 +653,7 @@ Content-Type: application/json
 
 ---
 
-#### File Information abrufen
+#### Get file information
 
 ```http
 POST /api/openai/files/info
@@ -667,7 +667,7 @@ Content-Type: application/json
 
 ---
 
-#### File löschen
+#### Delete file
 
 ```http
 DELETE /api/openai/files/:fileId
@@ -682,7 +682,7 @@ Content-Type: application/json
 
 ### OpenAI Vector Stores API
 
-#### Vector Store erstellen
+#### Create vector store
 
 ```http
 POST /api/openai/vector-stores/create
@@ -696,7 +696,7 @@ Content-Type: application/json
 
 ---
 
-#### Files zu Vector Store hinzufügen
+#### Add files to vector store
 
 ```http
 POST /api/openai/vector-stores/:vectorStoreId/files
@@ -710,7 +710,7 @@ Content-Type: application/json
 
 ---
 
-#### Files in Vector Store auflisten
+#### List files in vector store
 
 ```http
 GET /api/openai/vector-stores/:vectorStoreId/files?tenantId=507f191e810c19729de860ea&limit=100
@@ -718,7 +718,7 @@ GET /api/openai/vector-stores/:vectorStoreId/files?tenantId=507f191e810c19729de8
 
 ---
 
-#### Vector Store Information abrufen
+#### Get vector store information
 
 ```http
 GET /api/openai/vector-stores/:vectorStoreId?tenantId=507f191e810c19729de860ea
@@ -726,7 +726,7 @@ GET /api/openai/vector-stores/:vectorStoreId?tenantId=507f191e810c19729de860ea
 
 ---
 
-#### File aus Vector Store entfernen
+#### Remove file from vector store
 
 ```http
 DELETE /api/openai/vector-stores/:vectorStoreId/files/:fileId?tenantId=507f191e810c19729de860ea
@@ -734,7 +734,7 @@ DELETE /api/openai/vector-stores/:vectorStoreId/files/:fileId?tenantId=507f191e8
 
 ---
 
-#### Vector Store löschen
+#### Delete vector store
 
 ```http
 DELETE /api/openai/vector-stores/:vectorStoreId
@@ -749,7 +749,7 @@ Content-Type: application/json
 
 ### Admin Endpoints
 
-#### Cleanup manuell auslösen
+#### Trigger cleanup manually
 
 ```http
 POST /api/admin/cleanup
@@ -775,9 +775,9 @@ Content-Type: application/json
 
 ---
 
-## 📝 Request/Response-Beispiele
+## 📝 Request/Response Examples
 
-### Workflow ausführen
+### Execute workflow
 
 **Request:**
 ```http
@@ -810,7 +810,7 @@ Content-Type: application/json
 }
 ```
 
-### Run Status abrufen
+### Get run status
 
 **Request:**
 ```http
@@ -878,16 +878,16 @@ Client
 ### Node Processing Flow
 
 ```
-1. Workflow empfangen
-2. Start Node identifizieren
-3. Für jeden Node:
-   a. Input validieren
-   b. Expressions auflösen
-   c. Secrets laden
-   d. Node ausführen
-   e. Output speichern
-   f. Nächsten Node bestimmen
-4. Workflow abschließen
+1. Receive workflow
+2. Identify start node
+3. For each node:
+   a. Validate input
+   b. Resolve expressions
+   c. Load secrets
+   d. Execute node
+   e. Store output
+   f. Determine next node
+4. Complete workflow
 ```
 
 ---
@@ -914,8 +914,8 @@ GET /health
 ```
 
 **Status Codes:**
-- `200` - Service ist gesund, alle Services verbunden
-- `500` - Service hat Probleme
+- `200` - Service is healthy, all services connected
+- `500` - Service has issues
 
 ---
 
@@ -923,7 +923,7 @@ GET /health
 
 ### Logging
 
-Der Service nutzt **Console Logging** (kann auf Pino migriert werden):
+The service uses **Console Logging** (can be migrated to Pino):
 
 ```typescript
 console.log('🚀 Starting Execution Service...');
@@ -933,7 +933,7 @@ console.error('❌ Failed to start server:', error);
 ### Testing
 
 ```bash
-# Tests ausführen (wenn vorhanden)
+# Run tests (if available)
 pnpm test
 ```
 
@@ -992,48 +992,48 @@ docker run -p 5004:5004 \
 
 ### Docker Compose
 
-Der Service ist Teil der `docker-compose.yml` im Root-Verzeichnis.
+The service is part of `docker-compose.yml` in the root directory.
 
 ### Azure Container Apps
 
-Der Service ist für Azure Container Apps konfiguriert:
+The service is configured for Azure Container Apps:
 
 - **Port:** 5004 (intern)
 - **Health Check:** `/health`
-- **Service Discovery:** Automatisch über interne Namen
+- **Service Discovery:** Automatically via internal names
 
 ### Graceful Shutdown
 
-Der Service unterstützt graceful shutdown:
-- Bei `SIGINT` werden alle Verbindungen geschlossen
-- Laufende Workflows werden nicht unterbrochen
-- Cleanup Service wird gestoppt
+The service supports graceful shutdown:
+- On `SIGINT`, all connections are closed
+- Running workflows are not interrupted
+- Cleanup service is stopped
 
 ### ⚠️ Production Checklist
 
-- [ ] `MONGODB_URL` korrekt konfiguriert
-- [ ] `REDIS_URL` korrekt konfiguriert
-- [ ] `RABBITMQ_URL` korrekt konfiguriert
-- [ ] `SECRETS_SERVICE_URL` korrekt konfiguriert
-- [ ] `INTERNAL_SERVICE_KEY` stark und zufällig
+- [ ] `MONGODB_URL` correctly configured
+- [ ] `REDIS_URL` correctly configured
+- [ ] `RABBITMQ_URL` correctly configured
+- [ ] `SECRETS_SERVICE_URL` correctly configured
+- [ ] `INTERNAL_SERVICE_KEY` strong and random
 - [ ] `NODE_ENV=production`
-- [ ] `EXECUTION_RETENTION_DAYS` angemessen gesetzt
-- [ ] `CLEANUP_INTERVAL_MS` konfiguriert
-- [ ] Monitoring für fehlgeschlagene Executions
+- [ ] `EXECUTION_RETENTION_DAYS` appropriately set
+- [ ] `CLEANUP_INTERVAL_MS` configured
+- [ ] Monitoring for failed executions
 - [ ] Redis & RabbitMQ High Availability
 
 ---
 
-## 🔗 Weitere Informationen
+## 🔗 Further Information
 
-- **Agent SDK:** Siehe [`AGENTS_SDK_README.md`](./AGENTS_SDK_README.md)
-- **Packages Overview:** Siehe [`../README.md`](../README.md)
+- **Agent SDK:** See [`AGENTS_SDK_README.md`](./AGENTS_SDK_README.md)
+- **Packages Overview:** See [`../README.md`](../README.md)
 - **OpenAI Agents SDK:** [github.com/openai/agents](https://github.com/openai/agents)
 - **MCP Documentation:** [modelcontextprotocol.io](https://modelcontextprotocol.io/)
 
 ---
 
-## 📄 Lizenz
+## 📄 License
 
-Siehe Root-Repository für Lizenzinformationen.
+See root repository for license information.
 

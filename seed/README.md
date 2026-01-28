@@ -1,68 +1,68 @@
 # 🌱 MonshyFlow Database Seeder
 
-Schnelle Testdaten-Generierung für Entwickler. Erstellt Tenants, Users und API Keys in MongoDB.
+Fast test data generation for developers. Creates tenants, users and API keys in MongoDB.
 
-## 📋 Übersicht
+## 📋 Overview
 
-Dieses Tool erstellt automatisch Testdaten für die Entwicklung:
+This tool automatically creates test data for local development:
 
-- **4 Tenants** (Monshy, Acme Corporation, TechStart Inc, Demo Company)
-- **5 Users** mit verschiedenen Rollen (inkl. Superadmin)
-- **3 API Keys** für verschiedene Tenants
+- **4 tenants** (Monshy, Acme Corporation, TechStart Inc, Demo Company)
+- **5 users** with different roles (including a superadmin)
+- **3 API keys** for different tenants
 
-## 🚀 Schnellstart
+## 🚀 Quick Start
 
-### Erste Schritte (Einmalig)
+### First-time setup (once)
 
-Wenn du das Projekt zum ersten Mal verwendest, führe diese Schritte aus:
+If you use this project for the first time, run:
 
 ```bash
-# 1. Dependencies installieren
+# 1. Install dependencies
 pnpm install
 
-# 2. Benötigte Packages bauen (ohne Frontend)
+# 2. Build required backend packages (without frontend)
 pnpm build:packages
-# Oder gezielt nur die Seed-Dependencies:
+# Or only the seed dependencies:
 pnpm --filter @monshy/core --filter @monshy/database --filter @monshy/auth build
 ```
 
-> ⚠️ **Wichtig**: Die Packages müssen gebaut werden, bevor das Seed-Script funktioniert!
+> ⚠️ **Important**: Packages must be built before the seed script can run successfully.
 
-### Voraussetzungen
+### Requirements
 
-1. MongoDB muss laufen (lokal oder Docker)
-2. Dependencies installiert: `pnpm install`
-3. Packages gebaut: `pnpm build:packages`
+1. MongoDB is running (local or via Docker)
+2. Dependencies installed: `pnpm install`
+3. Packages built: `pnpm build:packages`
 
-### Verwendung
+### Usage
 
 ```bash
-# Alle Daten seeden
+# Seed all data
 pnpm --filter @monshy/seed seed
 
-# Datenbank leeren und neu seeden
+# Clean database and re-seed
 pnpm --filter @monshy/seed seed:clean
 
-# Nur Tenants seeden
+# Seed only tenants
 pnpm --filter @monshy/seed seed:tenants
 
-# Nur Users seeden (erstellt auch Tenants, da Users Tenants benötigen)
+# Seed only users (also creates tenants if needed)
 pnpm --filter @monshy/seed seed:users
 ```
 
-### Mit Docker Compose
+### With Docker Compose
 
-Wenn MongoDB über Docker Compose läuft:
+If MongoDB runs via Docker Compose:
 
 ```bash
-# MongoDB muss laufen
+# Ensure MongoDB is running
 docker-compose up -d monshyflow-mongodb
 
-# Seed ausführen
+# Run seed
 pnpm --filter @monshy/seed seed
 ```
 
-## 📊 Generierte Testdaten
+## 📊 Generated Test Data
 
 ### Tenants
 
@@ -85,60 +85,61 @@ pnpm --filter @monshy/seed seed
 
 ### API Keys
 
-- **Development API Key** (Acme Corporation) - Läuft nie ab
-- **Production API Key** (TechStart Inc) - Läuft in 1 Jahr ab
-- **Demo API Key** (Demo Company) - Läuft nie ab
+- **Development API Key** (Acme Corporation) – never expires
+- **Production API Key** (TechStart Inc) – expires in 1 year
+- **Demo API Key** (Demo Company) – never expires
 
-> ⚠️ **Wichtig**: Die API Keys werden nur einmal angezeigt. Speichere sie sicher!
+> ⚠️ **Important**: API keys are only shown once in the logs. Store them safely.
 
 
-## 🔧 Konfiguration
+## 🔧 Configuration
 
-### MongoDB Verbindung
+### MongoDB connection
 
-Das Script verwendet die gleiche MongoDB-Verbindung wie die Services:
+The script uses the same MongoDB connection as the backend services:
 
-- **Lokal (ohne Docker)**: `mongodb://admin:admin123@localhost:27019/MonshyFlow?authSource=admin`
-  - Port 27019 ist der externe Port (siehe `docker-compose.yml`: `27019:27017`)
-  - **⚠️ WICHTIG**: Der Code verwendet standardmäßig Port 27018, aber Docker mappt auf 27019!
-  - **Lösung**: Setze `MONGODB_URL` explizit: `export MONGODB_URL="mongodb://admin:admin123@localhost:27019/MonshyFlow?authSource=admin"`
-- **Docker (intern)**: `mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin`
-  - Port 27017 ist der interne Port im Docker-Netzwerk
-  - Service-Name: `MonshyFlow-mongodb`
-- **Environment Variable**: `MONGODB_URL`
-  - Wird automatisch verwendet, falls gesetzt
-  - **Empfohlen**: Setze `MONGODB_URL` explizit, um Port-Konflikte zu vermeiden
+- **Local (without Docker)**: `mongodb://admin:admin123@localhost:27019/MonshyFlow?authSource=admin`
+  - Port 27019 is the external port (see `docker-compose.yml`: `27019:27017`)
+  - ⚠️ The code default uses port 27018, but Docker maps to 27019.
+  - **Solution**: Set `MONGODB_URL` explicitly:  
+    `export MONGODB_URL="mongodb://admin:admin123@localhost:27019/MonshyFlow?authSource=admin"`
+- **Docker (internal)**: `mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin`
+  - Port 27017 is the internal port in the Docker network
+  - Service name: `MonshyFlow-mongodb`
+- **Environment variable**: `MONGODB_URL`
+  - Automatically used when set
+  - **Recommended**: Always set `MONGODB_URL` explicitly to avoid port mismatches.
 
 ## 📝 Scripts
 
-| Script | Beschreibung |
-|--------|--------------|
-| `seed` | Alle Daten seeden |
-| `seed:clean` | Datenbank leeren und neu seeden |
-| `seed:tenants` | Nur Tenants seeden |
-| `seed:users` | Nur Users seeden (erstellt auch Tenants) |
+| Script        | Description                             |
+|--------------|-----------------------------------------|
+| `seed`       | Seed all data                           |
+| `seed:clean` | Clean database and re-seed              |
+| `seed:tenants` | Seed only tenants                     |
+| `seed:users` | Seed only users (also creates tenants)  |
 
-## 🛠️ Entwicklung
+## 🛠️ Development
 
 ### Build
 
-**Wichtig**: Bevor du das Seed-Script ausführst, müssen die Dependencies gebaut sein:
+**Important**: Before running the seed script, all required packages must be built:
 
 ```bash
-# Alle benötigten Packages bauen
+# Build all required packages
 pnpm build:packages
 
-# Oder nur das Seed-Package selbst
+# Or only the seed package itself
 pnpm --filter @monshy/seed build
 ```
 
-### Watch Mode
+### Watch mode
 
 ```bash
 pnpm --filter @monshy/seed dev
 ```
 
-### TypeScript direkt ausführen
+### Run TypeScript directly
 
 ```bash
 pnpm --filter @monshy/seed seed
@@ -148,66 +149,66 @@ pnpm --filter @monshy/seed seed
 
 ### "Cannot find module '@monshy/database'"
 
-**Problem**: Das Seed-Script findet die Workspace-Packages nicht.
+**Problem**: The seed script cannot find the workspace packages.
 
-**Lösung**: 
+**Solution**:
 ```bash
-# Packages bauen
+# Build packages
 pnpm build:packages
-# Oder gezielt:
+# Or only the required ones:
 pnpm --filter @monshy/core --filter @monshy/database --filter @monshy/auth build
 ```
 
 ### "Cannot find module 'bcrypt' native binding"
 
-**Problem**: bcrypt native Module fehlen.
+**Problem**: bcrypt native modules are missing.
 
-**Lösung**: 
+**Solution**:
 ```bash
-# Dependencies neu installieren
+# Reinstall dependencies
 pnpm install
 
-# Oder bcrypt neu bauen
+# Or rebuild bcrypt
 pnpm rebuild bcrypt
 ```
 
-### MongoDB Connection Error
+### MongoDB connection error
 
 **Problem**: `MongoServerError: connection refused`
 
-**Lösung**: 
-1. Prüfe ob MongoDB läuft: `docker-compose ps`
-2. Prüfe die MongoDB URL:
-   - **Lokal (ohne Docker)**: Port 27019 (externer Port, siehe `docker-compose.yml`)
-   - **Docker (intern)**: Port 27017 (interner Port, Service-Name: `MonshyFlow-mongodb`)
-3. Setze `MONGODB_URL` Environment Variable falls nötig:
+**Solution**:
+1. Check if MongoDB is running: `docker-compose ps`
+2. Check the MongoDB URL:
+   - **Local (without Docker)**: port 27019 (external port, see `docker-compose.yml`)
+   - **Docker (internal)**: port 27017 (service name: `MonshyFlow-mongodb`)
+3. Set the `MONGODB_URL` environment variable if needed:
    ```bash
-   # Lokal (ohne Docker)
+   # Local (without Docker)
    export MONGODB_URL="mongodb://admin:admin123@localhost:27019/MonshyFlow?authSource=admin"
    
-   # Docker (intern)
+   # Docker (internal)
    export MONGODB_URL="mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin"
    ```
-4. Starte MongoDB: `docker-compose up -d monshyflow-mongodb`
+4. Start MongoDB: `docker-compose up -d monshyflow-mongodb`
 
-### Duplicate Key Error
+### Duplicate key error
 
 **Problem**: `E11000 duplicate key error`
 
-**Lösung**: 
-- Verwende `seed:clean` um die Datenbank zu leeren
-- Oder entferne manuell die betroffenen Dokumente
+**Solution**:
+- Use `seed:clean` to wipe the database
+- Or manually delete the affected documents
 
 
-## 📚 Weitere Informationen
+## 📚 Further information
 
-- [MonshyFlow Dokumentation](../README.md)
-- [Database Models](../packages/database/src/models/)
-- [Auth Package](../packages/auth/)
+- [MonshyFlow main documentation](../README.md)
+- [Database models](../packages/database/src/models/)
+- [Auth package](../packages/auth/)
 
-## 🤝 Beitragen
+## 🤝 Contributing
 
-Wenn du neue Testdaten hinzufügen möchtest, bearbeite `src/index.ts` und füge die entsprechenden Daten hinzu.
+If you want to add new test data, edit `src/index.ts` and add the corresponding data.
 
 ---
 
