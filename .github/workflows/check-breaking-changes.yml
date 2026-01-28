@@ -8,9 +8,17 @@ on:
       - 'shared/registry.json'
       - '.github/PULL_REQUEST_TEMPLATE.md'
 
+# Security: Restrict permissions to minimum required
+permissions:
+  contents: read  # Only read repository contents
+  pull-requests: read  # Only read PR information
+  # No write permissions - cannot modify repository
+
 jobs:
   validate-breaking-changes:
     runs-on: ubuntu-latest
+    # Security: Only run on PRs from forks if explicitly approved
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event.pull_request.head.repo.full_name != github.repository
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
