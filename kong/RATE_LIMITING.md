@@ -6,14 +6,21 @@ Kong Gateway implementiert Rate Limiting, um die API vor Missbrauch und DDoS-Ang
 
 ## ⚙️ Aktuelle Konfiguration
 
+**HINWEIS:** Die aktuellen Limits sind für E2E-Tests und Development erhöht. Für Production sollten sie reduziert werden.
+
 ### Öffentliche Auth Routes (Login, Register)
-- **Limit:** 10 Requests pro Minute
-- **Limit:** 100 Requests pro Stunde
+- **Limit:** 1000 Requests pro Minute (erhöht für E2E-Tests, Standard wäre 10)
+- **Limit:** 10000 Requests pro Stunde (erhöht für E2E-Tests, Standard wäre 100)
 - **Basis:** IP-Adresse
 
 ### API Routes (Workflows, etc.)
-- **Limit:** 100 Requests pro Minute
-- **Limit:** 1000 Requests pro Stunde
+- **Limit:** 1000 Requests pro Minute (erhöht für E2E-Tests, Standard wäre 100)
+- **Limit:** 10000 Requests pro Stunde (erhöht für E2E-Tests, Standard wäre 1000)
+- **Basis:** IP-Adresse
+
+### Secrets Service Routes
+- **Limit:** 5000 Requests pro Minute (sehr hoch für E2E-Tests)
+- **Limit:** 50000 Requests pro Stunde (sehr hoch für E2E-Tests)
 - **Basis:** IP-Adresse
 
 ## 🔴 Fehler: 429 Too Many Requests
@@ -94,7 +101,7 @@ if (error.message.includes('429') || error.message.includes('Rate limit')) {
   showError(
     'Zu viele Anfragen',
     'Bitte warten Sie einen Moment und versuchen Sie es erneut. ' +
-    'Maximal 10 Login-Versuche pro Minute erlaubt.'
+    'Maximal 1000 Login-Versuche pro Minute erlaubt (Development).'
   );
 }
 ```
@@ -110,8 +117,8 @@ In `kong/kong.yml`:
   service: auth-service
   route: auth-login
   config:
-    minute: 20  # Erhöht von 10 auf 20
-    hour: 200   # Erhöht von 100 auf 200
+    minute: 1000  # Erhöht für E2E-Tests (Standard: 10)
+    hour: 10000   # Erhöht für E2E-Tests (Standard: 100)
 ```
 
 Dann Kong neu starten:
@@ -122,8 +129,11 @@ docker-compose restart kong
 ### Für Production
 
 Rate-Limits sollten in Production strenger sein:
-- Login: 5 Requests/Minute (Schutz vor Brute-Force)
-- API: 100 Requests/Minute (normaler Traffic)
+- **Login/Register:** 5-10 Requests/Minute (Schutz vor Brute-Force)
+- **API Routes:** 100 Requests/Minute (normaler Traffic)
+- **Secrets Service:** 200 Requests/Minute (sensibler Service)
+
+**Aktuell:** Die Limits sind für E2E-Tests erhöht. Vor Production sollten sie in `kong/kong.yml` reduziert werden.
 
 ## 📊 Monitoring
 

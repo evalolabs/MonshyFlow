@@ -64,10 +64,10 @@ Die Kong-Konfiguration ist deklarativ in `kong/kong.yml` definiert (DB-less mode
 
 | Service | URL | Routes |
 |---------|-----|--------|
-| `api-service` | `http://api-service:80` | `/api/workflows`, `/health` |
+| `api-service` | `http://api-service:80` | `/api/workflows/*`, `/api/admin/*`, `/api/webhooks/*`, `/api/tenants/*`, `/api/audit-logs/*`, `/api/support-consents/*`, `/api/internal/*`, `/health` |
 | `auth-service` | `http://auth-service:80` | `/api/auth/*`, `/api/apikeys/*` |
 | `secrets-service` | `http://secrets-service:80` | `/api/secrets/*` |
-| `execution-service` | `http://execution-service:5004` | `/api/execute/*`, `/api/execution/*` |
+| `execution-service` | `http://execution-service:5004` | `/api/execute/*`, `/api/execution/*`, `/api/schemas/*`, `/api/events/*`, `/api/functions`, `/api/mcp-handlers`, `/api/web-search-handlers`, `/api/node-processors`, `/api/tool-creators`, `/api/openai/*` |
 | `scheduler-service` | `http://scheduler-service:80` | `/api/scheduler/*` |
 
 ## 🔌 Plugins
@@ -78,8 +78,11 @@ Die Kong-Konfiguration ist deklarativ in `kong/kong.yml` definiert (DB-less mode
 - Max Age: 3600 Sekunden
 
 ### Rate Limiting
-- **Öffentliche Auth Routes:** 5 Requests/Minute, 50/Hour
-- **API Routes:** 100 Requests/Minute, 1000/Hour
+- **Öffentliche Auth Routes:** 1000 Requests/Minute, 10000/Hour (erhöht für E2E-Tests)
+- **API Routes:** 1000 Requests/Minute, 10000/Hour (erhöht für E2E-Tests)
+- **Secrets Service:** 5000 Requests/Minute, 50000/Hour (sehr hoch für E2E-Tests)
+
+**HINWEIS:** Die aktuellen Limits sind für E2E-Tests und Development erhöht. Für Production sollten sie reduziert werden (siehe `RATE_LIMITING.md`).
 
 ### Correlation ID
 - Fügt `X-Request-ID` Header hinzu
@@ -228,9 +231,9 @@ Die Gateway-Funktionalität wurde von `http-proxy-middleware` (integriert im API
 - http-proxy-middleware für Routing
 
 **Nachher:**
-- Kong Gateway (Port 8000)
-- API Service nur noch für Workflow-Routes (Port 80 intern)
-- Alle anderen Routes über Kong
+- Kong Gateway (Port 5000 extern → 8000 intern)
+- API Service für Workflow Management (Port 80 intern)
+- Alle Services über Kong Gateway erreichbar
 
 **Vorteile:**
 - ✅ Professionelles API Gateway

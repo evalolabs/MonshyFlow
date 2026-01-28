@@ -7,7 +7,6 @@
  * - Tenants
  * - Users (with hashed passwords)
  * - API Keys
- * - Secrets (encrypted)
  * 
  * Usage:
  *   npm run seed              # Seed all data
@@ -16,9 +15,8 @@
  *   npm run seed:users        # Seed only users
  */
 
-import { connectDatabase, disconnectDatabase, Tenant, User, ApiKey, Secret } from '@monshy/database';
+import { connectDatabase, disconnectDatabase, Tenant, User, ApiKey } from '@monshy/database';
 import bcrypt from 'bcrypt';
-import crypto from 'crypto';
 import { generateApiKey, hashApiKey } from '@monshy/auth';
 import { logger } from '@monshy/core';
 
@@ -28,45 +26,6 @@ const cleanFirst = args.includes('--clean');
 const tenantsOnly = args.includes('--tenants-only');
 const usersOnly = args.includes('--users-only');
 
-/**
- * Encryption Service (simplified version for seeding)
- */
-class EncryptionService {
-  private readonly algorithm = 'aes-256-gcm';
-  private readonly keyLength = 32;
-  private readonly ivLength = 16;
-  private readonly saltLength = 32;
-
-  private getEncryptionKey(): Buffer {
-    const key = process.env.SECRETS_ENCRYPTION_KEY || 
-                process.env.ENCRYPTION_KEY ||
-                'default-encryption-key-change-in-production-min-32-chars';
-    
-    if (key.length < 32) {
-      return crypto.scryptSync('default-key', 'salt', 32);
-    }
-    
-    return crypto.scryptSync(key, 'salt', this.keyLength);
-  }
-
-  encrypt(value: string): { encryptedValue: string; salt: string } {
-    const salt = crypto.randomBytes(this.saltLength).toString('hex');
-    const key = crypto.scryptSync(this.getEncryptionKey().toString('hex'), salt, this.keyLength);
-    const iv = crypto.randomBytes(this.ivLength);
-    
-    const cipher = crypto.createCipheriv(this.algorithm, key, iv);
-    let encrypted = cipher.update(value, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    const tag = cipher.getAuthTag();
-    
-    const combined = iv.toString('hex') + ':' + tag.toString('hex') + ':' + encrypted;
-    
-    return {
-      encryptedValue: combined,
-      salt: salt,
-    };
-  }
-}
 
 /**
  * Seed Tenants
@@ -75,6 +34,7 @@ async function seedTenants(): Promise<Map<string, string>> {
   logger.info('🌱 Seeding tenants...');
   
   const tenantData = [
+    { name: 'Monshy', domain: 'Monshy.com' },
     { name: 'Acme Corporation', domain: 'acme.com' },
     { name: 'TechStart Inc', domain: 'techstart.io' },
     { name: 'Demo Company', domain: 'demo.monshy.com' },
@@ -110,6 +70,14 @@ async function seedUsers(tenantMap: Map<string, string>): Promise<Map<string, st
   logger.info('🌱 Seeding users...');
 
   const userData = [
+    {
+      email: 'superadmin@monshy.com',
+      password: 'superadmin123',
+      firstName: 'Super',
+      lastName: 'Admin',
+      roles: ['superadmin', 'admin', 'user'],
+      tenantName: 'Monshy',
+    },
     {
       email: 'admin@acme.com',
       password: 'admin123',
@@ -239,85 +207,6 @@ async function seedApiKeys(tenantMap: Map<string, string>): Promise<void> {
   }
 }
 
-/**
- * Seed Secrets
- */
-async function seedSecrets(tenantMap: Map<string, string>, userMap: Map<string, string>): Promise<void> {
-  logger.info('🌱 Seeding secrets...');
-
-  const encryptionService = new EncryptionService();
-
-  const secretData = [
-    {
-      name: 'OPENAI_API_KEY',
-      description: 'OpenAI API key for AI workflows',
-      secretType: 'apiKey',
-      provider: 'openai',
-      value: 'sk-demo-openai-key-replace-with-real-key',
-      tenantName: 'Acme Corporation',
-      userEmail: 'admin@acme.com',
-    },
-    {
-      name: 'AZURE_API_KEY',
-      description: 'Azure API key for cloud integrations',
-      secretType: 'apiKey',
-      provider: 'azure',
-      value: 'azure-demo-key-replace-with-real-key',
-      tenantName: 'TechStart Inc',
-      userEmail: 'developer@techstart.io',
-    },
-    {
-      name: 'DATABASE_PASSWORD',
-      description: 'Database connection password',
-      secretType: 'password',
-      provider: 'mongodb',
-      value: 'demo-password-123',
-      tenantName: 'Demo Company',
-      userEmail: 'demo@demo.monshy.com',
-    },
-  ];
-
-  for (const data of secretData) {
-    const tenantId = tenantMap.get(data.tenantName);
-    const userId = userMap.get(data.userEmail);
-    
-    if (!tenantId) {
-      logger.warn(`⚠️  Tenant not found: ${data.tenantName}, skipping secret ${data.name}`);
-      continue;
-    }
-    
-    if (!userId) {
-      logger.warn(`⚠️  User not found: ${data.userEmail}, skipping secret ${data.name}`);
-      continue;
-    }
-
-    // Check if secret with same name already exists
-    const existing = await Secret.findOne({ 
-      tenantId, 
-      name: data.name 
-    }).exec();
-
-    if (!existing) {
-      const { encryptedValue, salt } = encryptionService.encrypt(data.value);
-      
-      await Secret.create({
-        name: data.name,
-        description: data.description,
-        secretType: data.secretType,
-        provider: data.provider,
-        encryptedValue,
-        salt,
-        tenantId,
-        userId,
-        isActive: true,
-      });
-
-      logger.info(`✅ Created secret: ${data.name} (Value: ${data.value})`);
-    } else {
-      logger.info(`ℹ️  Secret already exists: ${data.name}`);
-    }
-  }
-}
 
 /**
  * Clean database
@@ -325,7 +214,6 @@ async function seedSecrets(tenantMap: Map<string, string>, userMap: Map<string, 
 async function cleanDatabase(): Promise<void> {
   logger.info('🧹 Cleaning database...');
   
-  await Secret.deleteMany({}).exec();
   await ApiKey.deleteMany({}).exec();
   await User.deleteMany({}).exec();
   await Tenant.deleteMany({}).exec();
@@ -359,13 +247,13 @@ async function main() {
       const tenantMap = await seedTenants();
       const userMap = await seedUsers(tenantMap);
       await seedApiKeys(tenantMap);
-      await seedSecrets(tenantMap, userMap);
     }
 
     logger.info('');
     logger.info('✅ Seeding completed successfully!');
     logger.info('');
     logger.info('📝 Test Credentials:');
+    logger.info('   Superadmin: superadmin@monshy.com / superadmin123');
     logger.info('   Admin: admin@acme.com / admin123');
     logger.info('   User:  user@acme.com / user123');
     logger.info('   Dev:   developer@techstart.io / dev123');

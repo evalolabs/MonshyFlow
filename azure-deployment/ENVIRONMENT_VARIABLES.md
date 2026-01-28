@@ -7,105 +7,123 @@ Diese Dokumentation listet alle Environment Variables auf, die für das Deployme
 ## 📋 Übersicht
 
 ### Services
-1. **agentservice** - Hauptservice für Workflows
-2. **authservice** - Authentifizierung & Authorization
-3. **secretsservice** - Secrets Management
-4. **gateway** - API Gateway (Ocelot)
-5. **execution-service** - TypeScript Execution Service
+1. **api-service** - API Gateway & Workflow Management
+2. **auth-service** - Authentifizierung & Authorization
+3. **secrets-service** - Secrets Management
+4. **execution-service** - Workflow Execution Service
+5. **scheduler-service** - Workflow Scheduling
 6. **frontend** - React Frontend (Static Web App)
 
 ---
 
-## 🔧 AgentService Environment Variables
+## 🔧 API Service Environment Variables
 
-**Container App Name:** `agentservice`
+**Container App Name:** `api-service`
 
 ```bash
+# Port
+PORT=80
+
 # MongoDB / Cosmos DB
-MongoDbSettings__ConnectionString=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb
-MongoDbSettings__DatabaseName=agentbuilder
-MongoDbSettings__WorkflowsCollectionName=workflows
+MONGODB_URL=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/MonshyFlow?ssl=true&replicaSet=globaldb&authSource=admin
 
 # Redis Cache
-RedisSettings__ConnectionString=<cache-name>.redis.cache.windows.net:6380,password=<key>,ssl=True
+REDIS_URL=rediss://:<key>@<cache-name>.redis.cache.windows.net:6380
 
 # JWT Settings
-JwtSettings__SecretKey=<your-jwt-secret-key-min-32-chars>
-JwtSettings__Issuer=AgentBuilder.AuthService
-JwtSettings__Audience=AgentBuilder.Services
+JWT_SECRET_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/JwtSecretKey/)
+JWT_ISSUER=monshy-auth-service
+JWT_AUDIENCE=monshy-services
 
-# Execution Service URL (internal Container App name)
-ExecutionService__Url=http://execution-service:80
+# Service URLs (internal Container App names)
+AUTH_SERVICE_URL=http://auth-service:80
+SECRETS_SERVICE_URL=http://secrets-service:80
+EXECUTION_SERVICE_URL=http://execution-service:5004
+SCHEDULER_SERVICE_URL=http://scheduler-service:80
 
-# Secrets Service URL (internal Container App name)
-SecretsService__BaseUrl=http://secretsservice:80
-SecretsService__ServiceKey=<internal-service-key>
-
-# API Keys
-OpenAI__ApiKey=<openai-api-key>
-SerperApi__ApiKey=<serper-api-key>
-
-# File Storage (optional - für Azure Blob Storage später)
-FileStorage__UploadPath=uploads
-```
-
----
-
-## 🔐 AuthService Environment Variables
-
-**Container App Name:** `authservice`
-
-```bash
-# MongoDB / Cosmos DB
-MongoDbSettings__ConnectionString=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb
-MongoDbSettings__DatabaseName=agentbuilder
-
-# JWT Settings
-JwtSettings__SecretKey=<your-jwt-secret-key-min-32-chars>
-JwtSettings__Issuer=AgentBuilder.AuthService
-JwtSettings__Audience=AgentBuilder.Services
-JwtSettings__ExpirationMinutes=60
-```
-
----
-
-## 🔒 SecretsService Environment Variables
-
-**Container App Name:** `secretsservice`
-
-```bash
-# MongoDB / Cosmos DB
-MongoDbSettings__ConnectionString=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb
-MongoDbSettings__DatabaseName=agentbuilder
-
-# JWT Settings
-JwtSettings__SecretKey=<your-jwt-secret-key-min-32-chars>
-JwtSettings__Issuer=AgentBuilder.AuthService
-JwtSettings__Audience=AgentBuilder.Services
-JwtSettings__ExpirationMinutes=60
-
-# Encryption
-EncryptionSettings__EncryptionKey=<your-encryption-key-min-32-chars>
-
-# Internal Service Key
-InternalService__ServiceKey=<internal-service-key>
-```
-
----
-
-## 🌐 Gateway Environment Variables
-
-**Container App Name:** `gateway`
-
-```bash
-# Ocelot Configuration File
-OCELOT_CONFIG_FILE=ocelot.Azure.json
+# Internal Service Key (für Service-to-Service Kommunikation)
+INTERNAL_SERVICE_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/InternalServiceKey/)
 
 # Frontend URL (für CORS)
 FRONTEND_URL=https://your-frontend.azurestaticapps.net
 
-# Base URL (wird in ocelot.Azure.json verwendet)
-ASPNETCORE_URLS=http://+:80
+# Node Environment
+NODE_ENV=production
+```
+
+---
+
+## 🔐 Auth Service Environment Variables
+
+**Container App Name:** `auth-service`
+
+```bash
+# Port
+PORT=80
+
+# MongoDB / Cosmos DB
+MONGODB_URL=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/MonshyFlow?ssl=true&replicaSet=globaldb&authSource=admin
+
+# JWT Settings
+JWT_SECRET_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/JwtSecretKey/)
+JWT_ISSUER=monshy-auth-service
+JWT_AUDIENCE=monshy-services
+
+# Node Environment
+NODE_ENV=production
+```
+
+---
+
+## 🔒 Secrets Service Environment Variables
+
+**Container App Name:** `secrets-service`
+
+```bash
+# Port
+PORT=80
+
+# MongoDB / Cosmos DB
+MONGODB_URL=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/MonshyFlow?ssl=true&replicaSet=globaldb&authSource=admin
+
+# JWT Settings
+JWT_SECRET_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/JwtSecretKey/)
+JWT_ISSUER=monshy-auth-service
+JWT_AUDIENCE=monshy-services
+
+# Encryption
+SECRETS_ENCRYPTION_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/EncryptionKey/)
+# oder
+ENCRYPTION_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/EncryptionKey/)
+
+# Internal Service Key
+INTERNAL_SERVICE_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/InternalServiceKey/)
+
+# Auth Service URL (für Token-Validierung)
+AUTH_SERVICE_URL=http://auth-service:80
+
+# Node Environment
+NODE_ENV=production
+```
+
+---
+
+## 🌐 API Service Environment Variables (zusätzlich)
+
+**Container App Name:** `api-service`
+
+```bash
+# Frontend URL (für CORS)
+FRONTEND_URL=https://your-frontend.azurestaticapps.net
+
+# Service URLs (interne Container App Namen)
+AUTH_SERVICE_URL=http://auth-service:80
+SECRETS_SERVICE_URL=http://secrets-service:80
+EXECUTION_SERVICE_URL=http://execution-service:5004
+SCHEDULER_SERVICE_URL=http://scheduler-service:80
+
+# Internal Service Key (für Service-to-Service Kommunikation)
+INTERNAL_SERVICE_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/InternalServiceKey/)
 ```
 
 ---
@@ -117,7 +135,7 @@ ASPNETCORE_URLS=http://+:80
 ```bash
 # Node Environment
 NODE_ENV=production
-PORT=5002
+PORT=5004
 
 # MongoDB / Cosmos DB
 MONGODB_URL=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/agent-builder?ssl=true&replicaSet=globaldb
@@ -149,7 +167,7 @@ AGENT_SERVICE_URL=http://agentservice:80
 
 ```bash
 # API Gateway URL
-VITE_API_URL=https://your-gateway.azurecontainerapps.io
+VITE_API_URL=https://your-api-service.azurecontainerapps.io
 
 # Execution Service URL (optional, falls direkt genutzt)
 VITE_EXECUTION_API_URL=https://your-execution-service.azurecontainerapps.io
@@ -161,15 +179,11 @@ VITE_EXECUTION_API_URL=https://your-execution-service.azurecontainerapps.io
 
 ## 📝 Environment Variable Naming Convention
 
-### .NET Services (appsettings.json)
-- Format: `Section__Key` (doppelte Unterstriche)
-- Beispiel: `MongoDbSettings__ConnectionString`
-- .NET lädt diese automatisch in die Configuration
-
 ### Node.js Services
 - Format: `UPPER_SNAKE_CASE`
-- Beispiel: `MONGODB_URL`
+- Beispiel: `MONGODB_URL`, `JWT_SECRET_KEY`, `REDIS_URL`
 - Werden über `process.env` geladen
+- Alle Services verwenden dieses Format
 
 ### Frontend (Vite)
 - Format: `VITE_*` (muss mit VITE_ beginnen)

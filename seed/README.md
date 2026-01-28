@@ -1,15 +1,14 @@
 # 🌱 MonshyFlow Database Seeder
 
-Schnelle Testdaten-Generierung für Entwickler. Erstellt Tenants, Users, API Keys und Secrets in MongoDB.
+Schnelle Testdaten-Generierung für Entwickler. Erstellt Tenants, Users und API Keys in MongoDB.
 
 ## 📋 Übersicht
 
 Dieses Tool erstellt automatisch Testdaten für die Entwicklung:
 
-- **3 Tenants** (Acme Corporation, TechStart Inc, Demo Company)
-- **4 Users** mit verschiedenen Rollen
+- **4 Tenants** (Monshy, Acme Corporation, TechStart Inc, Demo Company)
+- **5 Users** mit verschiedenen Rollen (inkl. Superadmin)
 - **3 API Keys** für verschiedene Tenants
-- **3 Secrets** (verschlüsselt) für verschiedene Use Cases
 
 ## 🚀 Schnellstart
 
@@ -25,12 +24,6 @@ pnpm install
 pnpm build:packages
 # Oder gezielt nur die Seed-Dependencies:
 pnpm --filter @monshy/core --filter @monshy/database --filter @monshy/auth build
-
-# 3. bcrypt native bindings bauen (falls nötig)
-# Falls bcrypt-Fehler auftreten:
-cd node_modules/.pnpm/bcrypt@5.1.1/node_modules/bcrypt
-npm rebuild
-cd ../../../../..
 ```
 
 > ⚠️ **Wichtig**: Die Packages müssen gebaut werden, bevor das Seed-Script funktioniert!
@@ -75,6 +68,7 @@ pnpm --filter @monshy/seed seed
 
 | Name | Domain |
 |------|--------|
+| Monshy | Monshy.com |
 | Acme Corporation | acme.com |
 | TechStart Inc | techstart.io |
 | Demo Company | demo.monshy.com |
@@ -83,6 +77,7 @@ pnpm --filter @monshy/seed seed
 
 | Email | Password | Roles | Tenant |
 |-------|----------|-------|--------|
+| superadmin@monshy.com | superadmin123 | superadmin, admin, user | Monshy |
 | admin@acme.com | admin123 | admin, user | Acme Corporation |
 | user@acme.com | user123 | user | Acme Corporation |
 | developer@techstart.io | dev123 | user, developer | TechStart Inc |
@@ -96,13 +91,6 @@ pnpm --filter @monshy/seed seed
 
 > ⚠️ **Wichtig**: Die API Keys werden nur einmal angezeigt. Speichere sie sicher!
 
-### Secrets
-
-- **OPENAI_API_KEY** (Acme Corporation) - Demo OpenAI Key
-- **AZURE_API_KEY** (TechStart Inc) - Demo Azure Key
-- **DATABASE_PASSWORD** (Demo Company) - Demo Database Password
-
-> ⚠️ **Hinweis**: Die Secrets sind verschlüsselt gespeichert. Die Werte sind Demo-Werte und sollten in Produktion ersetzt werden.
 
 ## 🔧 Konfiguration
 
@@ -110,18 +98,16 @@ pnpm --filter @monshy/seed seed
 
 Das Script verwendet die gleiche MongoDB-Verbindung wie die Services:
 
-- **Lokal**: `mongodb://admin:admin123@localhost:27018/MonshyFlow?authSource=admin`
-- **Docker**: `mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin`
-- **Environment Variable**: `MONGODB_URL` oder `MongoDbSettings__ConnectionString`
-
-### Verschlüsselung
-
-Secrets werden mit AES-256-GCM verschlüsselt. Der Encryption Key kann über Environment Variables gesetzt werden:
-
-- `SECRETS_ENCRYPTION_KEY` (bevorzugt)
-- `ENCRYPTION_KEY` (Fallback)
-
-> ⚠️ **Sicherheit**: In Produktion sollte der Encryption Key aus Azure Key Vault oder ähnlichem kommen.
+- **Lokal (ohne Docker)**: `mongodb://admin:admin123@localhost:27019/MonshyFlow?authSource=admin`
+  - Port 27019 ist der externe Port (siehe `docker-compose.yml`: `27019:27017`)
+  - **⚠️ WICHTIG**: Der Code verwendet standardmäßig Port 27018, aber Docker mappt auf 27019!
+  - **Lösung**: Setze `MONGODB_URL` explizit: `export MONGODB_URL="mongodb://admin:admin123@localhost:27019/MonshyFlow?authSource=admin"`
+- **Docker (intern)**: `mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin`
+  - Port 27017 ist der interne Port im Docker-Netzwerk
+  - Service-Name: `MonshyFlow-mongodb`
+- **Environment Variable**: `MONGODB_URL`
+  - Wird automatisch verwendet, falls gesetzt
+  - **Empfohlen**: Setze `MONGODB_URL` explizit, um Port-Konflikte zu vermeiden
 
 ## 📝 Scripts
 
@@ -178,12 +164,10 @@ pnpm --filter @monshy/core --filter @monshy/database --filter @monshy/auth build
 
 **Lösung**: 
 ```bash
-# bcrypt neu bauen
-cd node_modules/.pnpm/bcrypt@5.1.1/node_modules/bcrypt
-npm rebuild
-cd ../../../../..
+# Dependencies neu installieren
+pnpm install
 
-# Oder mit pnpm (wenn Build-Scripts genehmigt):
+# Oder bcrypt neu bauen
 pnpm rebuild bcrypt
 ```
 
@@ -193,8 +177,18 @@ pnpm rebuild bcrypt
 
 **Lösung**: 
 1. Prüfe ob MongoDB läuft: `docker-compose ps`
-2. Prüfe die MongoDB URL in `.env` oder `docker-compose.yml`
-3. Starte MongoDB: `docker-compose up -d monshyflow-mongodb`
+2. Prüfe die MongoDB URL:
+   - **Lokal (ohne Docker)**: Port 27019 (externer Port, siehe `docker-compose.yml`)
+   - **Docker (intern)**: Port 27017 (interner Port, Service-Name: `MonshyFlow-mongodb`)
+3. Setze `MONGODB_URL` Environment Variable falls nötig:
+   ```bash
+   # Lokal (ohne Docker)
+   export MONGODB_URL="mongodb://admin:admin123@localhost:27019/MonshyFlow?authSource=admin"
+   
+   # Docker (intern)
+   export MONGODB_URL="mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin"
+   ```
+4. Starte MongoDB: `docker-compose up -d monshyflow-mongodb`
 
 ### Duplicate Key Error
 
@@ -204,13 +198,6 @@ pnpm rebuild bcrypt
 - Verwende `seed:clean` um die Datenbank zu leeren
 - Oder entferne manuell die betroffenen Dokumente
 
-### Encryption Key Warning
-
-**Problem**: `Encryption key is too short`
-
-**Lösung**: 
-- Setze `SECRETS_ENCRYPTION_KEY` in `.env` (mindestens 32 Zeichen)
-- Oder ignoriere die Warnung für Development (nicht für Production!)
 
 ## 📚 Weitere Informationen
 
