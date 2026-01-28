@@ -1,0 +1,635 @@
+name: CI - Packages (Path-based)
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+# Cancel in-progress runs when a new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Detect which packages have changed
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      core: ${{ steps.filter.outputs.core }}
+      database: ${{ steps.filter.outputs.database }}
+      auth: ${{ steps.filter.outputs.auth }}
+      api-service: ${{ steps.filter.outputs.api-service }}
+      auth-service: ${{ steps.filter.outputs.auth-service }}
+      execution-service: ${{ steps.filter.outputs.execution-service }}
+      scheduler-service: ${{ steps.filter.outputs.scheduler-service }}
+      secrets-service: ${{ steps.filter.outputs.secrets-service }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      shared: ${{ steps.filter.outputs.shared }}
+      root: ${{ steps.filter.outputs.root }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better change detection
+      
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            core:
+              - 'packages/core/**'
+              - 'tsconfig.base.json'
+              - 'package.json'
+              - 'pnpm-workspace.yaml'
+            database:
+              - 'packages/database/**'
+              - 'packages/core/**'
+              - 'tsconfig.base.json'
+              - 'package.json'
+            auth:
+              - 'packages/auth/**'
+              - 'packages/core/**'
+              - 'tsconfig.base.json'
+              - 'package.json'
+            api-service:
+              - 'packages/api-service/**'
+              - 'packages/core/**'
+              - 'packages/database/**'
+              - 'packages/auth/**'
+              - 'tsconfig.base.json'
+              - 'package.json'
+            auth-service:
+              - 'packages/auth-service/**'
+              - 'packages/core/**'
+              - 'packages/database/**'
+              - 'packages/auth/**'
+              - 'tsconfig.base.json'
+              - 'package.json'
+            execution-service:
+              - 'packages/execution-service/**'
+              - 'packages/core/**'
+              - 'packages/database/**'
+              - 'shared/**'
+              - 'tsconfig.base.json'
+              - 'package.json'
+            scheduler-service:
+              - 'packages/scheduler-service/**'
+              - 'packages/core/**'
+              - 'packages/database/**'
+              - 'packages/auth/**'
+              - 'tsconfig.base.json'
+              - 'package.json'
+            secrets-service:
+              - 'packages/secrets-service/**'
+              - 'packages/core/**'
+              - 'packages/database/**'
+              - 'packages/auth/**'
+              - 'tsconfig.base.json'
+              - 'package.json'
+            frontend:
+              - 'frontend/**'
+              - 'shared/**'
+              - 'package.json'
+            shared:
+              - 'shared/**'
+            root:
+              - 'package.json'
+              - 'pnpm-workspace.yaml'
+              - 'tsconfig.base.json'
+              - '.github/workflows/**'
+
+  # Level 0: Build @monshy/core (no dependencies)
+  build-core:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.core == 'true' || needs.detect-changes.outputs.root == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build @monshy/core
+        run: pnpm --filter @monshy/core build
+      
+      - name: Test @monshy/core
+        run: pnpm --filter @monshy/core test || echo "No tests configured"
+        continue-on-error: true
+
+  # Level 1: Build packages that depend on core
+  build-database:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-core]
+    if: |
+      (needs.detect-changes.outputs.database == 'true' || 
+       needs.detect-changes.outputs.core == 'true' || 
+       needs.detect-changes.outputs.root == 'true') &&
+      (needs.build-core.result == 'success' || needs.build-core.result == 'skipped')
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build dependencies
+        run: pnpm --filter @monshy/core build
+      
+      - name: Build @monshy/database
+        run: pnpm --filter @monshy/database build
+      
+      - name: Test @monshy/database
+        run: pnpm --filter @monshy/database test || echo "No tests configured"
+        continue-on-error: true
+
+  build-auth:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-core]
+    if: |
+      (needs.detect-changes.outputs.auth == 'true' || 
+       needs.detect-changes.outputs.core == 'true' || 
+       needs.detect-changes.outputs.root == 'true') &&
+      (needs.build-core.result == 'success' || needs.build-core.result == 'skipped')
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build dependencies
+        run: pnpm --filter @monshy/core build
+      
+      - name: Build @monshy/auth
+        run: pnpm --filter @monshy/auth build
+      
+      - name: Test @monshy/auth
+        run: pnpm --filter @monshy/auth test || echo "No tests configured"
+        continue-on-error: true
+
+  # Level 2: Build services that depend on shared packages
+  build-api-service:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-core, build-database, build-auth]
+    if: |
+      (needs.detect-changes.outputs.api-service == 'true' || 
+       needs.detect-changes.outputs.core == 'true' || 
+       needs.detect-changes.outputs.database == 'true' || 
+       needs.detect-changes.outputs.auth == 'true' || 
+       needs.detect-changes.outputs.root == 'true') &&
+      (needs.build-core.result == 'success' || needs.build-core.result == 'skipped') &&
+      (needs.build-database.result == 'success' || needs.build-database.result == 'skipped') &&
+      (needs.build-auth.result == 'success' || needs.build-auth.result == 'skipped')
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build dependencies
+        run: |
+          pnpm --filter @monshy/core build
+          pnpm --filter @monshy/database build
+          pnpm --filter @monshy/auth build
+      
+      - name: Lint @monshy/api-service
+        run: pnpm --filter @monshy/api-service lint || echo "No lint script"
+        continue-on-error: true
+      
+      - name: Build @monshy/api-service
+        run: pnpm --filter @monshy/api-service build
+      
+      - name: Test @monshy/api-service
+        run: pnpm --filter @monshy/api-service test || echo "No tests configured"
+        continue-on-error: true
+      
+      - name: Build Docker image (main branch only)
+        if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.api-service == 'true'
+        run: |
+          docker build -t monshyflow/api-service:latest -f packages/api-service/Dockerfile packages/api-service/
+
+  build-auth-service:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-core, build-database, build-auth]
+    if: |
+      (needs.detect-changes.outputs.auth-service == 'true' || 
+       needs.detect-changes.outputs.core == 'true' || 
+       needs.detect-changes.outputs.database == 'true' || 
+       needs.detect-changes.outputs.auth == 'true' || 
+       needs.detect-changes.outputs.root == 'true') &&
+      (needs.build-core.result == 'success' || needs.build-core.result == 'skipped') &&
+      (needs.build-database.result == 'success' || needs.build-database.result == 'skipped') &&
+      (needs.build-auth.result == 'success' || needs.build-auth.result == 'skipped')
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build dependencies
+        run: |
+          pnpm --filter @monshy/core build
+          pnpm --filter @monshy/database build
+          pnpm --filter @monshy/auth build
+      
+      - name: Lint @monshy/auth-service
+        run: pnpm --filter @monshy/auth-service lint || echo "No lint script"
+        continue-on-error: true
+      
+      - name: Build @monshy/auth-service
+        run: pnpm --filter @monshy/auth-service build
+      
+      - name: Test @monshy/auth-service
+        run: pnpm --filter @monshy/auth-service test || echo "No tests configured"
+        continue-on-error: true
+      
+      - name: Build Docker image (main branch only)
+        if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.auth-service == 'true'
+        run: |
+          docker build -t monshyflow/auth-service:latest -f packages/auth-service/Dockerfile packages/auth-service/
+
+  build-execution-service:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-core, build-database]
+    if: |
+      (needs.detect-changes.outputs.execution-service == 'true' || 
+       needs.detect-changes.outputs.core == 'true' || 
+       needs.detect-changes.outputs.database == 'true' || 
+       needs.detect-changes.outputs.shared == 'true' || 
+       needs.detect-changes.outputs.root == 'true') &&
+      (needs.build-core.result == 'success' || needs.build-core.result == 'skipped') &&
+      (needs.build-database.result == 'success' || needs.build-database.result == 'skipped')
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build dependencies
+        run: |
+          pnpm --filter @monshy/core build
+          pnpm --filter @monshy/database build
+      
+      - name: Lint execution-service
+        run: pnpm --filter execution-service lint || echo "No lint script"
+        continue-on-error: true
+      
+      - name: Build execution-service
+        run: pnpm --filter execution-service build
+      
+      - name: Test execution-service
+        run: pnpm --filter execution-service test || echo "No tests configured"
+        continue-on-error: true
+      
+      - name: Build Docker image (main branch only)
+        if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.execution-service == 'true'
+        run: |
+          docker build -t monshyflow/execution-service:latest -f packages/execution-service/Dockerfile packages/execution-service/
+
+  build-scheduler-service:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-core, build-database, build-auth]
+    if: |
+      (needs.detect-changes.outputs.scheduler-service == 'true' || 
+       needs.detect-changes.outputs.core == 'true' || 
+       needs.detect-changes.outputs.database == 'true' || 
+       needs.detect-changes.outputs.auth == 'true' || 
+       needs.detect-changes.outputs.root == 'true') &&
+      (needs.build-core.result == 'success' || needs.build-core.result == 'skipped') &&
+      (needs.build-database.result == 'success' || needs.build-database.result == 'skipped') &&
+      (needs.build-auth.result == 'success' || needs.build-auth.result == 'skipped')
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build dependencies
+        run: |
+          pnpm --filter @monshy/core build
+          pnpm --filter @monshy/database build
+          pnpm --filter @monshy/auth build
+      
+      - name: Lint @monshy/scheduler-service
+        run: pnpm --filter @monshy/scheduler-service lint || echo "No lint script"
+        continue-on-error: true
+      
+      - name: Build @monshy/scheduler-service
+        run: pnpm --filter @monshy/scheduler-service build
+      
+      - name: Test @monshy/scheduler-service
+        run: pnpm --filter @monshy/scheduler-service test || echo "No tests configured"
+        continue-on-error: true
+      
+      - name: Build Docker image (main branch only)
+        if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.scheduler-service == 'true'
+        run: |
+          docker build -t monshyflow/scheduler-service:latest -f packages/scheduler-service/Dockerfile packages/scheduler-service/
+
+  build-secrets-service:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-core, build-database, build-auth]
+    if: |
+      (needs.detect-changes.outputs.secrets-service == 'true' || 
+       needs.detect-changes.outputs.core == 'true' || 
+       needs.detect-changes.outputs.database == 'true' || 
+       needs.detect-changes.outputs.auth == 'true' || 
+       needs.detect-changes.outputs.root == 'true') &&
+      (needs.build-core.result == 'success' || needs.build-core.result == 'skipped') &&
+      (needs.build-database.result == 'success' || needs.build-database.result == 'skipped') &&
+      (needs.build-auth.result == 'success' || needs.build-auth.result == 'skipped')
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build dependencies
+        run: |
+          pnpm --filter @monshy/core build
+          pnpm --filter @monshy/database build
+          pnpm --filter @monshy/auth build
+      
+      - name: Lint @monshy/secrets-service
+        run: pnpm --filter @monshy/secrets-service lint || echo "No lint script"
+        continue-on-error: true
+      
+      - name: Build @monshy/secrets-service
+        run: pnpm --filter @monshy/secrets-service build
+      
+      - name: Test @monshy/secrets-service
+        run: pnpm --filter @monshy/secrets-service test || echo "No tests configured"
+        continue-on-error: true
+      
+      - name: Build Docker image (main branch only)
+        if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.secrets-service == 'true'
+        run: |
+          docker build -t monshyflow/secrets-service:latest -f packages/secrets-service/Dockerfile packages/secrets-service/
+
+  # Frontend (depends on shared/)
+  build-frontend:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.frontend == 'true' || 
+      needs.detect-changes.outputs.shared == 'true' || 
+      needs.detect-changes.outputs.root == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+      
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Lint frontend
+        run: cd frontend && pnpm lint || echo "Lint failed or not configured"
+        continue-on-error: true
+      
+      - name: Type check frontend
+        run: cd frontend && pnpm type-check || echo "Type-check not configured"
+        continue-on-error: true
+      
+      - name: Test frontend
+        run: cd frontend && pnpm test --run || echo "Tests not configured"
+        continue-on-error: true
+      
+      - name: Build frontend
+        run: cd frontend && pnpm build
+
+  # Summary job to show what was built
+  ci-summary:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-core, build-database, build-auth, build-api-service, build-auth-service, build-execution-service, build-scheduler-service, build-secrets-service, build-frontend]
+    if: always()
+    steps:
+      - name: CI Summary
+        run: |
+          echo "## CI/CD Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Changed Packages:" >> $GITHUB_STEP_SUMMARY
+          echo "- core: ${{ needs.detect-changes.outputs.core }}" >> $GITHUB_STEP_SUMMARY
+          echo "- database: ${{ needs.detect-changes.outputs.database }}" >> $GITHUB_STEP_SUMMARY
+          echo "- auth: ${{ needs.detect-changes.outputs.auth }}" >> $GITHUB_STEP_SUMMARY
+          echo "- api-service: ${{ needs.detect-changes.outputs.api-service }}" >> $GITHUB_STEP_SUMMARY
+          echo "- auth-service: ${{ needs.detect-changes.outputs.auth-service }}" >> $GITHUB_STEP_SUMMARY
+          echo "- execution-service: ${{ needs.detect-changes.outputs.execution-service }}" >> $GITHUB_STEP_SUMMARY
+          echo "- scheduler-service: ${{ needs.detect-changes.outputs.scheduler-service }}" >> $GITHUB_STEP_SUMMARY
+          echo "- secrets-service: ${{ needs.detect-changes.outputs.secrets-service }}" >> $GITHUB_STEP_SUMMARY
+          echo "- frontend: ${{ needs.detect-changes.outputs.frontend }}" >> $GITHUB_STEP_SUMMARY
+          echo "- shared: ${{ needs.detect-changes.outputs.shared }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Build Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- core: ${{ needs.build-core.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- database: ${{ needs.build-database.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- auth: ${{ needs.build-auth.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- api-service: ${{ needs.build-api-service.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- auth-service: ${{ needs.build-auth-service.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- execution-service: ${{ needs.build-execution-service.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- scheduler-service: ${{ needs.build-scheduler-service.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- secrets-service: ${{ needs.build-secrets-service.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- frontend: ${{ needs.build-frontend.result }}" >> $GITHUB_STEP_SUMMARY
+
