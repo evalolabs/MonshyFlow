@@ -620,6 +620,131 @@ pnpm lint
 
 ---
 
+## 👀 Code Review Checklist for Maintainers
+
+When reviewing Pull Requests, especially check for breaking changes and backward compatibility issues.
+
+### For Breaking Changes
+
+When a PR is marked as "💥 Breaking change", verify:
+
+- [ ] **Breaking change is properly documented**:
+  - PR description explains what breaks
+  - Migration path is provided
+  - Affected areas are listed
+  - Issue was created to discuss the change
+
+- [ ] **Migration path exists**:
+  - Migration documentation/scripts provided
+  - Users can migrate their workflows
+  - Old workflows still work (deprecated, not removed)
+
+- [ ] **CHANGELOG.md is updated**:
+  - Breaking change is documented
+  - Migration instructions included
+  - Version number reflects breaking change (major version bump)
+
+- [ ] **Tests cover both old and new behavior**:
+  - Old workflow formats still load
+  - Old workflows still execute
+  - New behavior is tested
+  - Migration logic is tested (if applicable)
+
+### For Node Changes
+
+When PRs modify or add nodes:
+
+- [ ] **Existing node types are preserved**:
+  - No node types removed without deprecation
+  - No node types renamed
+  - Old node types still work
+
+- [ ] **Node data schemas are backward compatible**:
+  - No required fields removed
+  - No field types changed (string → number, etc.)
+  - New fields are optional
+  - Default values provided for missing fields
+
+- [ ] **Old node configurations are still valid**:
+  - Existing workflows with old configs still work
+  - Validation handles both old and new formats
+  - No breaking changes to node processors
+
+### For Schema Changes
+
+When PRs change data structures:
+
+- [ ] **New fields are optional**:
+  - Old data without new fields still works
+  - Default values provided
+  - No required fields added to existing schemas
+
+- [ ] **Old formats are supported**:
+  - Migration logic handles old formats
+  - Both old and new formats validated
+  - No silent failures
+
+### Red Flags (Reject PR)
+
+**Immediately reject PRs that**:
+
+- ❌ Remove node types without deprecation
+- ❌ Change required fields to different types
+- ❌ Break existing workflow execution
+- ❌ Have no migration path for breaking changes
+- ❌ Contain spam or malicious code
+- ❌ Don't follow backward compatibility guidelines
+
+### Review Process
+
+1. **Check PR description**:
+   - Is breaking change checkbox checked?
+   - Is migration path provided?
+   - Are affected areas listed?
+
+2. **Review code changes**:
+   - Look for removed node types
+   - Check for schema changes
+   - Verify backward compatibility
+
+3. **Test if possible**:
+   - Try loading old workflow formats
+   - Test with existing workflows
+   - Verify migration works
+
+4. **Ask questions**:
+   - Why is breaking change necessary?
+   - Can it be done backward-compatibly?
+   - Is migration path clear?
+
+### If Breaking Change Gets Merged Accidentally
+
+**Immediate actions**:
+
+1. **Revert the PR** immediately
+2. **Create issue** to track the problem
+3. **Notify users** if possible (if already deployed)
+
+**Investigation**:
+
+1. Why did it pass review?
+2. What tests failed?
+3. How can we prevent this?
+
+**Fix properly**:
+
+1. Create new PR with proper migration
+2. Follow backward compatibility guidelines
+3. Get proper review before merging
+
+**Prevention**:
+
+1. Update CI/CD checks
+2. Improve review process
+3. Add more tests
+
+---
+
 ## 📚 Additional Resources
 
 - **Registry System**: `shared/README.md`
