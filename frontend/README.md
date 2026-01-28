@@ -4,6 +4,8 @@ AI-Powered Workflow Automation Platform - Frontend
 
 React + TypeScript + React Flow Workflow Builder
 
+> **📖 Contributing?** Please read [CONTRIBUTING.md](./CONTRIBUTING.md) first! It covers node development, backward compatibility, and breaking changes.
+
 ## 🚀 Quick Start
 
 ```bash
@@ -157,7 +159,9 @@ pnpm test:coverage
 
 ## 🤝 Contributing
 
-When contributing to the frontend, please read **[CONTRIBUTING.md](./CONTRIBUTING.md)** first. It covers important systems you need to understand:
+**👉 Start here**: Read [CONTRIBUTING.md](./CONTRIBUTING.md) before making any changes!
+
+The contributing guide covers:
 
 - **Node Registry System**: How nodes are defined and code is generated
 - **Animation System**: How workflow execution animation works
