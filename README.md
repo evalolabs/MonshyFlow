@@ -81,11 +81,54 @@ The frontend will be available at `http://localhost:5173` and the API gateway at
 ### Docker (Recommended)
 
 ```bash
-# Start all services with Docker Compose
-docker-compose up
+# Start all services with Docker Compose (Backend, DB, Kong, etc.)
+docker-compose up -d
 ```
 
 See [Deployment Guide](./azure-deployment/README.md) for more details.
+
+### Getting Started in 5 Minuten (Docker)
+
+**Ziel**: In wenigen Minuten das UI sehen und sich einloggen, ohne manuelles Setup.
+
+1. **Backend & Infrastruktur starten**
+
+   ```bash
+   # Im Projekt-Root
+   docker-compose up -d
+   ```
+
+   - API Gateway (Kong) läuft auf `http://localhost:5000`
+   - MongoDB, Redis, RabbitMQ und alle Node.js Services laufen im Hintergrund
+
+2. **Datenbank seeden (Tenants, Superadmin, Testdaten)**
+
+   ```bash
+   # Im Projekt-Root
+   pnpm install           # falls noch nicht geschehen
+   pnpm build:packages    # einmalig erforderlich
+
+   # Testdaten seeden (Tenants, Users, API Keys)
+   pnpm --filter @monshy/seed seed
+   ```
+
+   Danach existieren u.a.:
+
+   - Tenant: `Monshy`
+   - Superadmin-User: `superadmin@monshy.com / superadmin123`
+
+3. **Frontend starten und einloggen**
+
+   ```bash
+   cd frontend
+   pnpm install           # falls noch nicht geschehen
+   pnpm dev
+   ```
+
+   - Frontend: `http://localhost:5173`
+   - Login im UI mit: `superadmin@monshy.com / superadmin123`
+
+   Danach kannst du sofort Workflows anlegen, ausführen und die Plattform erkunden.
 
 ---
 
