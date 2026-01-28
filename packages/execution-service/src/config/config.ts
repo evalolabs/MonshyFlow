@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const config = {
-    port: process.env.PORT || 5002,
+    port: process.env.PORT || 5004,
     openaiApiKey: process.env.OPENAI_API_KEY || '',
     redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
     rabbitmqUrl: process.env.RABBITMQ_URL || 'amqp://localhost:5672',
