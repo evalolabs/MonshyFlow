@@ -19,7 +19,10 @@
 ### Installation
 ```bash
 cd frontend
-pnpm add -D @playwright/test
+# Install dependencies (includes @playwright/test)
+pnpm install
+
+# Install Playwright browsers
 pnpm exec playwright install
 ```
 

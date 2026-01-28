@@ -2,14 +2,19 @@
 
 ## 📦 Installation
 
-### 1. Playwright installieren
+### 1. Dependencies installieren
 ```bash
 cd frontend
-pnpm add -D @playwright/test
+pnpm install
+```
+
+Dies installiert alle Dependencies inklusive `@playwright/test` (bereits in `package.json` enthalten).
+
+### 2. Playwright Browser installieren
+```bash
 pnpm exec playwright install
 ```
 
-### 2. Browser installieren
 Playwright installiert automatisch Chromium, Firefox und WebKit.
 
 ### 3. Konfiguration prüfen
