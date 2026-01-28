@@ -1,0 +1,65 @@
+name: Check Breaking Changes
+
+on:
+  pull_request:
+    paths:
+      - 'frontend/src/**'
+      - 'packages/execution-service/src/nodes/**'
+      - 'shared/registry.json'
+      - '.github/PULL_REQUEST_TEMPLATE.md'
+
+jobs:
+  validate-breaking-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for comparison
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      
+      - name: Install dependencies
+        run: |
+          cd frontend
+          pnpm install --frozen-lockfile
+      
+      - name: Run Backward Compatibility Tests
+        run: |
+          cd frontend
+          pnpm test backward-compatibility
+      
+      - name: Check PR Description for Breaking Changes
+        if: github.event_name == 'pull_request'
+        run: |
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          # Check if breaking change is marked
+          if echo "$PR_BODY" | grep -q "💥 Breaking change"; then
+            echo "⚠️ Breaking change detected in PR"
+            
+            # Check if migration path is provided
+            if ! echo "$PR_BODY" | grep -q "Migration Path"; then
+              echo "❌ ERROR: Breaking change PR must include 'Migration Path' section"
+              echo "Please add a Migration Path section to your PR description"
+              exit 1
+            fi
+            
+            # Check if affected areas are listed
+            if ! echo "$PR_BODY" | grep -q "Affected Areas"; then
+              echo "⚠️ WARNING: Breaking change PR should list 'Affected Areas'"
+            fi
+            
+            echo "✅ Breaking change PR has required information"
+          else
+            echo "✅ No breaking changes detected"
+          fi
+
