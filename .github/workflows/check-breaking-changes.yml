@@ -17,8 +17,8 @@ permissions:
 jobs:
   validate-breaking-changes:
     runs-on: ubuntu-latest
-    # Security: Only run on PRs from forks if explicitly approved
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event.pull_request.head.repo.full_name != github.repository
+    # Security: Workflow runs on all PRs
+    # CODEOWNERS ensures workflow file changes require @evalolabs review
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
