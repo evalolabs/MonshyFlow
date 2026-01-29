@@ -282,11 +282,7 @@ This is an **alpha release**. Some features may be incomplete or subject to chan
 
 ### Known Limitations
 
-- If/Else Node UX could be improved
-- Agent Tools/Functions documentation is incomplete
-- Some advanced features are still in development
 
-See [ALPHA_LAUNCH_CHECKLIST.md](./ALPHA_LAUNCH_CHECKLIST.md) for the current development status.
 
 ---
 
@@ -294,7 +290,7 @@ See [ALPHA_LAUNCH_CHECKLIST.md](./ALPHA_LAUNCH_CHECKLIST.md) for the current dev
 
 - **GitHub Repository:** [https://github.com/evalolabs/MonshyFlow](https://github.com/evalolabs/MonshyFlow)
 - **Issues:** [GitHub Issues](https://github.com/evalolabs/MonshyFlow/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/evalolabs/MonshyFlow/discussions) (coming soon)
+- **Discussions:** [GitHub Discussions](https://github.com/evalolabs/MonshyFlow/discussions)
 
 ---
 
