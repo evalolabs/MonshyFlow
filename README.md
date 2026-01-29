@@ -239,6 +239,24 @@ We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
+## Project Transparency & Responsibility
+
+MonshyFlow is an independent open-source project.
+
+All third-party names, trademarks, logos, and brands mentioned or shown in this project are the property of their respective owners and are used for identification and interoperability purposes only.
+
+MonshyFlow is not affiliated with, endorsed by, or sponsored by any third-party company unless explicitly stated.
+
+Users are responsible for how they configure and use workflows, integrations, and automations created with this software.
+
+Automations and AI-generated outputs created with MonshyFlow are fully controlled by the user. The project does not take responsibility for external actions, data processing, or third-party service usage triggered by workflows.
+
+## Third-Party Software & Dependencies
+
+MonshyFlow builds upon a wide range of open-source libraries and third-party software components.
+
+All such dependencies are used in accordance with their respective licenses. Third-party libraries and SDKs remain the property of their respective authors and rights holders.
+
 ## 🔒 Security
 
 For security vulnerabilities, please see [SECURITY.md](./SECURITY.md) for reporting guidelines.
