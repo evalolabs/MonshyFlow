@@ -1,6 +1,6 @@
 {
   "id": "invoice-ninja",
-  "name": "Invoice Ninja",
+  "name": "Invoice Ninja (API)",
   "icon": "🧾",
   "logoUrl": "https://cdn.simpleicons.org/invoiceninja/000000",
   "description": "Open-source invoicing and billing platform",

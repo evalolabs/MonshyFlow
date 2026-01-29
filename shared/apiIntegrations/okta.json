@@ -1,6 +1,6 @@
 {
   "id": "okta",
-  "name": "Okta",
+  "name": "Okta (API)",
   "icon": "🔐",
   "logoUrl": "https://cdn.simpleicons.org/okta/007DC1",
   "description": "Identity and access management platform",

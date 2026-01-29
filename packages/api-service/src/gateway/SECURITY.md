@@ -1,41 +1,41 @@
 # 🔒 Gateway Security
 
-## ✅ Sicherheits-Features
+## ✅ Security Features
 
-Das Gateway ist **vollständig gesichert** mit folgenden Maßnahmen:
+The Gateway is **fully secured** with the following measures:
 
 ---
 
-## 🛡️ Implementierte Sicherheits-Features
+## 🛡️ Implemented Security Features
 
 ### 1. Authentication & Authorization ✅
 
-**Alle geschützten Routes benötigen JWT Token oder API Key:**
+**All protected routes require JWT Token or API Key:**
 
 ```typescript
-// Beispiel: Workflow Routes
+// Example: Workflow Routes
 app.get('/api/workflows', authMiddleware, ...);
 app.post('/api/workflows', authMiddleware, ...);
 ```
 
-**Öffentliche Routes:**
-- `/api/auth/login` - Öffentlich (Login)
-- `/api/auth/register` - Öffentlich (Registrierung)
-- `/health` - Öffentlich (Health Check)
+**Public Routes:**
+- `/api/auth/login` - Public (Login)
+- `/api/auth/register` - Public (Registration)
+- `/health` - Public (Health Check)
 
-**Geschützte Routes:**
-- `/api/workflows/*` - Benötigt Auth
-- `/api/apikeys/*` - Benötigt Auth
-- `/api/secrets/*` - Benötigt Auth
-- `/api/execute/*` - Benötigt Auth
-- `/api/scheduler/*` - Benötigt Auth
+**Protected Routes:**
+- `/api/workflows/*` - Requires Auth
+- `/api/apikeys/*` - Requires Auth
+- `/api/secrets/*` - Requires Auth
+- `/api/execute/*` - Requires Auth
+- `/api/scheduler/*` - Requires Auth
 
 ### 2. Rate Limiting ✅
 
-**Schutz vor DDoS und Brute-Force-Angriffen:**
+**Protection against DDoS and brute-force attacks:**
 
-- **API Routes:** 100 Requests pro 15 Minuten pro IP
-- **Auth Routes:** 5 Requests pro 15 Minuten pro IP (Login-Schutz)
+- **API Routes:** 100 Requests per 15 minutes per IP
+- **Auth Routes:** 5 Requests per 15 minutes per IP (Login protection)
 
 ```typescript
 app.use('/api', apiLimiter);      // 100 req/15min
@@ -44,16 +44,16 @@ app.use('/api/auth', authLimiter); // 5 req/15min
 
 ### 3. Security Headers (Helmet) ✅
 
-**Schutz vor XSS, Clickjacking, etc.:**
+**Protection against XSS, Clickjacking, etc.:**
 
 - Content Security Policy
 - HSTS (HTTP Strict Transport Security)
 - X-Frame-Options
 - X-Content-Type-Options
 
-### 4. CORS Konfiguration ✅
+### 4. CORS Configuration ✅
 
-**Nur erlaubte Origins:**
+**Only allowed origins:**
 
 ```typescript
 cors({
@@ -64,7 +64,7 @@ cors({
 
 ### 5. Request Size Limits ✅
 
-**Schutz vor großen Payloads:**
+**Protection against large payloads:**
 
 ```typescript
 app.use(express.json({ limit: '10mb' }));
@@ -73,22 +73,22 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 ### 6. Request ID Tracking ✅
 
-**Für Audit-Logs und Tracing:**
+**For audit logs and tracing:**
 
-- Jeder Request bekommt eine eindeutige ID
-- Wird in Logs und Error Responses verwendet
-- Ermöglicht Request-Tracing über Services hinweg
+- Each request gets a unique ID
+- Used in logs and error responses
+- Enables request tracing across services
 
 ### 7. Security Audit Logging ✅
 
-**Automatische Erkennung verdächtiger Requests:**
+**Automatic detection of suspicious requests:**
 
 - Path Traversal (`../`)
 - XSS Attempts (`<script>`)
 - SQL Injection (`union select`)
 - Command Injection (`exec(`)
 
-**Verdächtige Requests werden geloggt:**
+**Suspicious requests are logged:**
 
 ```typescript
 logger.warn({
@@ -101,7 +101,7 @@ logger.warn({
 
 ### 8. Timeout Protection ✅
 
-**Schutz vor hängenden Requests:**
+**Protection against hanging requests:**
 
 ```typescript
 createProxyMiddleware({
@@ -110,24 +110,24 @@ createProxyMiddleware({
 })
 ```
 
-- **Standard:** 30 Sekunden
-- **Execution Service:** 60 Sekunden (für lange Workflows)
+- **Standard:** 30 seconds
+- **Execution Service:** 60 seconds (for long workflows)
 
 ### 9. Error Handling ✅
 
-**Sichere Error Responses:**
+**Secure error responses:**
 
-- Keine Stack Traces in Production
-- Request IDs in Error Responses
-- Strukturierte Error-Logs
+- No stack traces in production
+- Request IDs in error responses
+- Structured error logs
 
 ### 10. Request Sanitization ✅
 
-**Automatische Sanitization durch Express:**
+**Automatic sanitization through Express:**
 
-- JSON Parsing mit Validierung
-- URL Encoding Protection
-- Body Size Limits
+- JSON parsing with validation
+- URL encoding protection
+- Body size limits
 
 ---
 
@@ -157,7 +157,7 @@ createProxyMiddleware({
 
 ## 🚨 Security Best Practices
 
-### ✅ Implementiert
+### ✅ Implemented
 
 1. ✅ **Authentication** - JWT & API Keys
 2. ✅ **Rate Limiting** - DDoS Protection
@@ -168,47 +168,46 @@ createProxyMiddleware({
 7. ✅ **Audit Logging** - Security Monitoring
 8. ✅ **Request ID Tracking** - Tracing & Audit
 
-### ⚠️ Optional (für höhere Sicherheit)
+### ⚠️ Optional (for higher security)
 
-1. ⚠️ **IP Whitelisting** - Nur bestimmte IPs erlauben
-2. ⚠️ **IP Blacklisting** - Bekannte böse IPs blocken
-3. ⚠️ **Request Signing** - HMAC Signatures für kritische Requests
+1. ⚠️ **IP Whitelisting** - Only allow specific IPs
+2. ⚠️ **IP Blacklisting** - Block known malicious IPs
+3. ⚠️ **Request Signing** - HMAC signatures for critical requests
 4. ⚠️ **WAF Integration** - Web Application Firewall (Azure WAF)
 
 ---
 
 ## 📊 Security Score
 
-| Kategorie | Score | Status |
-|-----------|-------|--------|
-| **Authentication** | 9/10 | ✅ Sehr gut |
-| **Rate Limiting** | 9/10 | ✅ Sehr gut |
-| **Input Validation** | 8/10 | ✅ Gut (Zod in Controllers) |
-| **Security Headers** | 10/10 | ✅ Perfekt |
-| **Audit Logging** | 9/10 | ✅ Sehr gut |
-| **Error Handling** | 9/10 | ✅ Sehr gut |
+| Category | Score | Status |
+|----------|-------|--------|
+| **Authentication** | 9/10 | ✅ Very Good |
+| **Rate Limiting** | 9/10 | ✅ Very Good |
+| **Input Validation** | 8/10 | ✅ Good (Zod in Controllers) |
+| **Security Headers** | 10/10 | ✅ Perfect |
+| **Audit Logging** | 9/10 | ✅ Very Good |
+| **Error Handling** | 9/10 | ✅ Very Good |
 
-**Gesamt: 9/10** 🔒
+**Overall: 9/10** 🔒
 
 ---
 
-## ✅ Fazit
+## ✅ Conclusion
 
-**Das Gateway ist sicher!** ✅
+**The Gateway is secure!** ✅
 
-- ✅ Alle wichtigen Security-Features implementiert
+- ✅ All important security features implemented
 - ✅ Production-ready
-- ✅ Audit-Logging vorhanden
-- ✅ Rate Limiting schützt vor DDoS
-- ✅ Authentication auf allen geschützten Routes
+- ✅ Audit logging available
+- ✅ Rate limiting protects against DDoS
+- ✅ Authentication on all protected routes
 
-**Für höchste Sicherheit können optional IP Whitelisting oder WAF hinzugefügt werden, aber die aktuelle Implementierung ist bereits sehr sicher!**
+**For maximum security, IP whitelisting or WAF can optionally be added, but the current implementation is already very secure!**
 
 ---
 
-## 🔗 Weitere Informationen
+## 🔗 Further Information
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [Express Security Best Practices](https://expressjs.com/en/advanced/best-practice-security.html)
 - [Helmet Documentation](https://helmetjs.github.io/)
-

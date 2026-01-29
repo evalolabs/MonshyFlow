@@ -1,6 +1,6 @@
 {
   "id": "mailjet",
-  "name": "Mailjet",
+  "name": "Mailjet (API)",
   "icon": "📧",
   "description": "Email and SMS delivery service",
   "baseUrl": "https://api.mailjet.com",

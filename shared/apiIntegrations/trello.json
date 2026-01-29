@@ -1,6 +1,6 @@
 {
   "id": "trello",
-  "name": "Trello",
+  "name": "Trello (API)",
   "icon": "📋",
   "logoUrl": "https://cdn.simpleicons.org/trello/0079BF",
   "description": "Project management and collaboration tool",

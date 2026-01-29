@@ -1,6 +1,6 @@
 {
   "id": "customerio",
-  "name": "Customer.io",
+  "name": "Customer.io (API)",
   "icon": "📧",
   "description": "Customer engagement and messaging platform",
   "baseUrl": "https://api.customer.io/v1",

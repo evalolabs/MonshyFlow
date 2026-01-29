@@ -1,111 +1,129 @@
 # Azure Container Apps - Environment Variables
 
-Diese Dokumentation listet alle Environment Variables auf, die für das Deployment in Azure Container Apps benötigt werden.
+This document lists all environment variables required for deploying MonshyFlow to Azure Container Apps.
 
 ---
 
-## 📋 Übersicht
+## 📋 Overview
 
 ### Services
-1. **agentservice** - Hauptservice für Workflows
-2. **authservice** - Authentifizierung & Authorization
-3. **secretsservice** - Secrets Management
-4. **gateway** - API Gateway (Ocelot)
-5. **execution-service** - TypeScript Execution Service
-6. **frontend** - React Frontend (Static Web App)
+1. **api-service** - API gateway & workflow management
+2. **auth-service** - Authentication & authorization
+3. **secrets-service** - Secrets management
+4. **execution-service** - Workflow execution service
+5. **scheduler-service** - Workflow scheduling
+6. **frontend** - React frontend (Static Web App)
 
 ---
 
-## 🔧 AgentService Environment Variables
+## 🔧 API Service Environment Variables
 
-**Container App Name:** `agentservice`
+**Container App Name:** `api-service`
 
 ```bash
+# Port
+PORT=80
+
 # MongoDB / Cosmos DB
-MongoDbSettings__ConnectionString=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb
-MongoDbSettings__DatabaseName=agentbuilder
-MongoDbSettings__WorkflowsCollectionName=workflows
+MONGODB_URL=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/MonshyFlow?ssl=true&replicaSet=globaldb&authSource=admin
 
 # Redis Cache
-RedisSettings__ConnectionString=<cache-name>.redis.cache.windows.net:6380,password=<key>,ssl=True
+REDIS_URL=rediss://:<key>@<cache-name>.redis.cache.windows.net:6380
 
 # JWT Settings
-JwtSettings__SecretKey=<your-jwt-secret-key-min-32-chars>
-JwtSettings__Issuer=AgentBuilder.AuthService
-JwtSettings__Audience=AgentBuilder.Services
+JWT_SECRET_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/JwtSecretKey/)
+JWT_ISSUER=monshy-auth-service
+JWT_AUDIENCE=monshy-services
 
-# Execution Service URL (internal Container App name)
-ExecutionService__Url=http://execution-service:80
+# Service URLs (internal Container App names)
+AUTH_SERVICE_URL=http://auth-service:80
+SECRETS_SERVICE_URL=http://secrets-service:80
+EXECUTION_SERVICE_URL=http://execution-service:5004
+SCHEDULER_SERVICE_URL=http://scheduler-service:80
 
-# Secrets Service URL (internal Container App name)
-SecretsService__BaseUrl=http://secretsservice:80
-SecretsService__ServiceKey=<internal-service-key>
+# Internal service key (for service-to-service communication)
+INTERNAL_SERVICE_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/InternalServiceKey/)
 
-# API Keys
-OpenAI__ApiKey=<openai-api-key>
-SerperApi__ApiKey=<serper-api-key>
-
-# File Storage (optional - für Azure Blob Storage später)
-FileStorage__UploadPath=uploads
-```
-
----
-
-## 🔐 AuthService Environment Variables
-
-**Container App Name:** `authservice`
-
-```bash
-# MongoDB / Cosmos DB
-MongoDbSettings__ConnectionString=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb
-MongoDbSettings__DatabaseName=agentbuilder
-
-# JWT Settings
-JwtSettings__SecretKey=<your-jwt-secret-key-min-32-chars>
-JwtSettings__Issuer=AgentBuilder.AuthService
-JwtSettings__Audience=AgentBuilder.Services
-JwtSettings__ExpirationMinutes=60
-```
-
----
-
-## 🔒 SecretsService Environment Variables
-
-**Container App Name:** `secretsservice`
-
-```bash
-# MongoDB / Cosmos DB
-MongoDbSettings__ConnectionString=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb
-MongoDbSettings__DatabaseName=agentbuilder
-
-# JWT Settings
-JwtSettings__SecretKey=<your-jwt-secret-key-min-32-chars>
-JwtSettings__Issuer=AgentBuilder.AuthService
-JwtSettings__Audience=AgentBuilder.Services
-JwtSettings__ExpirationMinutes=60
-
-# Encryption
-EncryptionSettings__EncryptionKey=<your-encryption-key-min-32-chars>
-
-# Internal Service Key
-InternalService__ServiceKey=<internal-service-key>
-```
-
----
-
-## 🌐 Gateway Environment Variables
-
-**Container App Name:** `gateway`
-
-```bash
-# Ocelot Configuration File
-OCELOT_CONFIG_FILE=ocelot.Azure.json
-
-# Frontend URL (für CORS)
+# Frontend URL (for CORS)
 FRONTEND_URL=https://your-frontend.azurestaticapps.net
 
-# Base URL (wird in ocelot.Azure.json verwendet)
-ASPNETCORE_URLS=http://+:80
+# Node Environment
+NODE_ENV=production
+```
+
+---
+
+## 🔐 Auth Service Environment Variables
+
+**Container App Name:** `auth-service`
+
+```bash
+# Port
+PORT=80
+
+# MongoDB / Cosmos DB
+MONGODB_URL=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/MonshyFlow?ssl=true&replicaSet=globaldb&authSource=admin
+
+# JWT Settings
+JWT_SECRET_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/JwtSecretKey/)
+JWT_ISSUER=monshy-auth-service
+JWT_AUDIENCE=monshy-services
+
+# Node Environment
+NODE_ENV=production
+```
+
+---
+
+## 🔒 Secrets Service Environment Variables
+
+**Container App Name:** `secrets-service`
+
+```bash
+# Port
+PORT=80
+
+# MongoDB / Cosmos DB
+MONGODB_URL=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/MonshyFlow?ssl=true&replicaSet=globaldb&authSource=admin
+
+# JWT Settings
+JWT_SECRET_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/JwtSecretKey/)
+JWT_ISSUER=monshy-auth-service
+JWT_AUDIENCE=monshy-services
+
+# Encryption
+SECRETS_ENCRYPTION_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/EncryptionKey/)
+# or
+ENCRYPTION_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/EncryptionKey/)
+
+# Internal Service Key
+INTERNAL_SERVICE_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/InternalServiceKey/)
+
+# Auth service URL (for token validation)
+AUTH_SERVICE_URL=http://auth-service:80
+
+# Node Environment
+NODE_ENV=production
+```
+
+---
+
+## 🌐 API Service Environment Variables (additional)
+
+**Container App Name:** `api-service`
+
+```bash
+# Frontend URL (for CORS)
+FRONTEND_URL=https://your-frontend.azurestaticapps.net
+
+# Service URLs (internal Container App names)
+AUTH_SERVICE_URL=http://auth-service:80
+SECRETS_SERVICE_URL=http://secrets-service:80
+EXECUTION_SERVICE_URL=http://execution-service:5004
+SCHEDULER_SERVICE_URL=http://scheduler-service:80
+
+# Internal service key (for service-to-service communication)
+INTERNAL_SERVICE_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/InternalServiceKey/)
 ```
 
 ---
@@ -117,7 +135,7 @@ ASPNETCORE_URLS=http://+:80
 ```bash
 # Node Environment
 NODE_ENV=production
-PORT=5002
+PORT=5004
 
 # MongoDB / Cosmos DB
 MONGODB_URL=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/agent-builder?ssl=true&replicaSet=globaldb
@@ -125,14 +143,14 @@ MONGODB_URL=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/age
 # Redis Cache
 REDIS_URL=rediss://:<key>@<cache-name>.redis.cache.windows.net:6380
 
-# RabbitMQ (OPTIONAL - aktuell nicht verwendet, Code unterstützt Fallback)
-# Nur setzen, wenn RabbitMQ benötigt wird (später)
+# RabbitMQ (OPTIONAL - currently not used, code supports fallback)
+# Set only if RabbitMQ is needed (future use)
 # RABBITMQ_URL=amqps://<user>:<pass>@<namespace>.servicebus.windows.net:5671
-# Oder RabbitMQ auf VM:
+# Or RabbitMQ on VM:
 # RABBITMQ_URL=amqp://admin:admin123@<vm-ip>:5672
 # 
-# HINWEIS: Wenn nicht gesetzt, verwendet execution-service in-memory queue (keine Persistenz)
-# Für Production später: Azure Service Bus oder RabbitMQ auf VM
+# NOTE: If not set, execution-service uses an in-memory queue (no persistence)
+# For production later: Azure Service Bus or RabbitMQ on a VM
 
 # OpenAI
 OPENAI_API_KEY=<openai-api-key>
@@ -145,56 +163,52 @@ AGENT_SERVICE_URL=http://agentservice:80
 
 ## 🎨 Frontend Environment Variables
 
-**Static Web App Configuration** (in Azure Portal oder `staticwebapp.config.json`)
+**Static Web App configuration** (in Azure Portal or `staticwebapp.config.json`)
 
 ```bash
-# API Gateway URL
-VITE_API_URL=https://your-gateway.azurecontainerapps.io
+# API gateway URL
+VITE_API_URL=https://your-api-service.azurecontainerapps.io
 
-# Execution Service URL (optional, falls direkt genutzt)
+# Execution service URL (optional, if used directly)
 VITE_EXECUTION_API_URL=https://your-execution-service.azurecontainerapps.io
 ```
 
-**Hinweis:** Frontend Environment Variables müssen zur Build-Zeit gesetzt werden, da Vite sie zur Build-Zeit einbindet.
+**Note:** Frontend Environment Variables must be set at build time, as Vite injects them at build time.
 
 ---
 
 ## 📝 Environment Variable Naming Convention
 
-### .NET Services (appsettings.json)
-- Format: `Section__Key` (doppelte Unterstriche)
-- Beispiel: `MongoDbSettings__ConnectionString`
-- .NET lädt diese automatisch in die Configuration
-
-### Node.js Services
+### Node.js services
 - Format: `UPPER_SNAKE_CASE`
-- Beispiel: `MONGODB_URL`
-- Werden über `process.env` geladen
+- Example: `MONGODB_URL`, `JWT_SECRET_KEY`, `REDIS_URL`
+- Loaded via `process.env`
+- All services use this format
 
 ### Frontend (Vite)
-- Format: `VITE_*` (muss mit VITE_ beginnen)
-- Beispiel: `VITE_API_URL`
-- Werden zur Build-Zeit eingebunden
+- Format: `VITE_*` (must start with `VITE_`)
+- Example: `VITE_API_URL`
+- Injected at build time
 
 ---
 
-## 🔄 Azure Container Apps Environment Variables Setzen
+## 🔄 Setting Azure Container Apps environment variables
 
-### Über Azure Portal
+### Via Azure Portal
 1. Container App → Configuration → Environment Variables
-2. Add → Name und Value eingeben
+2. Add → enter name & value
 3. Save
 
-### Über Azure CLI
+### Via Azure CLI
 ```bash
 az containerapp update \
-  --name agentservice \
+  --name api-service \
   --resource-group monshy-rg \
-  --set-env-vars "MongoDbSettings__ConnectionString=..." \
-                 "RedisSettings__ConnectionString=..."
+  --set-env-vars "MONGODB_URL=..." \
+                 "REDIS_URL=..."
 ```
 
-### Über ARM/Bicep Template
+### Via ARM/Bicep template
 ```json
 {
   "properties": {
@@ -202,7 +216,7 @@ az containerapp update \
       "containers": [{
         "env": [
           {
-            "name": "MongoDbSettings__ConnectionString",
+            "name": "MONGODB_URL",
             "value": "..."
           }
         ]
@@ -214,54 +228,54 @@ az containerapp update \
 
 ---
 
-## 🔐 Secrets Management
+## 🔐 Secrets management
 
-### Option 1: Azure Key Vault (Empfohlen)
+### Option 1: Azure Key Vault (recommended)
 ```bash
-# Secrets in Key Vault speichern
+# Store secrets in Key Vault
 az keyvault secret set --vault-name monshy-kv --name JwtSecretKey --value "..."
 
-# In Container Apps referenzieren
+# Reference in Container Apps
 az containerapp update \
-  --name agentservice \
+  --name api-service \
   --resource-group monshy-rg \
-  --set-env-vars "JwtSettings__SecretKey=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/JwtSecretKey/)"
+  --set-env-vars "JWT_SECRET_KEY=@Microsoft.KeyVault(SecretUri=https://monshy-kv.vault.azure.net/secrets/JwtSecretKey/)"
 ```
 
-### Option 2: Container Apps Secrets
+### Option 2: Container Apps secrets
 ```bash
-# Secret erstellen
+# Create secret
 az containerapp secret set \
-  --name agentservice \
+  --name api-service \
   --resource-group monshy-rg \
   --secrets jwt-secret-key="..."
 
-# In Environment Variable referenzieren
+# Reference in environment variable
 az containerapp update \
-  --name agentservice \
+  --name api-service \
   --resource-group monshy-rg \
-  --set-env-vars "JwtSettings__SecretKey=secretref:jwt-secret-key"
+  --set-env-vars "JWT_SECRET_KEY=secretref:jwt-secret-key"
 ```
 
 ---
 
-## ✅ Checkliste vor Deployment
+## ✅ Pre-deployment checklist
 
-- [ ] Alle Connection Strings gesammelt (Cosmos DB, Redis)
-- [ ] RabbitMQ optional (nur wenn benötigt)
-- [ ] JWT Secret Key generiert (min. 32 Zeichen)
-- [ ] Encryption Key generiert (min. 32 Zeichen)
-- [ ] Service Keys generiert
-- [ ] API Keys bereit (OpenAI, Serper, etc.)
-- [ ] Frontend URLs bekannt
-- [ ] Container App Namen definiert
-- [ ] Secrets in Key Vault oder Container Apps Secrets gespeichert
+- [ ] All connection strings collected (Cosmos DB, Redis)
+- [ ] RabbitMQ considered (optional, only if needed)
+- [ ] JWT secret key generated (min. 32 characters)
+- [ ] Encryption key generated (min. 32 characters)
+- [ ] Service keys generated
+- [ ] API keys available (OpenAI, Serper, etc.)
+- [ ] Frontend URLs known
+- [ ] Container App names defined
+- [ ] Secrets stored in Key Vault or Container Apps secrets
 
 ---
 
-## 📚 Weitere Ressourcen
+## 📚 Further resources
 
-- [Azure Container Apps Documentation](https://docs.microsoft.com/azure/container-apps/)
-- [Environment Variables in Container Apps](https://docs.microsoft.com/azure/container-apps/environment-variables)
-- [Azure Key Vault Integration](https://docs.microsoft.com/azure/container-apps/manage-secrets)
+- [Azure Container Apps documentation](https://docs.microsoft.com/azure/container-apps/)
+- [Environment variables in Container Apps](https://docs.microsoft.com/azure/container-apps/environment-variables)
+- [Azure Key Vault integration](https://docs.microsoft.com/azure/container-apps/manage-secrets)
 

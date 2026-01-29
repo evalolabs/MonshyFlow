@@ -1,6 +1,6 @@
 {
   "id": "humantic-ai",
-  "name": "Humantic AI",
+  "name": "Humantic AI (API)",
   "icon": "🧠",
   "description": "Personality profiling based on text data",
   "baseUrl": "https://api.humantic.ai/v1",

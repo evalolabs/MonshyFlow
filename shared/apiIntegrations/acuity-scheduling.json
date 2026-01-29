@@ -1,6 +1,6 @@
 {
   "id": "acuity-scheduling",
-  "name": "Acuity Scheduling",
+  "name": "Acuity Scheduling (API)",
   "icon": "📅",
   "description": "Online appointment scheduling software",
   "baseUrl": "https://acuityscheduling.com/api/v1",

@@ -1,6 +1,6 @@
 {
   "id": "freshdesk",
-  "name": "Freshdesk",
+  "name": "Freshdesk (API)",
   "icon": "🎫",
   "description": "Customer support and help desk software",
   "baseUrl": "https://{domain}.freshdesk.com/api/v2",

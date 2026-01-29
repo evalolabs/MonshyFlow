@@ -1,6 +1,6 @@
 {
   "id": "posthog",
-  "name": "PostHog",
+  "name": "PostHog (API)",
   "icon": "📊",
   "logoUrl": "https://cdn.simpleicons.org/posthog/E01F5E",
   "description": "Product analytics and feature flags platform",

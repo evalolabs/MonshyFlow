@@ -1,6 +1,6 @@
 {
   "id": "mautic",
-  "name": "Mautic",
+  "name": "Mautic (API)",
   "icon": "📊",
   "logoUrl": "https://cdn.simpleicons.org/mautic/000000",
   "description": "Open-source marketing automation platform",

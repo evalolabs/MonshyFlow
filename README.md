@@ -4,7 +4,7 @@
 
 MonshyFlow is an open-source, visual workflow automation platform that combines the power of AI agents with traditional workflow automation. Build complex workflows using a drag-and-drop interface, integrate with 50+ APIs, and leverage AI agents to automate your business processes.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev/)
 
@@ -81,11 +81,54 @@ The frontend will be available at `http://localhost:5173` and the API gateway at
 ### Docker (Recommended)
 
 ```bash
-# Start all services with Docker Compose
-docker-compose up
+# Start all services with Docker Compose (Backend, DB, Kong, etc.)
+docker-compose up -d
 ```
 
 See [Deployment Guide](./azure-deployment/README.md) for more details.
+
+### Getting Started in 5 Minutes (Docker)
+
+**Goal**: See the UI and log in within a few minutes, with minimal setup.
+
+1. **Start backend & infrastructure**
+
+   ```bash
+   # In the project root
+   docker-compose up -d
+   ```
+
+   - API gateway (Kong) is available at `http://localhost:5000`
+   - MongoDB, Redis, RabbitMQ and all Node.js services run in the background
+
+2. **Seed the database (tenants, superadmin, test data)**
+
+   ```bash
+   # In the project root
+   pnpm install           # if not done yet
+   pnpm build:packages    # required once
+
+   # Seed test data (tenants, users, API keys)
+   pnpm --filter @monshy/seed seed
+   ```
+
+   This will create, among other things:
+
+   - Tenant: `Monshy`
+   - Superadmin user: `superadmin@monshy.com / superadmin123`
+
+3. **Start the frontend and log in**
+
+   ```bash
+   cd frontend
+   pnpm install           # if not done yet
+   pnpm dev
+   ```
+
+   - Frontend: `http://localhost:5173`
+   - Login credentials: `superadmin@monshy.com / superadmin123`
+
+   After this, you can immediately create workflows, run them, and explore the platform.
 
 ---
 
@@ -194,7 +237,25 @@ We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](./LICENSE) file for details.
+
+## Project Transparency & Responsibility
+
+MonshyFlow is an independent open-source project.
+
+All third-party names, trademarks, logos, and brands mentioned or shown in this project are the property of their respective owners and are used for identification and interoperability purposes only.
+
+MonshyFlow is not affiliated with, endorsed by, or sponsored by any third-party company unless explicitly stated.
+
+Users are responsible for how they configure and use workflows, integrations, and automations created with this software.
+
+Automations and AI-generated outputs created with MonshyFlow are fully controlled by the user. The project does not take responsibility for external actions, data processing, or third-party service usage triggered by workflows.
+
+## Third-Party Software & Dependencies
+
+MonshyFlow builds upon a wide range of open-source libraries and third-party software components.
+
+All such dependencies are used in accordance with their respective licenses. Third-party libraries and SDKs remain the property of their respective authors and rights holders.
 
 ## 🔒 Security
 

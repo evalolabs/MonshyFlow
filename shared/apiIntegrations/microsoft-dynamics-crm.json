@@ -1,6 +1,6 @@
 {
   "id": "microsoft-dynamics-crm",
-  "name": "Microsoft Dynamics CRM",
+  "name": "Microsoft Dynamics CRM (API)",
   "icon": "📊",
   "description": "Customer relationship management via Dynamics 365 API",
   "baseUrl": "https://{subdomain}.{region}/api/data/v9.2",

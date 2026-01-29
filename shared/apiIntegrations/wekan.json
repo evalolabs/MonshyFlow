@@ -1,6 +1,6 @@
 {
   "id": "wekan",
-  "name": "Wekan",
+  "name": "Wekan (API)",
   "icon": "📋",
   "description": "Open-source kanban board",
   "baseUrl": "https://{host}/api",

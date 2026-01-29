@@ -1,6 +1,6 @@
 {
   "id": "bamboohr",
-  "name": "BambooHR",
+  "name": "BambooHR (API)",
   "icon": "👔",
   "description": "HR management system for employee and time off management",
   "baseUrl": "https://api.bamboohr.com/api/gateway.php/{subdomain}/v1",

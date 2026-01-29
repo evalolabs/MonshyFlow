@@ -1,6 +1,6 @@
 {
   "id": "getresponse",
-  "name": "GetResponse",
+  "name": "GetResponse (API)",
   "icon": "📧",
   "description": "Email marketing and automation platform",
   "baseUrl": "https://api.getresponse.com/v3",

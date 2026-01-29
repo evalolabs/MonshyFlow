@@ -1,6 +1,6 @@
 {
   "id": "azure-cosmos-db",
-  "name": "Azure Cosmos DB",
+  "name": "Azure Cosmos DB (API)",
   "icon": "🗄️",
   "description": "NoSQL database service",
   "baseUrl": "https://{account}.documents.azure.com/dbs/{database}",

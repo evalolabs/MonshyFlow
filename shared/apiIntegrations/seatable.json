@@ -1,6 +1,6 @@
 {
   "id": "seatable",
-  "name": "SeaTable",
+  "name": "SeaTable (API)",
   "icon": "🌊",
   "description": "Collaborative database platform",
   "baseUrl": "https://cloud.seatable.io",

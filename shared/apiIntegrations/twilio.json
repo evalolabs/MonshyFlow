@@ -1,6 +1,6 @@
 {
   "id": "twilio",
-  "name": "Twilio",
+  "name": "Twilio (API)",
   "icon": "📱",
   "description": "Cloud communications platform for SMS, voice, and messaging",
   "baseUrl": "https://api.twilio.com/2010-04-01/Accounts/{AccountSid}",

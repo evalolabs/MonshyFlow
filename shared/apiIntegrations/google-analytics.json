@@ -1,6 +1,6 @@
 {
   "id": "google-analytics",
-  "name": "Google Analytics",
+  "name": "Google Analytics (API)",
   "icon": "📊",
   "logoUrl": "https://cdn.simpleicons.org/googleanalytics/E37400",
   "description": "Web analytics and reporting platform",

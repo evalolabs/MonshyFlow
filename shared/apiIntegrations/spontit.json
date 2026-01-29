@@ -1,6 +1,6 @@
 {
   "id": "spontit",
-  "name": "Spontit",
+  "name": "Spontit (API)",
   "icon": "📢",
   "description": "Push notification service",
   "baseUrl": "https://api.spontit.com/v3",

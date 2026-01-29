@@ -1,6 +1,6 @@
 {
   "id": "flow",
-  "name": "Flow",
+  "name": "Flow (API)",
   "icon": "✅",
   "description": "Task management and collaboration platform",
   "baseUrl": "https://api.getflow.com/v2",

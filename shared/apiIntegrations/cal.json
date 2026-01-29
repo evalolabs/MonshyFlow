@@ -1,6 +1,6 @@
 {
   "id": "cal",
-  "name": "Cal",
+  "name": "Cal (API)",
   "icon": "📅",
   "description": "Open-source scheduling tool",
   "baseUrl": "https://{your-cal-instance}",

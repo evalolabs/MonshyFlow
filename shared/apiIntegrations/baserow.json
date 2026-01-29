@@ -1,6 +1,6 @@
 {
   "id": "baserow",
-  "name": "Baserow",
+  "name": "Baserow (API)",
   "icon": "📊",
   "logoUrl": "https://cdn.simpleicons.org/baserow/000000",
   "description": "Open-source Airtable alternative",

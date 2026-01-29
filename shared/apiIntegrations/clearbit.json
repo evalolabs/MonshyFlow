@@ -1,6 +1,6 @@
 {
   "id": "clearbit",
-  "name": "Clearbit",
+  "name": "Clearbit (API)",
   "icon": "🔍",
   "description": "Data enrichment platform for company and person data",
   "baseUrl": "https://{api}.clearbit.com",

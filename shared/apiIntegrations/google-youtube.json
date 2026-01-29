@@ -1,6 +1,6 @@
 {
   "id": "google-youtube",
-  "name": "Google YouTube",
+  "name": "Google YouTube (API)",
   "icon": "📺",
   "logoUrl": "https://cdn.simpleicons.org/youtube/FF0000",
   "description": "YouTube Data API v3 for accessing videos, playlists, channels, and more",

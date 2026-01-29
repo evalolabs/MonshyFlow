@@ -1,6 +1,6 @@
 {
   "id": "stripe",
-  "name": "Stripe",
+  "name": "Stripe (API)",
   "icon": "💳",
   "logoUrl": "https://cdn.simpleicons.org/stripe/635BFF",
   "description": "Payment processing platform",

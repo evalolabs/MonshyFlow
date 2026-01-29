@@ -1,6 +1,6 @@
 {
   "id": "adalo",
-  "name": "Adalo",
+  "name": "Adalo (API)",
   "icon": "📱",
   "description": "No-code platform for mobile apps",
   "baseUrl": "https://api.adalo.com/v0/apps/{appId}",

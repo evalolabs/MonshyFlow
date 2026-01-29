@@ -1,8 +1,8 @@
 # E2E Test Users
 
-Die E2E-Tests verwenden die Test-User aus dem Seed-Script (`seed/README.md`).
+The E2E tests use the test users from the seed script (`seed/README.md`).
 
-## Verfügbare Test-User
+## Available Test Users
 
 | Email | Password | Roles | Tenant |
 |-------|----------|-------|--------|
@@ -11,50 +11,49 @@ Die E2E-Tests verwenden die Test-User aus dem Seed-Script (`seed/README.md`).
 | `developer@techstart.io` | `dev123` | user, developer | TechStart Inc |
 | `demo@demo.monshy.com` | `demo123` | user | Demo Company |
 
-## Verwendung in Tests
+## Usage in Tests
 
 ### Standard (Admin User)
 ```typescript
 await loginAsTestUser(page);
-// Verwendet: admin@acme.com / admin123
+// Uses: admin@acme.com / admin123
 ```
 
-### Spezifischer Tenant
+### Specific Tenant
 ```typescript
 await loginAsTestUser(page, undefined, undefined, 'acme');
-// Verwendet: admin@acme.com / admin123
+// Uses: admin@acme.com / admin123
 
 await loginAsTestUser(page, undefined, undefined, 'techstart');
-// Verwendet: developer@techstart.io / dev123
+// Uses: developer@techstart.io / dev123
 
 await loginAsTestUser(page, undefined, undefined, 'demo');
-// Verwendet: demo@demo.monshy.com / demo123
+// Uses: demo@demo.monshy.com / demo123
 ```
 
-### Benutzerdefinierte Credentials
+### Custom Credentials
 ```typescript
 await loginAsTestUser(page, 'user@acme.com', 'user123');
-// Verwendet: user@acme.com / user123
+// Uses: user@acme.com / user123
 ```
 
-## Voraussetzungen
+## Prerequisites
 
-⚠️ **Wichtig**: Die Test-User müssen vorher mit dem Seed-Script erstellt werden:
+⚠️ **Important**: The test users must be created beforehand using the seed script:
 
 ```bash
 pnpm --filter @monshy/seed seed
 ```
 
-## Tenant-spezifische Secrets
+## Tenant-Specific Secrets
 
-Die Seed-Daten enthalten auch Secrets für verschiedene Tenants:
+The seed data also includes secrets for various tenants:
 
 - **Acme Corporation**: `OPENAI_API_KEY`
 - **TechStart Inc**: `AZURE_API_KEY`
 - **Demo Company**: `DATABASE_PASSWORD`
 
-Diese können in Tests verwendet werden, um Tenant-Isolation zu testen.
-
+These can be used in tests to verify tenant isolation.
 
 
 

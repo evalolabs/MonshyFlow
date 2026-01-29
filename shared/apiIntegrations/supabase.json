@@ -1,6 +1,6 @@
 {
   "id": "supabase",
-  "name": "Supabase",
+  "name": "Supabase (API)",
   "icon": "🗄️",
   "logoUrl": "https://cdn.simpleicons.org/supabase/3ECF8E",
   "description": "Open-source Firebase alternative with PostgreSQL",

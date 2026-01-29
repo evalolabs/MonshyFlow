@@ -1,6 +1,6 @@
 {
   "id": "google-gsuite-admin",
-  "name": "Google G Suite Admin",
+  "name": "Google G Suite Admin (API)",
   "icon": "👥",
   "description": "Google Workspace (formerly G Suite) Admin API for managing users, groups, and devices",
   "baseUrl": "https://www.googleapis.com/admin",

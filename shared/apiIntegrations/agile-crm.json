@@ -1,6 +1,6 @@
 {
   "id": "agile-crm",
-  "name": "Agile CRM",
+  "name": "Agile CRM (API)",
   "icon": "📊",
   "description": "CRM and marketing automation platform",
   "baseUrl": "https://{subdomain}.agilecrm.com/dev",

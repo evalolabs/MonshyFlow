@@ -1,6 +1,6 @@
 {
   "id": "gitlab",
-  "name": "GitLab",
+  "name": "GitLab (API)",
   "icon": "🦊",
   "logoUrl": "https://cdn.simpleicons.org/gitlab/FC6D26",
   "description": "Git repository hosting and DevOps platform",

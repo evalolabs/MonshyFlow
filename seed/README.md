@@ -1,80 +1,74 @@
 # 🌱 MonshyFlow Database Seeder
 
-Schnelle Testdaten-Generierung für Entwickler. Erstellt Tenants, Users, API Keys und Secrets in MongoDB.
+Fast test data generation for developers. Creates tenants, users and API keys in MongoDB.
 
-## 📋 Übersicht
+## 📋 Overview
 
-Dieses Tool erstellt automatisch Testdaten für die Entwicklung:
+This tool automatically creates test data for local development:
 
-- **3 Tenants** (Acme Corporation, TechStart Inc, Demo Company)
-- **4 Users** mit verschiedenen Rollen
-- **3 API Keys** für verschiedene Tenants
-- **3 Secrets** (verschlüsselt) für verschiedene Use Cases
+- **4 tenants** (Monshy, Acme Corporation, TechStart Inc, Demo Company)
+- **5 users** with different roles (including a superadmin)
+- **3 API keys** for different tenants
 
-## 🚀 Schnellstart
+## 🚀 Quick Start
 
-### Erste Schritte (Einmalig)
+### First-time setup (once)
 
-Wenn du das Projekt zum ersten Mal verwendest, führe diese Schritte aus:
+If you use this project for the first time, run:
 
 ```bash
-# 1. Dependencies installieren
+# 1. Install dependencies
 pnpm install
 
-# 2. Benötigte Packages bauen (ohne Frontend)
+# 2. Build required backend packages (without frontend)
 pnpm build:packages
-# Oder gezielt nur die Seed-Dependencies:
+# Or only the seed dependencies:
 pnpm --filter @monshy/core --filter @monshy/database --filter @monshy/auth build
-
-# 3. bcrypt native bindings bauen (falls nötig)
-# Falls bcrypt-Fehler auftreten:
-cd node_modules/.pnpm/bcrypt@5.1.1/node_modules/bcrypt
-npm rebuild
-cd ../../../../..
 ```
 
-> ⚠️ **Wichtig**: Die Packages müssen gebaut werden, bevor das Seed-Script funktioniert!
+> ⚠️ **Important**: Packages must be built before the seed script can run successfully.
 
-### Voraussetzungen
+### Requirements
 
-1. MongoDB muss laufen (lokal oder Docker)
-2. Dependencies installiert: `pnpm install`
-3. Packages gebaut: `pnpm build:packages`
+1. MongoDB is running (local or via Docker)
+2. Dependencies installed: `pnpm install`
+3. Packages built: `pnpm build:packages`
 
-### Verwendung
+### Usage
 
 ```bash
-# Alle Daten seeden
+# Seed all data
 pnpm --filter @monshy/seed seed
 
-# Datenbank leeren und neu seeden
+# Clean database and re-seed
 pnpm --filter @monshy/seed seed:clean
 
-# Nur Tenants seeden
+# Seed only tenants
 pnpm --filter @monshy/seed seed:tenants
 
-# Nur Users seeden (erstellt auch Tenants, da Users Tenants benötigen)
+# Seed only users (also creates tenants if needed)
 pnpm --filter @monshy/seed seed:users
 ```
 
-### Mit Docker Compose
+### With Docker Compose
 
-Wenn MongoDB über Docker Compose läuft:
+If MongoDB runs via Docker Compose:
 
 ```bash
-# MongoDB muss laufen
+# Ensure MongoDB is running
 docker-compose up -d monshyflow-mongodb
 
-# Seed ausführen
+# Run seed
 pnpm --filter @monshy/seed seed
 ```
 
-## 📊 Generierte Testdaten
+## 📊 Generated Test Data
 
 ### Tenants
 
 | Name | Domain |
 |------|--------|
+| Monshy | Monshy.com |
 | Acme Corporation | acme.com |
 | TechStart Inc | techstart.io |
 | Demo Company | demo.monshy.com |
@@ -83,6 +77,7 @@ pnpm --filter @monshy/seed seed
 
 | Email | Password | Roles | Tenant |
 |-------|----------|-------|--------|
+| superadmin@monshy.com | superadmin123 | superadmin, admin, user | Monshy |
 | admin@acme.com | admin123 | admin, user | Acme Corporation |
 | user@acme.com | user123 | user | Acme Corporation |
 | developer@techstart.io | dev123 | user, developer | TechStart Inc |
@@ -90,69 +85,61 @@ pnpm --filter @monshy/seed seed
 
 ### API Keys
 
-- **Development API Key** (Acme Corporation) - Läuft nie ab
-- **Production API Key** (TechStart Inc) - Läuft in 1 Jahr ab
-- **Demo API Key** (Demo Company) - Läuft nie ab
+- **Development API Key** (Acme Corporation) – never expires
+- **Production API Key** (TechStart Inc) – expires in 1 year
+- **Demo API Key** (Demo Company) – never expires
 
-> ⚠️ **Wichtig**: Die API Keys werden nur einmal angezeigt. Speichere sie sicher!
+> ⚠️ **Important**: API keys are only shown once in the logs. Store them safely.
 
-### Secrets
 
-- **OPENAI_API_KEY** (Acme Corporation) - Demo OpenAI Key
-- **AZURE_API_KEY** (TechStart Inc) - Demo Azure Key
-- **DATABASE_PASSWORD** (Demo Company) - Demo Database Password
+## 🔧 Configuration
 
-> ⚠️ **Hinweis**: Die Secrets sind verschlüsselt gespeichert. Die Werte sind Demo-Werte und sollten in Produktion ersetzt werden.
+### MongoDB connection
 
-## 🔧 Konfiguration
+The script uses the same MongoDB connection as the backend services:
 
-### MongoDB Verbindung
-
-Das Script verwendet die gleiche MongoDB-Verbindung wie die Services:
-
-- **Lokal**: `mongodb://admin:admin123@localhost:27018/MonshyFlow?authSource=admin`
-- **Docker**: `mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin`
-- **Environment Variable**: `MONGODB_URL` oder `MongoDbSettings__ConnectionString`
-
-### Verschlüsselung
-
-Secrets werden mit AES-256-GCM verschlüsselt. Der Encryption Key kann über Environment Variables gesetzt werden:
-
-- `SECRETS_ENCRYPTION_KEY` (bevorzugt)
-- `ENCRYPTION_KEY` (Fallback)
-
-> ⚠️ **Sicherheit**: In Produktion sollte der Encryption Key aus Azure Key Vault oder ähnlichem kommen.
+- **Local (without Docker)**: `mongodb://admin:admin123@localhost:27019/MonshyFlow?authSource=admin`
+  - Port 27019 is the external port (see `docker-compose.yml`: `27019:27017`)
+  - ⚠️ The code default uses port 27018, but Docker maps to 27019.
+  - **Solution**: Set `MONGODB_URL` explicitly:  
+    `export MONGODB_URL="mongodb://admin:admin123@localhost:27019/MonshyFlow?authSource=admin"`
+- **Docker (internal)**: `mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin`
+  - Port 27017 is the internal port in the Docker network
+  - Service name: `MonshyFlow-mongodb`
+- **Environment variable**: `MONGODB_URL`
+  - Automatically used when set
+  - **Recommended**: Always set `MONGODB_URL` explicitly to avoid port mismatches.
 
 ## 📝 Scripts
 
-| Script | Beschreibung |
-|--------|--------------|
-| `seed` | Alle Daten seeden |
-| `seed:clean` | Datenbank leeren und neu seeden |
-| `seed:tenants` | Nur Tenants seeden |
-| `seed:users` | Nur Users seeden (erstellt auch Tenants) |
+| Script        | Description                             |
+|--------------|-----------------------------------------|
+| `seed`       | Seed all data                           |
+| `seed:clean` | Clean database and re-seed              |
+| `seed:tenants` | Seed only tenants                     |
+| `seed:users` | Seed only users (also creates tenants)  |
 
-## 🛠️ Entwicklung
+## 🛠️ Development
 
 ### Build
 
-**Wichtig**: Bevor du das Seed-Script ausführst, müssen die Dependencies gebaut sein:
+**Important**: Before running the seed script, all required packages must be built:
 
 ```bash
-# Alle benötigten Packages bauen
+# Build all required packages
 pnpm build:packages
 
-# Oder nur das Seed-Package selbst
+# Or only the seed package itself
 pnpm --filter @monshy/seed build
 ```
 
-### Watch Mode
+### Watch mode
 
 ```bash
 pnpm --filter @monshy/seed dev
 ```
 
-### TypeScript direkt ausführen
+### Run TypeScript directly
 
 ```bash
 pnpm --filter @monshy/seed seed
@@ -162,65 +149,66 @@ pnpm --filter @monshy/seed seed
 
 ### "Cannot find module '@monshy/database'"
 
-**Problem**: Das Seed-Script findet die Workspace-Packages nicht.
+**Problem**: The seed script cannot find the workspace packages.
 
-**Lösung**: 
+**Solution**:
 ```bash
-# Packages bauen
+# Build packages
 pnpm build:packages
-# Oder gezielt:
+# Or only the required ones:
 pnpm --filter @monshy/core --filter @monshy/database --filter @monshy/auth build
 ```
 
 ### "Cannot find module 'bcrypt' native binding"
 
-**Problem**: bcrypt native Module fehlen.
+**Problem**: bcrypt native modules are missing.
 
-**Lösung**: 
+**Solution**:
 ```bash
-# bcrypt neu bauen
-cd node_modules/.pnpm/bcrypt@5.1.1/node_modules/bcrypt
-npm rebuild
-cd ../../../../..
+# Reinstall dependencies
+pnpm install
 
-# Oder mit pnpm (wenn Build-Scripts genehmigt):
+# Or rebuild bcrypt
 pnpm rebuild bcrypt
 ```
 
-### MongoDB Connection Error
+### MongoDB connection error
 
 **Problem**: `MongoServerError: connection refused`
 
-**Lösung**: 
-1. Prüfe ob MongoDB läuft: `docker-compose ps`
-2. Prüfe die MongoDB URL in `.env` oder `docker-compose.yml`
-3. Starte MongoDB: `docker-compose up -d monshyflow-mongodb`
+**Solution**:
+1. Check if MongoDB is running: `docker-compose ps`
+2. Check the MongoDB URL:
+   - **Local (without Docker)**: port 27019 (external port, see `docker-compose.yml`)
+   - **Docker (internal)**: port 27017 (service name: `MonshyFlow-mongodb`)
+3. Set the `MONGODB_URL` environment variable if needed:
+   ```bash
+   # Local (without Docker)
+   export MONGODB_URL="mongodb://admin:admin123@localhost:27019/MonshyFlow?authSource=admin"
+   
+   # Docker (internal)
+   export MONGODB_URL="mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin"
+   ```
+4. Start MongoDB: `docker-compose up -d monshyflow-mongodb`
 
-### Duplicate Key Error
+### Duplicate key error
 
 **Problem**: `E11000 duplicate key error`
 
-**Lösung**: 
-- Verwende `seed:clean` um die Datenbank zu leeren
-- Oder entferne manuell die betroffenen Dokumente
+**Solution**:
+- Use `seed:clean` to wipe the database
+- Or manually delete the affected documents
 
-### Encryption Key Warning
 
-**Problem**: `Encryption key is too short`
+## 📚 Further information
 
-**Lösung**: 
-- Setze `SECRETS_ENCRYPTION_KEY` in `.env` (mindestens 32 Zeichen)
-- Oder ignoriere die Warnung für Development (nicht für Production!)
+- [MonshyFlow main documentation](../README.md)
+- [Database models](../packages/database/src/models/)
+- [Auth package](../packages/auth/)
 
-## 📚 Weitere Informationen
+## 🤝 Contributing
 
-- [MonshyFlow Dokumentation](../README.md)
-- [Database Models](../packages/database/src/models/)
-- [Auth Package](../packages/auth/)
-
-## 🤝 Beitragen
-
-Wenn du neue Testdaten hinzufügen möchtest, bearbeite `src/index.ts` und füge die entsprechenden Daten hinzu.
+If you want to add new test data, edit `src/index.ts` and add the corresponding data.
 
 ---
 

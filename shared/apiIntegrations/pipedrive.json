@@ -1,6 +1,6 @@
 {
   "id": "pipedrive",
-  "name": "Pipedrive",
+  "name": "Pipedrive (API)",
   "icon": "📊",
   "description": "CRM and sales pipeline management",
   "baseUrl": "https://api.pipedrive.com/v1",

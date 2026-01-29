@@ -1,6 +1,6 @@
 {
   "id": "questdb",
-  "name": "QuestDB",
+  "name": "QuestDB (API)",
   "icon": "🗄️",
   "description": "High-performance time-series database",
   "baseUrl": "postgresql://{host}:{port}/{database}",

@@ -1,6 +1,6 @@
 {
   "id": "uproc",
-  "name": "uProc",
+  "name": "uProc (API)",
   "icon": "⚙️",
   "description": "API toolbox with various tools for data processing",
   "baseUrl": "https://api.uproc.io/api/v2",

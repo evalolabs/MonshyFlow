@@ -1,6 +1,6 @@
 {
   "id": "autopilot",
-  "name": "Autopilot",
+  "name": "Autopilot (API)",
   "icon": "✈️",
   "description": "Marketing automation platform",
   "baseUrl": "https://api2.autopilothq.com/v1",

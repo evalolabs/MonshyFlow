@@ -1,6 +1,6 @@
 {
   "id": "cortex",
-  "name": "Cortex",
+  "name": "Cortex (API)",
   "icon": "🔍",
   "description": "Threat intelligence platform for security analysis",
   "baseUrl": "https://{your-cortex-instance}/api",

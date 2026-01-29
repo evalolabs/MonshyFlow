@@ -1,6 +1,6 @@
 {
   "id": "cratedb",
-  "name": "CrateDB",
+  "name": "CrateDB (API)",
   "icon": "🗄️",
   "logoUrl": "https://cdn.simpleicons.org/cratedb/000000",
   "description": "Distributed SQL database for machine data",

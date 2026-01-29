@@ -1,6 +1,6 @@
 {
   "id": "taiga",
-  "name": "Taiga",
+  "name": "Taiga (API)",
   "icon": "🎯",
   "description": "Project management platform for agile teams",
   "baseUrl": "https://api.taiga.io/api/v1",

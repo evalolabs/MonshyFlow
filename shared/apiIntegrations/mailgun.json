@@ -1,6 +1,6 @@
 {
   "id": "mailgun",
-  "name": "Mailgun",
+  "name": "Mailgun (API)",
   "icon": "📧",
   "logoUrl": "https://cdn.simpleicons.org/mailgun/FF6B6B",
   "description": "Email delivery service",

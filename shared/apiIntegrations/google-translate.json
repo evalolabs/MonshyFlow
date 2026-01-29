@@ -1,6 +1,6 @@
 {
   "id": "google-translate",
-  "name": "Google Translate",
+  "name": "Google Translate (API)",
   "icon": "🌐",
   "logoUrl": "https://cdn.simpleicons.org/googletranslate/4285F4",
   "description": "Google Cloud Translation API for translating text and detecting languages",

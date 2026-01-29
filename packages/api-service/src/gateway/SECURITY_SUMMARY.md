@@ -1,22 +1,22 @@
-# 🔒 Gateway Security - Zusammenfassung
+# 🔒 Gateway Security - Summary
 
-## ✅ Ja, das Gateway ist sicher!
+## ✅ Yes, the Gateway is Secure!
 
-Das Gateway ist **vollständig gesichert** mit professionellen Security-Features.
+The Gateway is **fully secured** with professional security features.
 
 ---
 
-## 🛡️ Implementierte Sicherheits-Features
+## 🛡️ Implemented Security Features
 
 ### 1. Authentication ✅
-- **JWT Token Validation** auf allen geschützten Routes
-- **API Key Support** (wird implementiert)
-- **Tenant Isolation** - Jeder Request wird validiert
+- **JWT Token Validation** on all protected routes
+- **API Key Support** (being implemented)
+- **Tenant Isolation** - Every request is validated
 
 ### 2. Rate Limiting ✅
-- **API Routes:** 100 Requests / 15 Minuten pro IP
-- **Auth Routes:** 5 Requests / 15 Minuten pro IP
-- **Schutz vor:** DDoS, Brute-Force-Angriffen
+- **API Routes:** 100 Requests / 15 minutes per IP
+- **Auth Routes:** 5 Requests / 15 minutes per IP
+- **Protection against:** DDoS, brute-force attacks
 
 ### 3. Security Headers ✅
 - **Helmet** - XSS, Clickjacking Protection
@@ -24,77 +24,77 @@ Das Gateway ist **vollständig gesichert** mit professionellen Security-Features
 - **Content Security Policy**
 
 ### 4. CORS ✅
-- **Nur erlaubte Origins** - Frontend URL konfiguriert
-- **Credentials Support** - Für Cookies/Sessions
+- **Only allowed origins** - Frontend URL configured
+- **Credentials Support** - For cookies/sessions
 
 ### 5. Request Size Limits ✅
-- **10MB Maximum** - Schutz vor großen Payloads
+- **10MB Maximum** - Protection against large payloads
 - **Body Parsing Limits** - JSON & URL-encoded
 
 ### 6. Timeout Protection ✅
-- **30 Sekunden** - Standard Timeout
-- **60 Sekunden** - Execution Service (für lange Workflows)
-- **Schutz vor** hängenden Requests
+- **30 seconds** - Standard timeout
+- **60 seconds** - Execution Service (for long workflows)
+- **Protection against** hanging requests
 
 ### 7. Security Audit Logging ✅
-- **Automatische Erkennung** verdächtiger Patterns:
+- **Automatic detection** of suspicious patterns:
   - Path Traversal (`../`)
   - XSS Attempts (`<script>`)
   - SQL Injection (`union select`)
   - Command Injection (`exec(`)
-- **Alle verdächtigen Requests werden geloggt**
+- **All suspicious requests are logged**
 
 ### 8. Request ID Tracking ✅
-- **Eindeutige Request-IDs** für Tracing
-- **Audit-Logs** mit Request-IDs
-- **Error Tracking** über Services hinweg
+- **Unique request IDs** for tracing
+- **Audit logs** with request IDs
+- **Error tracking** across services
 
 ### 9. Error Handling ✅
-- **Sichere Error Responses** - Keine Stack Traces
-- **Request IDs** in Error Responses
-- **Strukturierte Logs**
+- **Secure error responses** - No stack traces
+- **Request IDs** in error responses
+- **Structured logs**
 
 ### 10. Input Validation ✅
-- **Zod Schemas** in Controllers
-- **Type Safety** durch TypeScript
-- **Automatische Validierung**
+- **Zod schemas** in controllers
+- **Type safety** through TypeScript
+- **Automatic validation**
 
 ---
 
 ## 📊 Security Score: 9/10
 
-| Kategorie | Score | Status |
-|-----------|-------|--------|
-| Authentication | 9/10 | ✅ Sehr gut |
-| Rate Limiting | 9/10 | ✅ Sehr gut |
-| Input Validation | 8/10 | ✅ Gut |
-| Security Headers | 10/10 | ✅ Perfekt |
-| Audit Logging | 9/10 | ✅ Sehr gut |
-| Error Handling | 9/10 | ✅ Sehr gut |
+| Category | Score | Status |
+|----------|-------|--------|
+| Authentication | 9/10 | ✅ Very Good |
+| Rate Limiting | 9/10 | ✅ Very Good |
+| Input Validation | 8/10 | ✅ Good |
+| Security Headers | 10/10 | ✅ Perfect |
+| Audit Logging | 9/10 | ✅ Very Good |
+| Error Handling | 9/10 | ✅ Very Good |
 
 ---
 
-## 🔍 Geschützte vs. Öffentliche Routes
+## 🔍 Protected vs. Public Routes
 
-### ✅ Öffentliche Routes (keine Auth)
+### ✅ Public Routes (no auth)
 - `/api/auth/login` - Login
-- `/api/auth/register` - Registrierung
+- `/api/auth/register` - Registration
 - `/health` - Health Check
 
-### 🔒 Geschützte Routes (benötigen Auth)
+### 🔒 Protected Routes (require auth)
 - `/api/workflows/*` - Workflow Management
 - `/api/apikeys/*` - API Key Management
 - `/api/secrets/*` - Secrets Management
 - `/api/execute/*` - Workflow Execution
 - `/api/scheduler/*` - Workflow Scheduling
 - `/api/execution/*` - Execution History
-- `/api/auth/*` (außer login/register) - Auth Management
+- `/api/auth/*` (except login/register) - Auth Management
 
 ---
 
 ## 🚨 Security Monitoring
 
-### Automatisch geloggt:
+### Automatically logged:
 1. ✅ **Authentication Failures** (401, 403)
 2. ✅ **Suspicious Requests** (Path Traversal, XSS, etc.)
 3. ✅ **Service Errors** (503)
@@ -114,25 +114,24 @@ Das Gateway ist **vollständig gesichert** mit professionellen Security-Features
 
 ---
 
-## ✅ Fazit
+## ✅ Conclusion
 
-**Das Gateway ist sicher!** ✅
+**The Gateway is secure!** ✅
 
-- ✅ Alle wichtigen Security-Features implementiert
+- ✅ All important security features implemented
 - ✅ Production-ready
-- ✅ Audit-Logging vorhanden
-- ✅ Rate Limiting schützt vor DDoS
-- ✅ Authentication auf allen geschützten Routes
-- ✅ Security Headers schützen vor XSS, Clickjacking
-- ✅ Request ID Tracking für Audit
+- ✅ Audit logging available
+- ✅ Rate limiting protects against DDoS
+- ✅ Authentication on all protected routes
+- ✅ Security headers protect against XSS, Clickjacking
+- ✅ Request ID tracking for audit
 
-**Für höchste Sicherheit können optional IP Whitelisting oder WAF hinzugefügt werden, aber die aktuelle Implementierung ist bereits sehr sicher!**
+**For maximum security, IP whitelisting or WAF can optionally be added, but the current implementation is already very secure!**
 
 ---
 
-## 🔗 Weitere Informationen
+## 🔗 Further Information
 
-- [Vollständige Security-Dokumentation](./SECURITY.md)
-- [Gateway Dokumentation](./GATEWAY.md)
+- [Complete Security Documentation](./SECURITY.md)
+- [Gateway Documentation](./GATEWAY.md)
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-

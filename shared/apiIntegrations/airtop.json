@@ -1,6 +1,6 @@
 {
   "id": "airtop",
-  "name": "Airtop",
+  "name": "Airtop (API)",
   "icon": "🤖",
   "description": "Browser automation API for web scraping and interactions",
   "baseUrl": "https://api.airtop.ai/api/v1",

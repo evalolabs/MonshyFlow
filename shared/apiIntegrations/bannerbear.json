@@ -1,6 +1,6 @@
 {
   "id": "bannerbear",
-  "name": "Bannerbear",
+  "name": "Bannerbear (API)",
   "icon": "🖼️",
   "description": "Automated image generation API",
   "baseUrl": "https://api.bannerbear.com/v2",

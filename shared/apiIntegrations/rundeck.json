@@ -1,6 +1,6 @@
 {
   "id": "rundeck",
-  "name": "Rundeck",
+  "name": "Rundeck (API)",
   "icon": "⚙️",
   "logoUrl": "https://cdn.simpleicons.org/rundeck/000000",
   "description": "Operations automation and runbook platform",

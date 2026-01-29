@@ -1,6 +1,6 @@
 {
   "id": "circleci",
-  "name": "CircleCI",
+  "name": "CircleCI (API)",
   "icon": "🔄",
   "logoUrl": "https://cdn.simpleicons.org/circleci/343434",
   "description": "Continuous integration and deployment platform",

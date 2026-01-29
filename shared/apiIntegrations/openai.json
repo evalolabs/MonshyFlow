@@ -1,6 +1,6 @@
 {
   "id": "openai",
-  "name": "OpenAI",
+  "name": "OpenAI (API)",
   "icon": "🤖",
   "logoUrl": "https://cdn.simpleicons.org/openai/412991",
   "description": "AI platform for language models and image generation",

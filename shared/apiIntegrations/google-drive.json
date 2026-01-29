@@ -1,6 +1,6 @@
 {
   "id": "google-drive",
-  "name": "Google Drive",
+  "name": "Google Drive (API)",
   "icon": "📁",
   "logoUrl": "https://cdn.simpleicons.org/googledrive/4285F4",
   "description": "Cloud storage and file sharing service",

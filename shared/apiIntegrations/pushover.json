@@ -1,6 +1,6 @@
 {
   "id": "pushover",
-  "name": "Pushover",
+  "name": "Pushover (API)",
   "icon": "📢",
   "description": "Push notification service for mobile and desktop",
   "baseUrl": "https://api.pushover.net/1",

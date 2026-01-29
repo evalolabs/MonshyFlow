@@ -1,6 +1,6 @@
 {
   "id": "messagebird",
-  "name": "MessageBird",
+  "name": "MessageBird (API)",
   "icon": "📱",
   "description": "SMS, voice, and messaging platform",
   "baseUrl": "https://rest.messagebird.com",

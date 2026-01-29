@@ -1,6 +1,6 @@
 {
   "id": "facebook-lead-ads",
-  "name": "Facebook Lead Ads",
+  "name": "Facebook Lead Ads (API)",
   "icon": "📋",
   "logoUrl": "https://cdn.simpleicons.org/facebook/1877F2",
   "description": "Facebook Lead Ads API for retrieving lead data",

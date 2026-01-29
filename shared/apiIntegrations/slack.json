@@ -1,6 +1,6 @@
 {
   "id": "slack",
-  "name": "Slack",
+  "name": "Slack (API)",
   "icon": "💬",
   "logoUrl": "https://cdn.simpleicons.org/slack/4A154B",
   "description": "Team communication and collaboration",

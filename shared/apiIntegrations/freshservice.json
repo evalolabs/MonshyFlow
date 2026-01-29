@@ -1,6 +1,6 @@
 {
   "id": "freshservice",
-  "name": "Freshservice",
+  "name": "Freshservice (API)",
   "icon": "🎫",
   "description": "IT service management and help desk software",
   "baseUrl": "https://{domain}.freshservice.com/api/v2",

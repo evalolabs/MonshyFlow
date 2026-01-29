@@ -1,6 +1,6 @@
 {
   "id": "google-bigquery",
-  "name": "Google BigQuery",
+  "name": "Google BigQuery (API)",
   "icon": "📊",
   "logoUrl": "https://cdn.simpleicons.org/googlebigquery/4285F4",
   "description": "Data warehouse for large-scale data analytics with SQL-like queries",

@@ -1,6 +1,6 @@
 {
   "id": "postgresql",
-  "name": "PostgreSQL",
+  "name": "PostgreSQL (API)",
   "icon": "🐘",
   "logoUrl": "https://cdn.simpleicons.org/postgresql/4169E1",
   "description": "Relational database management system",

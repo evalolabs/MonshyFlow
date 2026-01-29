@@ -1,6 +1,6 @@
 {
   "id": "nocodb",
-  "name": "NocoDB",
+  "name": "NocoDB (API)",
   "icon": "📊",
   "description": "Open-source Airtable alternative",
   "baseUrl": "https://{host}",

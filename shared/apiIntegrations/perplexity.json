@@ -1,6 +1,6 @@
 {
   "id": "perplexity",
-  "name": "Perplexity",
+  "name": "Perplexity (API)",
   "icon": "🔍",
   "logoUrl": "https://cdn.simpleicons.org/perplexity/000000",
   "description": "AI search engine that generates answers with citations",

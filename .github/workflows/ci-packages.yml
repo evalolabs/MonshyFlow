@@ -15,6 +15,9 @@ jobs:
   # Detect which packages have changed
   detect-changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     outputs:
       core: ${{ steps.filter.outputs.core }}
       database: ${{ steps.filter.outputs.database }}

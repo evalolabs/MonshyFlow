@@ -1,43 +1,50 @@
-# 🚦 Rate Limiting - Dokumentation
+# 🚦 Rate Limiting - Documentation
 
-## 📋 Übersicht
+## 📋 Overview
 
-Kong Gateway implementiert Rate Limiting, um die API vor Missbrauch und DDoS-Angriffen zu schützen.
+Kong Gateway implements rate limiting to protect the API from abuse and DDoS attacks.
 
-## ⚙️ Aktuelle Konfiguration
+## ⚙️ Current configuration
 
-### Öffentliche Auth Routes (Login, Register)
-- **Limit:** 10 Requests pro Minute
-- **Limit:** 100 Requests pro Stunde
-- **Basis:** IP-Adresse
+**Note:** The current limits are increased for E2E tests and development. For production they should be reduced.
 
-### API Routes (Workflows, etc.)
-- **Limit:** 100 Requests pro Minute
-- **Limit:** 1000 Requests pro Stunde
-- **Basis:** IP-Adresse
+### Public auth routes (login, register)
+- **Limit:** 1000 requests per minute (increased for E2E tests, default would be 10)
+- **Limit:** 10000 requests per hour (increased for E2E tests, default would be 100)
+- **Based on:** IP address
 
-## 🔴 Fehler: 429 Too Many Requests
+### API routes (workflows, etc.)
+- **Limit:** 1000 requests per minute (increased for E2E tests, default would be 100)
+- **Limit:** 10000 requests per hour (increased for E2E tests, default would be 1000)
+- **Based on:** IP address
 
-### Was bedeutet das?
+### Secrets service routes
+- **Limit:** 5000 requests per minute (very high for E2E tests)
+- **Limit:** 50000 requests per hour (very high for E2E tests)
+- **Based on:** IP address
 
-Der Benutzer hat das Rate-Limit überschritten. Kong blockiert weitere Requests für eine bestimmte Zeit.
+## 🔴 Error: 429 Too Many Requests
 
-### Was soll der Benutzer tun?
+### What does this mean?
 
-#### Option 1: Warten (Empfohlen)
+The client has exceeded the rate limit. Kong blocks further requests for a certain period of time.
+
+### What should the client do?
+
+#### Option 1: Wait (recommended)
 ```
-"Bitte warten Sie 60 Sekunden und versuchen Sie es erneut."
+"Please wait 60 seconds and try again."
 ```
 
-#### Option 2: Rate-Limit-Header prüfen
-Die Response enthält Header mit Informationen (von Kong automatisch gesendet):
-- `X-RateLimit-Limit-Minute`: Maximale Anzahl Requests pro Minute (z.B. 10)
-- `X-RateLimit-Remaining-Minute`: Verbleibende Requests pro Minute (z.B. 0)
-- `X-RateLimit-Limit-Hour`: Maximale Anzahl Requests pro Stunde (z.B. 100)
-- `X-RateLimit-Remaining-Hour`: Verbleibende Requests pro Stunde (z.B. 96)
-- `Retry-After`: Wartezeit in Sekunden bis zum nächsten Versuch (z.B. 141)
+#### Option 2: Inspect rate limit headers
+The response contains headers with information (sent automatically by Kong):
+- `X-RateLimit-Limit-Minute`: Maximum number of requests per minute (e.g. 10)
+- `X-RateLimit-Remaining-Minute`: Remaining requests per minute (e.g. 0)
+- `X-RateLimit-Limit-Hour`: Maximum number of requests per hour (e.g. 100)
+- `X-RateLimit-Remaining-Hour`: Remaining requests per hour (e.g. 96)
+- `Retry-After`: Time in seconds until the next attempt (e.g. 141)
 
-#### Option 3: Fehlermeldung anzeigen
+#### Option 3: Show error message
 ```json
 {
   "success": false,
@@ -47,12 +54,12 @@ Die Response enthält Header mit Informationen (von Kong automatisch gesendet):
 }
 ```
 
-## 🛠️ Frontend-Implementierung
+## 🛠️ Frontend implementation
 
-### Beispiel: Fehlerbehandlung
+### Example: Error handling
 
 ```typescript
-// API Client
+// API client
 async function login(email: string, password: string) {
   try {
     const response = await fetch('http://localhost:5000/api/auth/login', {
@@ -62,46 +69,46 @@ async function login(email: string, password: string) {
     });
 
     if (response.status === 429) {
-      // Rate Limit erreicht
+      // Rate limit reached
       const retryAfter = response.headers.get('Retry-After') || '60';
       const remainingMinute = response.headers.get('X-RateLimit-Remaining-Minute') || '0';
       const limitMinute = response.headers.get('X-RateLimit-Limit-Minute') || '10';
       
       throw new Error(
-        `Zu viele Anfragen. Bitte warten Sie ${retryAfter} Sekunden. ` +
-        `Verbleibend: ${remainingMinute} von ${limitMinute} Requests/Minute.`
+        `Too many requests. Please wait ${retryAfter} seconds. ` +
+        `Remaining: ${remainingMinute} of ${limitMinute} requests/minute.`
       );
     }
 
     if (!response.ok) {
-      throw new Error('Login fehlgeschlagen');
+      throw new Error('Login failed');
     }
 
     return await response.json();
   } catch (error) {
-    // Fehlerbehandlung
+    // Error handling
     console.error('Login error:', error);
     throw error;
   }
 }
 ```
 
-### Beispiel: UI-Fehlermeldung
+### Example: UI error message
 
 ```typescript
 // React/Vue/etc.
 if (error.message.includes('429') || error.message.includes('Rate limit')) {
   showError(
-    'Zu viele Anfragen',
-    'Bitte warten Sie einen Moment und versuchen Sie es erneut. ' +
-    'Maximal 10 Login-Versuche pro Minute erlaubt.'
+    'Too many requests',
+    'Please wait a moment and try again. ' +
+    'Maximum 1000 login attempts per minute allowed (development).'
   );
 }
 ```
 
-## 🔧 Rate-Limits anpassen
+## 🔧 Adjusting rate limits
 
-### Für Development erhöhen
+### Increase for development
 
 In `kong/kong.yml`:
 
@@ -110,57 +117,60 @@ In `kong/kong.yml`:
   service: auth-service
   route: auth-login
   config:
-    minute: 20  # Erhöht von 10 auf 20
-    hour: 200   # Erhöht von 100 auf 200
+    minute: 1000  # Increased for E2E tests (default: 10)
+    hour: 10000   # Increased for E2E tests (default: 100)
 ```
 
-Dann Kong neu starten:
+Then restart Kong:
 ```bash
 docker-compose restart kong
 ```
 
-### Für Production
+### For production
 
-Rate-Limits sollten in Production strenger sein:
-- Login: 5 Requests/Minute (Schutz vor Brute-Force)
-- API: 100 Requests/Minute (normaler Traffic)
+Rate limits should be stricter in production:
+- **Login/Register:** 5-10 requests/minute (protect against brute-force)
+- **API routes:** 100 requests/minute (normal traffic)
+- **Secrets service:** 200 requests/minute (sensitive service)
+
+**Currently:** Limits are increased for E2E tests. Before going to production, reduce them in `kong/kong.yml`.
 
 ## 📊 Monitoring
 
-### Rate-Limit-Status prüfen
+### Inspect rate limiting status
 
 ```bash
 # Kong Admin API
 curl http://localhost:8001/plugins | jq '.data[] | select(.name=="rate-limiting")'
 ```
 
-### Logs prüfen
+### Inspect logs
 
 ```bash
-# Rate-Limit-Verletzungen in Logs
+# Rate limit violations in logs
 docker-compose logs kong | grep "429"
 ```
 
-## 🎯 Best Practices
+## 🎯 Best practices
 
-1. **Benutzerfreundliche Fehlermeldungen**
-   - Zeige klare Meldung: "Zu viele Anfragen"
-   - Zeige Wartezeit: "Bitte warten Sie 60 Sekunden"
-   - Zeige Retry-Button (nach Wartezeit)
+1. **User-friendly error messages**
+   - Show a clear message: "Too many requests"
+   - Show wait time: "Please wait 60 seconds"
+   - Show a retry button (after the wait time)
 
-2. **Rate-Limit-Header nutzen**
-   - Zeige verbleibende Requests im UI
-   - Zeige Countdown bis Reset
+2. **Use rate limit headers**
+   - Show remaining requests in the UI
+   - Show a countdown until reset
 
-3. **Retry-Logik**
-   - Automatischer Retry nach `retryAfter` Sekunden
-   - Exponential Backoff bei wiederholten 429-Fehlern
+3. **Retry logic**
+   - Automatic retry after `retryAfter` seconds
+   - Exponential backoff on repeated 429 errors
 
-4. **Development vs. Production**
-   - Development: Höhere Limits (20-50/Minute)
-   - Production: Strikte Limits (5-10/Minute für Auth)
+4. **Development vs production**
+   - Development: higher limits (20-50/minute)
+   - Production: strict limits (5-10/minute for auth)
 
-## 🔗 Weitere Ressourcen
+## 🔗 Further resources
 
 - [Kong Rate Limiting Plugin](https://docs.konghq.com/hub/kong-inc/rate-limiting/)
 - [HTTP 429 Status Code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429)

@@ -1,6 +1,6 @@
 {
   "id": "facebook-graph",
-  "name": "Facebook Graph API",
+  "name": "Facebook Graph API (API)",
   "icon": "📘",
   "logoUrl": "https://cdn.simpleicons.org/facebook/1877F2",
   "description": "Facebook's Graph API for accessing social data",

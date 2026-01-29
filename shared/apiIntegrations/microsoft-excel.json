@@ -1,6 +1,6 @@
 {
   "id": "microsoft-excel",
-  "name": "Microsoft Excel",
+  "name": "Microsoft Excel (API)",
   "icon": "📊",
   "description": "Excel spreadsheet management via Microsoft Graph API",
   "baseUrl": "https://graph.microsoft.com/v1.0/me",

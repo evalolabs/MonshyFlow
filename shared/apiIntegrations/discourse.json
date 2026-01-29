@@ -1,6 +1,6 @@
 {
   "id": "discourse",
-  "name": "Discourse",
+  "name": "Discourse (API)",
   "icon": "💬",
   "logoUrl": "https://cdn.simpleicons.org/discourse/000000",
   "description": "Open-source discussion platform",

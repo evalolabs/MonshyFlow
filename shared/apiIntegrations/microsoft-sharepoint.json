@@ -1,6 +1,6 @@
 {
   "id": "microsoft-sharepoint",
-  "name": "Microsoft SharePoint",
+  "name": "Microsoft SharePoint (API)",
   "icon": "📄",
   "description": "Collaboration and document management platform",
   "baseUrl": "https://graph.microsoft.com/v1.0",

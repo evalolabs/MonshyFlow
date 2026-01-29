@@ -539,7 +539,7 @@
     },
     {
       "id": "salesforce",
-      "name": "Salesforce",
+      "name": "Salesforce (API)",
       "icon": "☁️",
       "logoUrl": "https://cdn.simpleicons.org/salesforce/00A1E0",
       "description": "Customer relationship management platform",
@@ -587,7 +587,7 @@
     },
     {
       "id": "slack",
-      "name": "Slack",
+      "name": "Slack (API)",
       "icon": "💬",
       "logoUrl": "https://cdn.simpleicons.org/slack/4A154B",
       "description": "Team communication and collaboration",
@@ -634,7 +634,7 @@
     },
     {
       "id": "hubspot",
-      "name": "HubSpot",
+      "name": "HubSpot (API)",
       "icon": "🟠",
       "logoUrl": "https://cdn.simpleicons.org/hubspot/FF7A59",
       "description": "Marketing, sales, and service software",
@@ -677,7 +677,7 @@
     },
     {
       "id": "shopify",
-      "name": "Shopify",
+      "name": "Shopify (API)",
       "icon": "🛒",
       "logoUrl": "https://cdn.simpleicons.org/shopify/96BF48",
       "description": "E-commerce platform",
@@ -730,7 +730,7 @@
     },
     {
       "id": "stripe",
-      "name": "Stripe",
+      "name": "Stripe (API)",
       "icon": "💳",
       "logoUrl": "https://cdn.simpleicons.org/stripe/635BFF",
       "description": "Payment processing platform",
@@ -786,7 +786,7 @@
     },
     {
       "id": "google-sheets",
-      "name": "Google Sheets",
+      "name": "Google Sheets (API)",
       "icon": "📊",
       "logoUrl": "https://cdn.simpleicons.org/googlesheets/34A853",
       "description": "Spreadsheet and data management",
@@ -828,7 +828,7 @@
     },
     {
       "id": "jira",
-      "name": "Jira",
+      "name": "Jira (API)",
       "icon": "🎯",
       "logoUrl": "https://cdn.simpleicons.org/jira/0052CC",
       "description": "Project management and issue tracking",

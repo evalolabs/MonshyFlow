@@ -1,6 +1,6 @@
 {
   "id": "thehive",
-  "name": "TheHive",
+  "name": "TheHive (API)",
   "icon": "🛡️",
   "description": "Security incident response platform",
   "baseUrl": "https://{your-thehive-instance}/api",

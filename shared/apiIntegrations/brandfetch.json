@@ -1,6 +1,6 @@
 {
   "id": "brandfetch",
-  "name": "Brandfetch",
+  "name": "Brandfetch (API)",
   "icon": "🎨",
   "logoUrl": "https://cdn.simpleicons.org/brandfetch/000000",
   "description": "Brand asset API for logos, colors, fonts, and other brand information",

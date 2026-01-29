@@ -1,6 +1,6 @@
 {
   "id": "tapfiliate",
-  "name": "Tapfiliate",
+  "name": "Tapfiliate (API)",
   "icon": "🎯",
   "description": "Affiliate marketing and referral tracking platform",
   "baseUrl": "https://api.tapfiliate.com/1.6",

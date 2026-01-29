@@ -1,6 +1,6 @@
 {
   "id": "dropbox",
-  "name": "Dropbox",
+  "name": "Dropbox (API)",
   "icon": "📦",
   "logoUrl": "https://cdn.simpleicons.org/dropbox/0061FF",
   "description": "Cloud storage and file sharing service",

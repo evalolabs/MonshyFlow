@@ -1,6 +1,6 @@
 {
   "id": "grafana",
-  "name": "Grafana",
+  "name": "Grafana (API)",
   "icon": "📊",
   "logoUrl": "https://cdn.simpleicons.org/grafana/F46800",
   "description": "Analytics and monitoring platform",

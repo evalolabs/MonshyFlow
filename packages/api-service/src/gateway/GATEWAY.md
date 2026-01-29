@@ -1,16 +1,16 @@
-# 🌐 Gateway Dokumentation
+# 🌐 Gateway Documentation
 
-## ✅ Gateway ist wichtig und vollständig implementiert!
+## ✅ Gateway is Important and Fully Implemented!
 
-Das Gateway ist **vollständig integriert** im API Service und bietet alle wichtigen Funktionen:
+The Gateway is **fully integrated** in the API Service and provides all important functions:
 
 ---
 
-## 🎯 Gateway-Funktionen
+## 🎯 Gateway Functions
 
 ### 1. Request Routing ✅
 
-Routet alle Requests zu den entsprechenden Services:
+Routes all requests to the corresponding services:
 
 - `/api/auth` → Auth Service
 - `/api/apikeys` → Auth Service  
@@ -18,13 +18,13 @@ Routet alle Requests zu den entsprechenden Services:
 - `/api/execute` → Execution Service
 - `/api/execution` → Execution Service
 - `/api/scheduler` → Scheduler Service
-- `/api/workflows` → API Service (lokal)
+- `/api/workflows` → API Service (local)
 
 ### 2. Security ✅
 
-- Rate Limiting (100 req/15min für API, 5 req/15min für Auth)
+- Rate Limiting (100 req/15min for API, 5 req/15min for Auth)
 - Security Headers (Helmet)
-- CORS Konfiguration
+- CORS Configuration
 - Request Logging
 
 ### 3. Error Handling ✅
@@ -35,25 +35,25 @@ Routet alle Requests zu den entsprechenden Services:
 
 ---
 
-## 💰 Kosten: $0 (kostenlos!)
+## 💰 Cost: $0 (Free!)
 
-**Wir nutzen:**
-- ✅ **http-proxy-middleware** - Kostenlos, Open Source
-- ✅ **Express** - Bereits vorhanden
-- ✅ **Keine externen Services** - Alles selbst gehostet
+**We use:**
+- ✅ **http-proxy-middleware** - Free, Open Source
+- ✅ **Express** - Already available
+- ✅ **No external services** - Everything self-hosted
 
-**Nicht genutzt:**
-- ❌ **Kong** - ~$100-500/Monat
+**Not used:**
+- ❌ **Kong** - ~$100-500/month
 - ❌ **AWS API Gateway** - Pay-per-request
-- ❌ **Azure API Management** - ~$200+/Monat
+- ❌ **Azure API Management** - ~$200+/month
 
-**Ersparnis: ~$100-500/Monat** 💰
+**Savings: ~$100-500/month** 💰
 
 ---
 
-## 🔧 Implementierung
+## 🔧 Implementation
 
-### Code-Struktur
+### Code Structure
 
 ```
 packages/api-service/
@@ -61,13 +61,13 @@ packages/api-service/
 │   ├── routes/
 │   │   └── index.ts          # Gateway Routes
 │   ├── gateway/
-│   │   ├── README.md         # Gateway Dokumentation
-│   │   └── GATEWAY.md        # Diese Datei
+│   │   ├── README.md         # Gateway Documentation
+│   │   └── GATEWAY.md        # This file
 │   └── config/
 │       └── index.ts          # Service URLs
 ```
 
-### Beispiel-Route
+### Example Route
 
 ```typescript
 // Auth Service Proxy
@@ -88,26 +88,25 @@ app.use(
 
 ---
 
-## 📊 Vergleich: Integriert vs. Separates Gateway
+## 📊 Comparison: Integrated vs. Separate Gateway
 
-| Feature | Integriert (Aktuell) | Separates Gateway (Kong) |
+| Feature | Integrated (Current) | Separate Gateway (Kong) |
 |---------|---------------------|-------------------------|
-| **Kosten** | $0 | ~$100-500/Monat |
-| **Performance** | Sehr gut (keine extra Hop) | Gut (extra Hop) |
-| **Komplexität** | Niedrig | Hoch |
-| **Wartung** | Einfach | Komplex |
-| **Features** | Alles was wir brauchen | Viele, aber nicht alle nötig |
+| **Cost** | $0 | ~$100-500/month |
+| **Performance** | Very good (no extra hop) | Good (extra hop) |
+| **Complexity** | Low | High |
+| **Maintenance** | Simple | Complex |
+| **Features** | Everything we need | Many, but not all needed |
 
-**Fazit:** Integriert ist besser für unsere Anforderungen! ✅
+**Conclusion:** Integrated is better for our requirements! ✅
 
 ---
 
 ## ✅ Status
 
-- ✅ **Vollständig implementiert**
-- ✅ **Produktionsreif**
-- ✅ **Kostenlos**
-- ✅ **Alle wichtigen Features vorhanden**
+- ✅ **Fully implemented**
+- ✅ **Production-ready**
+- ✅ **Free**
+- ✅ **All important features available**
 
-**Das Gateway ist wichtig und funktioniert perfekt - nur kostenlos!** 🎉
-
+**The Gateway is important and works perfectly - just free!** 🎉

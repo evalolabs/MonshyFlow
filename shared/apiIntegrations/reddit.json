@@ -1,6 +1,6 @@
 {
   "id": "reddit",
-  "name": "Reddit",
+  "name": "Reddit (API)",
   "icon": "🤖",
   "logoUrl": "https://cdn.simpleicons.org/reddit/FF4500",
   "description": "Social news aggregation and discussion platform",

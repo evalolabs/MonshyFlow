@@ -19,7 +19,7 @@ Security vulnerabilities should be reported privately to protect users.
 
 ### 2. Email us directly
 
-Send an email to: **[INSERT SECURITY EMAIL]**
+Send an email to: **h.izadi@evalolabs.de**
 
 Include the following information:
 - Description of the vulnerability
@@ -124,7 +124,7 @@ We appreciate responsible disclosure. Security researchers who follow these guid
 
 ## Contact
 
-For security concerns, please email: **[INSERT SECURITY EMAIL]**
+For security concerns, please email: **h.izadi@evalolabs.de**
 
 ---
 

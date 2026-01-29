@@ -1,6 +1,6 @@
 {
   "id": "cisco-webex",
-  "name": "Cisco Webex",
+  "name": "Cisco Webex (API)",
   "icon": "💬",
   "logoUrl": "https://cdn.simpleicons.org/webex/000000",
   "description": "Video conferencing and team collaboration platform",

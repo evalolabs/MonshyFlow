@@ -1,6 +1,6 @@
 {
   "id": "profitwell",
-  "name": "ProfitWell",
+  "name": "ProfitWell (API)",
   "icon": "💰",
   "description": "Subscription analytics and revenue recognition platform",
   "baseUrl": "https://api.profitwell.com/v2",

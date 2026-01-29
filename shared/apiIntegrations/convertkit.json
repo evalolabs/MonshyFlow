@@ -1,6 +1,6 @@
 {
   "id": "convertkit",
-  "name": "ConvertKit",
+  "name": "ConvertKit (API)",
   "icon": "📧",
   "description": "Email marketing platform for creators",
   "baseUrl": "https://api.convertkit.com/v3",

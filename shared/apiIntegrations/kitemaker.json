@@ -1,6 +1,6 @@
 {
   "id": "kitemaker",
-  "name": "Kitemaker",
+  "name": "Kitemaker (API)",
   "icon": "📋",
   "description": "Product management platform with GraphQL API",
   "baseUrl": "https://toil.kitemaker.co/developers",

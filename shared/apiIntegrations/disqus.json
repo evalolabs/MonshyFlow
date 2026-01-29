@@ -1,6 +1,6 @@
 {
   "id": "disqus",
-  "name": "Disqus",
+  "name": "Disqus (API)",
   "icon": "💬",
   "logoUrl": "https://cdn.simpleicons.org/disqus/2E9FFF",
   "description": "Commenting platform for websites",

@@ -1,6 +1,6 @@
 {
   "id": "highlevel",
-  "name": "HighLevel",
+  "name": "HighLevel (API)",
   "icon": "📈",
   "description": "All-in-one marketing platform for agencies",
   "baseUrl": "https://rest.gohighlevel.com/v1",
