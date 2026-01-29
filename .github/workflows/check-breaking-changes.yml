@@ -47,22 +47,25 @@ jobs:
       
       - name: Check PR Description for Breaking Changes
         if: github.event_name == 'pull_request'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          PR_BODY="${{ github.event.pull_request.body }}"
+          # Write PR body to temporary file to avoid shell interpretation issues
+          echo "$PR_BODY" > /tmp/pr_body.txt
           
           # Check if breaking change is marked
-          if echo "$PR_BODY" | grep -q "💥 Breaking change"; then
+          if grep -q "💥 Breaking change" /tmp/pr_body.txt; then
             echo "⚠️ Breaking change detected in PR"
             
             # Check if migration path is provided
-            if ! echo "$PR_BODY" | grep -q "Migration Path"; then
+            if ! grep -q "Migration Path" /tmp/pr_body.txt; then
               echo "❌ ERROR: Breaking change PR must include 'Migration Path' section"
               echo "Please add a Migration Path section to your PR description"
               exit 1
             fi
             
             # Check if affected areas are listed
-            if ! echo "$PR_BODY" | grep -q "Affected Areas"; then
+            if ! grep -q "Affected Areas" /tmp/pr_body.txt; then
               echo "⚠️ WARNING: Breaking change PR should list 'Affected Areas'"
             fi
             
@@ -70,4 +73,7 @@ jobs:
           else
             echo "✅ No breaking changes detected"
           fi
+          
+          # Cleanup
+          rm -f /tmp/pr_body.txt
 
