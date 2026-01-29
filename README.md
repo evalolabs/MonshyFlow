@@ -286,8 +286,6 @@ This is an **alpha release**. Some features may be incomplete or subject to chan
 - Agent Tools/Functions documentation is incomplete
 - Some advanced features are still in development
 
-See [ALPHA_LAUNCH_CHECKLIST.md](./ALPHA_LAUNCH_CHECKLIST.md) for the current development status.
-
 ---
 
 ## 🔗 Links
