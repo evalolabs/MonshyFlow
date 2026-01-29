@@ -1,6 +1,6 @@
 {
   "id": "magento2",
-  "name": "Magento 2",
+  "name": "Magento 2 (API)",
   "icon": "🛒",
   "description": "Open-source e-commerce platform",
   "baseUrl": "{host}",

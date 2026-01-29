@@ -1,6 +1,6 @@
 {
   "id": "zendesk",
-  "name": "Zendesk",
+  "name": "Zendesk (API)",
   "icon": "🎫",
   "logoUrl": "https://cdn.simpleicons.org/zendesk/03363D",
   "description": "Customer service and support ticketing platform",

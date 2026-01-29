@@ -1,6 +1,6 @@
 {
   "id": "eventbrite",
-  "name": "Eventbrite",
+  "name": "Eventbrite (API)",
   "icon": "🎫",
   "description": "Event management and ticketing platform",
   "baseUrl": "https://www.eventbriteapi.com/v3",

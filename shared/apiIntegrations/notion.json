@@ -1,6 +1,6 @@
 {
   "id": "notion",
-  "name": "Notion",
+  "name": "Notion (API)",
   "icon": "📝",
   "logoUrl": "https://cdn.simpleicons.org/notion/000000",
   "description": "All-in-one workspace for notes, docs, and collaboration",

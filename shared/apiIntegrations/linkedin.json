@@ -1,6 +1,6 @@
 {
   "id": "linkedin",
-  "name": "LinkedIn",
+  "name": "LinkedIn (API)",
   "icon": "💼",
   "description": "Professional networking and career platform",
   "baseUrl": "https://api.linkedin.com/v2",

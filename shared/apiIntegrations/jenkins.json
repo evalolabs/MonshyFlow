@@ -1,6 +1,6 @@
 {
   "id": "jenkins",
-  "name": "Jenkins",
+  "name": "Jenkins (API)",
   "icon": "🔧",
   "logoUrl": "https://cdn.simpleicons.org/jenkins/D24939",
   "description": "Automation server for CI/CD",

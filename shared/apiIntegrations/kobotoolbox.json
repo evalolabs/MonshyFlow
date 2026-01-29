@@ -1,6 +1,6 @@
 {
   "id": "kobotoolbox",
-  "name": "KoBoToolbox",
+  "name": "KoBoToolbox (API)",
   "icon": "📦",
   "description": "Data collection platform for humanitarian and development contexts",
   "baseUrl": "https://{your-kobotoolbox-instance}",

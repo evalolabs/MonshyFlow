@@ -1,6 +1,6 @@
 {
   "id": "uptimerobot",
-  "name": "UptimeRobot",
+  "name": "UptimeRobot (API)",
   "icon": "📊",
   "description": "Website monitoring and uptime tracking",
   "baseUrl": "https://api.uptimerobot.com/v2",

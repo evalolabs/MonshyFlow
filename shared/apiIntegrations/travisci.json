@@ -1,6 +1,6 @@
 {
   "id": "travisci",
-  "name": "TravisCI",
+  "name": "TravisCI (API)",
   "icon": "🔧",
   "logoUrl": "https://cdn.simpleicons.org/travisci/3EAAAF",
   "description": "Continuous integration and deployment platform",

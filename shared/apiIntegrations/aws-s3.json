@@ -1,6 +1,6 @@
 {
   "id": "aws-s3",
-  "name": "AWS S3",
+  "name": "AWS S3 (API)",
   "icon": "☁️",
   "description": "Amazon Simple Storage Service for object storage",
   "baseUrl": "https://{bucket}.s3.{region}.amazonaws.com",

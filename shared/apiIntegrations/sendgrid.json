@@ -1,6 +1,6 @@
 {
   "id": "sendgrid",
-  "name": "SendGrid",
+  "name": "SendGrid (API)",
   "icon": "📧",
   "description": "Email delivery and marketing platform",
   "baseUrl": "https://api.sendgrid.com/v3",

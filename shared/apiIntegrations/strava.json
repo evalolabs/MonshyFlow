@@ -1,6 +1,6 @@
 {
   "id": "strava",
-  "name": "Strava",
+  "name": "Strava (API)",
   "icon": "🏃",
   "logoUrl": "https://cdn.simpleicons.org/strava/FC4C02",
   "description": "Fitness tracking platform for accessing activities, athlete data, and more",

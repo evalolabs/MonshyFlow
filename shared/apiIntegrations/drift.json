@@ -1,6 +1,6 @@
 {
   "id": "drift",
-  "name": "Drift",
+  "name": "Drift (API)",
   "icon": "💬",
   "description": "Conversational marketing platform for sales and marketing",
   "baseUrl": "https://driftapi.com",

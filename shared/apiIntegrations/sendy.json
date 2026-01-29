@@ -1,6 +1,6 @@
 {
   "id": "sendy",
-  "name": "Sendy",
+  "name": "Sendy (API)",
   "icon": "📧",
   "description": "Self-hosted email marketing tool",
   "baseUrl": "https://{your-sendy-instance}",

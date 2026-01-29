@@ -1,6 +1,6 @@
 {
   "id": "toggl",
-  "name": "Toggl",
+  "name": "Toggl (API)",
   "icon": "⏱️",
   "logoUrl": "https://cdn.simpleicons.org/toggl/E01B22",
   "description": "Time tracking and productivity app",

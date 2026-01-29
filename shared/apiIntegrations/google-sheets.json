@@ -1,6 +1,6 @@
 {
   "id": "google-sheets",
-  "name": "Google Sheets",
+  "name": "Google Sheets (API)",
   "icon": "📊",
   "logoUrl": "https://cdn.simpleicons.org/googlesheets/34A853",
   "description": "Spreadsheet and data management",

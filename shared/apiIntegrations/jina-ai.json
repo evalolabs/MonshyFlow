@@ -1,6 +1,6 @@
 {
   "id": "jina-ai",
-  "name": "Jina AI",
+  "name": "Jina AI (API)",
   "icon": "🤖",
   "description": "AI-powered reader, search, and research platform",
   "baseUrl": "https://r.jina.ai",

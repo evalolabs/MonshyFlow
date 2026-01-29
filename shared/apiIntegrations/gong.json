@@ -1,6 +1,6 @@
 {
   "id": "gong",
-  "name": "Gong",
+  "name": "Gong (API)",
   "icon": "📞",
   "description": "Revenue intelligence platform for sales teams",
   "baseUrl": "https://{your-gong-instance}",

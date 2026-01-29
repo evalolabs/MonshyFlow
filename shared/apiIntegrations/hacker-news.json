@@ -1,6 +1,6 @@
 {
   "id": "hacker-news",
-  "name": "Hacker News",
+  "name": "Hacker News (API)",
   "icon": "📰",
   "logoUrl": "https://cdn.simpleicons.org/ycombinator/FF6600",
   "description": "Social news website focused on computer science and entrepreneurship",

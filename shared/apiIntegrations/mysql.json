@@ -1,6 +1,6 @@
 {
   "id": "mysql",
-  "name": "MySQL",
+  "name": "MySQL (API)",
   "icon": "🗄️",
   "logoUrl": "https://cdn.simpleicons.org/mysql/4479A1",
   "description": "Relational database management system",

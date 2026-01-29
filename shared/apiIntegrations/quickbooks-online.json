@@ -1,6 +1,6 @@
 {
   "id": "quickbooks-online",
-  "name": "QuickBooks Online",
+  "name": "QuickBooks Online (API)",
   "icon": "💰",
   "logoUrl": "https://cdn.simpleicons.org/quickbooks/0077C5",
   "description": "Cloud-based accounting software",

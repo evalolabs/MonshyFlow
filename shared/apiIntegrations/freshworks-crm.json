@@ -1,6 +1,6 @@
 {
   "id": "freshworks-crm",
-  "name": "Freshworks CRM",
+  "name": "Freshworks CRM (API)",
   "icon": "💼",
   "description": "CRM and sales management platform",
   "baseUrl": "https://{domain}.myfreshworks.com/crm/sales/api",

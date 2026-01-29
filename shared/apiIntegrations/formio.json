@@ -1,6 +1,6 @@
 {
   "id": "formio",
-  "name": "Form.io",
+  "name": "Form.io (API)",
   "icon": "📋",
   "description": "Form builder and data management platform",
   "baseUrl": "https://api.form.io",

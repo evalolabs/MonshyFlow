@@ -1,6 +1,6 @@
 {
   "id": "beeminder",
-  "name": "Beeminder",
+  "name": "Beeminder (API)",
   "icon": "📊",
   "description": "Goal tracking and data visualization platform",
   "baseUrl": "https://www.beeminder.com/api/v1",

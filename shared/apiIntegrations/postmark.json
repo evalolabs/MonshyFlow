@@ -1,6 +1,6 @@
 {
   "id": "postmark",
-  "name": "Postmark",
+  "name": "Postmark (API)",
   "icon": "📧",
   "description": "Transactional email delivery service",
   "baseUrl": "https://api.postmarkapp.com",

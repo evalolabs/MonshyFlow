@@ -1,6 +1,6 @@
 {
   "id": "snowflake",
-  "name": "Snowflake",
+  "name": "Snowflake (API)",
   "icon": "❄️",
   "logoUrl": "https://cdn.simpleicons.org/snowflake/29B5E8",
   "description": "Cloud data warehouse",

@@ -1,6 +1,6 @@
 {
   "id": "unleashed-software",
-  "name": "Unleashed Software",
+  "name": "Unleashed Software (API)",
   "icon": "📦",
   "description": "Inventory management and ERP system",
   "baseUrl": "https://api.unleashedsoftware.com",

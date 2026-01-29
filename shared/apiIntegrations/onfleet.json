@@ -1,6 +1,6 @@
 {
   "id": "onfleet",
-  "name": "Onfleet",
+  "name": "Onfleet (API)",
   "icon": "🚚",
   "description": "Delivery management platform for last-mile deliveries",
   "baseUrl": "https://onfleet.com/api/v2",

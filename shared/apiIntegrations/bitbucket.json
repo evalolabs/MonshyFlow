@@ -1,6 +1,6 @@
 {
   "id": "bitbucket",
-  "name": "Bitbucket",
+  "name": "Bitbucket (API)",
   "icon": "🔷",
   "logoUrl": "https://cdn.simpleicons.org/bitbucket/0052CC",
   "description": "Git repository hosting and collaboration platform",

@@ -1,6 +1,6 @@
 {
   "id": "segment",
-  "name": "Segment",
+  "name": "Segment (API)",
   "icon": "📊",
   "description": "Customer data platform and analytics",
   "baseUrl": "https://api.segment.io/v1",

@@ -1,6 +1,6 @@
 {
   "id": "servicenow",
-  "name": "ServiceNow",
+  "name": "ServiceNow (API)",
   "icon": "🔧",
   "description": "IT service management and workflow automation platform",
   "baseUrl": "https://{subdomain}.service-now.com/api",

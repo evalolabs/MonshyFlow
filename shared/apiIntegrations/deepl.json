@@ -1,6 +1,6 @@
 {
   "id": "deepl",
-  "name": "DeepL",
+  "name": "DeepL (API)",
   "icon": "🌐",
   "logoUrl": "https://cdn.simpleicons.org/deepl/0F2B46",
   "description": "AI-powered translation service",

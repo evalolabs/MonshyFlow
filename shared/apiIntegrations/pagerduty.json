@@ -1,6 +1,6 @@
 {
   "id": "pagerduty",
-  "name": "PagerDuty",
+  "name": "PagerDuty (API)",
   "icon": "🚨",
   "logoUrl": "https://cdn.simpleicons.org/pagerduty/06AC38",
   "description": "Incident management system for DevOps teams",

@@ -1,6 +1,6 @@
 {
   "id": "wufoo",
-  "name": "Wufoo",
+  "name": "Wufoo (API)",
   "icon": "📝",
   "description": "Online form builder",
   "baseUrl": "https://{subdomain}.wufoo.com/api/v3",

@@ -1,6 +1,6 @@
 {
   "id": "mailchimp",
-  "name": "Mailchimp",
+  "name": "Mailchimp (API)",
   "icon": "📧",
   "logoUrl": "https://cdn.simpleicons.org/mailchimp/FFE01B",
   "description": "Email marketing and automation platform",

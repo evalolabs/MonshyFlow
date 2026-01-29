@@ -1,6 +1,6 @@
 {
   "id": "grist",
-  "name": "Grist",
+  "name": "Grist (API)",
   "icon": "📊",
   "description": "Spreadsheet-database hybrid platform",
   "baseUrl": "https://docs.getgrist.com/api",

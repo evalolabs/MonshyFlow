@@ -1,6 +1,6 @@
 {
   "id": "azure-storage",
-  "name": "Azure Storage",
+  "name": "Azure Storage (API)",
   "icon": "☁️",
   "description": "Cloud storage service (Blob Storage)",
   "baseUrl": "https://{storageAccount}.blob.core.windows.net",

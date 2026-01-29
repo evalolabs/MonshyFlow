@@ -1,6 +1,6 @@
 {
   "id": "splunk",
-  "name": "Splunk",
+  "name": "Splunk (API)",
   "icon": "📊",
   "logoUrl": "https://cdn.simpleicons.org/splunk/000000",
   "description": "Data analytics platform for log analysis and monitoring",

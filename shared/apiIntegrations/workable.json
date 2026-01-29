@@ -1,6 +1,6 @@
 {
   "id": "workable",
-  "name": "Workable",
+  "name": "Workable (API)",
   "icon": "💼",
   "description": "Recruiting and applicant tracking system",
   "baseUrl": "https://{subdomain}.workable.com/spi/v3",

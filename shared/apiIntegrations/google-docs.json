@@ -1,6 +1,6 @@
 {
   "id": "google-docs",
-  "name": "Google Docs",
+  "name": "Google Docs (API)",
   "icon": "📄",
   "logoUrl": "https://cdn.simpleicons.org/googledocs/4285F4",
   "description": "Google Docs API for creating and managing documents",

@@ -1,6 +1,6 @@
 {
   "id": "gotowebinar",
-  "name": "GoToWebinar",
+  "name": "GoToWebinar (API)",
   "icon": "🎥",
   "logoUrl": "https://cdn.simpleicons.org/gotomeeting/000000",
   "description": "Webinar hosting and management platform",

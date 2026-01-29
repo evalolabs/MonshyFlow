@@ -1,6 +1,6 @@
 {
   "id": "google-calendar",
-  "name": "Google Calendar",
+  "name": "Google Calendar (API)",
   "icon": "📅",
   "logoUrl": "https://cdn.simpleicons.org/googlecalendar/4285F4",
   "description": "Calendar and event management",

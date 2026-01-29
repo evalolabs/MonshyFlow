@@ -1,6 +1,6 @@
 {
   "id": "dropcontact",
-  "name": "Dropcontact",
+  "name": "Dropcontact (API)",
   "icon": "📧",
   "description": "B2B email finder and contact enrichment platform",
   "baseUrl": "https://api.dropcontact.io",

@@ -1,6 +1,6 @@
 {
   "id": "copper",
-  "name": "Copper",
+  "name": "Copper (API)",
   "icon": "💼",
   "description": "CRM and sales pipeline management",
   "baseUrl": "https://api.copper.com/developer_api/v1",

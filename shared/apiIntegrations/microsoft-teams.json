@@ -1,6 +1,6 @@
 {
   "id": "microsoft-teams",
-  "name": "Microsoft Teams",
+  "name": "Microsoft Teams (API)",
   "icon": "👥",
   "description": "Team collaboration and communication platform",
   "baseUrl": "https://graph.microsoft.com/v1.0",

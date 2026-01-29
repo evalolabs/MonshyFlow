@@ -1,6 +1,6 @@
 {
   "id": "timescaledb",
-  "name": "TimescaleDB",
+  "name": "TimescaleDB (API)",
   "icon": "🗄️",
   "description": "PostgreSQL extension for time-series data",
   "baseUrl": "postgresql://{host}:{port}/{database}",

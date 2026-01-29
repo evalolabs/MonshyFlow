@@ -1,6 +1,6 @@
 {
   "id": "activecampaign",
-  "name": "ActiveCampaign",
+  "name": "ActiveCampaign (API)",
   "icon": "📧",
   "description": "Marketing automation and email marketing platform",
   "baseUrl": "{apiUrl}",

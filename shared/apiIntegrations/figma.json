@@ -1,6 +1,6 @@
 {
   "id": "figma",
-  "name": "Figma",
+  "name": "Figma (API)",
   "icon": "🎨",
   "logoUrl": "https://cdn.simpleicons.org/figma/F24E1E",
   "description": "Design collaboration platform for accessing design files, comments, projects, and versions",

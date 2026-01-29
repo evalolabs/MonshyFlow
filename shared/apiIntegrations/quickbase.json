@@ -1,6 +1,6 @@
 {
   "id": "quickbase",
-  "name": "QuickBase",
+  "name": "QuickBase (API)",
   "icon": "🗄️",
   "description": "Low-code application development platform",
   "baseUrl": "https://api.quickbase.com/v1",

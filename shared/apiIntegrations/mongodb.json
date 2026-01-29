@@ -1,6 +1,6 @@
 {
   "id": "mongodb",
-  "name": "MongoDB",
+  "name": "MongoDB (API)",
   "icon": "🍃",
   "logoUrl": "https://cdn.simpleicons.org/mongodb/47A248",
   "description": "NoSQL document database",

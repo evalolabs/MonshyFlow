@@ -1,6 +1,6 @@
 {
   "id": "iterable",
-  "name": "Iterable",
+  "name": "Iterable (API)",
   "icon": "📧",
   "description": "Marketing automation platform for customer engagement",
   "baseUrl": "https://api.iterable.com/api",

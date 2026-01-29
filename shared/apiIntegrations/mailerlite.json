@@ -1,6 +1,6 @@
 {
   "id": "mailerlite",
-  "name": "MailerLite",
+  "name": "MailerLite (API)",
   "icon": "📧",
   "description": "Email marketing and automation platform",
   "baseUrl": "https://api.mailerlite.com/api/v2",

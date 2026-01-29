@@ -1,6 +1,6 @@
 {
   "id": "uplead",
-  "name": "Uplead",
+  "name": "Uplead (API)",
   "icon": "🔍",
   "description": "B2B data enrichment platform for company and person data",
   "baseUrl": "https://api.uplead.com/v2",

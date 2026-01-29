@@ -1,6 +1,6 @@
 {
   "id": "filemaker",
-  "name": "FileMaker",
+  "name": "FileMaker (API)",
   "icon": "📁",
   "description": "Database and application development platform",
   "baseUrl": "https://{your-filemaker-host}/fmi/data/v1/databases/{database}",

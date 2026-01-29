@@ -1,6 +1,6 @@
 {
   "id": "pushbullet",
-  "name": "Pushbullet",
+  "name": "Pushbullet (API)",
   "icon": "📱",
   "logoUrl": "https://cdn.simpleicons.org/pushbullet/000000",
   "description": "Push notifications and file sharing service",

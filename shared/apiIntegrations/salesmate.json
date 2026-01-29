@@ -1,6 +1,6 @@
 {
   "id": "salesmate",
-  "name": "Salesmate",
+  "name": "Salesmate (API)",
   "icon": "💼",
   "description": "CRM and sales pipeline management",
   "baseUrl": "https://apis.salesmate.io",

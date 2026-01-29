@@ -1,6 +1,6 @@
 {
   "id": "zammad",
-  "name": "Zammad",
+  "name": "Zammad (API)",
   "icon": "🎫",
   "description": "Open-source helpdesk and customer support platform",
   "baseUrl": "https://{your-zammad-instance}/api/v1",

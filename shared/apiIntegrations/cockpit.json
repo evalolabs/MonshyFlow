@@ -1,6 +1,6 @@
 {
   "id": "cockpit",
-  "name": "Cockpit",
+  "name": "Cockpit (API)",
   "icon": "📝",
   "logoUrl": "https://cdn.simpleicons.org/cockpit/000000",
   "description": "Headless CMS",

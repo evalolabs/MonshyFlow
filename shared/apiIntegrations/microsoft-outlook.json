@@ -1,6 +1,6 @@
 {
   "id": "microsoft-outlook",
-  "name": "Microsoft Outlook",
+  "name": "Microsoft Outlook (API)",
   "icon": "📧",
   "description": "Email and calendar management",
   "baseUrl": "https://graph.microsoft.com/v1.0",

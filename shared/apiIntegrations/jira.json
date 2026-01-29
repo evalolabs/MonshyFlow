@@ -1,6 +1,6 @@
 {
   "id": "jira",
-  "name": "Jira",
+  "name": "Jira (API)",
   "icon": "🎯",
   "logoUrl": "https://cdn.simpleicons.org/jira/0052CC",
   "description": "Project management and issue tracking",

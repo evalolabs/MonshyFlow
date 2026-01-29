@@ -1,6 +1,6 @@
 {
   "id": "elastic-security",
-  "name": "Elastic Security",
+  "name": "Elastic Security (API)",
   "icon": "🔒",
   "logoUrl": "https://cdn.simpleicons.org/elastic/005571",
   "description": "Security Information and Event Management (SIEM) platform",

@@ -1,6 +1,6 @@
 {
   "id": "google-chat",
-  "name": "Google Chat",
+  "name": "Google Chat (API)",
   "icon": "💬",
   "logoUrl": "https://cdn.simpleicons.org/googlechat/00832D",
   "description": "Google Chat API for integrating with Google Chat Spaces and Messages",

@@ -1,6 +1,6 @@
 {
   "id": "odoo",
-  "name": "Odoo",
+  "name": "Odoo (API)",
   "icon": "📦",
   "logoUrl": "https://cdn.simpleicons.org/odoo/714B67",
   "description": "Business management software (ERP/CRM)",

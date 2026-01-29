@@ -1,6 +1,6 @@
 {
   "id": "github",
-  "name": "GitHub",
+  "name": "GitHub (API)",
   "icon": "🐙",
   "logoUrl": "https://cdn.simpleicons.org/github/181717",
   "description": "Code hosting and version control platform",

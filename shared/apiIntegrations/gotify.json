@@ -1,6 +1,6 @@
 {
   "id": "gotify",
-  "name": "Gotify",
+  "name": "Gotify (API)",
   "icon": "📱",
   "description": "Self-hosted push notification service",
   "baseUrl": "https://{your-gotify-instance}",

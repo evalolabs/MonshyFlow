@@ -1,6 +1,6 @@
 {
   "id": "orbit",
-  "name": "Orbit",
+  "name": "Orbit (API)",
   "icon": "🌍",
   "description": "Community relationship management platform",
   "baseUrl": "https://app.orbit.love/api/v1",

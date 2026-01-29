@@ -1,6 +1,6 @@
 {
   "id": "mandrill",
-  "name": "Mandrill",
+  "name": "Mandrill (API)",
   "icon": "📧",
   "description": "Transactional email service by Mailchimp",
   "baseUrl": "https://mandrillapp.com/api/1.0",

@@ -1,6 +1,6 @@
 {
   "id": "paypal",
-  "name": "PayPal",
+  "name": "PayPal (API)",
   "icon": "💳",
   "logoUrl": "https://cdn.simpleicons.org/paypal/00457C",
   "description": "Payment processing and money transfer platform",

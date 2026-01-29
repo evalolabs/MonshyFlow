@@ -1,6 +1,6 @@
 {
   "id": "telegram",
-  "name": "Telegram",
+  "name": "Telegram (API)",
   "icon": "✈️",
   "logoUrl": "https://cdn.simpleicons.org/telegram/26A5E4",
   "description": "Messaging and bot platform",

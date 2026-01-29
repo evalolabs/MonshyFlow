@@ -1,6 +1,6 @@
 {
   "id": "misp",
-  "name": "MISP",
+  "name": "MISP (API)",
   "icon": "🔒",
   "description": "Open-source threat intelligence platform",
   "baseUrl": "https://{your-misp-instance}",

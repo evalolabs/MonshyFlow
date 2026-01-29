@@ -1,6 +1,6 @@
 {
   "id": "jotform",
-  "name": "JotForm",
+  "name": "JotForm (API)",
   "icon": "📋",
   "description": "Online form builder and data collection platform",
   "baseUrl": "https://{apiDomain || 'api.jotform.com'}",

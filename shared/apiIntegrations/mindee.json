@@ -1,6 +1,6 @@
 {
   "id": "mindee",
-  "name": "Mindee",
+  "name": "Mindee (API)",
   "icon": "📄",
   "description": "OCR and document parsing API",
   "baseUrl": "https://api.mindee.net/v1/products/mindee",

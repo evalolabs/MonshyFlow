@@ -1,6 +1,6 @@
 {
   "id": "netlify",
-  "name": "Netlify",
+  "name": "Netlify (API)",
   "icon": "🌐",
   "logoUrl": "https://cdn.simpleicons.org/netlify/00C7B7",
   "description": "Web hosting and deployment platform",

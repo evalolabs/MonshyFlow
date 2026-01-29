@@ -1,6 +1,6 @@
 {
   "id": "affinity",
-  "name": "Affinity",
+  "name": "Affinity (API)",
   "icon": "🤝",
   "description": "Relationship intelligence and CRM platform",
   "baseUrl": "https://api.affinity.co",

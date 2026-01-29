@@ -1,6 +1,6 @@
 {
   "id": "emelia",
-  "name": "Emelia",
+  "name": "Emelia (API)",
   "icon": "📧",
   "description": "Cold email marketing platform with GraphQL API",
   "baseUrl": "https://graphql.emelia.io",

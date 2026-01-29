@@ -1,6 +1,6 @@
 {
   "id": "microsoft-graph-security",
-  "name": "Microsoft Graph Security",
+  "name": "Microsoft Graph Security (API)",
   "icon": "🔒",
   "description": "Microsoft Graph Security API for security insights and threat intelligence",
   "baseUrl": "https://graph.microsoft.com/v1.0/security",

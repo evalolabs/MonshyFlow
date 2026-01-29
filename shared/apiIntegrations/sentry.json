@@ -1,6 +1,6 @@
 {
   "id": "sentry",
-  "name": "Sentry.io",
+  "name": "Sentry.io (API)",
   "icon": "🐛",
   "logoUrl": "https://cdn.simpleicons.org/sentry/362D20",
   "description": "Error tracking and performance monitoring",

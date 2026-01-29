@@ -1,6 +1,6 @@
 {
   "id": "strapi",
-  "name": "Strapi",
+  "name": "Strapi (API)",
   "icon": "📝",
   "logoUrl": "https://cdn.simpleicons.org/strapi/2E7EEA",
   "description": "Headless content management system",

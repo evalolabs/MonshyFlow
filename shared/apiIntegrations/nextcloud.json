@@ -1,6 +1,6 @@
 {
   "id": "nextcloud",
-  "name": "NextCloud",
+  "name": "NextCloud (API)",
   "icon": "☁️",
   "logoUrl": "https://cdn.simpleicons.org/nextcloud/0082C9",
   "description": "Self-hosted file sharing and collaboration platform",

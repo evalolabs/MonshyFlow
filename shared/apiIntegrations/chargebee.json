@@ -1,6 +1,6 @@
 {
   "id": "chargebee",
-  "name": "Chargebee",
+  "name": "Chargebee (API)",
   "icon": "💳",
   "description": "Subscription billing and revenue management",
   "baseUrl": "https://{accountName}.chargebee.com/api/v2",

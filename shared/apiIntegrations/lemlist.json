@@ -1,6 +1,6 @@
 {
   "id": "lemlist",
-  "name": "Lemlist",
+  "name": "Lemlist (API)",
   "icon": "📬",
   "description": "Cold email outreach and automation platform",
   "baseUrl": "https://api.lemlist.com/api",

@@ -1,6 +1,6 @@
 {
   "id": "stackby",
-  "name": "Stackby",
+  "name": "Stackby (API)",
   "icon": "📊",
   "description": "Database and spreadsheet platform similar to Airtable",
   "baseUrl": "https://stackby.com/api/betav1",

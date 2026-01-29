@@ -1,6 +1,6 @@
 {
   "id": "microsoft-todo",
-  "name": "Microsoft ToDo",
+  "name": "Microsoft ToDo (API)",
   "icon": "✅",
   "description": "Task management via Microsoft Graph API",
   "baseUrl": "https://graph.microsoft.com/v1.0/me",

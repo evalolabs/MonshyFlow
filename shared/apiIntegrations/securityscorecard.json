@@ -1,6 +1,6 @@
 {
   "id": "securityscorecard",
-  "name": "SecurityScorecard",
+  "name": "SecurityScorecard (API)",
   "icon": "🔒",
   "logoUrl": "https://cdn.simpleicons.org/securityscorecard/000000",
   "description": "Security ratings and risk monitoring platform",

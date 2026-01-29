@@ -1,6 +1,6 @@
 {
   "id": "bitwarden",
-  "name": "Bitwarden",
+  "name": "Bitwarden (API)",
   "icon": "🔐",
   "logoUrl": "https://cdn.simpleicons.org/bitwarden/175DDC",
   "description": "Password manager with cloud and self-hosted support",

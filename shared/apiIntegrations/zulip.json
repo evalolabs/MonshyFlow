@@ -1,6 +1,6 @@
 {
   "id": "zulip",
-  "name": "Zulip",
+  "name": "Zulip (API)",
   "icon": "💬",
   "logoUrl": "https://cdn.simpleicons.org/zulip/000000",
   "description": "Team chat and collaboration platform",

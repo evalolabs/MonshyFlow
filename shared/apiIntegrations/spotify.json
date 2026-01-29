@@ -1,6 +1,6 @@
 {
   "id": "spotify",
-  "name": "Spotify",
+  "name": "Spotify (API)",
   "icon": "🎵",
   "logoUrl": "https://cdn.simpleicons.org/spotify/1DB954",
   "description": "Music streaming platform API for accessing music data, playlists, player control, and personal library",

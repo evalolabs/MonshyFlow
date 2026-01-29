@@ -1,6 +1,6 @@
 {
   "id": "bubble",
-  "name": "Bubble",
+  "name": "Bubble (API)",
   "icon": "🫧",
   "description": "No-code platform for web apps",
   "baseUrl": "https://{appName}.bubbleapps.io/api/1.1",
