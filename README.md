@@ -27,7 +27,7 @@ MonshyFlow is an open-source, visual workflow automation platform that combines 
 - **Tool Integration** - Connect tools to agents for extended capabilities
 
 ### 🔗 Integrations
-- **50+ API Integrations** - Pre-built integrations for popular services
+- **200+ API Integrations** - Pre-built integrations for popular services
 - **HTTP Request Node** - Custom API calls
 - **Email Integration** - SMTP email sending
 - **Webhook Support** - Trigger workflows via webhooks
