@@ -270,7 +270,6 @@ We welcome contributions! Please read our [Contributing Guide](./CONTRIBUTING.md
 ## 🙏 Acknowledgments
 
 - Built with [React Flow](https://reactflow.dev/) for the visual workflow editor
-- Inspired by workflow automation platforms like n8n, Activepieces, and Zapier
 - Powered by modern web technologies
 
 ---
