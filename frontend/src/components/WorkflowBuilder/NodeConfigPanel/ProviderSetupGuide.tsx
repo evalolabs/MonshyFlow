@@ -58,13 +58,13 @@ export const ProviderSetupGuide: React.FC<ProviderSetupGuideProps> = ({
   return (
     <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mt-3">
       <div className="text-xs font-semibold text-blue-800 mb-2">
-        🔑 Setup-Anleitung für {name}
+        🔑 Setup Guide for {name}
       </div>
       
       {requiredSecrets.length > 0 && (
         <div className="mb-2">
           <div className="text-[11px] font-medium text-blue-700 mb-1">
-            Benötigte Secrets:
+            Required Secrets:
           </div>
           <ul className="text-[11px] text-blue-600 space-y-1 list-disc list-inside ml-1">
             {requiredSecrets.map((secretName) => (
@@ -75,9 +75,9 @@ export const ProviderSetupGuide: React.FC<ProviderSetupGuideProps> = ({
                   type="button"
                   onClick={() => createSecret(secretName)}
                   className="text-blue-700 hover:text-blue-900 underline underline-offset-2 text-[10px]"
-                  title={`Secret "${secretName}" anlegen`}
+                  title={`Create Secret "${secretName}"`}
                 >
-                  anlegen
+                  create
                 </button>
               </li>
             ))}
@@ -88,7 +88,7 @@ export const ProviderSetupGuide: React.FC<ProviderSetupGuideProps> = ({
       {apiKeyUrl && (
         <div className="mb-2">
           <div className="text-[11px] font-medium text-blue-700 mb-1">
-            API Key erhalten:
+            Get API Key:
           </div>
           <a
             href={apiKeyUrl}
@@ -107,7 +107,7 @@ export const ProviderSetupGuide: React.FC<ProviderSetupGuideProps> = ({
       {setupInstructions && (
         <div className="mb-2">
           <div className="text-[11px] font-medium text-blue-700 mb-1">
-            Anleitung:
+            Instructions:
           </div>
           <p className="text-[11px] text-blue-600 whitespace-pre-wrap">
             {setupInstructions}
@@ -123,7 +123,7 @@ export const ProviderSetupGuide: React.FC<ProviderSetupGuideProps> = ({
             rel="noopener noreferrer"
             className="text-[11px] text-blue-600 hover:text-blue-800 underline inline-flex items-center gap-1"
           >
-            📚 Vollständige Dokumentation öffnen
+            📚 Open full documentation
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
@@ -135,15 +135,15 @@ export const ProviderSetupGuide: React.FC<ProviderSetupGuideProps> = ({
         <div className="mt-2 pt-2 border-t border-blue-200">
           <div className="flex items-center justify-between gap-2">
             <p className="text-[11px] text-blue-600">
-              💡 <strong>Tipp:</strong> Lege die Secrets im Bereich „Secrets" an, damit {name} funktioniert.
+              💡 <strong>Tip:</strong> Create the secrets in the "Secrets" section for {name} to work.
             </p>
             <button
               type="button"
               onClick={goToSecrets}
               className="text-blue-700 hover:text-blue-900 underline underline-offset-2 text-[10px] whitespace-nowrap"
-              title="Zur Secrets-Seite"
+              title="Go to Secrets page"
             >
-              Secrets öffnen
+              Open Secrets
             </button>
           </div>
         </div>

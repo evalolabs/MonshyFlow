@@ -204,9 +204,9 @@ export function NodeInfoOverlay({
                           const key = parseMissingSecretKey(issue.message);
                           if (key) createMissingSecret(key);
                         }}
-                        title="Secret anlegen"
+                        title="Create Secret"
                       >
-                        Secret anlegen
+                        Create Secret
                       </button>
                       {' '}
                       <span className="text-red-400">·</span>{' '}
@@ -217,7 +217,7 @@ export function NodeInfoOverlay({
                           e.stopPropagation();
                           goToSecrets();
                         }}
-                        title="Secrets öffnen"
+                        title="Open Secrets"
                       >
                         Secrets
                       </button> */}
@@ -242,9 +242,9 @@ export function NodeInfoOverlay({
                           const key = parseMissingSecretKey(issue.message);
                           if (key) createMissingSecret(key);
                         }}
-                        title="Secret anlegen"
+                        title="Create Secret"
                       >
-                        Secret anlegen
+                        Create Secret
                       </button>
                       {' '}
                       <span className="text-amber-400">·</span>{' '}
@@ -255,7 +255,7 @@ export function NodeInfoOverlay({
                           e.stopPropagation();
                           goToSecrets();
                         }}
-                        title="Secrets öffnen"
+                        title="Open Secrets"
                       >
                         Secrets
                       </button>

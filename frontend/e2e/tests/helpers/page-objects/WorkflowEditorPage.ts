@@ -71,7 +71,7 @@ export class WorkflowEditorPage {
   }
 
   async clickCreateSecretLink(secretKey: string) {
-    const link = this.configPanel.locator(`a:has-text("Secret anlegen")`);
+    const link = this.configPanel.locator(`a:has-text("Create Secret")`);
     await link.click();
   }
 
