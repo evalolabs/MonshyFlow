@@ -69,10 +69,12 @@ async function seedTenants(): Promise<Map<string, string>> {
 async function seedUsers(tenantMap: Map<string, string>): Promise<Map<string, string>> {
   logger.info('🌱 Seeding users...');
 
+  // ⚠️ WARNING: These are TEST PASSWORDS for development/seed data only!
+  // DO NOT use these passwords in production. These are only for local development and testing.
   const userData = [
     {
       email: 'superadmin@monshy.com',
-      password: 'superadmin123',
+      password: 'superadmin123', // Test password - Development only!
       firstName: 'Super',
       lastName: 'Admin',
       roles: ['superadmin', 'admin', 'user'],

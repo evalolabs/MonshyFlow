@@ -128,7 +128,7 @@ See [Deployment Guide](./azure-deployment/README.md) for more details.
    ```
 
    - Frontend: `http://localhost:5173`
-   - Login credentials: `superadmin@monshy.com / superadmin123`
+   - Login credentials: `superadmin@monshy.com / superadmin123` (⚠️ **Development only** - Test credentials for local setup)
 
    After this, you can immediately create workflows, run them, and explore the platform.
 
@@ -226,6 +226,8 @@ pnpm test
 We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) (coming soon) for details.
 
 ### Development Setup
+
+⚠️ **Security Note:** This repository contains default credentials (passwords, API keys) for **local development only**. Never use these credentials in production environments. Always set secure, unique credentials via environment variables in production.
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
