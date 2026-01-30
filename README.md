@@ -9,6 +9,7 @@ MonshyFlow is an open-source, visual workflow automation platform that combines 
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev/)
 
 ---
+<img width="1905" height="907" alt="image" src="https://github.com/user-attachments/assets/2ee4564b-178b-4f47-ac0f-424a7ede897e" />
 
 ## ✨ Features
 
