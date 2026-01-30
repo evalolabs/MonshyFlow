@@ -1,4 +1,4 @@
-# 🚀 MonshyFlow
+#  MonshyFlow
 
 **AI-Powered Workflow Automation Platform**
 
