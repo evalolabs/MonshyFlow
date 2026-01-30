@@ -1470,9 +1470,9 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                                 const key = parseMissingSecretKey(error);
                                 if (key) openCreateSecret(key, 'HTTP Request');
                               }}
-                              title="Secret anlegen"
+                              title="Create Secret"
                             >
-                              Secret anlegen
+                              Create Secret
                             </button>
                             {' '}
                             <span className="text-red-400">·</span>{' '}
@@ -1480,7 +1480,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                               type="button"
                               className="text-red-700 underline underline-offset-2 hover:text-red-900"
                               onClick={openSecrets}
-                              title="Secrets öffnen"
+                              title="Open Secrets"
                             >
                               Secrets
                             </button>
@@ -1504,9 +1504,9 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                                 const key = parseMissingSecretKey(warning);
                                 if (key) openCreateSecret(key, 'HTTP Request');
                               }}
-                              title="Secret anlegen"
+                              title="Create Secret"
                             >
-                              Secret anlegen
+                              Create Secret
                             </button>
                             {' '}
                             <span className="text-amber-400">·</span>{' '}
@@ -1514,7 +1514,7 @@ export function NodeConfigPanel({ selectedNode, onClose, onUpdateNode, onDeleteN
                               type="button"
                               className="text-amber-700 underline underline-offset-2 hover:text-amber-900"
                               onClick={openSecrets}
-                              title="Secrets öffnen"
+                              title="Open Secrets"
                             >
                               Secrets
                             </button>
