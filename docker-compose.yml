@@ -1,3 +1,7 @@
+# ⚠️ WARNING: This docker-compose.yml uses default credentials for LOCAL DEVELOPMENT ONLY!
+# DO NOT use these credentials in production. Always use secure, unique passwords in production.
+# Default credentials: MongoDB (admin:admin123), Redis (redis123), RabbitMQ (admin:admin123)
+
 services:
   execution-service:
     build:

@@ -12,11 +12,13 @@ export async function connectDatabase(): Promise<void> {
   // Azure Cosmos DB oder lokale MongoDB
   // Wichtig: Database Name ist "MonshyFlow" (nicht agent-builder)
   // Container Name: "MonshyFlow-mongodb" (nicht agentbuilder-mongodb)
+  // ⚠️ WARNING: Default MongoDB URLs below use test credentials for LOCAL DEVELOPMENT ONLY!
+  // In production, always set MONGODB_URL environment variable with secure credentials.
   const mongoUrl = process.env.MONGODB_URL || 
                    process.env.MongoDbSettings__ConnectionString ||
                    (process.env.NODE_ENV === 'production' 
-                     ? 'mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin'
-                     : 'mongodb://admin:admin123@localhost:27018/MonshyFlow?authSource=admin');
+                     ? 'mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin' // Development only!
+                     : 'mongodb://admin:admin123@localhost:27018/MonshyFlow?authSource=admin'); // Development only!
   
   try {
     // Azure Cosmos DB benötigt spezielle Optionen
