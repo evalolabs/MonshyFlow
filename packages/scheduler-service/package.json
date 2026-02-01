@@ -19,7 +19,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "tsyringe": "^4.10.0",
-    "zod": "^3.25.76",
+    "zod": "^4.3.6",
     "cron-parser": "^4.9.0",
     "axios": "^1.12.2",
     "express-rate-limit": "^7.4.1",
