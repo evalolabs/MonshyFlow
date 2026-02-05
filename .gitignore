@@ -160,6 +160,10 @@ azure-deployment/config.local.sh
 azure-deployment/.env.local
 azure-deployment/connection-strings.local.txt
 
+# Docker Hub credentials (if stored locally)
+docker-hub-credentials.txt
+.dockerhub
+
 # Build outputs
 [Dd]ebug/
 [Rr]elease/

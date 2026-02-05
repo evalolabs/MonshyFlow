@@ -4,7 +4,19 @@ These scripts create all necessary Azure resources for the Monshy project.
 
 ---
 
+## ⚡ Quick Start
+
+**Wichtig:** Viele Scripts wurden während der Entwicklung erstellt und aktualisiert. 
+
+👉 **Siehe zuerst:** [`QUICK_REFERENCE.md`](./QUICK_REFERENCE.md) für eine Übersicht, welche Scripts funktionieren!
+
+👉 **Detaillierte Info:** [`README_SCRIPTS.md`](./README_SCRIPTS.md) erklärt alle Scripts im Detail.
+
+---
+
 ## 📋 Scripts Overview
+
+### Resource Creation Scripts (Funktionieren alle ✅)
 
 1. **01-create-resource-group** - Creates Resource Group
 2. **02-create-container-registry** - Creates Azure Container Registry (ACR)
@@ -13,6 +25,19 @@ These scripts create all necessary Azure resources for the Monshy project.
 5. **05-create-redis-cache** - Creates Azure Cache for Redis
 6. **06-create-key-vault** - Creates Azure Key Vault
 7. **07-summary** - Shows summary of all created resources
+
+### Container Apps Scripts
+
+**✅ Funktionieren:**
+- `create-container-apps-fixed.ps1` - Erstellt Container Apps
+- `set-all-env-vars.ps1` - Setzt Environment Variables
+- `setup-keyvault-access-simple.ps1` - Key Vault Zugriff
+- `build-push-dockerhub.ps1` - Images bauen/pushen
+- `update-container-apps-dockerhub.ps1` - Container Apps aktualisieren
+
+**❌ Funktionieren nicht:**
+- `create-container-apps.ps1` - Nutze `create-container-apps-fixed.ps1` stattdessen
+- Andere `set-env-vars-*.ps1` - Nutze `set-all-env-vars.ps1` stattdessen
 
 **Note:** RabbitMQ is **not** included (optional, code has fallback to in-memory queue). See [../RABBITMQ_NOTES.md](../RABBITMQ_NOTES.md) for details.
 
@@ -93,7 +118,8 @@ ACR_SKU="Basic"
 ENV_NAME="monshy-env"
 LOG_ANALYTICS_WORKSPACE="monshy-logs"
 
-# Cosmos DB
+# Cosmos DB (MongoDB-compatible cloud database)
+# Note: Locally you use MongoDB in Docker, but in Azure we use Cosmos DB
 COSMOS_ACCOUNT_NAME="monshy-cosmos"
 DATABASE_NAME="agentbuilder"
 COSMOS_SKU="Serverless"

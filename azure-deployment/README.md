@@ -129,11 +129,13 @@ Creates:
 - Resource Group
 - Azure Container Registry (ACR)
 - Container Apps Environment
-- Azure Cosmos DB (MongoDB API)
+- **Azure Cosmos DB (MongoDB API)** - MongoDB-compatible cloud database
 - Azure Cache for Redis
 - Azure Key Vault
 
-**Note:** RabbitMQ is **not** included (optional, code has fallback). See [RABBITMQ_NOTES.md](./RABBITMQ_NOTES.md) for details.
+**Note:** 
+- **Cosmos DB** is used instead of MongoDB in Azure. It's MongoDB-compatible, so your code works without changes.
+- **RabbitMQ** is **not** included (optional, code has fallback). See [RABBITMQ_NOTES.md](./RABBITMQ_NOTES.md) for details.
 
 **See [scripts/README.md](./scripts/README.md) for details.**
 
@@ -195,6 +197,21 @@ The scripts output all connection strings. Save these securely:
 
 ## 🔧 Configuration
 
+### Database: MongoDB vs Cosmos DB
+
+**Important:** This project uses MongoDB locally, but Azure Cosmos DB (MongoDB API) in Azure.
+
+| Environment | Database | Why |
+|-------------|----------|-----|
+| **Local Development** | MongoDB (Docker) | Fast, free, easy setup |
+| **Azure Production** | Cosmos DB (MongoDB API) | Managed, scalable, automatic backups |
+
+**The code works with both!** Only the connection string changes:
+- **Local:** `mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow`
+- **Azure:** `mongodb://account:key@account.mongo.cosmos.azure.com:10255/MonshyFlow?ssl=true`
+
+The code automatically detects which database you're using. No code changes needed!
+
 ### Environment Variables
 
 See [ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md) for a complete list of all required environment variables.
@@ -202,6 +219,11 @@ See [ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md) for a complete list o
 ### Collect Connection Strings
 
 After Step 1 (create resources), the connection strings will be output. These must be set in the environment variables.
+
+**Cosmos DB Connection String Format:**
+```
+mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/MonshyFlow?ssl=true&replicaSet=globaldb&authSource=admin
+```
 
 ---
 
@@ -259,6 +281,8 @@ See [ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md#secrets-management) fo
 
 - [Azure Container Apps Documentation](https://docs.microsoft.com/azure/container-apps/)
 - [Environment Variables Guide](./ENVIRONMENT_VARIABLES.md)
+- [Database: MongoDB vs Cosmos DB](./DATABASE.md) - Understand the difference
+- [MongoDB Atlas Setup](./MONGODB_ATLAS.md) - Use MongoDB Atlas instead of Cosmos DB
 - [Monshy Project README](../README.md)
 
 ---

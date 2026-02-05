@@ -27,6 +27,9 @@ $REDIS_SIZE = "C0"
 # Key Vault
 $KEY_VAULT_NAME = "monshy-kv"
 
+# Docker Hub
+$DOCKER_HUB_USERNAME = ""
+
 # Azure Subscription (optional - leave empty to use current subscription)
 $SUBSCRIPTION_ID = ""
 
