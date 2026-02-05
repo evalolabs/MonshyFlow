@@ -154,6 +154,12 @@ strategy/
 analysis/
 .private/
 
+# Azure deployment local configuration
+azure-deployment/config.local.ps1
+azure-deployment/config.local.sh
+azure-deployment/.env.local
+azure-deployment/connection-strings.local.txt
+
 # Build outputs
 [Dd]ebug/
 [Rr]elease/

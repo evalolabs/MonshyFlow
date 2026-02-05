@@ -11,6 +11,8 @@ azure-deployment/
 ├── README.md                          # This file
 ├── ENVIRONMENT_VARIABLES.md           # Environment Variables documentation
 ├── CODE_CHANGES.md                   # Code changes documentation
+├── config.local.example.ps1           # Example local configuration (template)
+├── config.local.ps1                   # Your local configuration (gitignored)
 ├── scripts/
 │   ├── README.md                      # Scripts documentation
 │   ├── 00-create-all-resources.sh     # Master script (all resources)
@@ -24,6 +26,37 @@ azure-deployment/
 │   └── (PowerShell versions: *.ps1)
 └── templates/
     └── (later: ARM/Bicep Templates)
+```
+
+---
+
+## ⚙️ Configuration
+
+### Local Configuration (Recommended)
+
+For your personal Azure account, create a local configuration file:
+
+1. **Copy the example file:**
+   ```bash
+   cp config.local.example.ps1 config.local.ps1
+   ```
+
+2. **Edit `config.local.ps1`** with your Azure settings:
+   - Resource names (must be globally unique)
+   - Location/Region
+   - Subscription ID (optional)
+   - SKU settings
+
+3. **The file `config.local.ps1` is in `.gitignore`** and will not be committed.
+
+The scripts will automatically load your local configuration if it exists.
+
+### Using Parameters
+
+Alternatively, you can pass parameters directly to the scripts:
+
+```powershell
+.\00-create-all-resources.ps1 -ResourceGroupName "my-rg" -Location "eastus"
 ```
 
 ---
@@ -47,7 +80,7 @@ azure-deployment/
    az login
    ```
 
-4. **Select Azure Subscription**
+4. **Select Azure Subscription** (optional)
    ```bash
    az account set --subscription "Your Subscription Name"
    ```
@@ -235,6 +268,7 @@ See [ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md#secrets-management) fo
 - [ ] Azure CLI installed and logged in
 - [ ] Docker installed
 - [ ] Subscription selected
+- [ ] Local configuration created (`config.local.ps1`) - optional but recommended
 - [ ] All scripts made executable (`chmod +x scripts/*.sh`)
 - [ ] Connection Strings collected
 - [ ] Secrets generated (JWT, Encryption Keys)

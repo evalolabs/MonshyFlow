@@ -2,9 +2,40 @@
 # This script runs all resource creation scripts in sequence
 
 param(
-    [string]$ResourceGroupName = "monshy-rg",
-    [string]$Location = "westeurope"
+    [string]$ResourceGroupName = "",
+    [string]$Location = ""
 )
+
+# Get script directory
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$configDir = Split-Path -Parent $scriptDir
+
+# Load local configuration if it exists
+$localConfigPath = Join-Path $configDir "config.local.ps1"
+if (Test-Path $localConfigPath) {
+    Write-Host "Loading local configuration from config.local.ps1..." -ForegroundColor Cyan
+    . $localConfigPath
+    
+    # Use local config values if parameters not provided
+    if ([string]::IsNullOrEmpty($ResourceGroupName)) {
+        $ResourceGroupName = $RESOURCE_GROUP_NAME
+    }
+    if ([string]::IsNullOrEmpty($Location)) {
+        $Location = $LOCATION
+    }
+} else {
+    Write-Host "No local configuration found. Using defaults or parameters." -ForegroundColor Yellow
+    Write-Host "Tip: Copy config.local.example.ps1 to config.local.ps1 and customize it." -ForegroundColor Yellow
+    Write-Host ""
+    
+    # Use defaults if not provided
+    if ([string]::IsNullOrEmpty($ResourceGroupName)) {
+        $ResourceGroupName = "monshy-rg"
+    }
+    if ([string]::IsNullOrEmpty($Location)) {
+        $Location = "westeurope"
+    }
+}
 
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host "Monshy Azure Resources Setup" -ForegroundColor Cyan
@@ -31,9 +62,6 @@ Write-Host ""
 # Set environment variables
 $env:RESOURCE_GROUP_NAME = $ResourceGroupName
 $env:LOCATION = $Location
-
-# Get script directory
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # Run all scripts in sequence
 Write-Host "==========================================" -ForegroundColor Cyan
