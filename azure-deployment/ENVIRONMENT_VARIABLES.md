@@ -4,6 +4,28 @@ This document lists all environment variables required for deploying MonshyFlow 
 
 ---
 
+## 📊 Database: MongoDB vs Cosmos DB
+
+**Important:** This project uses:
+- **MongoDB** locally (in Docker) for development
+- **Azure Cosmos DB (MongoDB API)** in Azure for production
+
+Both are MongoDB-compatible, so **no code changes are needed**. Only the connection string changes:
+
+### Local Development (Docker)
+```bash
+MONGODB_URL=mongodb://admin:admin123@MonshyFlow-mongodb:27017/MonshyFlow?authSource=admin
+```
+
+### Azure Production (Cosmos DB)
+```bash
+MONGODB_URL=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/MonshyFlow?ssl=true&replicaSet=globaldb&authSource=admin
+```
+
+The code automatically detects which database you're using. See [packages/database/src/connection.ts](../../packages/database/src/connection.ts) for details.
+
+---
+
 ## 📋 Overview
 
 ### Services
@@ -62,6 +84,7 @@ NODE_ENV=production
 PORT=80
 
 # MongoDB / Cosmos DB
+# In Azure, use Cosmos DB (MongoDB API) - MongoDB-compatible, no code changes needed
 MONGODB_URL=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/MonshyFlow?ssl=true&replicaSet=globaldb&authSource=admin
 
 # JWT Settings
@@ -84,6 +107,7 @@ NODE_ENV=production
 PORT=80
 
 # MongoDB / Cosmos DB
+# In Azure, use Cosmos DB (MongoDB API) - MongoDB-compatible, no code changes needed
 MONGODB_URL=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/MonshyFlow?ssl=true&replicaSet=globaldb&authSource=admin
 
 # JWT Settings
@@ -138,6 +162,7 @@ NODE_ENV=production
 PORT=5004
 
 # MongoDB / Cosmos DB
+# In Azure, use Cosmos DB (MongoDB API) - MongoDB-compatible, no code changes needed
 MONGODB_URL=mongodb://<account>:<key>@<account>.mongo.cosmos.azure.com:10255/agent-builder?ssl=true&replicaSet=globaldb
 
 # Redis Cache
