@@ -27,7 +27,7 @@
     "nodemailer": "^7.0.10",
     "openai": "^6.2.0",
     "redis": "^5.8.3",
-    "zod": "^3.25.76"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.7",

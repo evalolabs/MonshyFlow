@@ -28,7 +28,7 @@
     "swagger-ui-express": "^5.0.1",
     "tsyringe": "^4.10.0",
     "uuid": "^11.0.3",
-    "zod": "^3.25.76"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

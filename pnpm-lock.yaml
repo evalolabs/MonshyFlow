@@ -172,8 +172,8 @@ importers:
         specifier: ^11.0.3
         version: 11.1.0
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@types/bcrypt':
         specifier: ^5.0.2
@@ -288,8 +288,8 @@ importers:
         specifier: ^11.0.3
         version: 11.1.0
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@types/bcrypt':
         specifier: ^5.0.2
@@ -334,8 +334,8 @@ importers:
         specifier: ^13.0.0
         version: 13.1.3
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@types/express':
         specifier: ^5.0.3
@@ -370,7 +370,7 @@ importers:
         version: link:../core
       '@openai/agents':
         specifier: ^0.1.10
-        version: 0.1.11(ws@8.18.3)(zod@3.25.76)
+        version: 0.1.11(ws@8.18.3)(zod@4.3.6)
       '@types/nodemailer':
         specifier: ^7.0.4
         version: 7.0.4
@@ -400,13 +400,13 @@ importers:
         version: 7.0.11
       openai:
         specifier: ^6.2.0
-        version: 6.10.0(ws@8.18.3)(zod@3.25.76)
+        version: 6.10.0(ws@8.18.3)(zod@4.3.6)
       redis:
         specifier: ^5.8.3
         version: 5.10.0
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@types/amqplib':
         specifier: ^0.10.7
@@ -466,8 +466,8 @@ importers:
         specifier: ^11.0.3
         version: 11.1.0
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@types/cors':
         specifier: ^2.8.17
@@ -533,8 +533,8 @@ importers:
         specifier: ^11.0.3
         version: 11.1.0
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@types/bcrypt':
         specifier: ^5.0.2
@@ -4318,8 +4318,8 @@ packages:
     peerDependencies:
       zod: ^3.25 || ^4
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
   zustand@4.5.7:
     resolution: {integrity: sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw==}
@@ -5265,7 +5265,7 @@ snapshots:
 
   '@marijn/find-cluster-break@1.0.2': {}
 
-  '@modelcontextprotocol/sdk@1.24.3(zod@3.25.76)':
+  '@modelcontextprotocol/sdk@1.24.3(zod@4.3.6)':
     dependencies:
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
@@ -5279,8 +5279,8 @@ snapshots:
       jose: 6.1.3
       pkce-challenge: 5.0.1
       raw-body: 3.0.2
-      zod: 3.25.76
-      zod-to-json-schema: 3.25.0(zod@3.25.76)
+      zod: 4.3.6
+      zod-to-json-schema: 3.25.0(zod@4.3.6)
     transitivePeerDependencies:
       - supports-color
     optional: true
@@ -5303,50 +5303,50 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
 
-  '@openai/agents-core@0.1.11(ws@8.18.3)(zod@3.25.76)':
+  '@openai/agents-core@0.1.11(ws@8.18.3)(zod@4.3.6)':
     dependencies:
       debug: 4.4.3(supports-color@5.5.0)
-      openai: 5.23.2(ws@8.18.3)(zod@3.25.76)
+      openai: 5.23.2(ws@8.18.3)(zod@4.3.6)
     optionalDependencies:
-      '@modelcontextprotocol/sdk': 1.24.3(zod@3.25.76)
-      zod: 3.25.76
+      '@modelcontextprotocol/sdk': 1.24.3(zod@4.3.6)
+      zod: 4.3.6
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - supports-color
       - ws
 
-  '@openai/agents-openai@0.1.11(ws@8.18.3)(zod@3.25.76)':
+  '@openai/agents-openai@0.1.11(ws@8.18.3)(zod@4.3.6)':
     dependencies:
-      '@openai/agents-core': 0.1.11(ws@8.18.3)(zod@3.25.76)
+      '@openai/agents-core': 0.1.11(ws@8.18.3)(zod@4.3.6)
       debug: 4.4.3(supports-color@5.5.0)
-      openai: 5.23.2(ws@8.18.3)(zod@3.25.76)
-      zod: 3.25.76
+      openai: 5.23.2(ws@8.18.3)(zod@4.3.6)
+      zod: 4.3.6
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - supports-color
       - ws
 
-  '@openai/agents-realtime@0.1.11(zod@3.25.76)':
+  '@openai/agents-realtime@0.1.11(zod@4.3.6)':
     dependencies:
-      '@openai/agents-core': 0.1.11(ws@8.18.3)(zod@3.25.76)
+      '@openai/agents-core': 0.1.11(ws@8.18.3)(zod@4.3.6)
       '@types/ws': 8.18.1
       debug: 4.4.3(supports-color@5.5.0)
       ws: 8.18.3
-      zod: 3.25.76
+      zod: 4.3.6
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - bufferutil
       - supports-color
       - utf-8-validate
 
-  '@openai/agents@0.1.11(ws@8.18.3)(zod@3.25.76)':
+  '@openai/agents@0.1.11(ws@8.18.3)(zod@4.3.6)':
     dependencies:
-      '@openai/agents-core': 0.1.11(ws@8.18.3)(zod@3.25.76)
-      '@openai/agents-openai': 0.1.11(ws@8.18.3)(zod@3.25.76)
-      '@openai/agents-realtime': 0.1.11(zod@3.25.76)
+      '@openai/agents-core': 0.1.11(ws@8.18.3)(zod@4.3.6)
+      '@openai/agents-openai': 0.1.11(ws@8.18.3)(zod@4.3.6)
+      '@openai/agents-realtime': 0.1.11(zod@4.3.6)
       debug: 4.4.3(supports-color@5.5.0)
-      openai: 5.23.2(ws@8.18.3)(zod@3.25.76)
-      zod: 3.25.76
+      openai: 5.23.2(ws@8.18.3)(zod@4.3.6)
+      zod: 4.3.6
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - bufferutil
@@ -7537,15 +7537,15 @@ snapshots:
     dependencies:
       wrappy: 1.0.2
 
-  openai@5.23.2(ws@8.18.3)(zod@3.25.76):
+  openai@5.23.2(ws@8.18.3)(zod@4.3.6):
     optionalDependencies:
       ws: 8.18.3
-      zod: 3.25.76
+      zod: 4.3.6
 
-  openai@6.10.0(ws@8.18.3)(zod@3.25.76):
+  openai@6.10.0(ws@8.18.3)(zod@4.3.6):
     optionalDependencies:
       ws: 8.18.3
-      zod: 3.25.76
+      zod: 4.3.6
 
   openapi-types@12.1.3: {}
 
@@ -8475,12 +8475,12 @@ snapshots:
     optionalDependencies:
       commander: 9.5.0
 
-  zod-to-json-schema@3.25.0(zod@3.25.76):
+  zod-to-json-schema@3.25.0(zod@4.3.6):
     dependencies:
-      zod: 3.25.76
+      zod: 4.3.6
     optional: true
 
-  zod@3.25.76: {}
+  zod@4.3.6: {}
 
   zustand@4.5.7(@types/react@19.2.7)(react@19.2.1):
     dependencies:

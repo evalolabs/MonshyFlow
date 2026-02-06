@@ -20,7 +20,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "tsyringe": "^4.10.0",
-    "zod": "^3.25.76",
+    "zod": "^4.3.6",
     "bcrypt": "^5.1.1",
     "express-rate-limit": "^7.4.1",
     "helmet": "^8.0.0",
