@@ -1,0 +1,349 @@
+# Production Docker Compose für MonshyFlow
+# Für stabile Releases auf dem Server
+# Verwendung: docker compose -f docker-compose.prod.yml up -d
+#
+# WICHTIG: Keine Volume-Mounts für Code - Code ist im Docker Image
+# Für Updates: Image neu bauen und pushen, dann docker compose pull && docker compose up -d
+
+services:
+  # MonshyFlow Frontend (Nginx)
+  monshyflow-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    container_name: monshyflow-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"  # Für späteres SSL
+    depends_on:
+      - monshyflow-kong
+    networks:
+      - monshyflow-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # Kong Gateway (API Gateway)
+  monshyflow-kong:
+    image: kong:3.9
+    container_name: monshyflow-kong
+    restart: unless-stopped
+    # Port nur intern (Frontend proxy über Nginx)
+    expose:
+      - "8000"
+      - "8001"  # Admin API (nur intern)
+    environment:
+      KONG_DATABASE: "off"  # DB-less mode (deklarative Konfiguration)
+      KONG_DECLARATIVE_CONFIG: /kong/kong.yml
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+    volumes:
+      - ./kong/kong.yml:/kong/kong.yml:ro
+    depends_on:
+      - monshyflow-api-service
+      - monshyflow-auth-service
+      - monshyflow-secrets-service
+      - monshyflow-execution-service
+      - monshyflow-scheduler-service
+    networks:
+      - monshyflow-network
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # API Service (Workflow Management)
+  monshyflow-api-service:
+    build:
+      context: .
+      dockerfile: packages/api-service/Dockerfile
+    container_name: monshyflow-api-service
+    restart: unless-stopped
+    expose:
+      - "80"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+      - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@monshyflow-redis:6379
+      - AUTH_SERVICE_URL=http://monshyflow-auth-service:80
+      - SECRETS_SERVICE_URL=http://monshyflow-secrets-service:80
+      - EXECUTION_SERVICE_URL=http://monshyflow-execution-service:5004
+      - SCHEDULER_SERVICE_URL=http://monshyflow-scheduler-service:80
+    depends_on:
+      monshyflow-mongodb:
+        condition: service_healthy
+      monshyflow-redis:
+        condition: service_healthy
+    networks:
+      - monshyflow-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Auth Service (SSO Provider für MonshyBot)
+  monshyflow-auth-service:
+    build:
+      context: .
+      dockerfile: packages/auth-service/Dockerfile
+    container_name: monshyflow-auth-service
+    restart: unless-stopped
+    expose:
+      - "80"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+      - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
+    depends_on:
+      monshyflow-mongodb:
+        condition: service_healthy
+    networks:
+      - monshyflow-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Secrets Service
+  monshyflow-secrets-service:
+    build:
+      context: .
+      dockerfile: packages/secrets-service/Dockerfile
+    container_name: monshyflow-secrets-service
+    restart: unless-stopped
+    expose:
+      - "80"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+      - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
+      - AUTH_SERVICE_URL=http://monshyflow-auth-service:80
+    depends_on:
+      monshyflow-mongodb:
+        condition: service_healthy
+      monshyflow-auth-service:
+        condition: service_healthy
+    networks:
+      - monshyflow-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Execution Service (Workflow Execution Engine)
+  monshyflow-execution-service:
+    build:
+      context: .
+      dockerfile: packages/execution-service/Dockerfile
+    container_name: monshyflow-execution-service
+    restart: unless-stopped
+    expose:
+      - "5004"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=5004
+      - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@monshyflow-redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@monshyflow-rabbitmq:5672
+      - AGENT_SERVICE_URL=http://monshyflow-api-service:80
+    depends_on:
+      monshyflow-mongodb:
+        condition: service_healthy
+      monshyflow-redis:
+        condition: service_healthy
+      monshyflow-rabbitmq:
+        condition: service_healthy
+    networks:
+      - monshyflow-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Scheduler Service
+  monshyflow-scheduler-service:
+    build:
+      context: .
+      dockerfile: packages/scheduler-service/Dockerfile
+    container_name: monshyflow-scheduler-service
+    restart: unless-stopped
+    expose:
+      - "80"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+      - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
+      - EXECUTION_SERVICE_URL=http://monshyflow-execution-service:5004
+    depends_on:
+      monshyflow-mongodb:
+        condition: service_healthy
+      monshyflow-execution-service:
+        condition: service_healthy
+    networks:
+      - monshyflow-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MongoDB für MonshyFlow
+  monshyflow-mongodb:
+    image: mongo:7.0
+    container_name: monshyflow-mongodb
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:27017:27017"  # Nur lokal erreichbar
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: MonshyFlow
+    volumes:
+      - monshyflow_mongodb_data:/data/db
+      - monshyflow_mongodb_config:/data/configdb
+    networks:
+      - monshyflow-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis für MonshyFlow
+  monshyflow-redis:
+    image: redis:7-alpine
+    container_name: monshyflow-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"  # Nur lokal erreichbar
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - monshyflow_redis_data:/data
+    networks:
+      - monshyflow-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "-a", "${REDIS_PASSWORD}", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # RabbitMQ für MonshyFlow (optional, für Message Queue)
+  monshyflow-rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: monshyflow-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5672:5672"   # AMQP port (nur lokal)
+      - "127.0.0.1:15672:15672"  # Management UI (nur lokal)
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - monshyflow_rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - monshyflow-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Optional: Mongo Express für MongoDB Management (nur lokal erreichbar)
+  monshyflow-mongo-express:
+    image: mongo-express:latest
+    container_name: monshyflow-mongo-express
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8083:8081"  # Nur lokal erreichbar
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - monshyflow-mongodb
+    networks:
+      - monshyflow-network
+    profiles:
+      - tools  # Nur mit --profile tools starten
+
+  # Optional: Redis Commander für Redis Management (nur lokal erreichbar)
+  monshyflow-redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: monshyflow-redis-commander
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8084:8081"  # Nur lokal erreichbar
+    environment:
+      REDIS_HOSTS: local:monshyflow-redis:6379:0:${REDIS_PASSWORD}
+    depends_on:
+      - monshyflow-redis
+    networks:
+      - monshyflow-network
+    profiles:
+      - tools  # Nur mit --profile tools starten
+
+  # Portainer - Docker Management UI (wie Docker Desktop)
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9443:9443"  # HTTPS (optional)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - monshyflow-network
+    profiles:
+      - tools  # Nur mit --profile tools starten
+
+volumes:
+  monshyflow_mongodb_data:
+    driver: local
+  monshyflow_mongodb_config:
+    driver: local
+  monshyflow_redis_data:
+    driver: local
+  monshyflow_rabbitmq_data:
+    driver: local
+  portainer_data:
+    driver: local
+
+networks:
+  monshyflow-network:
+    driver: bridge
+
