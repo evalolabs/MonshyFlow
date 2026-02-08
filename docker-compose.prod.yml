@@ -9,8 +9,8 @@ services:
   # MonshyFlow Frontend (Nginx)
   monshyflow-frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./frontend/Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL:-/api}
     container_name: monshyflow-frontend

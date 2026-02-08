@@ -4,14 +4,18 @@ FROM node:20-alpine as builder
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy package files from frontend
+COPY frontend/package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy source code
-COPY . .
+# Copy shared directory first (needed for apiIntegrations)
+# Must be at ../shared relative to frontend
+COPY shared/ ../shared/
+
+# Copy frontend source code
+COPY frontend/ ./
 
 # Build arguments for environment variables
 ARG VITE_API_URL
