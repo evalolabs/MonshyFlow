@@ -1,7 +1,11 @@
 import axios from 'axios';
 
-// Use VITE_API_URL if set, otherwise use empty string for relative URLs (Nginx will proxy /api)
-const API_URL = import.meta.env.VITE_API_URL !== undefined ? import.meta.env.VITE_API_URL : '';
+// Use VITE_API_URL if set, otherwise:
+// - In development: use http://localhost:5000 (Kong Gateway)
+// - In production: use empty string for relative URLs (Nginx will proxy /api)
+const API_URL = import.meta.env.VITE_API_URL !== undefined 
+  ? import.meta.env.VITE_API_URL 
+  : (import.meta.env.DEV ? 'http://localhost:5000' : '');
 // All requests should go through Kong Gateway (Port 5000)
 // No need for separate executionApi - use api (Kong Gateway) for all requests
 const EXECUTION_API_URL = API_URL; // Use Gateway instead of direct service
