@@ -16,8 +16,8 @@ services:
     container_name: monshyflow-frontend
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"  # Für späteres SSL
+      - "8080:80"  # Port 8080 für parallelen Betrieb mit MonshyBot (Port 80)
+      - "8443:443"  # Für späteres SSL
     depends_on:
       - monshyflow-kong
     networks:
