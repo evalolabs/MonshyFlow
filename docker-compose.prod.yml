@@ -50,11 +50,11 @@ services:
     volumes:
       - ./kong/kong.yml:/kong/kong.yml:ro
     depends_on:
-      - monshyflow-api-service
-      - monshyflow-auth-service
-      - monshyflow-secrets-service
-      - monshyflow-execution-service
-      - monshyflow-scheduler-service
+      - api-service
+      - auth-service
+      - secrets-service
+      - execution-service
+      - scheduler-service
     networks:
       - monshyflow-network
     healthcheck:
@@ -65,7 +65,7 @@ services:
       start_period: 20s
 
   # API Service (Workflow Management)
-  monshyflow-api-service:
+  api-service:
     build:
       context: .
       dockerfile: packages/api-service/Dockerfile
@@ -80,10 +80,10 @@ services:
       - PORT=80
       - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
       - REDIS_URL=redis://:${REDIS_PASSWORD}@monshyflow-redis:6379
-      - AUTH_SERVICE_URL=http://monshyflow-auth-service:80
-      - SECRETS_SERVICE_URL=http://monshyflow-secrets-service:80
-      - EXECUTION_SERVICE_URL=http://monshyflow-execution-service:5004
-      - SCHEDULER_SERVICE_URL=http://monshyflow-scheduler-service:80
+      - AUTH_SERVICE_URL=http://auth-service:80
+      - SECRETS_SERVICE_URL=http://secrets-service:80
+      - EXECUTION_SERVICE_URL=http://execution-service:5004
+      - SCHEDULER_SERVICE_URL=http://scheduler-service:80
     depends_on:
       monshyflow-mongodb:
         condition: service_healthy
@@ -99,7 +99,7 @@ services:
       start_period: 40s
 
   # Auth Service (SSO Provider für MonshyBot)
-  monshyflow-auth-service:
+  auth-service:
     build:
       context: .
       dockerfile: packages/auth-service/Dockerfile
@@ -126,7 +126,7 @@ services:
       start_period: 40s
 
   # Secrets Service
-  monshyflow-secrets-service:
+  secrets-service:
     build:
       context: .
       dockerfile: packages/secrets-service/Dockerfile
@@ -140,11 +140,11 @@ services:
       - NODE_ENV=production
       - PORT=80
       - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
-      - AUTH_SERVICE_URL=http://monshyflow-auth-service:80
+      - AUTH_SERVICE_URL=http://auth-service:80
     depends_on:
       monshyflow-mongodb:
         condition: service_healthy
-      monshyflow-auth-service:
+      auth-service:
         condition: service_healthy
     networks:
       - monshyflow-network
@@ -156,7 +156,7 @@ services:
       start_period: 40s
 
   # Execution Service (Workflow Execution Engine)
-  monshyflow-execution-service:
+  execution-service:
     build:
       context: .
       dockerfile: packages/execution-service/Dockerfile
@@ -172,7 +172,7 @@ services:
       - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
       - REDIS_URL=redis://:${REDIS_PASSWORD}@monshyflow-redis:6379
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@monshyflow-rabbitmq:5672
-      - AGENT_SERVICE_URL=http://monshyflow-api-service:80
+      - AGENT_SERVICE_URL=http://api-service:80
     depends_on:
       monshyflow-mongodb:
         condition: service_healthy
@@ -190,7 +190,7 @@ services:
       start_period: 40s
 
   # Scheduler Service
-  monshyflow-scheduler-service:
+  scheduler-service:
     build:
       context: .
       dockerfile: packages/scheduler-service/Dockerfile
@@ -204,11 +204,11 @@ services:
       - NODE_ENV=production
       - PORT=80
       - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
-      - EXECUTION_SERVICE_URL=http://monshyflow-execution-service:5004
+      - EXECUTION_SERVICE_URL=http://execution-service:5004
     depends_on:
       monshyflow-mongodb:
         condition: service_healthy
-      monshyflow-execution-service:
+      execution-service:
         condition: service_healthy
     networks:
       - monshyflow-network
