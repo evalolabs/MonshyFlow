@@ -475,8 +475,8 @@ export function StartNodeConfigForm({
                 <button
                   type="button"
                   onClick={() => {
-                    // Use backend API URL instead of frontend origin
-                    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                    // Use relative URL (Nginx will proxy /api)
+                    const apiUrl = import.meta.env.VITE_API_URL !== undefined ? import.meta.env.VITE_API_URL : window.location.origin;
                     const webhookUrl = `${apiUrl}/api/webhook/${workflowId}`;
                     navigator.clipboard.writeText(webhookUrl);
                   }}
@@ -487,7 +487,7 @@ export function StartNodeConfigForm({
               </div>
               <div className="bg-white border border-blue-300 rounded p-2">
                 <code className="text-xs font-mono text-blue-900 break-all">
-                  {(import.meta.env.VITE_API_URL || 'http://localhost:5000')}/api/webhook/{workflowId}
+                  {(import.meta.env.VITE_API_URL !== undefined ? import.meta.env.VITE_API_URL : window.location.origin)}/api/webhook/{workflowId}
                 </code>
               </div>
             </div>
