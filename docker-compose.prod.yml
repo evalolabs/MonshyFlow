@@ -78,7 +78,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=80
-      - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
+      - MONGODB_URL=${MONGODB_URL:-mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@monshyflow-redis:6379
       - AUTH_SERVICE_URL=http://auth-service:80
       - SECRETS_SERVICE_URL=http://secrets-service:80
@@ -112,7 +112,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=80
-      - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
+      - MONGODB_URL=${MONGODB_URL:-mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin}
     depends_on:
       monshyflow-mongodb:
         condition: service_healthy
@@ -139,11 +139,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=80
-      - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
+      - MONGODB_URL=${MONGODB_URL:-mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin}
       - AUTH_SERVICE_URL=http://auth-service:80
     depends_on:
-      monshyflow-mongodb:
-        condition: service_healthy
       auth-service:
         condition: service_healthy
     networks:
@@ -169,13 +167,11 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=5004
-      - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
+      - MONGODB_URL=${MONGODB_URL:-mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@monshyflow-redis:6379
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@monshyflow-rabbitmq:5672
       - AGENT_SERVICE_URL=http://api-service:80
     depends_on:
-      monshyflow-mongodb:
-        condition: service_healthy
       monshyflow-redis:
         condition: service_healthy
       monshyflow-rabbitmq:
@@ -203,11 +199,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=80
-      - MONGODB_URL=mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin
+      - MONGODB_URL=${MONGODB_URL:-mongodb://admin:${MONGO_ROOT_PASSWORD}@monshyflow-mongodb:27017/MonshyFlow?authSource=admin}
       - EXECUTION_SERVICE_URL=http://execution-service:5004
     depends_on:
-      monshyflow-mongodb:
-        condition: service_healthy
       execution-service:
         condition: service_healthy
     networks:
