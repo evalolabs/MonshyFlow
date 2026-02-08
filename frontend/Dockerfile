@@ -21,7 +21,9 @@ COPY frontend/ ./
 ARG VITE_API_URL
 
 # Set environment variables for build
-ENV VITE_API_URL=${VITE_API_URL:-http://localhost:5000}
+# Default to empty string for production (relative URLs via Nginx)
+# For local development, set VITE_API_URL=http://localhost:5000 explicitly
+ENV VITE_API_URL=${VITE_API_URL:-}
 
 # Build application
 RUN npm run build
