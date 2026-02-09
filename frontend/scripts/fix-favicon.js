@@ -32,16 +32,19 @@ if (!distIndexPath) {
 try {
   let html = readFileSync(distIndexPath, 'utf-8');
   
+  // Cache-Busting: Timestamp für Favicon
+  const cacheBuster = `?v=${Date.now()}`;
+  
   // Unsere Favicon-Links (müssen nach charset meta tag eingefügt werden)
   const faviconLinks = `    <!-- Favicon muss als erstes geladen werden -->
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" href="/favicon.png${cacheBuster}" />
     <!-- Favicons für verschiedene Größen -->
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png${cacheBuster}" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png${cacheBuster}" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png${cacheBuster}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png${cacheBuster}" />
     <!-- Fallback für Browser, die favicon.ico suchen -->
-    <link rel="shortcut icon" href="/favicon.png" />`;
+    <link rel="shortcut icon" href="/favicon.png${cacheBuster}" />`;
   
   // Entferne ALLE vorhandenen Favicon-Links (inkl. vite.svg falls vorhanden)
   html = html.replace(/<link[^>]*rel=["'](icon|shortcut icon)["'][^>]*>/gi, '');
