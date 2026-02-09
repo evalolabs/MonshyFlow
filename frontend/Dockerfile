@@ -19,11 +19,15 @@ COPY frontend/ ./
 
 # Build arguments for environment variables
 ARG VITE_API_URL
+ARG VITE_LOGO_PATH
+ARG VITE_APP_NAME
 
 # Set environment variables for build
 # Default to empty string for production (relative URLs via Nginx)
 # For local development, set VITE_API_URL=http://localhost:5000 explicitly
 ENV VITE_API_URL=${VITE_API_URL:-}
+ENV VITE_LOGO_PATH=${VITE_LOGO_PATH:-/logo.png}
+ENV VITE_APP_NAME=${VITE_APP_NAME:-Monshy}
 
 # Build application
 RUN npm run build

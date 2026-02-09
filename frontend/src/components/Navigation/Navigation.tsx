@@ -119,8 +119,20 @@ export function Navigation() {
       >
         {/* Logo Section */}
         <div className="h-16 border-b border-gray-200 flex items-center px-6 flex-shrink-0">
-          <img src="/logo.png" alt="MonshyFlow Logo" className="h-12 mr-3" />
-          <h1 className="text-xl font-bold text-gray-900">Monshy</h1>
+          <img 
+            src={import.meta.env.VITE_LOGO_PATH || '/logo.png'} 
+            alt="MonshyFlow Logo" 
+            className="h-12 mr-3" 
+            onError={(e) => {
+              // Fallback to default logo if custom logo fails to load
+              if (e.currentTarget.src !== '/logo.png') {
+                e.currentTarget.src = '/logo.png';
+              }
+            }}
+          />
+          <h1 className="text-xl font-bold text-gray-900">
+            {import.meta.env.VITE_APP_NAME || 'Monshy'}
+          </h1>
         </div>
 
       {/* Navigation Links */}
