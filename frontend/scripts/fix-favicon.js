@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -7,26 +7,28 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // dist/index.html is relative to the frontend directory (parent of scripts/)
-// Try multiple possible paths
+// Try multiple possible paths (in order of likelihood)
 const possiblePaths = [
-  join(__dirname, '..', 'dist', 'index.html'),  // From scripts/ to dist/
-  join(process.cwd(), 'dist', 'index.html'),     // From current working directory
+  join(process.cwd(), 'dist', 'index.html'),     // Docker build: /app/dist/index.html
+  join(__dirname, '..', 'dist', 'index.html'),   // From scripts/ to dist/
   join(process.cwd(), 'frontend', 'dist', 'index.html'), // If run from repo root
 ];
 
-let distIndexPath = possiblePaths.find(path => {
-  try {
-    readFileSync(path, 'utf-8');
-    return true;
-  } catch {
-    return false;
+let distIndexPath = null;
+for (const path of possiblePaths) {
+  if (existsSync(path)) {
+    distIndexPath = path;
+    console.log(`✅ Found dist/index.html at: ${path}`);
+    break;
   }
-});
+}
 
 if (!distIndexPath) {
-  // Fallback to first path
-  distIndexPath = possiblePaths[0];
-  console.warn(`⚠️  dist/index.html not found in expected locations, using: ${distIndexPath}`);
+  console.error('❌ dist/index.html not found in any of these locations:');
+  possiblePaths.forEach(p => console.error(`   - ${p}`));
+  console.error(`   Current working directory: ${process.cwd()}`);
+  console.error(`   Script directory: ${__dirname}`);
+  process.exit(1);
 }
 
 try {
@@ -58,9 +60,15 @@ try {
   
   writeFileSync(distIndexPath, html, 'utf-8');
   console.log(`✅ Favicon-Links in ${distIndexPath} gesetzt`);
+  
+  // Verify the links were added
+  const verifyHtml = readFileSync(distIndexPath, 'utf-8');
+  const faviconCount = (verifyHtml.match(/favicon\.png/g) || []).length;
+  console.log(`✅ Verification: Found ${faviconCount} favicon.png references in HTML`);
 } catch (error) {
   console.error('❌ Fehler beim Setzen der Favicon-Links:', error.message);
-  console.error('   Versuchte Pfade:', possiblePaths);
+  console.error(`   Datei: ${distIndexPath}`);
+  console.error(`   Current working directory: ${process.cwd()}`);
   process.exit(1);
 }
 
