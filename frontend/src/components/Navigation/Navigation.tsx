@@ -119,6 +119,7 @@ export function Navigation() {
       >
         {/* Logo Section */}
         <div className="h-16 border-b border-gray-200 flex items-center px-6 flex-shrink-0">
+          <img src="/logo.png" alt="MonshyFlow Logo" className="h-12 mr-3" />
           <h1 className="text-xl font-bold text-gray-900">Monshy</h1>
         </div>
 
