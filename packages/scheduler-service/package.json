@@ -16,7 +16,7 @@
     "@monshy/database": "workspace:*",
     "@monshy/auth": "workspace:*",
     "express": "^5.1.0",
-    "cors": "^2.8.5",
+    "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "tsyringe": "^4.10.0",
     "zod": "^3.25.76",
